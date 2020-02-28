@@ -11,19 +11,24 @@ class CreateTournamentTest extends Specification {
         tournamentService = new TournamentService()
     }
 
-    def "start time is lower then end time" () {
+    def "create tournament" () {
         // and exception is thrown
         expect: true
     }
 
-    def "topic exists" () {
+    def "start time is higher then end time" () {
         // and exception is thrown
-        expect: true
+        expect: false
     }
 
-    def "number of questions is higher then zero" () {
+    def "topic not exists" () {
         // and exception is thrown
-        expect: true
+        expect: false
+    }
+
+    def "number of questions is lower or zero" () {
+        // and exception is thrown
+        expect: false
     }
 
     def "start time is empty" () {
