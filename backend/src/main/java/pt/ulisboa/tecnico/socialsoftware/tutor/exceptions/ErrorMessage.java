@@ -37,6 +37,7 @@ public enum ErrorMessage {
 
     QUESTION_IS_USED_IN_QUIZ("Question is used in quiz %s"),
     QUIZ_NOT_CONSISTENT("Field %s of quiz is not consistent"),
+    TOURNAMENT_NOT_CONSISTENT("Field %s of tournament is not consistent"),
     USER_NOT_ENROLLED("%s - Not enrolled in any available course"),
     QUIZ_NO_LONGER_AVAILABLE("This quiz is no longer available"),
     QUIZ_NOT_YET_AVAILABLE("This quiz is not yet available"),
