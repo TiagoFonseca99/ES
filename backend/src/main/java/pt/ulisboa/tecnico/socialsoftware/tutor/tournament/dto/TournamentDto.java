@@ -4,20 +4,71 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import java.io.Serializable;
 
 public class TournamentDto implements Serializable {
-    public TournamentDto() {}
+    private Integer id;
+    private String startTime;
+    private String endTime;
+    private Integer numberOfQuestions;
+    private Enum state;
 
-    public TournamentDto(Tournament tournament) {}
+    public TournamentDto() {
+    }
 
-    void setStartTime(String startTime) {}
-    void setEndTime(String endTime) {}
-    void setTopicName(String topicName) {}
-    void setNumberOfQuestions(Integer numberOfQuestions) {}
+    public TournamentDto(Tournament tournament) {
+        this.id = tournament.getId();
+        this.startTime = tournament.getStartTime();
+        this.endTime = tournament.getEndTime();
+        this.numberOfQuestions = tournament.getNumberOfQuestions();
+        this.state = tournament.getState();
+    }
 
-    Integer getID() {return 1;}
-    String getStartTime() {return "";}
-    String getEndTime() {return  "";}
-    String getTopicName() {return  "";}
-    Integer getNumberOfQuestions() {return  1;}
-    String getState() {return "";}
-    String getCreator() {return "";}
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public Integer getNumberOfQuestions() {
+        return  numberOfQuestions;
+    }
+
+    public void setNumberOfQuestions(Integer numberOfQuestions) {
+        this.numberOfQuestions = numberOfQuestions;
+    }
+
+    public Enum getState() {
+        return state;
+    }
+
+    public void setState(Enum state) {
+        this.state = state;
+    }
+
+    @Override
+    public String toString() {
+        return "TournamentDto{" +
+                "id=" + id +
+                ", startTime='" + startTime + '\'' +
+                ", endTime='" + endTime + '\'' +
+                ", numberOfQuestions='" + numberOfQuestions + '\'' +
+                ", state='" + state + '\'' +
+                '}';
+    }
 }
