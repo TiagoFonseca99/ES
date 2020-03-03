@@ -22,6 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
 import java.util.*;
+import java.time.LocalDateTime;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -52,11 +53,24 @@ public class TournamentService {
             throw new TutorException(USER_NOT_FOUND, username);
         }
 
+        if (!tournamentDto.getStartTime().isBefore(tournamentDto.getEndTime())
+            || tournamentDto.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "date");
+        }
+
+        if (tournamentDto.getNumberOfQuestions() <= 0) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "number of questions");
+        }
+
         List<Topic> topics = new ArrayList<>();
         for (Integer topicId : topicsId) {
             Topic topic = topicRepository.findById(topicId)
                     .orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
             topics.add(topic);
+        }
+
+        if (topics.size() == 0) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "topics");
         }
 
         Tournament tournament = new Tournament(user, topics, tournamentDto);
@@ -68,10 +82,12 @@ public class TournamentService {
       value = { SQLException.class },
       backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void removeTopic(Integer topicId) {
+    public void removeTopic(Integer topicId, TournamentDto tournamentDto) {
         Topic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
 
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                        .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
         tournament.removeTopic(topic);
     }
 }

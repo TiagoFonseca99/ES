@@ -5,6 +5,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
@@ -18,14 +19,14 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import spock.lang.Specification
 
+import java.time.LocalDateTime
+
 @DataJpaTest
 class CreateTournamentTest extends Specification {
     public static final String USER_NAME = "Tiago"
     public static final String USERNAME = "TiagoFonseca99"
     public static final Integer KEY = 1
     public static final String COURSE_NAME = "Software Architecture"
-    public static final String START_TIME = "2020-03-03 10:00"
-    public static final String END_TIME = "2020-03-03 12:00"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
     public static final int NUMBER_OF_QUESTIONS = 5
@@ -52,6 +53,8 @@ class CreateTournamentTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
+    def startTime = LocalDateTime.now().plusHours(1)
+    def endTime = LocalDateTime.now().plusHours(2)
 
     def setup() {
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
@@ -77,8 +80,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(START_TIME)
-        tournamentDto.setEndTime(END_TIME)
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -89,24 +92,31 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
         result.getId() != null
-        result.getStartTime() == START_TIME
-        result.getEndTime() == END_TIME
+        result.getStartTime() == startTime
+        result.getEndTime() == endTime
         result.getTopics() == [topic1, topic2]
         result.getNumberOfQuestions() == NUMBER_OF_QUESTIONS
         result.getState() == Tournament.Status.NOT_CANCELED
         result.getCreator() == user
     }
 
-    /*def "start time is lower then current time"() {
+    def "start time is lower then current time"() {
         given:
-
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(LocalDateTime.now().minusHours(2))
+        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
-
+        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
 
         then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
+        tournamentRepository.count() == 0L
 
-    }*/
+    }
 
     //def "tournament is created by a student"() TODO
     //def "tournament is created by a teacher"() TODO
@@ -116,8 +126,8 @@ class CreateTournamentTest extends Specification {
     def "start time is higher then end time"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime("2020-03-03 12:00")
-        tournamentDto.setEndTime("2020-03-03 10:00")
+        tournamentDto.setStartTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.setEndTime(LocalDateTime.now())
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -125,17 +135,16 @@ class CreateTournamentTest extends Specification {
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
 
         then:
-        //def exception = thrown(TournamentException)
-        //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
         tournamentRepository.count() == 0L
     }
 
-    // Makes sense??!?!?!?! TODO TODO TODO TODO TODO
     def "topic not exists"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(START_TIME)
-        tournamentDto.setEndTime(END_TIME)
+        tournamentDto.setStartTime(LocalDateTime.now())
+        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
         topics = new ArrayList<Integer>()
@@ -144,16 +153,16 @@ class CreateTournamentTest extends Specification {
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
 
         then:
-        //def exception = thrown(TournamentException)
-        //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
         tournamentRepository.count() == 0L
     }
 
     def "number of questions is negative"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(START_TIME)
-        tournamentDto.setEndTime(END_TIME)
+        tournamentDto.setStartTime(LocalDateTime.now())
+        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
         tournamentDto.setNumberOfQuestions(-1)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -161,16 +170,16 @@ class CreateTournamentTest extends Specification {
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
 
         then:
-        //def exception = thrown(TournamentException)
-        //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
         tournamentRepository.count() == 0L
     }
 
     def "number of questions is zero"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(START_TIME)
-        tournamentDto.setEndTime(END_TIME)
+        tournamentDto.setStartTime(LocalDateTime.now())
+        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
         tournamentDto.setNumberOfQuestions(0)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -178,16 +187,16 @@ class CreateTournamentTest extends Specification {
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
 
         then:
-        //def exception = thrown(TournamentException)
-        //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
         tournamentRepository.count() == 0L
     }
 
-    def "start time is empty"() {
+    /*def "start time is empty"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime("")
-        tournamentDto.setEndTime(END_TIME)
+        tournamentDto.setStartTime(LocalDateTime.now())
+        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -203,8 +212,8 @@ class CreateTournamentTest extends Specification {
     def "end time is empty"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(START_TIME)
-        tournamentDto.setEndTime("")
+        tournamentDto.setStartTime(LocalDateTime.now())
+        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -215,7 +224,7 @@ class CreateTournamentTest extends Specification {
         //def exception = thrown(TournamentException)
         //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
         tournamentRepository.count() == 0L
-    }
+    }*/
 
     /*def "number of questions is empty"() {
         given:

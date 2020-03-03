@@ -28,7 +28,7 @@ public class User implements UserDetails, Importable {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-    
+
     @Column(unique=true)
     private String username;
 
