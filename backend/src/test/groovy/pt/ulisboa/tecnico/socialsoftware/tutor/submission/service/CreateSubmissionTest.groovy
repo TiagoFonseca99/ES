@@ -1,15 +1,16 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.service
 
+import org.h2.engine.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Specification
@@ -19,16 +20,10 @@ class CreateSubmissionTest extends Specification {
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
-    public static final String QUESTION_TITLE = 'question title'
-    public static final String QUESTION_CONTENT = 'question content'
-    public static final String OPTION_CONTENT = "optionId content"
-    public static final String URL = 'URL'
-
-    @Autowired
-    QuestionService questionService
-
-    @Autowired
-    SubmissionService submissionService
+    public static final String QUESTION_TITLE = "Pergunta exemplo?"
+    public static final String QUESTION_CONTENT = "Resposta"
+    public static final String STUDENT_NAME = "João Silva"
+    public static final String STUDENT_USERNAME = "joaosilva"
 
     @Autowired
     CourseRepository courseRepository
@@ -37,28 +32,27 @@ class CreateSubmissionTest extends Specification {
     CourseExecutionRepository courseExecutionRepository
 
     @Autowired
-    QuestionRepository questionRepository
-
-    def course
-    def courseExecution
+    SubmissionRepository submissionRepository
 
     def setup() {
-        course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        def course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
-
-        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        def courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
         courseExecutionRepository.save(courseExecution)
-    }
-
-    def "create submission"(){
-        expect: false
+        def acronym = courseExecution.getAcronym()
+        def student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
+        def question = new Question();
+        question.getTitle(QUESTION_TITLE);
+        question.getKey(1);
+        question.getContent(QUESTION_CONTENT);
     }
 
     def "create submission with question not null"(){
         expect: false
     }
 
-    def "student that submits a question exists"(){
+
+    def "user is a student"(){
         expect: false
     }
 
@@ -66,8 +60,18 @@ class CreateSubmissionTest extends Specification {
         expect: false
     }
 
-    def "topic exists and not null"(){
+    def "student submits the same question title"(){
         expect: false
     }
+
+    @TestConfiguration
+    static class SubmissionServiceImplTestContextConfiguration {
+
+        @Bean
+        SubmissionService submissionService() {
+            return new SubmissionService()
+        }
+    }
+
 
 }
