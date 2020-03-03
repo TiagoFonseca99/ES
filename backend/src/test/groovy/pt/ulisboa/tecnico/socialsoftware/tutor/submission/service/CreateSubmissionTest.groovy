@@ -48,20 +48,64 @@ class CreateSubmissionTest extends Specification {
     }
 
     def "create submission with question not null"(){
-        expect: false
+        given: "a submissionDto"
+        def submissionDto = new submissionDto()
+        submissionDto.setKey(1)
+        submissionDto.setTitle(question.getTitle())
+        submissionDto.setStudentId(student.getId())
+
+        when: submissionService.createSubmission(student.getId(), question.getId(), submissionDto)
+
+        then: "the correct submission is in the repository"
+        submissionRepository.count() == 1L
+        def result = submissionRepository.findAll().get(0)
+        result.getId() != null
+        result.getKey() == 1
+        result.getTitle() == QUESTION_TITLE
+        result.getStudentId() == student.getId()
+        result.getStudent().getSubmittedQuestions().contains(question)
+        result.getQuestion() != null
+        result.getQuestion().getType() == Question.Status.SUBMITTED
     }
 
 
     def "user is a student"(){
-        expect: false
+        given: "a submissionDto"
+        def submissionDto = new submissionDto()
+
+        when: submissionService.createSubmission(student.getId(), question.getId(), submissionDto)
+
+        then: "user is student"
+        submission.getStudent().getRole() == User.Role.STUDENT
     }
 
     def "student that submits a question enrolled in course"(){
-        expect: false
+        given: "a submissionDto"
+        def submissionDto = new submissionDto()
+
+        when: submissionService.createSubmission(student.getId(), question.getId(), submissionDto)
+
+        then:
+        def result = submissionRepository.findAll().get(0)
+        def enrolledCourse = result.getCourse()
+        result.getStudent().getEnrolledCourseAcronyms().contains(acronym)
     }
 
     def "student submits the same question title"(){
-        expect: false
+        given: "a question"
+        def question2 = new Question();
+        question2.getTitle(QUESTION_TITLE);
+        question2.getKey(2);
+        and: "a submissionDto"
+        def submissionDto = new submissionDto()
+        and: "another submissionDto"
+        def submissionDto2 = new submissionDto()
+
+        when: "creating submitting the question again"
+        submissionService.createSubmission(student.getId(), question2.getId(), submissionDto2)
+
+        then: "exception is thrown"
+        thrown(TutorException)
     }
 
     @TestConfiguration
