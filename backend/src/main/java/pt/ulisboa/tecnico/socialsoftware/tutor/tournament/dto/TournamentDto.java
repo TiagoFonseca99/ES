@@ -60,7 +60,7 @@ public class TournamentDto implements Serializable {
         return state;
     }
 
-    public void setState(Enum state) {
+    public void setState(Tournament.Status state) {
         this.state = state;
     }
 
