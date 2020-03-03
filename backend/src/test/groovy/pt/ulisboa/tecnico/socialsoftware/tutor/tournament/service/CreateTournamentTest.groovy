@@ -110,6 +110,8 @@ class CreateTournamentTest extends Specification {
 
     //def "tournament is created by a student"() TODO
     //def "tournament is created by a teacher"() TODO
+    //def "add existing topic"() TODO
+    //def "remove topic when only one left"() TODO
 
     def "start time is higher then end time"() {
         given:
