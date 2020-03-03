@@ -11,7 +11,7 @@ public class TournamentDto implements Serializable {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer numberOfQuestions;
-    private Enum state;
+    private Tournament.Status state;
 
     public TournamentDto() {
     }
