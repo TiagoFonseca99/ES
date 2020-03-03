@@ -13,8 +13,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.TopicService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
@@ -36,9 +34,6 @@ class CreateTournamentTest extends Specification {
     TournamentService tournamentService
 
     @Autowired
-    TopicService topicService
-
-    @Autowired
     UserRepository userRepository
 
     @Autowired
@@ -52,10 +47,11 @@ class CreateTournamentTest extends Specification {
 
     def user
     def course
+    def topic1
+    def topic2
     def topicDto1
     def topicDto2
-    def topics
-    def tournamentDto
+    def topics = new ArrayList<Integer>()
 
     def setup() {
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
@@ -66,25 +62,25 @@ class CreateTournamentTest extends Specification {
 
         topicDto1 = new TopicDto()
         topicDto1.setName(TOPIC_NAME1)
-        topicService.createTopic(course.getId(), topicDto1)
+        topic1 = new Topic(course, topicDto1)
+        topicRepository.save(topic1)
 
         topicDto2 = new TopicDto()
         topicDto2.setName(TOPIC_NAME2)
-        topicService.createTopic(course.getId(), topicDto2)
+        topic2 = new Topic(course, topicDto2)
+        topicRepository.save(topic2)
 
-        //topics.add(topicRepository.findAll().get(0).getId())
-        //topics.add(topicRepository.findAll().get(1).getId())
-        topics = topicRepository.findAll()
-        
-        tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(START_TIME)
-        tournamentDto.setEndTime(END_TIME)
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.SCHEDULED)
+        topics.add(topic1.getId())
+        topics.add(topic2.getId())
     }
 
     def "create tournament"() {
         given:
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(START_TIME)
+        tournamentDto.setEndTime(END_TIME)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
@@ -95,10 +91,10 @@ class CreateTournamentTest extends Specification {
         result.getId() != null
         result.getStartTime() == START_TIME
         result.getEndTime() == END_TIME
-        result.getTopics() == [TOPIC_NAME1, TOPIC_NAME2]
+        result.getTopics() == [topic1, topic2]
         result.getNumberOfQuestions() == NUMBER_OF_QUESTIONS
-        result.getState() == STATE
-        result.getCreator() != null
+        result.getState() == Tournament.Status.NOT_CANCELED
+        result.getCreator() == user
     }
 
     /*def "start time is lower then current time"() {
@@ -112,10 +108,16 @@ class CreateTournamentTest extends Specification {
 
     }*/
 
+    //def "tournament is created by a student"() TODO
+    //def "tournament is created by a teacher"() TODO
+
     def "start time is higher then end time"() {
         given:
+        def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime("2020-03-03 12:00")
         tournamentDto.setEndTime("2020-03-03 10:00")
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
@@ -129,7 +131,12 @@ class CreateTournamentTest extends Specification {
     // Makes sense??!?!?!?! TODO TODO TODO TODO TODO
     def "topic not exists"() {
         given:
-        //tournamentDto.setTopicName("<Tópico inexistente>")
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(START_TIME)
+        tournamentDto.setEndTime(END_TIME)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+        topics = new ArrayList<Integer>()
 
         when:
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
@@ -142,7 +149,11 @@ class CreateTournamentTest extends Specification {
 
     def "number of questions is negative"() {
         given:
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(START_TIME)
+        tournamentDto.setEndTime(END_TIME)
         tournamentDto.setNumberOfQuestions(-1)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
@@ -155,7 +166,11 @@ class CreateTournamentTest extends Specification {
 
     def "number of questions is zero"() {
         given:
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(START_TIME)
+        tournamentDto.setEndTime(END_TIME)
         tournamentDto.setNumberOfQuestions(0)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
@@ -168,7 +183,11 @@ class CreateTournamentTest extends Specification {
 
     def "start time is empty"() {
         given:
+        def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime("")
+        tournamentDto.setEndTime(END_TIME)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
@@ -181,7 +200,11 @@ class CreateTournamentTest extends Specification {
 
     def "end time is empty"() {
         given:
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(START_TIME)
         tournamentDto.setEndTime("")
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
@@ -192,22 +215,13 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 0L
     }
 
-    def "topic is empty"() {
+    /*def "number of questions is empty"() {
         given:
-        topics = []
-
-        when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
-
-        then:
-        //def exception = thrown(TournamentException)
-        //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
-        tournamentRepository.count() == 0L
-    }
-
-    def "number of questions is empty"() {
-        given:
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(START_TIME)
+        tournamentDto.setEndTime(END_TIME)
         tournamentDto.setNumberOfQuestions(null)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
         tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
@@ -216,9 +230,9 @@ class CreateTournamentTest extends Specification {
         //def exception = thrown(TournamentException)
         //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
         tournamentRepository.count() == 0L
-    }
+    }*/
 
-    def "invalid arguments"() {
+    /*def "invalid arguments"() {
         // TODO FAZER O QUE O STOR FEZ
         given:
 
@@ -230,10 +244,10 @@ class CreateTournamentTest extends Specification {
         tournamentDto.getEndTime().getClass().equals(String.class)
         tournamentDto.getTopicName().getClass().equals(String.class)
         tournamentDto.getNumberOfQuestions().getClass().equals(Integer.class)
-    }
+    }*/
 
     // TODO
-    def "duplicate tournament"() {
+    /*def "duplicate tournament"() {
         given:
         // dar set a um Id que exista
         when:
@@ -241,23 +255,13 @@ class CreateTournamentTest extends Specification {
 
         then:
         tournamentRepository.count() == 0L
-    }
+    }*/
 
     @TestConfiguration
     static class TournamentServiceImplTestContextConfiguration {
         @Bean
         TournamentService tournamentService() {
             return new TournamentService()
-        }
-
-        @Bean
-        QuestionService questionService() {
-            return new QuestionService()
-        }
-
-        @Bean
-        TopicService topicService() {
-            return new TopicService()
         }
     }
 }
