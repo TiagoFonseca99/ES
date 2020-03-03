@@ -56,7 +56,7 @@ public class TournamentDto implements Serializable {
         this.numberOfQuestions = numberOfQuestions;
     }
 
-    public Enum getState() {
+    public Tournament.Status getState() {
         return state;
     }
 
