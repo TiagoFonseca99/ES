@@ -46,7 +46,7 @@ public class TournamentDto implements Serializable {
     }
 
     public Integer getNumberOfQuestions() {
-        return  numberOfQuestions;
+        return numberOfQuestions;
     }
 
     public void setNumberOfQuestions(Integer numberOfQuestions) {

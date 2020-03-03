@@ -12,7 +12,7 @@ import java.util.*;
 public class Tournament {
     @SuppressWarnings("unused")
     public enum Status {
-        SCHEDULED, CANCELED, OPEN, CLOSED
+        NOT_CANCELED, CANCELED
     }
 
     @Id
@@ -28,6 +28,8 @@ public class Tournament {
 
     private Integer numberOfQuestions;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User creator;
 
     private Enum state;
@@ -37,10 +39,10 @@ public class Tournament {
     public Tournament(User user, List<Topic> topics, TournamentDto tournamentDto) {
         this.startTime = tournamentDto.getStartTime();
         this.endTime = tournamentDto.getEndTime();
-        this.topics = topics;
         this.numberOfQuestions = tournamentDto.getNumberOfQuestions();
-        this.creator = user;
         this.state = tournamentDto.getState();
+        this.creator = user;
+        this.topics = topics;
     }
 
     public Integer getId() {

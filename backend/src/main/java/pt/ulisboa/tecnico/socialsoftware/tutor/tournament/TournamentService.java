@@ -46,20 +46,20 @@ public class TournamentService {
       value = { SQLException.class },
       backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public TournamentDto createTournament(String username, List<Topic> topicsId, TournamentDto tournamentDto) {
+    public TournamentDto createTournament(String username, List<Integer> topicsId, TournamentDto tournamentDto) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new TutorException(USER_NOT_FOUND, username);
         }
 
-        /*List<Topic> topics = new ArrayList<>();
+        List<Topic> topics = new ArrayList<>();
         for (Integer topicId : topicsId) {
-            Topic topic = topicRepository.findById(0)
+            Topic topic = topicRepository.findById(topicId)
                     .orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
             topics.add(topic);
-        }*/
+        }
 
-        Tournament tournament = new Tournament(user, topicsId, tournamentDto);
+        Tournament tournament = new Tournament(user, topics, tournamentDto);
         this.entityManager.persist(tournament);
         return new TournamentDto(tournament);
     }
