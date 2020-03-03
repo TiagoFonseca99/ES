@@ -1,11 +1,15 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 
 import javax.persistence.*;
 import java.util.*;
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
+
 
 @Entity
 @Table(name = "tournaments")
@@ -19,9 +23,9 @@ public class Tournament {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String startTime;
+    private Date startTime;
 
-    private String endTime;
+    private Date endTime;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
     private List<Topic> topics = new ArrayList<>();
@@ -53,38 +57,24 @@ public class Tournament {
         this.id = id;
     }
 
-    public String getStartTime() {
+    public Date getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 
     public List<Topic> getTopics() {
         return topics;
-    }
-
-    public void addTopic(Topic topic) {
-        if (topics.contains(topic)) {
-            // THRWO EXCEPTION TODO
-        }
-        this.topics.add(topic);
-    }
-
-    public void removeTopic(Topic topic) {
-        if (topics.size() <= 1) {
-            // ELSE THROW EXCEPTION TODO
-        }
-        this.topics.remove(topic);
     }
 
     public Integer getNumberOfQuestions() {
@@ -109,6 +99,20 @@ public class Tournament {
 
     public void setState(Enum state) {
         this.state = state;
+    }
+
+    public void addTopic(Topic topic) {
+        if (topics.contains(topic)) {
+            throw new TutorException(DUPLICATE_TOURNAMENT_TOPIC, topic.getId());
+        }
+        this.topics.add(topic);
+    }
+
+    public void removeTopic(Topic topic) {
+        if (topics.size() <= 1) {
+            throw new TutorException(TOURNAMENT_HAS_ONLY_ONE_TOPIC);
+        }
+        this.topics.remove(topic);
     }
 
     @Override

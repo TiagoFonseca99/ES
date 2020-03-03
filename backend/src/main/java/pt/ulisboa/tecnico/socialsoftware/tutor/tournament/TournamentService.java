@@ -63,4 +63,15 @@ public class TournamentService {
         this.entityManager.persist(tournament);
         return new TournamentDto(tournament);
     }
+
+    @Retryable(
+      value = { SQLException.class },
+      backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void removeTopic(Integer topicId) {
+        Topic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
+
+        tournament.removeTopic(topic);
+    }
 }
