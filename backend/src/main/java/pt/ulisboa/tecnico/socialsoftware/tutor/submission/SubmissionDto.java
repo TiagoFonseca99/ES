@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public class SubmissionDto implements Serializable {
 
-    public SubmissionDto(){
-    }
+    public SubmissionDto(){}
+
 }
