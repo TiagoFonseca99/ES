@@ -7,9 +7,10 @@ import org.springframework.context.annotation.Bean
 import spock.lang.Specification
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.User
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.QuestionAnswer
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
@@ -29,6 +30,7 @@ class CreateDiscussionTest extends Specification {
     @Autowired
     DiscussionRepository discussionRepository
 
+    def quiz
     def quizquestion1
     def quizquestion2
     def question1
@@ -41,12 +43,12 @@ class CreateDiscussionTest extends Specification {
     def setup(){
         question1 = new Question()
         question1.setKey(1)
-        question1.setContent(QUESTION_TITLE)
+        question1.setTitle(QUESTION_TITLE)
         question1.setContent(QUESTION_CONTENT)
 
         question2 = new Question()
         question2.setKey(2)
-        question2.setContent(QUESTION_TITLE)
+        question2.setTitle(QUESTION_TITLE)
         question2.setContent(QUESTION_CONTENT)
 
         teacher = new User()
@@ -82,7 +84,7 @@ class CreateDiscussionTest extends Specification {
         discussionDto.setUser(student)
 
         when:
-        discussionService(question1.getId(), discussionDto)
+        discussionService.createDiscussion(question1.getId(), discussionDto)
 
         then: "the correct discussion is inside the repository"
         discussionRepository.count() == 1L
@@ -111,7 +113,7 @@ class CreateDiscussionTest extends Specification {
         discussionDto.setUser(student)
 
         when: "creating a discussion on a non answered question"
-        discussionService(question2.getId(), discussionDto)
+        discussionService.createDiscussion(question2.getId(), discussionDto)
 
         then:
         thrown(TutorException)
@@ -123,7 +125,7 @@ class CreateDiscussionTest extends Specification {
         discussionDto1.setKey(1)
         discussionDto1.setContent(DISCUSSION_CONTENT)
         discussionDto1.setUser(student)
-        discussionService(question1.getId(), discussionDto1)
+        discussionService.createDiscussion(question1.getId(), discussionDto1)
 
         and: "another discussionDto"
         def discussionDto2 = new DiscussionDto()
@@ -132,7 +134,7 @@ class CreateDiscussionTest extends Specification {
         discussionDto2.setUser(student)
 
         when: "creating the second discussion"
-        discussionService(question1.getId(), discussionDto2)
+        discussionService.createDiscussion(question1.getId(), discussionDto2)
 
         then:
         thrown(TutorException)
