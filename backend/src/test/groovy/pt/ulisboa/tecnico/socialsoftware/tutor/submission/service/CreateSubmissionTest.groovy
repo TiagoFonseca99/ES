@@ -6,12 +6,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Specification
 
@@ -34,14 +35,21 @@ class CreateSubmissionTest extends Specification {
     @Autowired
     SubmissionRepository submissionRepository
 
+    def course
+    def courseExecution
+    def student
+    def acronym
+    def question
+
+
     def setup() {
-        def course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
-        def courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
         courseExecutionRepository.save(courseExecution)
-        def acronym = courseExecution.getAcronym()
-        def student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
-        def question = new Question();
+        acronym = courseExecution.getAcronym()
+        student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
+        question = new Question();
         question.getTitle(QUESTION_TITLE);
         question.getKey(1);
         question.getContent(QUESTION_CONTENT);
@@ -49,7 +57,7 @@ class CreateSubmissionTest extends Specification {
 
     def "create submission with question not null"(){
         given: "a submissionDto"
-        def submissionDto = new submissionDto()
+        def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
         submissionDto.setTitle(question.getTitle())
         submissionDto.setStudentId(student.getId())
@@ -71,7 +79,7 @@ class CreateSubmissionTest extends Specification {
 
     def "user is a student"(){
         given: "a submissionDto"
-        def submissionDto = new submissionDto()
+        def submissionDto = new SubmissionDto()
 
         when: submissionService.createSubmission(student.getId(), question.getId(), submissionDto)
 
@@ -81,7 +89,7 @@ class CreateSubmissionTest extends Specification {
 
     def "student that submits a question enrolled in course"(){
         given: "a submissionDto"
-        def submissionDto = new submissionDto()
+        def submissionDto = new SubmissionDto()
 
         when: submissionService.createSubmission(student.getId(), question.getId(), submissionDto)
 
@@ -97,9 +105,9 @@ class CreateSubmissionTest extends Specification {
         question2.getTitle(QUESTION_TITLE);
         question2.getKey(2);
         and: "a submissionDto"
-        def submissionDto = new submissionDto()
+        def submissionDto = new SubmissionDto()
         and: "another submissionDto"
-        def submissionDto2 = new submissionDto()
+        def submissionDto2 = new SubmissionDto()
 
         when: "creating submitting the question again"
         submissionService.createSubmission(student.getId(), question2.getId(), submissionDto2)
