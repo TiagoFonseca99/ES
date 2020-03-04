@@ -116,6 +116,11 @@ public class Tournament {
         this.topics.remove(topic);
     }
 
+    // TODO
+    public void seeOpenedTournaments() {
+
+    }
+
     @Override
     public String toString() {
         return "Tournament{" +

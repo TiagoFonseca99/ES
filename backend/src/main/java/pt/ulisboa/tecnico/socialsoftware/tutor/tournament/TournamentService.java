@@ -78,6 +78,11 @@ public class TournamentService {
         return new TournamentDto(tournament);
     }
 
+    // TODO
+    public void seeOpenedTournaments() {
+
+    }
+
     @Retryable(
       value = { SQLException.class },
       backoff = @Backoff(delay = 5000))
