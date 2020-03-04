@@ -132,7 +132,7 @@ class CreateDiscussionTest extends Specification {
         discussionDto2.setUser(student)
 
         when: "creating the second discussion"
-        discussionService(question2.getId(), discussionDto)
+        discussionService(question1.getId(), discussionDto2)
 
         then:
         thrown(TutorException)
