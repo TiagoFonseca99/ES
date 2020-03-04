@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 
@@ -28,7 +29,7 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-    
+
     @Column(unique=true)
     private String username;
 
@@ -56,6 +57,9 @@ public class User implements UserDetails {
 
     @ManyToMany
     private Set<CourseExecution> courseExecutions = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Discussion> discussions = new HashSet<>();
 
     public User() {
     }

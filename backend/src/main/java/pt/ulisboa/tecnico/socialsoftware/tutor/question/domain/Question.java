@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.question.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
@@ -68,6 +69,9 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "question", orphanRemoval = true)
+    private Discussion discussion;
 
     public Question() {
     }
