@@ -65,6 +65,9 @@ public class TournamentDto implements Serializable {
         this.state = state;
     }
 
+
+
+
     @Override
     public String toString() {
         return "TournamentDto{" +

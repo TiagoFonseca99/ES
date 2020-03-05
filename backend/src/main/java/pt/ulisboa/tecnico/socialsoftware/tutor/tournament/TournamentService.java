@@ -23,6 +23,7 @@ import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
 import java.util.*;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -79,9 +80,14 @@ public class TournamentService {
         return new TournamentDto(tournament);
     }
 
-    // TODO
-    public void seeOpenedTournaments() {
-
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    // Tournament DTO?
+    public List<TournamentDto> seeOpenedTournaments() {
+        return tournamentRepository.seeOpenedTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
+                // TODO throw exeptions?
     }
 
     @Retryable(
