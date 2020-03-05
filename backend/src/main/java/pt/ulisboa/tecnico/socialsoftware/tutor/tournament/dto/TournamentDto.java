@@ -36,6 +36,7 @@ public class TournamentDto implements Serializable {
         return startTime;
     }
 
+    // TODO Verificar
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }

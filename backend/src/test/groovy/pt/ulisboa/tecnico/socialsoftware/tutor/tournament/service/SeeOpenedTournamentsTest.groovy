@@ -118,7 +118,7 @@ class SeeOpenedTournamentsTest extends Specification {
         resTournament1.getState == Not_CANCELED
         def topicsResults1 = resTournament1.getTopics()
         topicsResults1[0].getName == TOPIC_NAME1
-        topicsResults1[0].getCourse().getName = COURSE_NAME
+        topicsResults1[0].getCourse().getName == COURSE_NAME
 
         resTournament2.getCreator() == user
         resTournament2.getStartTime == startTime_Now
@@ -127,7 +127,7 @@ class SeeOpenedTournamentsTest extends Specification {
         resTournament2.getState == Not_CANCELED
         def topicsResults2 = resTournament1.getTopics()
         topicsResults2[0].getName == TOPIC_NAME2
-        topicsResults2[0].getCourse().getName = COURSE_NAME
+        topicsResults2[0].getCourse().getName == COURSE_NAME
 
     }
 
@@ -155,7 +155,7 @@ class SeeOpenedTournamentsTest extends Specification {
         tournamentDto3.setEndTime(endTime_Later)
         tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto3.setState(Tournament.Status.NOT_CANCELED)
-        tournamentService.createTournament(user.getUsername(), topics1, tournamentDto2)
+        tournamentService.createTournament(user.getUsername(), topics1, tournamentDto3)
 
         when:
         def result = tournamentService.seeOpenedTournaments()
@@ -172,7 +172,7 @@ class SeeOpenedTournamentsTest extends Specification {
         resTournament1.getState == Not_CANCELED
         def topicsResults1 = resTournament1.getTopics()
         topicsResults1[0].getName == TOPIC_NAME1
-        topicsResults1[0].getCourse().getName = COURSE_NAME
+        topicsResults1[0].getCourse().getName == COURSE_NAME
 
         resTournament2.getCreator() == user
         resTournament2.getStartTime == startTime_Now
@@ -181,7 +181,7 @@ class SeeOpenedTournamentsTest extends Specification {
         resTournament2.getState == Not_CANCELED
         def topicsResults2 = resTournament1.getTopics()
         topicsResults2[0].getName == TOPIC_NAME2
-        topicsResults2[0].getCourse().getName = COURSE_NAME
+        topicsResults2[0].getCourse().getName == COURSE_NAME
 
     }
 
@@ -208,7 +208,7 @@ class SeeOpenedTournamentsTest extends Specification {
         tournamentDto3.setEndTime(endTime_Now)
         tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto3.setState(Tournament.Status.CANCELED)
-        tournamentService.createTournament(user.getUsername(), topics1, tournamentDto2)
+        tournamentService.createTournament(user.getUsername(), topics1, tournamentDto3)
 
         when:
         def result = tournamentService.seeOpenedTournaments()
@@ -225,7 +225,7 @@ class SeeOpenedTournamentsTest extends Specification {
         resTournament1.getState == Not_CANCELED
         def topicsResults1 = resTournament1.getTopics()
         topicsResults1[0].getName == TOPIC_NAME1
-        topicsResults1[0].getCourse().getName = COURSE_NAME
+        topicsResults1[0].getCourse().getName == COURSE_NAME
 
         resTournament2.getCreator() == user
         resTournament2.getStartTime == startTime_Now
@@ -234,7 +234,7 @@ class SeeOpenedTournamentsTest extends Specification {
         resTournament2.getState == Not_CANCELED
         def topicsResults2 = resTournament1.getTopics()
         topicsResults2[0].getName == TOPIC_NAME2
-        topicsResults2[0].getCourse().getName = COURSE_NAME
+        topicsResults2[0].getCourse().getName == COURSE_NAME
 
     }
 
@@ -255,7 +255,7 @@ class SeeOpenedTournamentsTest extends Specification {
         tournamentDto3.setEndTime(endTime_Later)
         tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto3.setState(Tournament.Status.NOT_CANCELED)
-        tournamentService.createTournament(user.getUsername(), topics1, tournamentDto2)
+        tournamentService.createTournament(user.getUsername(), topics1, tournamentDto3)
 
         when:
         def result = tournamentService.seeOpenedTournaments()
@@ -271,7 +271,7 @@ class SeeOpenedTournamentsTest extends Specification {
         tournamentDto3.setEndTime(endTime_Now)
         tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto3.setState(Tournament.Status.CANCELED)
-        tournamentService.createTournament(user.getUsername(), topics1, tournamentDto2)
+        tournamentService.createTournament(user.getUsername(), topics1, tournamentDto3)
 
         when:
         def result = tournamentService.seeOpenedTournaments()
@@ -280,6 +280,12 @@ class SeeOpenedTournamentsTest extends Specification {
         result().size == 0
     }
 
-
+    @TestConfiguration
+    static class TournamentServiceImplTestContextConfiguration {
+        @Bean
+        TournamentService tournamentService() {
+            return new TournamentService()
+        }
+    }
 
 }

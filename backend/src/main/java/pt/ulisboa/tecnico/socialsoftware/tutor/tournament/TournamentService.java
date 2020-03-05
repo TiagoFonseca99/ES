@@ -53,8 +53,9 @@ public class TournamentService {
             throw new TutorException(USER_NOT_FOUND, username);
         }
 
+        // Added 10 seconds as a buffer to take latency into consideration
         if (!tournamentDto.getStartTime().isBefore(tournamentDto.getEndTime())
-            || tournamentDto.getStartTime().isBefore(LocalDateTime.now())) {
+            || tournamentDto.getStartTime().plusSeconds(10).isBefore(LocalDateTime.now())) {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "date");
         }
 
