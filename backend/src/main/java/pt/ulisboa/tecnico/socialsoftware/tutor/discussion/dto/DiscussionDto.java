@@ -4,40 +4,34 @@ import java.io.Serializable;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 
 public class DiscussionDto implements Serializable {
-    private Integer id;
-    private Integer key;
+    private Integer userId;
+    private Integer questionId;
+    private QuestionDto question;
     private String content;
-    private Question question;
-    private User user;
 
     public DiscussionDto() {
     }
 
     public DiscussionDto(Discussion discussion) {
-        this.id = discussion.getId();
-        this.key = discussion.getKey();
+        this.userId = discussion.getUser().getId();
+        this.questionId = discussion.getQuestion().getId();
         this.content = discussion.getContent();
-        this.question = discussion.getQuestion();
-        this.user = discussion.getUser();
+        this.question = new QuestionDto(discussion.getQuestion());
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public Integer getQuestionId() {
+        return question.getId();
     }
 
-    public Integer getKey() {
-        return key;
-    }
-
-    public void setKey(Integer key) {
-        this.key = key;
+    public void setUserId(Integer id) {
+        this.userId = id;
     }
 
     public String getContent() {
@@ -48,27 +42,11 @@ public class DiscussionDto implements Serializable {
         this.content = content;
     }
 
-    public Question getQuestion() {
+    public QuestionDto getQuestion() {
         return question;
     }
 
-    public void setQuestion(Question question) {
+    public void setQuestion(QuestionDto question) {
         this.question = question;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    @Override
-    public String toString() {
-        return "DiscussionDto{" +
-            "id=" + id +
-            ", content='" + content + '\'' +
-                "}";
     }
 }
