@@ -58,7 +58,7 @@ public class User implements UserDetails {
     @ManyToMany
     private Set<CourseExecution> courseExecutions = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Discussion> discussions = new HashSet<>();
 
     public User() {
@@ -448,5 +448,9 @@ public class User implements UserDetails {
         }
 
         return result;
+    }
+
+    public void addDiscussion(Discussion discussion){
+        discussions.add(discussion);
     }
 }

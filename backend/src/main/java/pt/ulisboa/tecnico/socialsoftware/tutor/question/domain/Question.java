@@ -70,7 +70,7 @@ public class Question {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "question", orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Discussion discussion;
 
     public Question() {
@@ -323,5 +323,9 @@ public class Question {
 
     public boolean belongsToAssessment(Assessment chosenAssessment) {
         return chosenAssessment.getTopicConjunctions().stream().map(TopicConjunction::getTopics).collect(Collectors.toList()).contains(this.topics);
+    }
+
+    public void setDiscussion(Discussion discussion) {
+        this.discussion = discussion;
     }
 }

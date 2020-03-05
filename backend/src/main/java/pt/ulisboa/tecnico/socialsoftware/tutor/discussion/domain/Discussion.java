@@ -2,48 +2,41 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain;
 
 import javax.persistence.*;
 
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.DiscussionId;
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Entity
-@Table(
-       name = "discussions"
-)
-
+@Table(name = "discussions")
 public class Discussion {
-    @SuppressWarnings("unused")
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(unique=true, nullable = false)
-    private Integer key;
+    @EmbeddedId
+    private DiscussionId discussionId;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="user_id", insertable = false, updatable = false)
     private User user;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="question_id", insertable = false, updatable = false)
     private Question question;
 
-    public Integer getId() {
-        return id;
+    public Discussion() {
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getKey() {
-        return key;
-    }
-
-    public void setKey(Integer key) {
-        this.key = key;
+    public Discussion(User user, Question question, DiscussionDto discussionDto) {
+        checkConsistentDiscussion(discussionDto);
+        this.content = discussionDto.getContent();
+        this.question = question;
+        question.setDiscussion(this);
+        this.user = user;
+        user.addDiscussion(this);
     }
 
     public String getContent() {
@@ -60,6 +53,7 @@ public class Discussion {
 
     public void setQuestion(Question question) {
         this.question = question;
+        this.discussionId.setQuestionId(question.getId());
     }
 
     public User getUser() {
@@ -68,5 +62,12 @@ public class Discussion {
 
     public void setUser(User user) {
         this.user = user;
+        this.discussionId.setUserId(user.getId());
+    }
+
+    private void checkConsistentDiscussion(DiscussionDto discussionDto){
+        if(discussionDto.getContent().trim().length() == 0){
+            throw new TutorException(DISCUSSION_MISSING_DATA);
+        }
     }
 }
