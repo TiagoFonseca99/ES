@@ -111,28 +111,25 @@ class SeeOpenedTournamentsTest extends Specification {
         def resTournament1 = result.get(0)
         def resTournament2 = result.get(1)
 
-        resTournament1 == tournamentDto1
-        resTournament2 == tournamentDto2
-/*
         //resTournament1.getCreator() == user
-        resTournament1.getStartTime() == startTime_Now
-        resTournament2.getEndTime() == endTime_Now
-        resTournament1.getNumberOfQuestions() == NUMBER_OF_QUESTIONS1
-        resTournament1.getState() == 'NOT_CANCELED'
+        resTournament1.getStartTime() == tournamentDto1.getStartTime()
+        resTournament2.getEndTime() == tournamentDto1.getEndTime()
+        resTournament1.getNumberOfQuestions() == tournamentDto1.getNumberOfQuestions()
+        resTournament1.getState() == tournamentDto1.getState()
         //def topicsResults1 = resTournament1.getTopics()
         //topicsResults1[0].getName == TOPIC_NAME1
         //topicsResults1[0].getCourse().getName == COURSE_NAME
 
         //resTournament2.getCreator() == user
-        resTournament2.getStartTime() == startTime_Now
-        resTournament2.getEndTime() == endTime_Now
-        resTournament2.getNumberOfQuestions() == NUMBER_OF_QUESTIONS2
-        resTournament2.getState() == 'NOT_CANCELED'
+        resTournament2.getStartTime() == tournamentDto2.getStartTime()
+        resTournament2.getEndTime() == tournamentDto2.getEndTime()
+        resTournament2.getNumberOfQuestions() == tournamentDto2.getNumberOfQuestions()
+        resTournament2.getState() == tournamentDto2.getState()
         //def topicsResults2 = resTournament1.getTopics()
         //topicsResults2[0].getName == TOPIC_NAME2
         //topicsResults2[0].getCourse().getName == COURSE_NAME
 
- */
+
 
     }
 
