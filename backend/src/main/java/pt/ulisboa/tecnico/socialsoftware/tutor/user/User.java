@@ -8,6 +8,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.Submission;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -56,6 +57,10 @@ public class User implements UserDetails {
 
     @ManyToMany
     private Set<CourseExecution> courseExecutions = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch=FetchType.LAZY, orphanRemoval=true)
+    private Set<Submission>  submissions = new HashSet<>();
+
 
     public User() {
     }
@@ -148,6 +153,16 @@ public class User implements UserDetails {
 
     public Set<CourseExecution> getCourseExecutions() {
         return courseExecutions;
+    }
+
+    public Set<Submission> getSubmissions() { return submissions; }
+
+    public Set<Question> getSubmittedQuestions() {
+        Set <Question> questions = new HashSet<>();
+        for(Submission submission : this.submissions)
+            questions.add(submission.getQuestion());
+
+        return questions;
     }
 
     public void setCourseExecutions(Set<CourseExecution> courseExecutions) {
@@ -347,6 +362,12 @@ public class User implements UserDetails {
     public void addCourse(CourseExecution course) {
         this.courseExecutions.add(course);
     }
+
+    public void addSubmission(Submission submission) { this.submissions.add(submission); }
+
+    public Boolean isStudent(){ return this.role == User.Role.STUDENT; }
+
+    public Boolean isTeacher(){ return this.role == User.Role.TEACHER; }
 
     @Override
     public String toString() {
