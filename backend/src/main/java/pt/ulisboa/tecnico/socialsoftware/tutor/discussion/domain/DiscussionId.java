@@ -2,6 +2,8 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain;
 
 import java.io.Serializable;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
@@ -30,5 +32,19 @@ public class DiscussionId implements Serializable {
 
     public Integer getUserId() {
         return userId;
+    }
+
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof DiscussionId)) {
+            return false;
+        }
+
+        return ((DiscussionId) o).getQuestionId() == questionId && ((DiscussionId) o).getUserId() == userId;
+    }
+
+    public int hashCode() {
+        return Objects.hash(questionId, userId);
     }
 }
