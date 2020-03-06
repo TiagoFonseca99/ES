@@ -14,7 +14,7 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 @Table(name = "discussions")
 public class Discussion {
     @EmbeddedId
-    private DiscussionId discussionId;
+    private DiscussionId discussionId = new DiscussionId();
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -37,6 +37,8 @@ public class Discussion {
         question.setDiscussion(this);
         this.user = user;
         user.addDiscussion(this);
+        discussionId.setQuestionId(question.getId());
+        discussionId.setUserId(user.getId());
     }
 
     public String getContent() {
