@@ -60,11 +60,11 @@ public class DiscussionService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public DiscussionDto createDiscussion(Integer userId, Integer questionId, DiscussionDto discussionDto) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-        Question question = questionRepository.findById(questionId)
-            .orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
+    public DiscussionDto createDiscussion(DiscussionDto discussionDto) {
+        User user = userRepository.findById(discussionDto.getUserId())
+            .orElseThrow(() -> new TutorException(USER_NOT_FOUND, discussionDto.getUserId()));
+        Question question = questionRepository.findById(discussionDto.getQuestionId())
+            .orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, discussionDto.getQuestionId()));
 
         if(user.getRole() == User.Role.TEACHER){
             throw new TutorException(DISCUSSION_NOT_TEACHER_CREATOR);
@@ -72,6 +72,7 @@ public class DiscussionService {
 
         Discussion discussion = new Discussion(user, question, discussionDto);
         this.entityManager.persist(discussion);
+
         return new DiscussionDto(discussion);
     }
 }
