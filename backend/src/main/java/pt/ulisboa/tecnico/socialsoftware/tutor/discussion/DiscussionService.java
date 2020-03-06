@@ -66,8 +66,12 @@ public class DiscussionService {
         Question question = questionRepository.findById(discussionDto.getQuestionId())
             .orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, discussionDto.getQuestionId()));
 
-        if(user.getRole() == User.Role.TEACHER){
+        if(user.getRole() == User.Role.TEACHER) {
             throw new TutorException(DISCUSSION_NOT_TEACHER_CREATOR);
+        }
+
+        if(!discussionRepository.findByUserIdQuestionId(user.getId(), question.getId()).isEmpty()){
+            throw new TutorException(DUPLICATE_DISCUSSION, user.getId(), question.getId());
         }
 
         Discussion discussion = new Discussion(user, question, discussionDto);
