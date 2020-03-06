@@ -328,4 +328,16 @@ public class Question {
     public void setDiscussion(Discussion discussion) {
         this.discussion = discussion;
     }
+
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (!(o instanceof Question)) {
+            return false;
+        }
+
+        return ((Question) o).getId() == id;
+    }
 }

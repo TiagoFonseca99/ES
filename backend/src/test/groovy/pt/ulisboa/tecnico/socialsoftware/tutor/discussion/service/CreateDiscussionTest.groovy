@@ -14,10 +14,13 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
@@ -40,17 +43,22 @@ class CreateDiscussionTest extends Specification {
     QuestionRepository questionRepository
 
     @Autowired
+    QuestionAnswerRepository questionAnswerRepository
+
+    @Autowired
     QuizRepository quizRepository
+
+    @Autowired
+    QuizAnswerRepository quizAnswerRepository;
+
+    @Autowired
+    QuizQuestionRepository quizQuestionRepository;
 
     @Autowired
     UserRepository userRepository
 
-    def quiz
-    def quizquestion1
     def question1
     def question2
-    def questionanswer
-    def quizanswer
     def teacher
     def student
 
@@ -59,7 +67,6 @@ class CreateDiscussionTest extends Specification {
         question1.setKey(1)
         question1.setTitle(QUESTION_TITLE)
         question1.setContent(QUESTION_CONTENT)
-        questionRepository.save(question1)
 
         question2 = new Question()
         question2.setKey(2)
@@ -71,20 +78,32 @@ class CreateDiscussionTest extends Specification {
         userRepository.save(teacher)
         student = new User(USER_NAME, USER_USERNAME, 2, User.Role.STUDENT)
 
-        quiz = new Quiz()
+        def quiz = new Quiz()
         quiz.setKey(1)
-        quizRepository.save(quiz)
 
-        quizquestion1 = new QuizQuestion(quiz, question1, 3)
+        def quizanswer = new QuizAnswer()
 
-        quizanswer = new QuizAnswer()
-
-        questionanswer = new QuestionAnswer()
-        questionanswer.setQuizQuestion(quizquestion1)
+        def questionanswer = new QuestionAnswer()
+        questionanswer.setTimeTaken(1)
+        def quizquestion = new QuizQuestion(quiz, question1, 3)
+        questionanswer.setQuizQuestion(quizquestion)
         questionanswer.setQuizAnswer(quizanswer)
+        questionAnswerRepository.save(questionanswer)
 
+        quizquestion.addQuestionAnswer(questionanswer)
         quizanswer.addQuestionAnswer(questionanswer)
 
+        quizQuestionRepository.save(quizquestion)
+        quizAnswerRepository.save(quizanswer)
+
+
+        quiz.addQuizAnswer(quizanswer)
+        quiz.addQuizQuestion(quizquestion)
+
+        quizRepository.save(quiz)
+
+
+        questionRepository.save(question1)
         student.addQuizAnswer(quizanswer)
         userRepository.save(student)
     }
@@ -136,7 +155,7 @@ class CreateDiscussionTest extends Specification {
 
         then:
         def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.QUESTION_ANSWER_NOT_FOUND
+        exception.getErrorMessage() == ErrorMessage.QUESTION_NOT_ANSWERED
     }
 
     def "student can't create 2 discussions to same question"(){
@@ -160,7 +179,8 @@ class CreateDiscussionTest extends Specification {
         discussionService.createDiscussion(discussionDto2)
 
         then:
-        thrown(TutorException)
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.DUPLICATE_DISCUSSION
     }
 
     @TestConfiguration

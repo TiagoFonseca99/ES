@@ -74,6 +74,10 @@ public class DiscussionService {
             throw new TutorException(DUPLICATE_DISCUSSION, user.getId(), question.getId());
         }
 
+        if (!user.checkQuestionAnswered(question)) {
+            throw new TutorException(QUESTION_NOT_ANSWERED, question.getId());
+        }
+
         Discussion discussion = new Discussion(user, question, discussionDto);
         this.entityManager.persist(discussion);
 
