@@ -16,7 +16,7 @@ public class TournamentDto implements Serializable {
     private LocalDateTime endTime;
     private List<TopicDto> topicsDto = new ArrayList<>();
     private Integer numberOfQuestions;
-    private Enum state;
+    private Tournament.Status state;
 
     public TournamentDto() {
     }
@@ -42,6 +42,7 @@ public class TournamentDto implements Serializable {
         return startTime;
     }
 
+    // TODO Verificar
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
@@ -66,11 +67,11 @@ public class TournamentDto implements Serializable {
         this.numberOfQuestions = numberOfQuestions;
     }
 
-    public Enum getState() {
+    public Tournament.Status getState() {
         return state;
     }
 
-    public void setState(Enum state) {
+    public void setState(Tournament.Status state) {
         this.state = state;
     }
 

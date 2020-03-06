@@ -24,20 +24,24 @@ public class Tournament {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "start_time")
     private LocalDateTime startTime;
 
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
     private List<Topic> topics = new ArrayList<>();
 
+    @Column(name = "number_of_questions")
     private Integer numberOfQuestions;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User creator;
 
-    private Enum state;
+    @Enumerated(EnumType.STRING)
+    private Status state;
 
     public Tournament() {}
 
@@ -94,11 +98,11 @@ public class Tournament {
         this.creator = creator;
     }
 
-    public Enum getState() {
+    public Status  getState() {
         return state;
     }
 
-    public void setState(Enum state) {
+    public void setState(Status state) {
         this.state = state;
     }
 
@@ -121,6 +125,7 @@ public class Tournament {
         }
         this.topics.remove(topic);
     }
+
 
     @Override
     public String toString() {
