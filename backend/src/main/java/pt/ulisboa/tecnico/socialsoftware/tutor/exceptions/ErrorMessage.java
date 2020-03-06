@@ -29,6 +29,7 @@ public enum ErrorMessage {
     DUPLICATE_TOPIC("Duplicate topic: %s"),
     DUPLICATE_USER("Duplicate user: %s"),
     DUPLICATE_COURSE_EXECUTION("Duplicate course execution: %s"),
+    DUPLICATE_DISCUSSION("Duplicate discussion for user id %d and question id %d"),
 
     USERS_IMPORT_ERROR("Error importing users: %s"),
     QUESTIONS_IMPORT_ERROR("Error importing questions: %s"),
