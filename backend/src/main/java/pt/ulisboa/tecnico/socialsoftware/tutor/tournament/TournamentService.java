@@ -75,7 +75,7 @@ public class TournamentService {
 
         Tournament tournament = new Tournament(user, topics, tournamentDto);
         this.entityManager.persist(tournament);
-        return new TournamentDto(tournament);
+        return new TournamentDto(tournament, tournamentDto.getTopics());
     }
 
     @Retryable(

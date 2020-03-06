@@ -1,25 +1,31 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
-import java.io.Serializable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
 
+import java.io.Serializable;
 import java.util.*;
 import java.time.LocalDateTime;
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 public class TournamentDto implements Serializable {
     private Integer id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private List<TopicDto> topicsDto = new ArrayList<>();
     private Integer numberOfQuestions;
-    private Tournament.Status state;
+    private Enum state;
 
     public TournamentDto() {
     }
 
-    public TournamentDto(Tournament tournament) {
+    public TournamentDto(Tournament tournament, List<TopicDto> topicsDto) {
         this.id = tournament.getId();
         this.startTime = tournament.getStartTime();
         this.endTime = tournament.getEndTime();
+        this.topicsDto = topicsDto;
         this.numberOfQuestions = tournament.getNumberOfQuestions();
         this.state = tournament.getState();
     }
@@ -48,6 +54,10 @@ public class TournamentDto implements Serializable {
         this.endTime = endTime;
     }
 
+    public List<TopicDto> getTopics() {
+        return topicsDto;
+    }
+
     public Integer getNumberOfQuestions() {
         return numberOfQuestions;
     }
@@ -56,12 +66,32 @@ public class TournamentDto implements Serializable {
         this.numberOfQuestions = numberOfQuestions;
     }
 
-    public Tournament.Status getState() {
+    public Enum getState() {
         return state;
     }
 
-    public void setState(Tournament.Status state) {
+    public void setState(Enum state) {
         this.state = state;
+    }
+
+    public void addTopics(List<TopicDto> topicsDto) {
+        for (TopicDto topicDto : topicsDto) {
+            addTopic(topicDto);
+        }
+    }
+
+    public void addTopic(TopicDto topicDto) {
+        if (topicsDto.contains(topicDto)) {
+            throw new TutorException(DUPLICATE_TOURNAMENT_TOPIC, topicDto.getId());
+        }
+        this.topicsDto.add(topicDto);
+    }
+
+    public void removeTopic(TopicDto topicDto) {
+        if (topicsDto.size() <= 1) {
+            throw new TutorException(TOURNAMENT_HAS_ONLY_ONE_TOPIC);
+        }
+        this.topicsDto.remove(topicDto);
     }
 
     @Override

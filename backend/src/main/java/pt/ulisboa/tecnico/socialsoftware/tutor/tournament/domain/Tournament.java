@@ -37,7 +37,7 @@ public class Tournament {
     @JoinColumn(name = "user_id")
     private User creator;
 
-    private Status state;
+    private Enum state;
 
     public Tournament() {}
 
@@ -94,12 +94,18 @@ public class Tournament {
         this.creator = creator;
     }
 
-    public Status getState() {
+    public Enum getState() {
         return state;
     }
 
-    public void setState(Status state) {
+    public void setState(Enum state) {
         this.state = state;
+    }
+
+    public void addTopics(List<Topic> topics) {
+        for (Topic topic : topics) {
+            addTopic(topic);
+        }
     }
 
     public void addTopic(Topic topic) {

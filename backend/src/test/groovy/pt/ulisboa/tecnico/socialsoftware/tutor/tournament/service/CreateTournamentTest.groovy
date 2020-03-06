@@ -4,19 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -53,6 +53,7 @@ class CreateTournamentTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
+    def topicsDto = new ArrayList<TopicDto>()
     def startTime = LocalDateTime.now().plusHours(1)
     def endTime = LocalDateTime.now().plusHours(2)
 
@@ -75,6 +76,9 @@ class CreateTournamentTest extends Specification {
 
         topics.add(topic1.getId())
         topics.add(topic2.getId())
+
+        topicsDto.add(topicDto1)
+        topicsDto.add(topicDto2)
     }
 
     def "create tournament"() {
@@ -82,6 +86,7 @@ class CreateTournamentTest extends Specification {
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(startTime)
         tournamentDto.setEndTime(endTime)
+        tournamentDto.addTopics(topicsDto)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -105,6 +110,7 @@ class CreateTournamentTest extends Specification {
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(LocalDateTime.now().minusHours(2))
         tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.addTopics(topicsDto)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -128,6 +134,7 @@ class CreateTournamentTest extends Specification {
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(LocalDateTime.now().plusHours(2))
         tournamentDto.setEndTime(LocalDateTime.now())
+        tournamentDto.addTopics(topicsDto)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -145,6 +152,7 @@ class CreateTournamentTest extends Specification {
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(LocalDateTime.now())
         tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.addTopics(topicsDto)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
         topics = new ArrayList<Integer>()
@@ -163,6 +171,7 @@ class CreateTournamentTest extends Specification {
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(LocalDateTime.now())
         tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.addTopics(topicsDto)
         tournamentDto.setNumberOfQuestions(-1)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -180,6 +189,7 @@ class CreateTournamentTest extends Specification {
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(LocalDateTime.now())
         tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.addTopics(topicsDto)
         tournamentDto.setNumberOfQuestions(0)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
