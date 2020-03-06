@@ -27,7 +27,7 @@ public class DiscussionDto implements Serializable {
     }
 
     public Integer getQuestionId() {
-        return question.getId();
+        return questionId;
     }
 
     public void setUserId(Integer id) {
@@ -48,5 +48,6 @@ public class DiscussionDto implements Serializable {
 
     public void setQuestion(QuestionDto question) {
         this.question = question;
+        this.questionId = question.getId();
     }
 }
