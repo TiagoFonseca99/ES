@@ -19,6 +19,7 @@ public enum ErrorMessage {
     COURSE_EXECUTION_ACRONYM_IS_EMPTY("The course execution acronym is empty"),
     COURSE_EXECUTION_ACADEMIC_TERM_IS_EMPTY("The course execution academic term is empty"),
     USERNAME_NOT_FOUND("Username %s not found"),
+    TOURNAMENT_NOT_FOUND("Tournament %s not found"),
 
     USER_NOT_STUDENT("Username %s is not a student"),
     QUESTION_ALREADY_SUBMITTED("User %s has already submitted this question"),
@@ -31,6 +32,7 @@ public enum ErrorMessage {
     DUPLICATE_TOPIC("Duplicate topic: %s"),
     DUPLICATE_USER("Duplicate user: %s"),
     DUPLICATE_COURSE_EXECUTION("Duplicate course execution: %s"),
+    DUPLICATE_TOURNAMENT_TOPIC("Duplicate tournament topic: %s"),
 
     USERS_IMPORT_ERROR("Error importing users: %s"),
     QUESTIONS_IMPORT_ERROR("Error importing questions: %s"),
@@ -40,9 +42,11 @@ public enum ErrorMessage {
 
     QUESTION_IS_USED_IN_QUIZ("Question is used in quiz %s"),
     QUIZ_NOT_CONSISTENT("Field %s of quiz is not consistent"),
+    TOURNAMENT_NOT_CONSISTENT("Field %s of tournament is not consistent"),
     USER_NOT_ENROLLED("%s - Not enrolled in any available course"),
     QUIZ_NO_LONGER_AVAILABLE("This quiz is no longer available"),
     QUIZ_NOT_YET_AVAILABLE("This quiz is not yet available"),
+    TOURNAMENT_HAS_ONLY_ONE_TOPIC("This tournament has only one topic left"),
 
     NO_CORRECT_OPTION("Question does not have a correct option"),
     NOT_ENOUGH_QUESTIONS("Not enough questions to create a quiz"),
