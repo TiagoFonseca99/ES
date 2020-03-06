@@ -9,7 +9,12 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.Submission
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionDto
@@ -21,10 +26,14 @@ class CreateSubmissionTest extends Specification {
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
-    public static final String QUESTION_TITLE = "Pergunta exemplo?"
-    public static final String QUESTION_CONTENT = "Resposta"
+    public static final String QUESTION_TITLE = "Question?"
+    public static final String QUESTION_CONTENT = "Answer"
     public static final String STUDENT_NAME = "João Silva"
     public static final String STUDENT_USERNAME = "joaosilva"
+    public static final String TEACHER_NAME = "Ana Rita"
+    public static final String TEACHER_USERNAME = "anarita"
+    @Autowired
+    SubmissionService submissionService
 
     @Autowired
     CourseRepository courseRepository
@@ -35,82 +44,100 @@ class CreateSubmissionTest extends Specification {
     @Autowired
     SubmissionRepository submissionRepository
 
+    @Autowired
+    UserRepository userRepository
+
+    @Autowired
+    QuestionRepository questionRepository
+
     def course
     def courseExecution
     def student
     def acronym
     def question
-
+    def teacher
 
     def setup() {
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
         courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
         courseExecutionRepository.save(courseExecution)
-        acronym = courseExecution.getAcronym()
         student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
-        question = new Question();
-        question.getTitle(QUESTION_TITLE);
-        question.getKey(1);
-        question.getContent(QUESTION_CONTENT);
+        student.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
+        userRepository.save(student)
+        teacher = new User(TEACHER_NAME, TEACHER_USERNAME, 2, User.Role.TEACHER)
+        userRepository.save(teacher)
+        question = new Question()
+        question.setKey(1)
+        question.setTitle(QUESTION_TITLE)
+        question.setContent(QUESTION_CONTENT)
+        question.setCourse(course)
+        questionRepository.save(question)
     }
 
     def "create submission with question not null"(){
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setTitle(question.getTitle())
+        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(student.getId())
 
-        when: submissionService.createSubmission(student.getId(), question.getId(), submissionDto)
+        when: submissionService.createSubmission(question, submissionDto)
 
         then: "the correct submission is in the repository"
         submissionRepository.count() == 1L
         def result = submissionRepository.findAll().get(0)
         result.getId() != null
         result.getKey() == 1
-        result.getTitle() == QUESTION_TITLE
-        result.getStudentId() == student.getId()
-        result.getStudent().getSubmittedQuestions().contains(question)
+        result.getUser() == student
         result.getQuestion() != null
-        result.getQuestion().getType() == Question.Status.SUBMITTED
+        result.getQuestion() == question
     }
 
 
-    def "user is a student"(){
-        given: "a submissionDto"
+    def "user is not a student"(){
+        given: "a submissionDto for a teacher"
         def submissionDto = new SubmissionDto()
+        submissionDto.setKey(1)
+        submissionDto.setQuestionId(question.getId())
+        submissionDto.setStudentId(teacher.getId())
 
-        when: submissionService.createSubmission(student.getId(), question.getId(), submissionDto)
+        when: submissionService.createSubmission(question, submissionDto)
 
-        then: "user is student"
-        submission.getStudent().getRole() == User.Role.STUDENT
+        then: "exception is thrown"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
     }
 
     def "student that submits a question enrolled in course"(){
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
+        submissionDto.setKey(1)
+        submissionDto.setQuestionId(question.getId())
+        submissionDto.setStudentId(student.getId())
 
-        when: submissionService.createSubmission(student.getId(), question.getId(), submissionDto)
+        when: submissionService.createSubmission(question, submissionDto)
 
         then:
-        def result = submissionRepository.findAll().get(0)
-        def enrolledCourse = result.getCourse()
-        result.getStudent().getEnrolledCourseAcronyms().contains(acronym)
+        student.getEnrolledCoursesAcronyms().contains(courseExecution.getAcronym())
     }
 
-    def "student submits the same question title"(){
-        given: "a question"
-        def question2 = new Question();
-        question2.getTitle(QUESTION_TITLE);
-        question2.getKey(2);
-        and: "a submissionDto"
+    def "student submits the same question"(){
+        given: "a submissionDto"
         def submissionDto = new SubmissionDto()
+        submissionDto.setKey(1)
+        submissionDto.setQuestionId(question.getId())
+        submissionDto.setStudentId(student.getId())
+        and: "a user with a previous submission of the question"
+        student.addSubmission(new Submission(question, student, submissionDto))
         and: "another submissionDto"
         def submissionDto2 = new SubmissionDto()
+        submissionDto2.setKey(2)
+        submissionDto2.setQuestionId(question.getId())
+        submissionDto2.setStudentId(student.getId())
 
-        when: "creating submitting the question again"
-        submissionService.createSubmission(student.getId(), question2.getId(), submissionDto2)
+        when: "creating a submission with a previously submitted question"
+        submissionService.createSubmission(question, submissionDto2)
 
         then: "exception is thrown"
         thrown(TutorException)
