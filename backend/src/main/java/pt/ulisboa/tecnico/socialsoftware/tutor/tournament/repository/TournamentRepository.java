@@ -13,5 +13,5 @@ import java.util.Optional;
 @Transactional
 public interface TournamentRepository extends JpaRepository<Tournament, Integer> {
     @Query(value = "SELECT * FROM tournaments t WHERE t.start_time < CURRENT_TIMESTAMP AND t.end_time > CURRENT_TIMESTAMP AND t.state = 'NOT_CANCELED'", nativeQuery = true)
-    List<Tournament> seeOpenedTournaments();
+    List<Tournament> getOpenedTournaments();
 }

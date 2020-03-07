@@ -22,7 +22,7 @@ import spock.lang.Specification
 import java.time.LocalDateTime
 
 @DataJpaTest
-class SeeOpenedTournamentsTest extends Specification {
+class GetOpenedTournamentsTest extends Specification {
 
     public static final String USER_NAME = "Dinis"
     public static final String USERNAME = "JDinis99"
@@ -86,7 +86,7 @@ class SeeOpenedTournamentsTest extends Specification {
 
     }
 
-    def "create 2 tournaments on time and see opened tournaments"() {
+    def "create 2 tournaments on time and get opened tournaments"() {
         given:
         def tournamentDto1 = new TournamentDto()
         tournamentDto1.setStartTime(startTime_Now)
@@ -104,7 +104,7 @@ class SeeOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getUsername(), topics2, tournamentDto2)
 
         when:
-        def result = tournamentService.seeOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments()
 
         then: "the returned data is correct"
         result.size() == 2
@@ -128,7 +128,7 @@ class SeeOpenedTournamentsTest extends Specification {
     }
 
 
-    def "create 2 tournaments on time and 1 out of time and see opened tournaments"() {
+    def "create 2 tournaments on time and 1 out of time and get opened tournaments"() {
         given:
         def tournamentDto1 = new TournamentDto()
         tournamentDto1.setStartTime(startTime_Now)
@@ -154,7 +154,7 @@ class SeeOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getUsername(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.seeOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments()
 
 
         then: "the returned data is correct"
@@ -178,7 +178,7 @@ class SeeOpenedTournamentsTest extends Specification {
 
     }
 
-    def "create 2 tournaments on time and 1 canceled and see opened tournaments"() {
+    def "create 2 tournaments on time and 1 canceled and get opened tournaments"() {
         given:
         def tournamentDto1 = new TournamentDto()
         tournamentDto1.setStartTime(startTime_Now)
@@ -204,7 +204,7 @@ class SeeOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getUsername(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.seeOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments()
 
         then: "the returned data is correct"
         result.size() == 2
@@ -227,17 +227,17 @@ class SeeOpenedTournamentsTest extends Specification {
 
     }
 
-    def "create 0 tournaments and see opened tournaments"() {
+    def "create 0 tournaments and get opened tournaments"() {
         given:
 
         when:
-        def result = tournamentService.seeOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments()
 
         then: "there is no returned data"
         result.size() == 0
     }
 
-    def "create one out of time and see opened tournaments"() {
+    def "create one out of time and get opened tournaments"() {
         given:
         def tournamentDto3 = new TournamentDto()
         tournamentDto3.setStartTime(startTime_Later)
@@ -247,13 +247,13 @@ class SeeOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getUsername(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.seeOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments()
 
         then: "there is no returned data"
         result.size() == 0
     }
 
-    def "create one canceled and see opened tournaments"() {
+    def "create one canceled and get opened tournaments"() {
         given:
         def tournamentDto3 = new TournamentDto()
         tournamentDto3.setStartTime(startTime_Now)
@@ -263,7 +263,7 @@ class SeeOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getUsername(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.seeOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments()
 
         then: "there is no returned data"
         result.size() == 0

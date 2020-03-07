@@ -24,29 +24,216 @@ import java.time.LocalDateTime
 @DataJpaTest
 class StudentJoinTournamentTest extends Specification {
 
+    public static final String USER_NAME1 = "Dinis"
+    public static final String USERNAME1 = "JDinis99"
+    public static final String USER_NAME2 = "Tiago"
+    public static final String USERNAME2 = "TiagoFonseca99"
+    public static final String USER_NAME3 = "Tomas"
+    public static final String USERNAME3 = "TomasInacio99"
+    public static final String USER_NAME4 = "Daniel"
+    public static final String USERNAME4 = "DanielMatos99"
+    public static final Integer KEY1 = 1
+    public static final Integer KEY2 = 2
+    public static final Integer KEY3 = 3
+    public static final Integer KEY4 = 4
+    public static final String COURSE_NAME = "Software Architecture"
+    public static final String TOPIC_NAME1 = "Informática"
+    public static final String TOPIC_NAME2 = "Engenharia de Software"
+    public static final int NUMBER_OF_QUESTIONS1 = 5
+
+    @Autowired
+    TournamentService tournamentService
+
+    @Autowired
+    UserRepository userRepository
+
+    @Autowired
+    CourseRepository courseRepository
+
+    @Autowired
+    TournamentRepository tournamentRepository
+
+    @Autowired
+    TopicRepository topicRepository
+
+    def user
+    def course
+    def topic1
+    def topic2
+    def topicDto1
+    def topicDto2
+    def topics = new ArrayList<Integer>()
+    def startTime_Now = LocalDateTime.now()
+    def endTime_Now = LocalDateTime.now().plusHours(2)
+    def tournamentDto = new TournamentDto()
 
     def setup() {
+        user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
+        userRepository.save(user)
+
+        course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+
+        topicDto1 = new TopicDto()
+        topicDto1.setName(TOPIC_NAME1)
+        topic1 = new Topic(course, topicDto1)
+        topicRepository.save(topic1)
+
+        topicDto2 = new TopicDto()
+        topicDto2.setName(TOPIC_NAME2)
+        topic2 = new Topic(course, topicDto2)
+        topicRepository.save(topic2)
+
+        topics.add(topic1.getId())
+        topics.add(topic2.getId())
+
+
+        tournamentDto.setStartTime(startTime_Now)
+        tournamentDto.setEndTime(endTime_Now)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
 
     }
 
-    def "2 student join an open tournament and check participants" () {
+    def "2 student join an open tournament and get participants" () {
+        given:
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        userRepository.save(user2)
+
+        and:
+        def user3 = new User(USER_NAME3, USERNAME3, KEY3, User.Role.STUDENT)
+        userRepository.save(user3)
+
+        tournamentService.joinTournament(user2)
+        tournamentService.joinTournament(user3)
+
+        when:
+        def result = tournamentService.getTournamentParticipants()
+
+        then: "the students have joined the tournament"
+        result.size() == 2
+        def resTournamentParticipant1 = result.get(0)
+        def resTournamentParticipant2 = result.get(1)
+
+        resTournamentParticipant1.getId() == KEY2
+        resTournamentParticipant1.getUsername == USERNAME2
+        resTournamentParticipant1.getName == USER_NAME2
+        resTournamentParticipant1.getRole == User.Role.STUDENT
+
+        resTournamentParticipant2.getId() == KEY3
+        resTournamentParticipant2.getUsername == USERNAME3
+        resTournamentParticipant2.getName == USER_NAME3
+        resTournamentParticipant2.getRole == User.Role.STUDENT
 
     }
 
-    def "2 student and 1 teacher join an open tournament and check participants" () {
+    def "2 student and 1 teacher join an open tournament and get participants" () {
+        given:
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        userRepository.save(user2)
 
+        and:
+        def user3 = new User(USER_NAME3, USERNAME3, KEY3, User.Role.STUDENT)
+        userRepository.save(user3)
+
+        and:
+        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.TEACHER)
+        userRepository.save(user4)
+
+        tournamentService.joinTournament(user2)
+        tournamentService.joinTournament(user3)
+        tournamentService.joinTournament(user4)
+
+        when:
+        def result = tournamentService.getTournamentParticipants()
+
+        then: "the students have joined the tournament"
+        result.size() == 2
+        def resTournamentParticipant1 = result.get(0)
+        def resTournamentParticipant2 = result.get(1)
+
+        resTournamentParticipant1.getId() == KEY2
+        resTournamentParticipant1.getUsername == USERNAME2
+        resTournamentParticipant1.getName == USER_NAME2
+        resTournamentParticipant1.getRole == User.Role.STUDENT
+
+        resTournamentParticipant2.getId() == KEY3
+        resTournamentParticipant2.getUsername == USERNAME3
+        resTournamentParticipant2.getName == USER_NAME3
+        resTournamentParticipant2.getRole == User.Role.STUDENT
     }
 
-    def "2 student and 1 admin join an open tournament and check participants" () {
+    def "2 student and 1 admin join an open tournament and get participants" () {
+        given:
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        userRepository.save(user2)
 
+        and:
+        def user3 = new User(USER_NAME3, USERNAME3, KEY3, User.Role.STUDENT)
+        userRepository.save(user3)
+
+        and:
+        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.ADMIN)
+        userRepository.save(user4)
+
+        tournamentService.joinTournament(user2)
+        tournamentService.joinTournament(user3)
+        tournamentService.joinTournament(user4)
+
+        when:
+        def result = tournamentService.getTournamentParticipants()
+
+        then: "the students have joined the tournament"
+        result.size() == 2
+        def resTournamentParticipant1 = result.get(0)
+        def resTournamentParticipant2 = result.get(1)
+
+        resTournamentParticipant1.getId() == KEY2
+        resTournamentParticipant1.getUsername == USERNAME2
+        resTournamentParticipant1.getName == USER_NAME2
+        resTournamentParticipant1.getRole == User.Role.STUDENT
+
+        resTournamentParticipant2.getId() == KEY3
+        resTournamentParticipant2.getUsername == USERNAME3
+        resTournamentParticipant2.getName == USER_NAME3
+        resTournamentParticipant2.getRole == User.Role.STUDENT
     }
 
-    def "1 teacher join an open tournament and check participants" () {
+    def "1 teacher join an open tournament and get participants" () {
+        given:
+        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.TEACHER)
+        userRepository.save(user4)
 
+        tournamentService.joinTournament(user4)
+
+        when:
+        def result = tournamentService.getTournamentParticipants()
+
+        then: "no students have joined tournament"
+        result.size() == 0
     }
 
-    def "1 admin join an open tournament and check participants" () {
+    def "1 admin join an open tournament and get participants" () {
+        given:
+        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.ADMIN)
+        userRepository.save(user4)
 
+        tournamentService.joinTournament(user4)
+
+        when:
+        def result = tournamentService.getTournamentParticipants()
+
+        then: "no students have joined tournament"
+        result.size() == 0
+    }
+
+    @TestConfiguration
+    static class TournamentServiceImplTestContextConfiguration {
+        @Bean
+        TournamentService tournamentService() {
+            return new TournamentService()
+        }
     }
 
 }

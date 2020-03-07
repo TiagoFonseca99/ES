@@ -84,10 +84,26 @@ public class TournamentService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    // Tournament DTO?
-    public List<TournamentDto> seeOpenedTournaments() {
-        return tournamentRepository.seeOpenedTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
-                // TODO throw exeptions?
+    public List<TournamentDto> getOpenedTournaments() {
+        return tournamentRepository.getOpenedTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
+    }
+
+
+    // TODO
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void joinTournament(User user) {
+
+    }
+    // TODO
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void getTournamentParticipants() {
+
     }
 
     @Retryable(
