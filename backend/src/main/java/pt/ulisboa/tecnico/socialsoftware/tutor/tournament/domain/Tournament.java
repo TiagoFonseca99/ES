@@ -117,13 +117,19 @@ public class Tournament {
         if (topics.contains(topic)) {
             throw new TutorException(DUPLICATE_TOURNAMENT_TOPIC, topic.getId());
         }
+
         this.topics.add(topic);
     }
 
     public void removeTopic(Topic topic) {
+        if (!this.topics.contains(topic)) {
+            throw new TutorException(TOURNAMENT_TOPIC_MISMATCH, this.id, topic.getId());
+        }
+
         if (topics.size() <= 1) {
             throw new TutorException(TOURNAMENT_HAS_ONLY_ONE_TOPIC);
         }
+
         this.topics.remove(topic);
     }
 

@@ -104,7 +104,7 @@ class CreateTournamentTest extends Specification {
         given:
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(LocalDateTime.now().minusHours(2))
-        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.setEndTime(endTime)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -117,11 +117,6 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 0L
 
     }
-
-    //def "tournament is created by a student"() TODO
-    //def "tournament is created by a teacher"() TODO
-    //def "add existing topic"() TODO
-    //def "remove topic when only one left"() TODO
 
     def "start time is higher then end time"() {
         given:
@@ -140,11 +135,11 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 0L
     }
 
-    def "topic not exists"() {
+    def "0 topics"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(LocalDateTime.now())
-        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
         topics = new ArrayList<Integer>()
@@ -158,11 +153,120 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 0L
     }
 
+    def "add topic"() {
+        given: "a tournament"
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+
+        and: "new topic"
+        def topicDto3 = new TopicDto()
+        topicDto3.setName("TOPIC3")
+        def topic3 = new Topic(course, topicDto3)
+        topicRepository.save(topic3)
+
+        when:
+        tournamentService.addTopic(topic3.getId(), tournamentDto)
+
+        then:
+        tournamentRepository.count() == 1L
+        def result = tournamentRepository.findAll().get(0)
+        result.getTopics() == [topic1, topic2, topic3]
+    }
+
+    def "add duplicate topic"() {
+        given: "a tournament"
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+
+        when:
+        tournamentService.addTopic(topic1.getId(), tournamentDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.DUPLICATE_TOURNAMENT_TOPIC
+        tournamentRepository.count() == 1L
+        def result = tournamentRepository.findAll().get(0)
+        result.getTopics() == [topic1, topic2]
+    }
+
+    def "remove existing topic from tournament that contains that topic"() {
+        given: "a tournament"
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+
+        when:
+        tournamentService.removeTopic(topic2.getId(), tournamentDto)
+
+        then:
+        tournamentRepository.count() == 1L
+        def result = tournamentRepository.findAll().get(0)
+        result.getTopics() == [topic1]
+    }
+
+    def "remove existing topic from tournament that does not contains that topic"() {
+        given: "a tournament"
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+
+        and: "new topic"
+        def topicDto3 = new TopicDto()
+        topicDto3.setName("TOPIC3")
+        def topic3 = new Topic(course, topicDto3)
+        topicRepository.save(topic3)
+
+        when:
+        tournamentService.removeTopic(topic3.getId(), tournamentDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_TOPIC_MISMATCH
+        tournamentRepository.count() == 1L
+        def result = tournamentRepository.findAll().get(0)
+        result.getTopics() == [topic1, topic2]
+    }
+
+    def "remove existing topic from tournament when only one left"() {
+        given: "a tournament"
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+        topics = [topic1.getId()]
+        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+
+        when:
+        tournamentService.removeTopic(topic1.getId(), tournamentDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_HAS_ONLY_ONE_TOPIC
+        tournamentRepository.count() == 1L
+        def result = tournamentRepository.findAll().get(0)
+        result.getTopics() == [topic1]
+    }
+
     def "number of questions is negative"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(LocalDateTime.now())
-        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
         tournamentDto.setNumberOfQuestions(-1)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -178,8 +282,8 @@ class CreateTournamentTest extends Specification {
     def "number of questions is zero"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(LocalDateTime.now())
-        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
         tournamentDto.setNumberOfQuestions(0)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -191,82 +295,6 @@ class CreateTournamentTest extends Specification {
         exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
         tournamentRepository.count() == 0L
     }
-
-    /*def "start time is empty"() {
-        given:
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(LocalDateTime.now())
-        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-
-        when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
-
-        then:
-        //def exception = thrown(TournamentException)
-        //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
-        tournamentRepository.count() == 0L
-    }
-
-    def "end time is empty"() {
-        given:
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(LocalDateTime.now())
-        tournamentDto.setEndTime(LocalDateTime.now().plusHours(2))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-
-        when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
-
-        then:
-        //def exception = thrown(TournamentException)
-        //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
-        tournamentRepository.count() == 0L
-    }*/
-
-    /*def "number of questions is empty"() {
-        given:
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(START_TIME)
-        tournamentDto.setEndTime(END_TIME)
-        tournamentDto.setNumberOfQuestions(null)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-
-        when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
-
-        then:
-        //def exception = thrown(TournamentException)
-        //exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
-        tournamentRepository.count() == 0L
-    }*/
-
-    /*def "invalid arguments"() {
-        // TODO FAZER O QUE O STOR FEZ
-        given:
-
-        when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
-
-        then:
-        tournamentDto.getStartTime().getClass().equals(String.class)
-        tournamentDto.getEndTime().getClass().equals(String.class)
-        tournamentDto.getTopicName().getClass().equals(String.class)
-        tournamentDto.getNumberOfQuestions().getClass().equals(Integer.class)
-    }*/
-
-    // TODO
-    /*def "duplicate tournament"() {
-        given:
-        // dar set a um Id que exista
-        when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
-
-        then:
-        tournamentRepository.count() == 0L
-    }*/
 
     @TestConfiguration
     static class TournamentServiceImplTestContextConfiguration {

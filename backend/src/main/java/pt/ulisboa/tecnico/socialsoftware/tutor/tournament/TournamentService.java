@@ -82,6 +82,32 @@ public class TournamentService {
     }
 
     @Retryable(
+    value = { SQLException.class },
+    backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void addTopic(Integer topicId, TournamentDto tournamentDto) {
+        Topic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
+
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                        .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+        tournament.addTopic(topic);
+    }
+
+    @Retryable(
+    value = { SQLException.class },
+    backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void removeTopic(Integer topicId, TournamentDto tournamentDto) {
+        Topic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
+
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                        .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+        tournament.removeTopic(topic);
+    }
+
+    @Retryable(
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -128,17 +154,4 @@ public class TournamentService {
 
     }
 
-    @Retryable(
-      value = { SQLException.class },
-      backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void removeTopic(Integer topicId, TournamentDto tournamentDto) {
-        Topic topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
-
-        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
-                        .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
-
-        tournament.removeTopic(topic);
-    }
 }
