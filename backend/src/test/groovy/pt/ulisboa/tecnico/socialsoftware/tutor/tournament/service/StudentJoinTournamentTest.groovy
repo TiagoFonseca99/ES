@@ -17,6 +17,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentR
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -42,6 +43,9 @@ class StudentJoinTournamentTest extends Specification {
     public static final int NUMBER_OF_QUESTIONS1 = 5
 
     @Autowired
+    UserService userService
+
+    @Autowired
     TournamentService tournamentService
 
     @Autowired
@@ -65,11 +69,11 @@ class StudentJoinTournamentTest extends Specification {
     def topics = new ArrayList<Integer>()
     def startTime_Now = LocalDateTime.now()
     def endTime_Now = LocalDateTime.now().plusHours(2)
+    def tournamentDtoInit = new TournamentDto()
     def tournamentDto = new TournamentDto()
 
     def setup() {
-        user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
-        userRepository.save(user)
+        user = userService.createUser(USER_NAME1, USERNAME1, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
@@ -88,143 +92,149 @@ class StudentJoinTournamentTest extends Specification {
         topics.add(topic2.getId())
 
 
-        tournamentDto.setStartTime(startTime_Now)
-        tournamentDto.setEndTime(endTime_Now)
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentDtoInit.setStartTime(startTime_Now)
+        tournamentDtoInit.setEndTime(endTime_Now)
+        tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
+        tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
+        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDtoInit)
 
     }
 
     def "2 student join an open tournament and get participants" () {
         given:
-        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
-        userRepository.save(user2)
+        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
 
         and:
-        def user3 = new User(USER_NAME3, USERNAME3, KEY3, User.Role.STUDENT)
-        userRepository.save(user3)
+        def user3 = userService.createUser(USER_NAME3, USERNAME3, User.Role.STUDENT)
 
-        tournamentService.joinTournament(user2)
-        tournamentService.joinTournament(user3)
+        tournamentService.joinTournament(user2.getId(), tournamentDto)
+        tournamentService.joinTournament(user3.getId(), tournamentDto)
 
         when:
-        def result = tournamentService.getTournamentParticipants()
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
 
         then: "the students have joined the tournament"
         result.size() == 2
         def resTournamentParticipant1 = result.get(0)
         def resTournamentParticipant2 = result.get(1)
 
-        resTournamentParticipant1.getId() == KEY2
-        resTournamentParticipant1.getUsername == USERNAME2
-        resTournamentParticipant1.getName == USER_NAME2
-        resTournamentParticipant1.getRole == User.Role.STUDENT
+        resTournamentParticipant1.getId() == user2.getId()
+        resTournamentParticipant1.getUsername() == USERNAME2
+        resTournamentParticipant1.getName() == USER_NAME2
+        resTournamentParticipant1.getRole() == User.Role.STUDENT
 
-        resTournamentParticipant2.getId() == KEY3
-        resTournamentParticipant2.getUsername == USERNAME3
-        resTournamentParticipant2.getName == USER_NAME3
-        resTournamentParticipant2.getRole == User.Role.STUDENT
+        resTournamentParticipant2.getId() == user3.getId()
+        resTournamentParticipant2.getUsername() == USERNAME3
+        resTournamentParticipant2.getName() == USER_NAME3
+        resTournamentParticipant2.getRole() == User.Role.STUDENT
 
     }
 
     def "2 student and 1 teacher join an open tournament and get participants" () {
         given:
-        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
-        userRepository.save(user2)
+        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
 
         and:
-        def user3 = new User(USER_NAME3, USERNAME3, KEY3, User.Role.STUDENT)
-        userRepository.save(user3)
+        def user3 = userService.createUser(USER_NAME3, USERNAME3, User.Role.STUDENT)
 
         and:
-        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.TEACHER)
-        userRepository.save(user4)
+        def user4 = userService.createUser(USER_NAME4, USERNAME4, User.Role.TEACHER)
 
-        tournamentService.joinTournament(user2)
-        tournamentService.joinTournament(user3)
-        tournamentService.joinTournament(user4)
+        tournamentService.joinTournament(user2.getId(), tournamentDto)
+        tournamentService.joinTournament(user3.getId(), tournamentDto)
 
         when:
-        def result = tournamentService.getTournamentParticipants()
+        tournamentService.joinTournament(user4.getId(), tournamentDto)
 
-        then: "the students have joined the tournament"
+        then: "the teacher cannot join the tournament"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+
+        and: "the students have joined the tournament"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
         result.size() == 2
         def resTournamentParticipant1 = result.get(0)
         def resTournamentParticipant2 = result.get(1)
 
-        resTournamentParticipant1.getId() == KEY2
-        resTournamentParticipant1.getUsername == USERNAME2
-        resTournamentParticipant1.getName == USER_NAME2
-        resTournamentParticipant1.getRole == User.Role.STUDENT
+        resTournamentParticipant1.getId() == user2.getId()
+        resTournamentParticipant1.getUsername() == USERNAME2
+        resTournamentParticipant1.getName() == USER_NAME2
+        resTournamentParticipant1.getRole() == User.Role.STUDENT
 
-        resTournamentParticipant2.getId() == KEY3
-        resTournamentParticipant2.getUsername == USERNAME3
-        resTournamentParticipant2.getName == USER_NAME3
-        resTournamentParticipant2.getRole == User.Role.STUDENT
+        resTournamentParticipant2.getId() == user3.getId()
+        resTournamentParticipant2.getUsername() == USERNAME3
+        resTournamentParticipant2.getName() == USER_NAME3
+        resTournamentParticipant2.getRole() == User.Role.STUDENT
     }
 
     def "2 student and 1 admin join an open tournament and get participants" () {
         given:
-        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
-        userRepository.save(user2)
+        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
 
         and:
-        def user3 = new User(USER_NAME3, USERNAME3, KEY3, User.Role.STUDENT)
-        userRepository.save(user3)
+        def user3 = userService.createUser(USER_NAME3, USERNAME3, User.Role.STUDENT)
 
         and:
-        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.ADMIN)
-        userRepository.save(user4)
+        def user4 = userService.createUser(USER_NAME4, USERNAME4, User.Role.ADMIN)
 
-        tournamentService.joinTournament(user2)
-        tournamentService.joinTournament(user3)
-        tournamentService.joinTournament(user4)
+        tournamentService.joinTournament(user2.getId(), tournamentDto)
+        tournamentService.joinTournament(user3.getId(), tournamentDto)
+
 
         when:
-        def result = tournamentService.getTournamentParticipants()
+        tournamentService.joinTournament(user4.getId(), tournamentDto)
 
-        then: "the students have joined the tournament"
+        then: "the admin cannot join the tournament"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+
+        and: "the students have joined the tournament"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
+
         result.size() == 2
         def resTournamentParticipant1 = result.get(0)
         def resTournamentParticipant2 = result.get(1)
 
-        resTournamentParticipant1.getId() == KEY2
-        resTournamentParticipant1.getUsername == USERNAME2
-        resTournamentParticipant1.getName == USER_NAME2
-        resTournamentParticipant1.getRole == User.Role.STUDENT
+        resTournamentParticipant1.getId() == user2.getId()
+        resTournamentParticipant1.getUsername() == USERNAME2
+        resTournamentParticipant1.getName() == USER_NAME2
+        resTournamentParticipant1.getRole() == User.Role.STUDENT
 
-        resTournamentParticipant2.getId() == KEY3
-        resTournamentParticipant2.getUsername == USERNAME3
-        resTournamentParticipant2.getName == USER_NAME3
-        resTournamentParticipant2.getRole == User.Role.STUDENT
+        resTournamentParticipant2.getId() == user3.getId()
+        resTournamentParticipant2.getUsername() == USERNAME3
+        resTournamentParticipant2.getName() == USER_NAME3
+        resTournamentParticipant2.getRole() == User.Role.STUDENT
     }
 
     def "1 teacher join an open tournament and get participants" () {
         given:
-        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.TEACHER)
-        userRepository.save(user4)
-
-        tournamentService.joinTournament(user4)
+        def user4 = userService.createUser(USER_NAME4, USERNAME4, User.Role.TEACHER)
 
         when:
-        def result = tournamentService.getTournamentParticipants()
+        tournamentService.joinTournament(user4.getId(), tournamentDto)
 
-        then: "no students have joined tournament"
+        then: "the teacher cannot join the tournament"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+
+        and: "the tournament has no participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
         result.size() == 0
     }
 
     def "1 admin join an open tournament and get participants" () {
         given:
-        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.ADMIN)
-        userRepository.save(user4)
-
-        tournamentService.joinTournament(user4)
+        def user4 = userService.createUser(USER_NAME4, USERNAME4, User.Role.ADMIN)
 
         when:
-        def result = tournamentService.getTournamentParticipants()
+        tournamentService.joinTournament(user4.getId(), tournamentDto)
 
-        then: "no students have joined tournament"
+        then: "the admin cannot join the tournament"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+
+        and: "the tournament has no participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
         result.size() == 0
     }
 
@@ -233,6 +243,14 @@ class StudentJoinTournamentTest extends Specification {
         @Bean
         TournamentService tournamentService() {
             return new TournamentService()
+        }
+    }
+
+    @TestConfiguration
+    static class UserServiceImplTestContextConfiguration {
+        @Bean
+        UserService userService() {
+            return new UserService()
         }
     }
 

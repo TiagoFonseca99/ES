@@ -17,6 +17,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -89,20 +90,41 @@ public class TournamentService {
     }
 
 
-    // TODO
     @Retryable(
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void joinTournament(User user) {
+    public void joinTournament(Integer userID, TournamentDto tournamentDto) {
+        User user = userRepository.findById(userID)
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userID));
 
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+
+        if (LocalDateTime.now().isBefore(tournament.getStartTime()) ||LocalDateTime.now().isAfter(tournament.getEndTime())) {
+            throw new TutorException(TOURNAMENT_NOT_OPEN, tournament.getId());
+        }
+
+        if (user.getRole() != User.Role.STUDENT) {
+            throw  new TutorException(USER_NOT_STUDENT, user.getId());
+        }
+
+        if (tournament.getParticipants().contains(user)) {
+            throw new TutorException(DUPLICATE_TOURNAMENT_PARTICIPANT, user.getUsername());
+        }
+
+        tournament.addParticipant(user);
     }
-    // TODO
+
     @Retryable(
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void getTournamentParticipants() {
+    public List<UserDto> getTournamentParticipants(TournamentDto tournamentDto) {
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+
+        return tournament.getParticipants().stream().map(UserDto::new).collect(Collectors.toList());
 
     }
 
@@ -116,6 +138,7 @@ public class TournamentService {
 
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                         .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+
         tournament.removeTopic(topic);
     }
 }
