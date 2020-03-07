@@ -23,6 +23,7 @@ import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
 import java.util.*;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -53,8 +54,9 @@ public class TournamentService {
             throw new TutorException(USER_NOT_FOUND, username);
         }
 
+        // Added 10 seconds as a buffer to take latency into consideration
         if (!tournamentDto.getStartTime().isBefore(tournamentDto.getEndTime())
-            || tournamentDto.getStartTime().isBefore(LocalDateTime.now())) {
+            || tournamentDto.getStartTime().plusSeconds(10).isBefore(LocalDateTime.now())) {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "date");
         }
 
@@ -76,6 +78,16 @@ public class TournamentService {
         Tournament tournament = new Tournament(user, topics, tournamentDto);
         this.entityManager.persist(tournament);
         return new TournamentDto(tournament);
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    // Tournament DTO?
+    public List<TournamentDto> seeOpenedTournaments() {
+        return tournamentRepository.seeOpenedTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
+                // TODO throw exeptions?
     }
 
     @Retryable(

@@ -1,10 +1,15 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
-import java.io.Serializable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
 
+
+import java.io.Serializable;
 import java.util.*;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 public class TournamentDto implements Serializable {
     private Integer id;
@@ -12,6 +17,7 @@ public class TournamentDto implements Serializable {
     private LocalDateTime endTime;
     private Integer numberOfQuestions;
     private Tournament.Status state;
+    private List<TopicDto> topics = new ArrayList<>();
 
     public TournamentDto() {
     }
@@ -22,6 +28,8 @@ public class TournamentDto implements Serializable {
         this.endTime = tournament.getEndTime();
         this.numberOfQuestions = tournament.getNumberOfQuestions();
         this.state = tournament.getState();
+        this.topics = tournament.getTopics().stream().map(TopicDto::new).collect(Collectors.toList());
+
     }
 
     public Integer getId() {
@@ -36,6 +44,7 @@ public class TournamentDto implements Serializable {
         return startTime;
     }
 
+    // TODO Verificar
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
@@ -63,6 +72,16 @@ public class TournamentDto implements Serializable {
     public void setState(Tournament.Status state) {
         this.state = state;
     }
+
+    public List<TopicDto> getTopics() {
+        return topics;
+    }
+
+    public void setTopics(List<TopicDto> topics) {
+        this.topics = topics;
+    }
+
+
 
     @Override
     public String toString() {

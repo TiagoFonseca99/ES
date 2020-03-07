@@ -23,6 +23,9 @@ public enum ErrorMessage {
     USERNAME_NOT_FOUND("Username %s not found"),
     TOURNAMENT_NOT_FOUND("Tournament %s not found"),
 
+    USER_NOT_STUDENT("Username %s is not a student"),
+    QUESTION_ALREADY_SUBMITTED("User %s has already submitted this question"),
+
     QUIZ_USER_MISMATCH("Quiz %s is not assigned to student %s"),
     QUIZ_MISMATCH("Quiz Answer Quiz %d does not match Quiz Question Quiz %d"),
     QUESTION_OPTION_MISMATCH("Question %d does not have option %d"),
