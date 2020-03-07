@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.Submission;
@@ -58,9 +59,8 @@ public class User implements UserDetails {
     @ManyToMany
     private Set<CourseExecution> courseExecutions = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch=FetchType.LAZY, orphanRemoval=true)
-    private Set<Submission>  submissions = new HashSet<>();
-
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Discussion> discussions = new HashSet<>();
 
     public User() {
     }
@@ -465,5 +465,18 @@ public class User implements UserDetails {
         }
 
         return result;
+    }
+
+    public boolean checkQuestionAnswered(Question question) {
+        return getQuizAnswers().stream()
+                .flatMap(quizAnswer -> quizAnswer.getQuestionAnswers().stream())
+                .filter(questionAnswer -> questionAnswer.getTimeTaken() != null && questionAnswer.getTimeTaken() != 0)
+                .map(questionAnswer -> questionAnswer.getQuizQuestion().getQuestion())
+                .collect(Collectors.toList())
+                .contains(question);
+    }
+
+    public void addDiscussion(Discussion discussion){
+        discussions.add(discussion);
     }
 }
