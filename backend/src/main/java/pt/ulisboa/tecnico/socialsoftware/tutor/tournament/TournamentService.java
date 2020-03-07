@@ -131,6 +131,10 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_NOT_OPEN, tournament.getId());
         }
 
+        if (tournament.getState() == Tournament.Status.CANCELED) {
+            throw  new TutorException(TOURNAMENT_CANCELED, tournament.getId());
+        }
+
         if (user.getRole() != User.Role.STUDENT) {
             throw  new TutorException(USER_NOT_STUDENT, user.getId());
         }

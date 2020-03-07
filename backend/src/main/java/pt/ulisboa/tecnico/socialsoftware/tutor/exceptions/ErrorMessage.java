@@ -34,6 +34,7 @@ public enum ErrorMessage {
     DUPLICATE_TOURNAMENT_PARTICIPANT("Duplicate tournament participant: %s"),
     TOURNAMENT_NOT_OPEN("Duplicate tournament not open: %s"),
     USER_NOT_STUDENT("User cant join tournament, not a student: %s"),
+    TOURNAMENT_CANCELED("Tournament canceled: %s"),
 
     USERS_IMPORT_ERROR("Error importing users: %s"),
     QUESTIONS_IMPORT_ERROR("Error importing questions: %s"),
