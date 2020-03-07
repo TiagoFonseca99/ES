@@ -29,7 +29,6 @@ public class TournamentDto implements Serializable {
         this.numberOfQuestions = tournament.getNumberOfQuestions();
         this.state = tournament.getState();
         this.topics = tournament.getTopics().stream().map(TopicDto::new).collect(Collectors.toList());
-
     }
 
     public Integer getId() {
@@ -44,7 +43,6 @@ public class TournamentDto implements Serializable {
         return startTime;
     }
 
-    // TODO Verificar
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
