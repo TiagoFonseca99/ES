@@ -1,4 +1,3 @@
-/*
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.service
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -194,6 +193,3 @@ class CreateDiscussionTest extends Specification {
 
 
 }
-
-
- */
