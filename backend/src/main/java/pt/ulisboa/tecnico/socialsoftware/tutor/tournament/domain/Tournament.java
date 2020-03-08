@@ -43,6 +43,9 @@ public class Tournament {
     @Enumerated(EnumType.STRING)
     private Status state;
 
+    @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    private List<User> participants = new ArrayList<>();
+
     public Tournament() {}
 
     public Tournament(User user, List<Topic> topics, TournamentDto tournamentDto) {
@@ -106,18 +109,33 @@ public class Tournament {
         this.state = state;
     }
 
+    public List<User> getParticipants() {
+        return participants;
+    }
+
     public void addTopic(Topic topic) {
         if (topics.contains(topic)) {
             throw new TutorException(DUPLICATE_TOURNAMENT_TOPIC, topic.getId());
         }
+
         this.topics.add(topic);
     }
 
     public void removeTopic(Topic topic) {
+        if (!this.topics.contains(topic)) {
+            throw new TutorException(TOURNAMENT_TOPIC_MISMATCH, this.id, topic.getId());
+        }
+
         if (topics.size() <= 1) {
             throw new TutorException(TOURNAMENT_HAS_ONLY_ONE_TOPIC);
         }
+
         this.topics.remove(topic);
+    }
+
+    public void addParticipant(User user) {
+
+        this.participants.add(user);
     }
 
 
@@ -130,6 +148,7 @@ public class Tournament {
                 ", topics='" + topics + '\'' +
                 ", numberOfQuestions='" + numberOfQuestions + '\'' +
                 ", creator='" + creator + '\'' +
+                ", participants='" + participants + '\'' +
                 '}';
     }
 }

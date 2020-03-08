@@ -17,6 +17,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -81,18 +82,21 @@ public class TournamentService {
     }
 
     @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
+    value = { SQLException.class },
+    backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    // Tournament DTO?
-    public List<TournamentDto> seeOpenedTournaments() {
-        return tournamentRepository.seeOpenedTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
-                // TODO throw exeptions?
+    public void addTopic(Integer topicId, TournamentDto tournamentDto) {
+        Topic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
+
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                        .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+        tournament.addTopic(topic);
     }
 
     @Retryable(
-      value = { SQLException.class },
-      backoff = @Backoff(delay = 5000))
+    value = { SQLException.class },
+    backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void removeTopic(Integer topicId, TournamentDto tournamentDto) {
         Topic topic = topicRepository.findById(topicId)
@@ -102,4 +106,52 @@ public class TournamentService {
                         .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
         tournament.removeTopic(topic);
     }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<TournamentDto> getOpenedTournaments() {
+        return tournamentRepository.getOpenedTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
+    }
+
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void joinTournament(Integer userID, TournamentDto tournamentDto) {
+        User user = userRepository.findById(userID)
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userID));
+
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+
+        if (LocalDateTime.now().isBefore(tournament.getStartTime()) ||LocalDateTime.now().isAfter(tournament.getEndTime())) {
+            throw new TutorException(TOURNAMENT_NOT_OPEN, tournament.getId());
+        }
+
+        if (user.getRole() != User.Role.STUDENT) {
+            throw  new TutorException(USER_NOT_STUDENT, user.getId());
+        }
+
+        if (tournament.getParticipants().contains(user)) {
+            throw new TutorException(DUPLICATE_TOURNAMENT_PARTICIPANT, user.getUsername());
+        }
+
+        tournament.addParticipant(user);
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<UserDto> getTournamentParticipants(TournamentDto tournamentDto) {
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+
+        return tournament.getParticipants().stream().map(UserDto::new).collect(Collectors.toList());
+
+    }
+
 }

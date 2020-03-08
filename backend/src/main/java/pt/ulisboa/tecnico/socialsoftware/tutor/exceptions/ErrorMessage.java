@@ -30,12 +30,15 @@ public enum ErrorMessage {
     QUIZ_MISMATCH("Quiz Answer Quiz %d does not match Quiz Question Quiz %d"),
     QUESTION_OPTION_MISMATCH("Question %d does not have option %d"),
     COURSE_EXECUTION_MISMATCH("Course Execution %d does not have quiz %d"),
+    TOURNAMENT_TOPIC_MISMATCH("Tournament %s does not have topic %d"),
 
     DUPLICATE_TOPIC("Duplicate topic: %s"),
     DUPLICATE_USER("Duplicate user: %s"),
     DUPLICATE_COURSE_EXECUTION("Duplicate course execution: %s"),
     DUPLICATE_DISCUSSION("Duplicate discussion for user id %d and question id %d"),
     DUPLICATE_TOURNAMENT_TOPIC("Duplicate tournament topic: %s"),
+    DUPLICATE_TOURNAMENT_PARTICIPANT("Duplicate tournament participant: %s"),
+    TOURNAMENT_NOT_OPEN("Duplicate tournament not open: %s"),
 
     USERS_IMPORT_ERROR("Error importing users: %s"),
     QUESTIONS_IMPORT_ERROR("Error importing questions: %s"),
