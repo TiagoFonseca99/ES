@@ -1,13 +1,10 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission;
 
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 
 import javax.persistence.*;
 
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.COURSE_NAME_IS_EMPTY;
 
 @Entity
 @Table(name = "submissions")
