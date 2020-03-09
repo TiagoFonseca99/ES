@@ -1,16 +1,13 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto;
 
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
-
 import java.io.Serializable;
-import java.util.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class TournamentDto implements Serializable {
