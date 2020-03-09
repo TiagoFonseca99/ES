@@ -32,6 +32,7 @@ class CreateSubmissionTest extends Specification {
     public static final String STUDENT_USERNAME = "joaosilva"
     public static final String TEACHER_NAME = "Ana Rita"
     public static final String TEACHER_USERNAME = "anarita"
+
     @Autowired
     SubmissionService submissionService
 
