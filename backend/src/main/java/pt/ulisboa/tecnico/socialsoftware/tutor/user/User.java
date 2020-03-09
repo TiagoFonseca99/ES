@@ -9,7 +9,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.Submission;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

@@ -1,6 +1,7 @@
-package pt.ulisboa.tecnico.socialsoftware.tutor.submission;
+package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
