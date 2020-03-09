@@ -1,4 +1,4 @@
-package pt.ulisboa.tecnico.socialsoftware.tutor.question.service
+package pt.ulisboa.tecnico.socialsoftware.tutor.submission.service
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -18,15 +18,13 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.ImageReposito
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.OptionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import spock.lang.Specification
 
 @DataJpaTest
-class TeacherTest extends Specification {
-
+class CreateReviewTest extends Specification{
     public static final String COURSE_NAME = "Arquitetura de Software"
     public static final String QUESTION_TITLE = 'question title'
     public static final String QUESTION_CONTENT = 'question content'
@@ -34,8 +32,6 @@ class TeacherTest extends Specification {
     public static final String URL = 'URL'
     public static final String JUSTIFICATION = 'Porque me apeteceu'
 
-    @Autowired
-    QuestionService questionService
 
     @Autowired
     CourseRepository courseRepository
@@ -44,84 +40,42 @@ class TeacherTest extends Specification {
     QuestionRepository questionRepository
 
     @Autowired
-    OptionRepository optionRepository
-
-    @Autowired
     ImageRepository imageRepository
 
-    @Autowired
-    TopicRepository topicRepository
-
-    @Autowired
-    QuizQuestionRepository quizQuestionRepository
-
-    @Autowired
-    QuizRepository quizRepository
 
     def course
     def question
-    def optionOK
-    def optionKO
-
-    def setup() {
-        course = new Course()
-        course.setName(COURSE_NAME)
-        courseRepository.save(course)
-
-        question = new Question()
-        question.setKey(1)
-        question.setContent(QUESTION_TITLE)
-        question.setContent(QUESTION_CONTENT)
-        question.setStatus(Question.Status.SUBMITTED)
-        question.setNumberOfAnswers(2)
-        question.setNumberOfCorrect(1)
-        question.setCourse(course)
-        course.addQuestion(question)
-
-        def image = new Image()
-        image.setUrl(URL)
-        image.setWidth(20)
-        imageRepository.save(image)
-        question.setImage(image)
-
-        optionOK = new Option()
-        optionOK.setContent(OPTION_CONTENT)
-        optionOK.setCorrect(true)
-        optionRepository.save(optionOK)
-        optionKO = new Option()
-        optionKO.setContent(OPTION_CONTENT)
-        optionKO.setCorrect(false)
-        optionRepository.save(optionKO)
-        question.addOption(optionOK)
-        question.addOption(optionKO)
-        questionRepository.save(question)
 
 
-    def "accepts a question with justification"() {
-        //justification
-        given:
-
-        when:
-        questionService.acceptQuestion(question.getId())
-
-        then: "the question status changes to accepted"
-        question.getStatus() == ACCEPTED
-    }
-
-    def "rejects a question without a justification"() {
-        //justification
-        when:
-        questionService.rejectQuestion(question.getId())
-
-        then: "an exception is thrown"
-        def exception = thrown(JustificationException)
-        exception.getErrorMessage() == ErrorMessage.NO_JUSTIFICATION
-
-    }
-
-    def "rejects a question with a justification with an image"() {
-        /
+    def "create review that accepts question with justification"() {
         expect: false
-    }    
+    }
+
+    def "create review that rejects question without justification"() {
+        expect: false
+    }
+
+    def "create review that rejects question with justification and image"() {
+        expect: false
+    }
+
+    def "user is not a teacher"(){
+        expect: false
+    }
+
+    def "submission has already been reviewed"(){
+        expect: false
+    }
+
+    /*@TestConfiguration
+    static class ReviewServiceImplTestContextConfiguration {
+
+        @Bean
+        ReviewService reviewService() {
+            return new ReviewService()
+        }
+    }*/
+
 
 }
+
