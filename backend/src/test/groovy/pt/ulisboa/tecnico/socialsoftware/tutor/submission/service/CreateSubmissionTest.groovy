@@ -72,6 +72,7 @@ class CreateSubmissionTest extends Specification {
         question.setTitle(QUESTION_TITLE)
         question.setContent(QUESTION_CONTENT)
         question.setCourse(course)
+        question.setStatus(Question.Status.SUBMITTED)
         questionRepository.save(question)
     }
 
@@ -141,6 +142,20 @@ class CreateSubmissionTest extends Specification {
 
         then: "exception is thrown"
         thrown(TutorException)
+    }
+
+    def "question status is submitted" () {
+        given: "a submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setKey(1)
+        submissionDto.setQuestionId(question.getId())
+        submissionDto.setStudentId(student.getId())
+
+        when: submissionService.createSubmission(question, submissionDto)
+
+        then: "question status is SUBMITTED"
+        def result = submissionRepository.findAll().get(0)
+        result.getQuestion().getStatus() == Question.Status.SUBMITTED
     }
 
     @TestConfiguration
