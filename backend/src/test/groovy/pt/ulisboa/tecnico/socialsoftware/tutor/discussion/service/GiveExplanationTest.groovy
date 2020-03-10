@@ -107,15 +107,16 @@ class GiveExplanationTest extends Specification {
         discussionDto.setUserId(user.getId())
         discussionDto.setQuestion(new QuestionDto(question))
         discussionService.createDiscussion(discussionDto)
+        and: "a response"
+        def replyDto = new ReplyDto(DISCUSSION_REPLY, teacher)
 
         when: "a reply is given"
-        discussionService.giveReply(discussionDto, teacher.getId(), DISCUSSION_REPLY)
+        discussionService.giveReply(replyDto, discussionDto)
 
         then: "the correct reply was given"
         def result = discussionRepository.findAll().get(0)
-        result.getReply() == DISCUSSION_REPLY
-        result.getTeacherId() == teacher.getId()
-        
+        result.getReply().getMessage() == DISCUSSION_REPLY
+        result.getReply().getTeacher() == teacher
     }
 
     def "ensure user is teacher"(){
@@ -125,9 +126,11 @@ class GiveExplanationTest extends Specification {
         discussionDto.setUserId(user.getId())
         discussionDto.setQuestion(new QuestionDto(question))
         discussionService.createDiscussion(discussionDto)
+        and: "a response created by a student"
+        def replyDto = new ReplyDto(DISCUSSION_REPLY, student)
        
         when: "a user creates a reply"
-        discussionService.giveReply(discussionDto, user.getId(), DISCUSSION_REPLY)
+        discussionService.giveReply(replyDto, discussionDto)
 
         then: "exception given"
         def exception = thrown(TutorException)
@@ -141,10 +144,12 @@ class GiveExplanationTest extends Specification {
         discussionDto.setUserId(user.getId())
         discussionDto.setQuestion(new QuestionDto(question))
         discussionService.createDiscussion(discussionDto)
-        discussionService.giveReply(discussionDto, teacher.getId(), DISCUSSION_REPLY)
+        def replyDto = new ReplyDto(DISCUSSION_REPLY, teacher)
+        def replyDto2 = new ReplyDto(DISCUSSION_REPLY, teacher)
+        discussionService.giveReply(replyDto, discussionDto)
 
         when: "another reply is given"
-        discussionService.giveReply(discussionDto, teacher.getId(), DISCUSSION_REPLY)
+        discussionService.giveReply(replyDto2, discussionDto)
 
         then: 
         def exception = thrown(TutorException)
