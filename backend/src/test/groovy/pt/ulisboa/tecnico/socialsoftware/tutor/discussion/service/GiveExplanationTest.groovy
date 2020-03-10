@@ -28,16 +28,135 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionR
 
 @DataJpaTest
 class GiveExplanationTest extends Specification {
+    public static final String DISCUSSION_REPLY = "discussion reply"
+    public static final String QUESTION_TITLE = "question title"
+    public static final String QUESTION_CONTENT = "question content"
+
+    @Autowired
+    DiscussionService discussionService
+
+    @Autowired
+    DiscussionRepository discussionRepository
+
+    @Autowired
+    QuestionRepository questionRepository
+
+    @Autowired
+    QuestionAnswerRepository questionAnswerRepository
+
+    @Autowired
+    QuizRepository quizRepository
+
+    @Autowired
+    QuizAnswerRepository quizAnswerRepository;
+
+    @Autowired
+    QuizQuestionRepository quizQuestionRepository;
+
+    @Autowired
+    UserRepository userRepository
+
+
+    def teacher
+    def student
+    def question
+
+    def setup() {
+        question = new Question()
+        question.setKey(1)
+        question.setTitle(QUESTION_TITLE)
+        question.setContent(QUESTION_CONTENT)
+
+        teacher = new User(USER_NAME + "1", USER_USERNAME + "1", 1, User.Role.TEACHER)
+        userRepository.save(teacher)
+
+        def quiz = new Quiz()
+        quiz.setKey(1)
+
+        def quizanswer = new QuizAnswer()
+
+        def questionanswer = new QuestionAnswer()
+        questionanswer.setTimeTaken(1)
+        def quizquestion = new QuizQuestion(quiz, question, 3)
+        questionanswer.setQuizQuestion(quizquestion)
+        questionanswer.setQuizAnswer(quizanswer)
+        questionAnswerRepository.save(questionanswer)
+
+        quizquestion.addQuestionAnswer(questionanswer)
+        quizanswer.addQuestionAnswer(questionanswer)
+
+        quizQuestionRepository.save(quizquestion)
+        quizAnswerRepository.save(quizanswer)
+
+
+        quiz.addQuizAnswer(quizanswer)
+        quiz.addQuizQuestion(quizquestion)
+
+        quizRepository.save(quiz)
+
+
+        questionRepository.save(question)
+        student.addQuizAnswer(quizanswer)
+        userRepository.save(student)
+    }
+
     def "give reply to discussion"(){
-        expect: true
+        given: "a discussion"
+        def discussionDto = new DiscussionDto()
+        and: "a student"
+        discussionDto.setUserId(user.getId())
+        discussionDto.setQuestion(new QuestionDto(question))
+        discussionService.createDiscussion(discussionDto)
+
+        when: "a reply is given"
+        discussionService.giveReply(discussionDto, teacher.getId(), DISCUSSION_REPLY)
+
+        then: "the correct reply was given"
+        def result = discussionRepository.findAll().get(0)
+        result.getReply() == DISCUSSION_REPLY
+        result.getTeacherId() == teacher.getId()
+        
     }
 
     def "ensure user is teacher"(){
-        expect: true
+        given: "a discussion"
+        def discussionDto = new DiscussionDto()
+        and: "a student"
+        discussionDto.setUserId(user.getId())
+        discussionDto.setQuestion(new QuestionDto(question))
+        discussionService.createDiscussion(discussionDto)
+       
+        when: "a user creates a reply"
+        discussionService.giveReply(discussionDto, user.getId(), DISCUSSION_REPLY)
+
+        then: "exception given"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.REPLY_NOT_TEACHER_CREATOR
     }
 
-    def "teacher enrolled in discussion's course"(){
-        expect: true
+    def "teacher can't submit 2 replies to the same discussion"(){
+        given: "a discussion"
+        def discussionDto = new DiscussionDto()
+        and: "a student"
+        discussionDto.setUserId(user.getId())
+        discussionDto.setQuestion(new QuestionDto(question))
+        discussionService.createDiscussion(discussionDto)
+        discussionService.giveReply(discussionDto, teacher.getId(), DISCUSSION_REPLY)
+
+        when: "another reply is given"
+        discussionService.giveReply(discussionDto, teacher.getId(), DISCUSSION_REPLY)
+
+        then: 
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.ANOTHER_REPLY_SUBMITTED
+    }
+
+    @TestConfiguration
+    static class DiscussionServiceImplTestContextConfiguration {
+        @Bean
+        DiscussionService discussionService() {
+            return new DiscussionService()
+        }
     }
 
 }
