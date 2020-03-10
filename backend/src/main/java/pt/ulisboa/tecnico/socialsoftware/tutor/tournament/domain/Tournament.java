@@ -30,7 +30,7 @@ public class Tournament {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Topic> topics = new ArrayList<>();
 
     @Column(name = "number_of_questions")
@@ -43,10 +43,11 @@ public class Tournament {
     @Enumerated(EnumType.STRING)
     private Status state;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<User> participants = new ArrayList<>();
 
-    public Tournament() {}
+    public Tournament() {
+    }
 
     public Tournament(User user, List<Topic> topics, TournamentDto tournamentDto) {
         this.startTime = tournamentDto.getStartTime();
@@ -74,7 +75,7 @@ public class Tournament {
     }
 
     public Integer getNumberOfQuestions() {
-        return  numberOfQuestions;
+        return numberOfQuestions;
     }
 
     public User getCreator() {
@@ -114,17 +115,4 @@ public class Tournament {
         this.participants.add(user);
     }
 
-
-    @Override
-    public String toString() {
-        return "Tournament{" +
-                "id=" + id +
-                ", startTime='" + startTime + '\'' +
-                ", endTime='" + endTime + '\'' +
-                ", topics='" + topics + '\'' +
-                ", numberOfQuestions='" + numberOfQuestions + '\'' +
-                ", creator='" + creator + '\'' +
-                ", participants='" + participants + '\'' +
-                '}';
-    }
 }

@@ -73,17 +73,4 @@ public class TournamentDto implements Serializable {
         return topics;
     }
 
-
-    @Override
-    public String toString() {
-        return "TournamentDto{" +
-                "id=" + id +
-                ", startTime='" + startTime + '\'' +
-                ", endTime='" + endTime + '\'' +
-                ", numberOfQuestions='" + numberOfQuestions + '\'' +
-                ", state='" + state + '\'' +
-                ", topics='" + topics + '\'' +
-                ", participants='" + participants + '\'' +
-                '}';
-    }
 }
