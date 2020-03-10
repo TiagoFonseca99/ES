@@ -103,12 +103,13 @@ class GiveExplanationTest extends Specification {
     def "give reply to discussion"(){
         given: "a discussion"
         def discussionDto = new DiscussionDto()
-        and: "a student"
         discussionDto.setUserId(user.getId())
         discussionDto.setQuestion(new QuestionDto(question))
         discussionService.createDiscussion(discussionDto)
         and: "a response"
-        def replyDto = new ReplyDto(DISCUSSION_REPLY, teacher)
+        def replyDto = new ReplyDto()
+        replyDto.setMessage(DISCUSSION_REPLY)
+        replyDto.setTeacher(teacher)
 
         when: "a reply is given"
         discussionService.giveReply(replyDto, discussionDto)
@@ -122,12 +123,13 @@ class GiveExplanationTest extends Specification {
     def "ensure user is teacher"(){
         given: "a discussion"
         def discussionDto = new DiscussionDto()
-        and: "a student"
         discussionDto.setUserId(user.getId())
         discussionDto.setQuestion(new QuestionDto(question))
         discussionService.createDiscussion(discussionDto)
         and: "a response created by a student"
-        def replyDto = new ReplyDto(DISCUSSION_REPLY, student)
+        def replyDto = new ReplyDto()
+        replyDto.setMessage(DISCUSSION_REPLY)
+        replyDto.setTeacher(student)
        
         when: "a user creates a reply"
         discussionService.giveReply(replyDto, discussionDto)
@@ -140,12 +142,16 @@ class GiveExplanationTest extends Specification {
     def "teacher can't submit 2 replies to the same discussion"(){
         given: "a discussion"
         def discussionDto = new DiscussionDto()
-        and: "a student"
         discussionDto.setUserId(user.getId())
         discussionDto.setQuestion(new QuestionDto(question))
         discussionService.createDiscussion(discussionDto)
-        def replyDto = new ReplyDto(DISCUSSION_REPLY, teacher)
-        def replyDto2 = new ReplyDto(DISCUSSION_REPLY, teacher)
+        and: "2 replies from the same teacher"
+        def replyDto = new ReplyDto()
+        replyDto.setMessage(DISCUSSION_REPLY)
+        replyDto.setTeacher(teacher)
+        def replyDto2 = new ReplyDto()
+        replyDto2.setMessage(DISCUSSION_REPLY)
+        replyDto2.setTeacher(teacher)
         discussionService.giveReply(replyDto, discussionDto)
 
         when: "another reply is given"

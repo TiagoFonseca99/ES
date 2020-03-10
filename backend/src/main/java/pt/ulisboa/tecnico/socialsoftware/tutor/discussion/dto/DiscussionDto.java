@@ -2,8 +2,8 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto;
 
 import java.io.Serializable;
 
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 
 public class DiscussionDto implements Serializable {
@@ -11,6 +11,7 @@ public class DiscussionDto implements Serializable {
     private Integer questionId;
     private QuestionDto question;
     private String content;
+    private Reply reply;
 
     public DiscussionDto() {
     }
@@ -49,5 +50,13 @@ public class DiscussionDto implements Serializable {
     public void setQuestion(QuestionDto question) {
         this.question = question;
         this.questionId = question.getId();
+    }
+
+    public Reply getReply() {
+        return reply;
+    }
+
+    public void setReply(Reply reply) {
+        this.reply = reply;
     }
 }
