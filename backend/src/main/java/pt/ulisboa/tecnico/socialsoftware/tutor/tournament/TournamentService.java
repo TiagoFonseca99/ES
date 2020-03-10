@@ -124,7 +124,7 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                 .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
 
-        if (LocalDateTime.now().isBefore(tournament.getStartTime()) ||LocalDateTime.now().isAfter(tournament.getEndTime())) {
+        if (LocalDateTime.now().isBefore(tournament.getStartTime()) || LocalDateTime.now().isAfter(tournament.getEndTime())) {
             throw new TutorException(TOURNAMENT_NOT_OPEN, tournament.getId());
         }
 

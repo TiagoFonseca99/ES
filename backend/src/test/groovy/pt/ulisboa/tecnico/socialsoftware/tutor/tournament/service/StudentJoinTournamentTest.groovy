@@ -97,7 +97,6 @@ class StudentJoinTournamentTest extends Specification {
         tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
         tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
-
     }
 
     def "2 student join an open tournament and get participants" () {
@@ -263,7 +262,7 @@ class StudentJoinTournamentTest extends Specification {
         result.size() == 0
     }
 
-    def "Student tries to join not open tournament" () {
+    def "Student tries to join not open (later) tournament" () {
         given:
         def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
 
@@ -275,6 +274,32 @@ class StudentJoinTournamentTest extends Specification {
         notOpenTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         notOpenTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
         notOpenTournamentDto = tournamentService.createTournament(user.getId(), topics, notOpenTournamentDtoInit)
+
+        when:
+        tournamentService.joinTournament(user2.getId(), notOpenTournamentDto)
+
+        then: "student cannot join"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_OPEN
+
+        and: "the tournament has no participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
+        result.size() == 0
+    }
+
+    def "Student tries to join not open (early) tournament" () {
+        given:
+        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+
+        and:
+        def notOpenTournamentDtoInit = new TournamentDto()
+        def notOpenTournamentDto = new TournamentDto()
+        notOpenTournamentDtoInit.setStartTime(startTime_Now)
+        notOpenTournamentDtoInit.setEndTime(LocalDateTime.now())
+        notOpenTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
+        notOpenTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
+        notOpenTournamentDto = tournamentService.createTournament(user.getId(), topics, notOpenTournamentDtoInit)
+        sleep(2000)
 
         when:
         tournamentService.joinTournament(user2.getId(), notOpenTournamentDto)
