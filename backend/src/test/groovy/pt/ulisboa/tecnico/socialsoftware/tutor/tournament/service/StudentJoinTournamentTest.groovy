@@ -96,7 +96,7 @@ class StudentJoinTournamentTest extends Specification {
         tournamentDtoInit.setEndTime(endTime_Now)
         tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDtoInit)
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
 
     }
 
@@ -249,7 +249,7 @@ class StudentJoinTournamentTest extends Specification {
         canceledTournamentDtoInit.setEndTime(endTime_Now)
         canceledTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         canceledTournamentDtoInit.setState(Tournament.Status.CANCELED)
-        canceledTournamentDto = tournamentService.createTournament(user.getUsername(), topics, canceledTournamentDtoInit)
+        canceledTournamentDto = tournamentService.createTournament(user.getId(), topics, canceledTournamentDtoInit)
 
         when:
         tournamentService.joinTournament(user2.getId(), canceledTournamentDto)
@@ -274,7 +274,7 @@ class StudentJoinTournamentTest extends Specification {
         notOpenTournamentDtoInit.setEndTime(endTime_Now.plusHours(10))
         notOpenTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         notOpenTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
-        notOpenTournamentDto = tournamentService.createTournament(user.getUsername(), topics, notOpenTournamentDtoInit)
+        notOpenTournamentDto = tournamentService.createTournament(user.getId(), topics, notOpenTournamentDtoInit)
 
         when:
         tournamentService.joinTournament(user2.getId(), notOpenTournamentDto)
