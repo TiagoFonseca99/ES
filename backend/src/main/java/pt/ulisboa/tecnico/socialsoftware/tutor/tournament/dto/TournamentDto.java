@@ -37,10 +37,6 @@ public class TournamentDto implements Serializable {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public LocalDateTime getStartTime() {
         return startTime;
     }
@@ -76,19 +72,6 @@ public class TournamentDto implements Serializable {
     public List<TopicDto> getTopics() {
         return topics;
     }
-
-    public void setTopics(List<TopicDto> topics) {
-        this.topics = topics;
-    }
-
-    public List<UserDto> getParticipants() {
-        return participants;
-    }
-
-    public void setParticipants(List<UserDto> participants) {
-        this.participants = participants;
-    }
-
 
 
     @Override

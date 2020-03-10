@@ -61,24 +61,12 @@ public class Tournament {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
     public LocalDateTime getEndTime() {
         return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
     }
 
     public List<Topic> getTopics() {
@@ -89,24 +77,12 @@ public class Tournament {
         return  numberOfQuestions;
     }
 
-    public void setNumberOfQuestions(Integer numberOfQuestions) {
-        this.numberOfQuestions = numberOfQuestions;
-    }
-
     public User getCreator() {
         return creator;
     }
 
-    public void setCreator(User creator) {
-        this.creator = creator;
-    }
-
     public Status getState() {
         return state;
-    }
-
-    public void setState(Status state) {
-        this.state = state;
     }
 
     public List<User> getParticipants() {
