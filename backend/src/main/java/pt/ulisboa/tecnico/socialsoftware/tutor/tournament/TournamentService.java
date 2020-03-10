@@ -48,11 +48,9 @@ public class TournamentService {
       value = { SQLException.class },
       backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public TournamentDto createTournament(String username, List<Integer> topicsId, TournamentDto tournamentDto) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new TutorException(USER_NOT_FOUND, username);
-        }
+    public TournamentDto createTournament(Integer userId, List<Integer> topicsId, TournamentDto tournamentDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
         // Added 10 seconds as a buffer to take latency into consideration
         if (!tournamentDto.getStartTime().isBefore(tournamentDto.getEndTime())
@@ -119,9 +117,9 @@ public class TournamentService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void joinTournament(Integer userID, TournamentDto tournamentDto) {
-        User user = userRepository.findById(userID)
-                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userID));
+    public void joinTournament(Integer userId, TournamentDto tournamentDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                 .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
