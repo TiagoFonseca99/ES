@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.question.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
@@ -26,7 +27,7 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 public class Question {
     @SuppressWarnings("unused")
     public enum Status {
-        DISABLED, REMOVED, AVAILABLE
+        DISABLED, REMOVED, AVAILABLE, SUBMITTED
     }
 
     @Id
@@ -68,6 +69,9 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Discussion discussion;
 
     public Question() {
     }
@@ -319,5 +323,21 @@ public class Question {
 
     public boolean belongsToAssessment(Assessment chosenAssessment) {
         return chosenAssessment.getTopicConjunctions().stream().map(TopicConjunction::getTopics).collect(Collectors.toList()).contains(this.topics);
+    }
+
+    public void setDiscussion(Discussion discussion) {
+        this.discussion = discussion;
+    }
+
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (!(o instanceof Question)) {
+            return false;
+        }
+
+        return ((Question) o).getId() == id;
     }
 }

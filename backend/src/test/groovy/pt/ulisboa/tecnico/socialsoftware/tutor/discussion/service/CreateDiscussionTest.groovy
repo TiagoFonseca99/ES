@@ -1,4 +1,3 @@
-/*
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.service
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,13 +7,21 @@ import org.springframework.context.annotation.Bean
 import spock.lang.Specification
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.User
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.QuestionAnswer
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
-import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
 
@@ -23,6 +30,8 @@ class CreateDiscussionTest extends Specification {
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
+    public static final String USER_USERNAME = "user username"
+    public static final String USER_NAME = "user name"
 
     @Autowired
     DiscussionService discussionService
@@ -30,113 +39,148 @@ class CreateDiscussionTest extends Specification {
     @Autowired
     DiscussionRepository discussionRepository
 
-    def quizquestion1
-    def quizquestion2
+    @Autowired
+    QuestionRepository questionRepository
+
+    @Autowired
+    QuestionAnswerRepository questionAnswerRepository
+
+    @Autowired
+    QuizRepository quizRepository
+
+    @Autowired
+    QuizAnswerRepository quizAnswerRepository;
+
+    @Autowired
+    QuizQuestionRepository quizQuestionRepository;
+
+    @Autowired
+    UserRepository userRepository
+
     def question1
     def question2
-    def questionanswer
-    def quizanswer
     def teacher
     def student
 
     def setup(){
         question1 = new Question()
         question1.setKey(1)
-        question1.setContent(QUESTION_TITLE)
+        question1.setTitle(QUESTION_TITLE)
         question1.setContent(QUESTION_CONTENT)
 
         question2 = new Question()
         question2.setKey(2)
-        question2.setContent(QUESTION_TITLE)
+        question2.setTitle(QUESTION_TITLE)
         question2.setContent(QUESTION_CONTENT)
+        questionRepository.save(question2)
 
-        teacher = new User()
-        teacher.setKey(1)
-        teacher.setRole(User.Role.TEACHER)
+        teacher = new User(USER_NAME + "1", USER_USERNAME + "1", 1, User.Role.TEACHER)
+        userRepository.save(teacher)
+        student = new User(USER_NAME, USER_USERNAME, 2, User.Role.STUDENT)
 
-        student = new User()
-        student.setKey(1)
-        student.setRole(User.Role.STUDENT)
-
-        quiz = new Quiz()
+        def quiz = new Quiz()
         quiz.setKey(1)
 
-        quizquestion1 = new QuizQuestion(quiz, question1, 3)
-        quizquestion2 = new QuizQuestion(quiz, question2, 4)
+        def quizanswer = new QuizAnswer()
 
-        quizanswer = new QuizAnswer()
-
-        questionanswer = new QuestionAnswer()
-        questionanswer.setQuizQuestion(quizquestion1)
+        def questionanswer = new QuestionAnswer()
+        questionanswer.setTimeTaken(1)
+        def quizquestion = new QuizQuestion(quiz, question1, 3)
+        questionanswer.setQuizQuestion(quizquestion)
         questionanswer.setQuizAnswer(quizanswer)
+        questionAnswerRepository.save(questionanswer)
 
+        quizquestion.addQuestionAnswer(questionanswer)
         quizanswer.addQuestionAnswer(questionanswer)
 
+        quizQuestionRepository.save(quizquestion)
+        quizAnswerRepository.save(quizanswer)
+
+
+        quiz.addQuizAnswer(quizanswer)
+        quiz.addQuizQuestion(quizquestion)
+
+        quizRepository.save(quiz)
+
+
+        questionRepository.save(question1)
         student.addQuizAnswer(quizanswer)
+        userRepository.save(student)
     }
 
     def "create discussion"(){
         given: "a discussionDto"
         def discussionDto = new DiscussionDto()
-        discussionDto.setKey(1)
         discussionDto.setContent(DISCUSSION_CONTENT)
-        discussionDto.setUser(student)
+        and: "a student"
+        discussionDto.setUserId(student.getId())
+        discussionDto.setQuestion(new QuestionDto(question1))
 
         when:
-        discussionService(question1.getId(), discussionDto)
+        discussionService.createDiscussion(discussionDto)
 
         then: "the correct discussion is inside the repository"
         discussionRepository.count() == 1L
-        def result = questionRepository.findAll().get(0)
-        result.getId() != null
-        result.getKey() == 1
+
+        def result = discussionRepository.findAll().get(0)
         result.getContent() == DISCUSSION_CONTENT
+        result.getUser().getId() == student.getId()
+        result.getQuestion().getId() == question1.getId()
     }
 
     def "ensure user is student"(){
         given: "a discussionDto"
         def discussionDto = new DiscussionDto()
+        and: "set teacher as creator"
+        discussionDto.setUserId(teacher.getId())
+        discussionDto.setQuestion(new QuestionDto(question1))
 
-        when: "adding teacher as creator"
-        discussionDto.setUser(teacher)
+        when: "creating discussion"
+        discussionService.createDiscussion(discussionDto)
 
         then:
-        thrown(TutorException)
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.DISCUSSION_NOT_TEACHER_CREATOR
     }
 
     def "student answered the question in discussion"(){
         given: "a discussionDto"
         def discussionDto = new DiscussionDto()
-        discussionDto.setKey(1)
         discussionDto.setContent(DISCUSSION_CONTENT)
-        discussionDto.setUser(student)
+        discussionDto.setUserId(student.getId())
+        discussionDto.setQuestion(new QuestionDto(question2))
 
         when: "creating a discussion on a non answered question"
-        discussionService(question2.getId(), discussionDto)
+        discussionService.createDiscussion(discussionDto)
 
         then:
-        thrown(TutorException)
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.QUESTION_NOT_ANSWERED
     }
 
     def "student can't create 2 discussions to same question"(){
-        given: "a discussionDto"
+        given: "a student"
+        def studentId = student.getId()
+
+        and:"a discussionDto"
         def discussionDto1 = new DiscussionDto()
-        discussionDto1.setKey(1)
         discussionDto1.setContent(DISCUSSION_CONTENT)
-        discussionDto1.setUser(student)
-        discussionService(question1.getId(), discussionDto1)
+        discussionDto1.setUserId(studentId)
+        discussionDto1.setQuestion(new QuestionDto(question1))
+        discussionService.createDiscussion(discussionDto1)
 
         and: "another discussionDto"
         def discussionDto2 = new DiscussionDto()
-        discussionDto2.setKey(2)
         discussionDto2.setContent(DISCUSSION_CONTENT)
-        discussionDto2.setUser(student)
+        discussionDto2.setUserId(studentId)
+        discussionDto2.setQuestion(new QuestionDto(question1))
 
         when: "creating the second discussion"
-        discussionService(question1.getId(), discussionDto2)
+        discussionService.createDiscussion(discussionDto2)
 
         then:
-        thrown(TutorException)
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.DUPLICATE_DISCUSSION
     }
 
     @TestConfiguration
@@ -149,6 +193,3 @@ class CreateDiscussionTest extends Specification {
 
 
 }
-
-
- */
