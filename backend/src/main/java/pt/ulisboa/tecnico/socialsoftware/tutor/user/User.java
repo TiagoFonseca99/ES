@@ -60,7 +60,7 @@ public class User implements UserDetails {
     @ManyToMany
     private Set<CourseExecution> courseExecutions = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "question", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Discussion> discussions = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "teacher", fetch=FetchType.LAZY, orphanRemoval=true)

@@ -63,7 +63,7 @@ public enum ErrorMessage {
     QUIZ_ALREADY_COMPLETED("Quiz already completed"),
     QUIZ_QUESTION_HAS_ANSWERS("Quiz question has answers"),
     DISCUSSION_MISSING_DATA("Missing information for discussion"),
-    DISCUSSION_NOT_TEACHER_CREATOR("Teacher cannot create discussion"),
+    DISCUSSION_NOT_STUDENT_CREATOR("Teacher cannot create discussion"),
     FENIX_ERROR("Fenix Error"),
     AUTHENTICATION_ERROR("Authentication Error"),
     FENIX_CONFIGURATION_ERROR("Incorrect server configuration files for fenix"),

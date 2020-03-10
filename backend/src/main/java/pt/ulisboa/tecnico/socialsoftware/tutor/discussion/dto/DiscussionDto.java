@@ -8,7 +8,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 
 public class DiscussionDto implements Serializable {
     private Integer userId;
-    private Integer questionId;
     private QuestionDto question;
     private String content;
     private Reply reply;
@@ -17,8 +16,7 @@ public class DiscussionDto implements Serializable {
     }
 
     public DiscussionDto(Discussion discussion) {
-        this.userId = discussion.getUser().getId();
-        this.questionId = discussion.getQuestion().getId();
+        this.userId = discussion.getId().getUserId();
         this.content = discussion.getContent();
         this.question = new QuestionDto(discussion.getQuestion());
     }
@@ -28,7 +26,7 @@ public class DiscussionDto implements Serializable {
     }
 
     public Integer getQuestionId() {
-        return questionId;
+        return question.getId();
     }
 
     public void setUserId(Integer id) {
@@ -49,7 +47,6 @@ public class DiscussionDto implements Serializable {
 
     public void setQuestion(QuestionDto question) {
         this.question = question;
-        this.questionId = question.getId();
     }
 
     public Reply getReply() {

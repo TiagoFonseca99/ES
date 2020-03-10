@@ -85,7 +85,7 @@ public class DiscussionService {
 
     private void checkUserAndQuestion(User user, Question question) {
         if(user.getRole() == User.Role.TEACHER) {
-            throw new TutorException(DISCUSSION_NOT_TEACHER_CREATOR);
+            throw new TutorException(DISCUSSION_NOT_STUDENT_CREATOR);
         }
 
         if(!discussionRepository.findByUserIdQuestionId(user.getId(), question.getId()).isEmpty()){
