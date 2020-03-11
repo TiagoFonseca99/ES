@@ -25,6 +25,9 @@ public class Submission {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval=true)
+    private Review review;
+
     //TODO add submission time
 
     public Submission() {}

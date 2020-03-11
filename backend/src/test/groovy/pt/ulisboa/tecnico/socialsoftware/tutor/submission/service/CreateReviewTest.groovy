@@ -2,21 +2,31 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.submission.service
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.ImageRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.ReviewService
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
 
 @DataJpaTest
-class CreateReviewTest extends Specification{
+class CreateReviewTest extends Specification {
+
     public static final String COURSE_NAME = "Arquitetura de Software"
     public static final String QUESTION_TITLE = 'question title'
     public static final String QUESTION_CONTENT = 'question content'
@@ -24,11 +34,13 @@ class CreateReviewTest extends Specification{
     public static final String IMAGE_URL = 'URL'
     public static final String REVIEW_JUSTIFICATION = 'Porque me apeteceu'
     public static final Integer IMAGE_WIDTH = 5
-    public static final Integer SUBMISSION_ID = 5
     public static final String STUDENT_NAME = "João Silva"
     public static final String STUDENT_USERNAME = "joaosilva"
     public static final String TEACHER_NAME = "Ana Rita"
     public static final String TEACHER_USERNAME = "anarita"
+
+    @Autowired
+    ReviewService reviewService
 
     @Autowired
     CourseRepository courseRepository
@@ -39,6 +51,14 @@ class CreateReviewTest extends Specification{
     @Autowired
     UserRepository userRepository
 
+    @Autowired
+    ReviewRepository reviewRepository
+
+    @Autowired
+    SubmissionRepository submissionRepository
+
+    @Autowired
+    ImageRepository imageRepository
 
     def course
     def student
@@ -46,6 +66,7 @@ class CreateReviewTest extends Specification{
     def imageDto
     def submission
     def teacher
+    def image
 
     def setup() {
 
@@ -66,27 +87,30 @@ class CreateReviewTest extends Specification{
         question.setStatus(Question.Status.SUBMITTED)
         questionRepository.save(question)
 
-        imageDto = new ImageDto()
-        imageDto.setWidth(IMAGE_WIDTH)
-        imageDto.setUrl(IMAGE_URL)
+        image = new Image()
+        image.setWidth(IMAGE_WIDTH)
+        image.setUrl(IMAGE_URL)
+        imageRepository.save(image)
 
         submission = new Submission()
-        submission.setId(SUBMISSION_ID)
         submission.setKey(1)
         submission.setQuestion(question)
         submission.setUser(student)
+        submissionRepository.save(submission)
         }
+
 
     def "create review that accepts question with justification"() {
 
         given: "a reviewDto"
-        def reviewDto = new reviewDto()
+        def reviewDto = new ReviewDto()
         reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setStatus(Review.Status.ACCEPTED)
         reviewDto.setSubmissionId(submission.getId())
+        reviewDto.setStudentId(submission.getUser().getId())
 
-        when: SubmissionService.reviewSubmission(teacher.getId(), reviewDto)
+        when: reviewService.reviewSubmission(teacher.getId(), reviewDto)
 
         then: "the service is in the repository"
         reviewRepository.count() == 1L
@@ -95,7 +119,7 @@ class CreateReviewTest extends Specification{
         result.getKey() == 1
         result.getJustification() == REVIEW_JUSTIFICATION
         result.getStatus() == Review.Status.ACCEPTED
-        result.getSubmissionId() == submission.getId()
+        result.getSubmission() == submission
 
     }
 
@@ -103,16 +127,17 @@ class CreateReviewTest extends Specification{
     def "create review without justification"() {
 
         given: "a reviewDto"
-        def reviewDto = new reviewDto()
+        def reviewDto = new ReviewDto()
         reviewDto.setKey(1)
         reviewDto.setStatus(Review.Status.REJECTED)
         reviewDto.setSubmissionId(submission.getId())
+        reviewDto.setStudentId(submission.getUser().getId())
 
-        when: SubmissionService.reviewSubmission(teacher.getId(), reviewDto)
+        when: reviewService.reviewSubmission(teacher.getId(), reviewDto)
 
         then: "exception is thrown"
-        def exception = thrown(ReviewException)
-        exception.getErrorMessage() = ErrorMessage.REVIEW_MISSING_DATA
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.REVIEW_MISSING_DATA
 
     }
 
@@ -120,14 +145,15 @@ class CreateReviewTest extends Specification{
     def "create review that rejects question with justification and image"() {
 
         given: "a reviewDto"
-        def reviewDto = new reviewDto()
+        def reviewDto = new ReviewDto()
         reviewDto.setKey(1)
-        reviewDto.setImageDto(imageDto)
+        reviewDto.setImageDto(new ImageDto(image))
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setStatus(Review.Status.REJECTED)
         reviewDto.setSubmissionId(submission.getId())
+        reviewDto.setStudentId(submission.getUser().getId())
 
-        when: SubmissionService.reviewSubmission(teacher.getId(), reviewDto)
+        when: reviewService.reviewSubmission(teacher.getId(), reviewDto)
 
         then: "the service is in the repository"
         reviewRepository.count() == 1L
@@ -135,9 +161,11 @@ class CreateReviewTest extends Specification{
         result.getId() != null
         result.getKey() == 1
         result.getJustification() == REVIEW_JUSTIFICATION
-        result.getImageDto() == imageDto
+        result.getImage().getId() != null
+        result.getImage().getUrl() == IMAGE_URL
+        result.getImage().getWidth() == IMAGE_WIDTH
         result.getStatus() == Review.Status.REJECTED
-        result.getSubmissionId() == submission.getId()
+        result.getSubmission() == submission
 
     }
 
@@ -150,8 +178,9 @@ class CreateReviewTest extends Specification{
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setStatus(Review.Status.REJECTED)
         reviewDto.setSubmissionId(submission.getId())
+        reviewDto.setStudentId(submission.getUser().getId())
 
-        when: SubmissionService.reviewSubmission(student.getId(), reviewDto)
+        when: reviewService.reviewSubmission(student.getId(), reviewDto)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
@@ -159,14 +188,14 @@ class CreateReviewTest extends Specification{
 
     }
 
-    /*@TestConfiguration
+    @TestConfiguration
     static class ReviewServiceImplTestContextConfiguration {
 
         @Bean
         ReviewService reviewService() {
             return new ReviewService()
         }
-    }*/
+    }
 
 
 }
