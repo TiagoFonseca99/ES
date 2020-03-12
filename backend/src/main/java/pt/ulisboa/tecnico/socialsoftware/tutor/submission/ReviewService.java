@@ -26,12 +26,15 @@ public class ReviewService {
     EntityManager entityManager;
 
 
-    public ReviewDto reviewSubmission(Integer teacher_id, ReviewDto reviewDto) {
+    public ReviewDto reviewSubmission(Integer teacher_id, ReviewDto reviewDto, Review.Status status) {
 
         User user = getTeacher(teacher_id);
         Submission submission = getSubmission(reviewDto);
 
         checkIfReviewHasJustification(reviewDto, user);
+        checkIfSubmissionIsApproved(reviewDto, teacher_id);
+
+        reviewDto.setStatus(status);
 
         Review review = new Review(user, submission, reviewDto);
 
@@ -49,20 +52,28 @@ public class ReviewService {
     }
 
 
-    private void checkIfReviewHasJustification(ReviewDto reviewDto, User user) {
-
-        String justification = reviewDto.getJustification();
-        if (justification == null || justification.isBlank()) {
-            throw new TutorException(REVIEW_MISSING_DATA, user.getUsername());
-        }
-    }
-
-
     private Submission getSubmission(ReviewDto reviewDto){
 
         int submission_id = reviewDto.getSubmissionId();
         Submission submission = submissionRepository.findById(submission_id).orElseThrow(() -> new TutorException(SUBMISSION_NOT_FOUND, submission_id));
         return submission;
     }
+
+
+    private void checkIfReviewHasJustification(ReviewDto reviewDto, User user) {
+
+        String justification = reviewDto.getJustification();
+        if (justification == null || justification.isBlank()) {
+            throw new TutorException(REVIEW_MISSING_JUSTIFICATION, user.getUsername());
+        }
+    }
+
+    private void checkIfSubmissionIsApproved(ReviewDto reviewDto, Integer teacher_id) {
+
+        if (reviewDto.getStatus() == Review.Status.APPROVED) {
+            throw new TutorException(QUESTION_ALREADY_APPROVED, teacher_id);
+        }
+    }
+
 
 }

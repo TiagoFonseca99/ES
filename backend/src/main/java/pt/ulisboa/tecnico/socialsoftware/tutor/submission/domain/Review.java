@@ -15,6 +15,7 @@ public class Review {
         APPROVED, REJECTED, IN_REVIEW
     }
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

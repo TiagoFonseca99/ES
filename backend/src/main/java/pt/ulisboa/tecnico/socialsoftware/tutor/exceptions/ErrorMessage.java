@@ -28,6 +28,7 @@ public enum ErrorMessage {
     USER_NOT_STUDENT("Username %s is not a student"),
     USER_NOT_TEACHER("Username %s is not a teacher"),
     QUESTION_ALREADY_SUBMITTED("User %s has already submitted this question"),
+    QUESTION_ALREADY_APPROVED("User %s has already approved this question"),
 
     QUIZ_USER_MISMATCH("Quiz %s is not assigned to student %s"),
     QUIZ_MISMATCH("Quiz Answer Quiz %d does not match Quiz Question Quiz %d"),
@@ -62,7 +63,7 @@ public enum ErrorMessage {
     QUESTION_MISSING_DATA("Missing information for quiz"),
     QUESTION_MULTIPLE_CORRECT_OPTIONS("Questions can only have 1 correct option"),
     QUESTION_CHANGE_CORRECT_OPTION_HAS_ANSWERS("Can not change correct option of answered question"),
-    REVIEW_MISSING_DATA("Missing information for quiz"),
+    REVIEW_MISSING_JUSTIFICATION("Missing justification for review"),
     QUIZ_HAS_ANSWERS("Quiz already has answers"),
     QUIZ_ALREADY_COMPLETED("Quiz already completed"),
     QUIZ_QUESTION_HAS_ANSWERS("Quiz question has answers"),
