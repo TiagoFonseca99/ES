@@ -28,7 +28,8 @@ public class Submission {
     @OneToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval=true)
     private Review review;
 
-    //TODO add submission time
+
+//TODO add submission time
 
     public Submission() {}
 
@@ -57,6 +58,10 @@ public class Submission {
     public void setUser(User user) { this.user = user; }
 
     public int getStudentId() { return this.user.getId(); }
+
+    public Review getReview() { return review; }
+
+    public void setReview(Review review) { this.review = review; }
 }
 
 

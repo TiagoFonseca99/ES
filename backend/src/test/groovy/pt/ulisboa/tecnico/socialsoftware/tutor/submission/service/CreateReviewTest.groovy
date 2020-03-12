@@ -13,7 +13,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.ImageRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.ReviewService
@@ -63,7 +62,6 @@ class CreateReviewTest extends Specification {
     def course
     def student
     def question
-    def imageDto
     def submission
     def teacher
     def image
@@ -97,20 +95,38 @@ class CreateReviewTest extends Specification {
         submission.setQuestion(question)
         submission.setUser(student)
         submissionRepository.save(submission)
+
         }
 
 
-    def "create review that accepts question with justification"() {
+    def "create review to an approved review"() {
+
+        given: "a review"
+        def reviewDto = new ReviewDto()
+        reviewDto.setKey(1)
+        reviewDto.setStatus(Review.Status.APPROVED)
+        reviewDto.setJustification(REVIEW_JUSTIFICATION)
+        reviewDto.setSubmissionId(submission.getId())
+        reviewDto.setStudentId(submission.getUser().getId())
+
+        when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
+
+        then: "exception is thrown"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.QUESTION_ALREADY_APPROVED
+
+    }
+
+    def "create review that approves question with justification"() {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
         reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
-        reviewDto.setStatus(Review.Status.ACCEPTED)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getUser().getId())
 
-        when: reviewService.reviewSubmission(teacher.getId(), reviewDto)
+        when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
 
         then: "the service is in the repository"
         reviewRepository.count() == 1L
@@ -118,7 +134,7 @@ class CreateReviewTest extends Specification {
         result.getId() != null
         result.getKey() == 1
         result.getJustification() == REVIEW_JUSTIFICATION
-        result.getStatus() == Review.Status.ACCEPTED
+        result.getStatus() == Review.Status.APPROVED
         result.getSubmission() == submission
 
     }
@@ -129,15 +145,14 @@ class CreateReviewTest extends Specification {
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
         reviewDto.setKey(1)
-        reviewDto.setStatus(Review.Status.REJECTED)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getUser().getId())
 
-        when: reviewService.reviewSubmission(teacher.getId(), reviewDto)
+        when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.REVIEW_MISSING_DATA
+        exception.getErrorMessage() == ErrorMessage.REVIEW_MISSING_JUSTIFICATION
 
     }
 
@@ -149,11 +164,10 @@ class CreateReviewTest extends Specification {
         reviewDto.setKey(1)
         reviewDto.setImageDto(new ImageDto(image))
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
-        reviewDto.setStatus(Review.Status.REJECTED)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getUser().getId())
 
-        when: reviewService.reviewSubmission(teacher.getId(), reviewDto)
+        when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
 
         then: "the service is in the repository"
         reviewRepository.count() == 1L
@@ -176,11 +190,10 @@ class CreateReviewTest extends Specification {
         def reviewDto = new ReviewDto()
         reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
-        reviewDto.setStatus(Review.Status.REJECTED)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getUser().getId())
 
-        when: reviewService.reviewSubmission(student.getId(), reviewDto)
+        when: reviewService.reviewSubmission(student.getId(), reviewDto, Review.Status.REJECTED)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)

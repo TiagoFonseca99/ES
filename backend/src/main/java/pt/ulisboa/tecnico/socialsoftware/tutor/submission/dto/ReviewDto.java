@@ -46,13 +46,9 @@ public class ReviewDto implements Serializable {
         this.studentId = studentId;
     }
 
-    public int getTeacherId() {
-        return teacherId;
-    }
+    public int getTeacherId() { return teacherId; }
 
-    public void setTeacherId(int teacherId) {
-        this.teacherId = teacherId;
-    }
+    public void setTeacherId(int teacherId) { this.teacherId = teacherId; }
 
     public int getSubmissionId() {
         return submissionId;
