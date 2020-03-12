@@ -10,7 +10,7 @@ public class DiscussionDto implements Serializable {
     private Integer userId;
     private QuestionDto question;
     private String content;
-    private Reply reply;
+    private ReplyDto replyDto;
 
     public DiscussionDto() {
     }
@@ -19,6 +19,9 @@ public class DiscussionDto implements Serializable {
         this.userId = discussion.getId().getUserId();
         this.content = discussion.getContent();
         this.question = new QuestionDto(discussion.getQuestion());
+        if(discussion.getReply() != null) {
+            this.replyDto = new ReplyDto(discussion.getReply());
+        }
     }
 
     public Integer getUserId() {
@@ -49,11 +52,11 @@ public class DiscussionDto implements Serializable {
         this.question = question;
     }
 
-    public Reply getReply() {
-        return reply;
+    public ReplyDto getReplyDto() {
+        return replyDto;
     }
 
-    public void setReply(Reply reply) {
-        this.reply = reply;
+    public void setReplyDto(ReplyDto replyDto) {
+        this.replyDto = replyDto;
     }
 }

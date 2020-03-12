@@ -486,4 +486,8 @@ public class User implements UserDetails {
     public void addDiscussion(Discussion discussion){
         discussions.add(discussion);
     }
+
+    public void addReply(Reply reply) {
+        replies.add(reply);
+    }
 }

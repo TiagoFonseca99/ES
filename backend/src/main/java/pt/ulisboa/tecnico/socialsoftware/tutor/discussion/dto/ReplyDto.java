@@ -9,9 +9,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 
 public class ReplyDto implements Serializable {
-    private int id;
-    private Discussion discussion;
-    private User teacher;
+    private Integer id;
+    private Integer teacherId;
     private String message;
     private LocalTime date;
 
@@ -19,7 +18,8 @@ public class ReplyDto implements Serializable {
     }
 
     public ReplyDto(Reply reply) {
-        this.setTeacher(reply.getTeacher());
+        this.setId(reply.getId());
+        this.setTeacherId(reply.getTeacher().getId());
         this.setMessage(reply.getMessage());
         this.setDate(reply.getDate());
     }
@@ -40,23 +40,15 @@ public class ReplyDto implements Serializable {
         this.message = message;
     }
 
-    public User getTeacher() {
-        return teacher;
+    public Integer getTeacherId() {
+        return teacherId;
     }
 
-    public void setTeacher(User teacher) {
-        this.teacher = teacher;
+    public void setTeacherId(int teacher_id) {
+        this.teacherId = teacher_id;
     }
 
-    public Discussion getDiscussion() {
-        return discussion;
-    }
-
-    public void setDiscussion(Discussion discussion) {
-        this.discussion = discussion;
-    }
-
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
