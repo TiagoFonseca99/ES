@@ -77,7 +77,7 @@ class CreateTournamentTest extends Specification {
         topics.add(topic2.getId())
     }
 
-    def "create tournament"() {
+    def "create tournament with existing user"() {
         given:
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(startTime)
@@ -86,7 +86,7 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         then:
         tournamentRepository.count() == 1L
@@ -100,6 +100,26 @@ class CreateTournamentTest extends Specification {
         result.getCreator() == user
     }
 
+    def "create tournament with not existing user"() {
+        given:
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime)
+        tournamentDto.setEndTime(endTime)
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+
+        and:
+        def fakeUserId = 99
+
+        when:
+        tournamentService.createTournament(fakeUserId, topics, tournamentDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_FOUND
+        tournamentRepository.count() == 0L
+    }
+
     def "start time is lower then current time"() {
         given:
         def tournamentDto = new TournamentDto()
@@ -109,13 +129,12 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         then:
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
         tournamentRepository.count() == 0L
-
     }
 
     def "start time is higher then end time"() {
@@ -127,7 +146,7 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         then:
         def exception = thrown(TutorException)
@@ -145,7 +164,7 @@ class CreateTournamentTest extends Specification {
         topics = new ArrayList<Integer>()
 
         when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         then:
         def exception = thrown(TutorException)
@@ -160,7 +179,7 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setEndTime(endTime)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         and: "new topic"
         def topicDto3 = new TopicDto()
@@ -184,7 +203,7 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setEndTime(endTime)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         when:
         tournamentService.addTopic(topic1.getId(), tournamentDto)
@@ -204,7 +223,7 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setEndTime(endTime)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         when:
         tournamentService.removeTopic(topic2.getId(), tournamentDto)
@@ -222,7 +241,7 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setEndTime(endTime)
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         and: "new topic"
         def topicDto3 = new TopicDto()
@@ -249,7 +268,7 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
         topics = [topic1.getId()]
-        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         when:
         tournamentService.removeTopic(topic1.getId(), tournamentDto)
@@ -271,7 +290,7 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         then:
         def exception = thrown(TutorException)
@@ -288,7 +307,7 @@ class CreateTournamentTest extends Specification {
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
         when:
-        tournamentService.createTournament(user.getUsername(), topics, tournamentDto)
+        tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         then:
         def exception = thrown(TutorException)

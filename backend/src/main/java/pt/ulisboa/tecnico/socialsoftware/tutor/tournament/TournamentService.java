@@ -6,24 +6,23 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
-import java.util.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -49,11 +48,9 @@ public class TournamentService {
       value = { SQLException.class },
       backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public TournamentDto createTournament(String username, List<Integer> topicsId, TournamentDto tournamentDto) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new TutorException(USER_NOT_FOUND, username);
-        }
+    public TournamentDto createTournament(Integer userId, List<Integer> topicsId, TournamentDto tournamentDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
         // Added 10 seconds as a buffer to take latency into consideration
         if (!tournamentDto.getStartTime().isBefore(tournamentDto.getEndTime())
@@ -120,15 +117,19 @@ public class TournamentService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void joinTournament(Integer userID, TournamentDto tournamentDto) {
-        User user = userRepository.findById(userID)
-                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userID));
+    public void joinTournament(Integer userId, TournamentDto tournamentDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                 .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
 
-        if (LocalDateTime.now().isBefore(tournament.getStartTime()) ||LocalDateTime.now().isAfter(tournament.getEndTime())) {
+        if (LocalDateTime.now().isBefore(tournament.getStartTime()) || LocalDateTime.now().isAfter(tournament.getEndTime())) {
             throw new TutorException(TOURNAMENT_NOT_OPEN, tournament.getId());
+        }
+
+        if (tournament.getState() == Tournament.Status.CANCELED) {
+            throw  new TutorException(TOURNAMENT_CANCELED, tournament.getId());
         }
 
         if (user.getRole() != User.Role.STUDENT) {
