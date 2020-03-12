@@ -14,6 +14,8 @@ public enum ErrorMessage {
     TOPIC_CONJUNCTION_NOT_FOUND("Topic Conjunction not found with id %d"),
     COURSE_EXECUTION_NOT_FOUND("Course execution not found with name %d"),
     DISCUSSION_NOT_FOUND("Discussion not found with user id %d and question id %d"),
+    SUBMISSION_NOT_FOUND("Submission not found with id %d"),
+
 
     COURSE_NOT_FOUND("Course not found with name %s"),
     COURSE_NAME_IS_EMPTY("The course name is empty"),
@@ -24,6 +26,7 @@ public enum ErrorMessage {
     TOURNAMENT_NOT_FOUND("Tournament %s not found"),
 
     USER_NOT_STUDENT("Username %s is not a student"),
+    USER_NOT_TEACHER("Username %s is not a teacher"),
     QUESTION_ALREADY_SUBMITTED("User %s has already submitted this question"),
 
     QUIZ_USER_MISMATCH("Quiz %s is not assigned to student %s"),
@@ -59,6 +62,7 @@ public enum ErrorMessage {
     QUESTION_MISSING_DATA("Missing information for quiz"),
     QUESTION_MULTIPLE_CORRECT_OPTIONS("Questions can only have 1 correct option"),
     QUESTION_CHANGE_CORRECT_OPTION_HAS_ANSWERS("Can not change correct option of answered question"),
+    REVIEW_MISSING_DATA("Missing information for quiz"),
     QUIZ_HAS_ANSWERS("Quiz already has answers"),
     QUIZ_ALREADY_COMPLETED("Quiz already completed"),
     QUIZ_QUESTION_HAS_ANSWERS("Quiz question has answers"),

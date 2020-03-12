@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.question.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 
 import javax.persistence.*;
 
@@ -17,6 +18,10 @@ public class Image {
     @JoinColumn(name="question_id")
     private Question question;
 
+    @OneToOne
+    @JoinColumn(name="review_id")
+    private Review review;
+
     public Image() {}
 
     public Image(ImageDto imageDto) {
@@ -24,6 +29,9 @@ public class Image {
         this.width = imageDto.getWidth();
     }
 
+    public Review getReview() { return review; }
+
+    public void setReview(Review review) { this.review = review; }
 
     public Integer getId() {
         return id;
