@@ -55,7 +55,7 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ReviewDto> getOpenedTournaments(int studentId) {
+    public List<ReviewDto> getSubmissionStatus(int studentId) {
         return reviewRepository.getSubmissionStatus(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
     }
 

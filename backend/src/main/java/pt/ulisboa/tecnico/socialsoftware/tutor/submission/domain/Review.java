@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class Review {
 
     public enum Status {
-        ACCEPTED, REJECTED, IN_REVIEW
+        APPROVED, REJECTED, IN_REVIEW
     }
 
     @Id

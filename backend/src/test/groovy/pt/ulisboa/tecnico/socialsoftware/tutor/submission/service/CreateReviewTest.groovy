@@ -106,7 +106,7 @@ class CreateReviewTest extends Specification {
         def reviewDto = new ReviewDto()
         reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
-        reviewDto.setStatus(Review.Status.ACCEPTED)
+        reviewDto.setStatus(Review.Status.APPROVED)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getUser().getId())
 
@@ -118,7 +118,7 @@ class CreateReviewTest extends Specification {
         result.getId() != null
         result.getKey() == 1
         result.getJustification() == REVIEW_JUSTIFICATION
-        result.getStatus() == Review.Status.ACCEPTED
+        result.getStatus() == Review.Status.APPROVED
         result.getSubmission() == submission
 
     }
