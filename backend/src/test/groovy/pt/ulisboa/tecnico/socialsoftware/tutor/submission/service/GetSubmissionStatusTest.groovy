@@ -105,10 +105,9 @@ class GetSubmissionStatusTest extends Specification {
         def reviewDto = new ReviewDto()
         reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION1)
-        reviewDto.setStatus(Review.Status.IN_REVIEW)
         reviewDto.setSubmissionId(submission1.getId())
         reviewDto.setStudentId(submission1.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto)
+        reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.IN_REVIEW)
 
         when:
         def result = submissionService.getSubmissionStatus(student.getId())
@@ -128,19 +127,17 @@ class GetSubmissionStatusTest extends Specification {
         def reviewDto1 = new ReviewDto()
         reviewDto1.setKey(1)
         reviewDto1.setJustification(REVIEW_JUSTIFICATION1)
-        reviewDto1.setStatus(Review.Status.APPROVED)
         reviewDto1.setSubmissionId(submission1.getId())
         reviewDto1.setStudentId(submission1.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto1)
+        reviewService.reviewSubmission(teacher.getId(), reviewDto1, Review.Status.APPROVED)
 
         and: "another approved submission review"
         def reviewDto2 = new ReviewDto()
         reviewDto2.setKey(2)
         reviewDto2.setJustification(REVIEW_JUSTIFICATION2)
-        reviewDto2.setStatus(Review.Status.APPROVED)
         reviewDto2.setSubmissionId(submission2.getId())
         reviewDto2.setStudentId(submission2.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto2)
+        reviewService.reviewSubmission(teacher.getId(), reviewDto2, Review.Status.APPROVED)
 
         when:
         def result = submissionService.getSubmissionStatus(student.getId())
@@ -166,19 +163,17 @@ class GetSubmissionStatusTest extends Specification {
         def reviewDto1 = new ReviewDto()
         reviewDto1.setKey(1)
         reviewDto1.setJustification(REVIEW_JUSTIFICATION1)
-        reviewDto1.setStatus(Review.Status.APPROVED)
         reviewDto1.setSubmissionId(submission1.getId())
         reviewDto1.setStudentId(submission1.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto1)
+        reviewService.reviewSubmission(teacher.getId(), reviewDto1, Review.Status.APPROVED)
 
         and: "a rejected submission review"
         def reviewDto2 = new ReviewDto()
         reviewDto2.setKey(2)
         reviewDto2.setJustification(REVIEW_JUSTIFICATION2)
-        reviewDto2.setStatus(Review.Status.REJECTED)
         reviewDto2.setSubmissionId(submission2.getId())
         reviewDto2.setStudentId(submission2.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto2)
+        reviewService.reviewSubmission(teacher.getId(), reviewDto2, Review.Status.REJECTED)
 
         when:
         def result = submissionService.getSubmissionStatus(student.getId())
