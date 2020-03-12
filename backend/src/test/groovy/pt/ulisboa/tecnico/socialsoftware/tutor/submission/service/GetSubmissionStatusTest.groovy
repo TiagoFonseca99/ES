@@ -18,7 +18,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Specification
 
 @DataJpaTest
-class CreateSubmissionTest extends Specification {
+class GetSubmissionStatusTest extends Specification {
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
@@ -82,7 +82,7 @@ class CreateSubmissionTest extends Specification {
         review.setUser(teacher)
 
         when:
-        def result = submissionService.getSubmissionStatus(student)
+        def result = submissionService.getSubmissionStatus(student.getId())
 
         then: "the returned data is correct"
         result.size() == 1
@@ -109,7 +109,7 @@ class CreateSubmissionTest extends Specification {
         review2.setUser(teacher)
 
         when:
-        def result = submissionService.getSubmissionStatus(student)
+        def result = submissionService.getSubmissionStatus(student.getId())
 
         then: "the returned data is correct"
         result.size() == 2
@@ -141,7 +141,7 @@ class CreateSubmissionTest extends Specification {
         review2.setUser(teacher)
 
         when:
-        def result = submissionService.getSubmissionStatus(student)
+        def result = submissionService.getSubmissionStatus(student.getId())
 
         then: "the returned data is correct"
         result.size() == 2
@@ -159,7 +159,7 @@ class CreateSubmissionTest extends Specification {
 
     def "check review status with no submissions"(){
         when:
-        def result = submissionService.getSubmissionStatus(student)
+        def result = submissionService.getSubmissionStatus(student.getId())
 
         then: "the returned data is correct"
         result.size() == 0

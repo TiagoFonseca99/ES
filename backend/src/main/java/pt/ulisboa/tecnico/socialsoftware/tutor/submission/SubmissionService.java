@@ -8,14 +8,19 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -24,6 +29,9 @@ public class SubmissionService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -41,6 +49,14 @@ public class SubmissionService {
 
         entityManager.persist(submission);
         return new SubmissionDto(submission);
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<ReviewDto> getOpenedTournaments(int studentId) {
+        return reviewRepository.getSubmissionStatus(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
     }
 
     private void checkIfQuestionAlreadySubmitted(Question question, User user) {
