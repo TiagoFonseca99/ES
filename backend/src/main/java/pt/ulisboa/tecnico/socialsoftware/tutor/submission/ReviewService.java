@@ -26,13 +26,13 @@ public class ReviewService {
     EntityManager entityManager;
 
 
-    public ReviewDto reviewSubmission(Integer teacher_id, ReviewDto reviewDto, Review.Status status) {
+    public ReviewDto reviewSubmission(Integer teacherId, ReviewDto reviewDto, Review.Status status) {
 
-        User user = getTeacher(teacher_id);
+        User user = getTeacher(teacherId);
         Submission submission = getSubmission(reviewDto);
 
         checkIfReviewHasJustification(reviewDto, user);
-        checkIfSubmissionIsApproved(reviewDto, teacher_id);
+        checkIfSubmissionIsApproved(reviewDto, teacherId);
 
         reviewDto.setStatus(status);
 
@@ -43,10 +43,10 @@ public class ReviewService {
     }
 
 
-    private User getTeacher(Integer teacher_id) {
+    private User getTeacher(Integer teacherId) {
 
-        User user = userRepository.findById(teacher_id).orElseThrow(() -> new TutorException(USER_NOT_FOUND, teacher_id));
-        if (!user.isTeacher())
+        User user = userRepository.findById(teacherId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, teacherId));
+        if (user.isTeacher() != null && !user.isTeacher())
             throw new TutorException(USER_NOT_TEACHER, user.getUsername());
         return user;
     }
@@ -54,9 +54,8 @@ public class ReviewService {
 
     private Submission getSubmission(ReviewDto reviewDto){
 
-        int submission_id = reviewDto.getSubmissionId();
-        Submission submission = submissionRepository.findById(submission_id).orElseThrow(() -> new TutorException(SUBMISSION_NOT_FOUND, submission_id));
-        return submission;
+        int submissionId = reviewDto.getSubmissionId();
+        return submissionRepository.findById(submissionId).orElseThrow(() -> new TutorException(SUBMISSION_NOT_FOUND, submissionId));
     }
 
 
@@ -68,10 +67,10 @@ public class ReviewService {
         }
     }
 
-    private void checkIfSubmissionIsApproved(ReviewDto reviewDto, Integer teacher_id) {
+    private void checkIfSubmissionIsApproved(ReviewDto reviewDto, Integer teacherId) {
 
         if (reviewDto.getStatus() == Review.Status.APPROVED) {
-            throw new TutorException(QUESTION_ALREADY_APPROVED, teacher_id);
+            throw new TutorException(QUESTION_ALREADY_APPROVED, teacherId);
         }
     }
 

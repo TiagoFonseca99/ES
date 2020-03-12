@@ -85,16 +85,8 @@ public class Review {
         return studentId;
     }
 
-    public void setStudentId(Integer studentId) {
-        this.studentId = studentId;
-    }
-
     public String getJustification() {
         return justification;
-    }
-
-    public void setJustification(String justification) {
-        this.justification = justification;
     }
 
     public Status getStatus() {

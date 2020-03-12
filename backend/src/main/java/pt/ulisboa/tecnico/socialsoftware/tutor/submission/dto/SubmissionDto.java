@@ -28,8 +28,6 @@ public class SubmissionDto implements Serializable {
 
     public void setKey(Integer key) { this.key = key; }
 
-    public int getQuestionId() { return questionId; }
-
     public void setQuestionId(int questionId) { this.questionId = questionId; }
 
     public int getStudentId() { return studentId; }

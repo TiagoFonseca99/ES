@@ -12,7 +12,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
-import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
@@ -67,7 +66,7 @@ public class SubmissionService {
     private User getStudent(SubmissionDto submissionDto) {
         int userId = submissionDto.getStudentId();
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-        if(user.isStudent() == false)
+        if(user.isStudent() != null && !user.isStudent())
             throw new TutorException(USER_NOT_STUDENT, user.getUsername());
         return user;
     }

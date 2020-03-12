@@ -56,9 +56,6 @@ public class Submission {
 
     public int getStudentId() { return this.user.getId(); }
 
-    public Review getReview() { return review; }
-
-    public void setReview(Review review) { this.review = review; }
 }
 
 
