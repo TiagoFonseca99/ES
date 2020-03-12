@@ -49,7 +49,6 @@ public class Reply implements Serializable {
         this.date = reply.getDate();
         this.message = reply.getMessage();
         this.discussion = discussion;
-        this.id = reply.getId();
         discussion.setReply(this);
     }
 

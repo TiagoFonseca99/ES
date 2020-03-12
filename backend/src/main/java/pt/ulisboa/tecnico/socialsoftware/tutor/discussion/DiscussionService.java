@@ -107,7 +107,7 @@ public class DiscussionService {
 
         Reply reply = new Reply(teacher, discussion, replyDto);
         this.entityManager.persist(reply);
-        //this.entityManager.refresh(discussion);
+        discussion = this.entityManager.merge(discussion);
 
         return new ReplyDto(reply);
 
