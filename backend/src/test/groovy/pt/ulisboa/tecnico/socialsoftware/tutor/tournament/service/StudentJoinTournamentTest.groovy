@@ -96,8 +96,7 @@ class StudentJoinTournamentTest extends Specification {
         tournamentDtoInit.setEndTime(endTime_Now)
         tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getUsername(), topics, tournamentDtoInit)
-
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
     }
 
     def "2 student join an open tournament and get participants" () {
@@ -232,6 +231,123 @@ class StudentJoinTournamentTest extends Specification {
         then: "the admin cannot join the tournament"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+
+        and: "the tournament has no participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
+        result.size() == 0
+    }
+
+    def "Student tries to join canceled tournament" () {
+        given:
+        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+
+        and:
+        def canceledTournamentDtoInit = new TournamentDto()
+        def canceledTournamentDto = new TournamentDto()
+        canceledTournamentDtoInit.setStartTime(startTime_Now)
+        canceledTournamentDtoInit.setEndTime(endTime_Now)
+        canceledTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
+        canceledTournamentDtoInit.setState(Tournament.Status.CANCELED)
+        canceledTournamentDto = tournamentService.createTournament(user.getId(), topics, canceledTournamentDtoInit)
+
+        when:
+        tournamentService.joinTournament(user2.getId(), canceledTournamentDto)
+
+        then: "student cannot join"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_CANCELED
+
+        and: "the tournament has no participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
+        result.size() == 0
+    }
+
+    def "Student tries to join not open (later) tournament" () {
+        given:
+        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+
+        and:
+        def notOpenTournamentDtoInit = new TournamentDto()
+        def notOpenTournamentDto = new TournamentDto()
+        notOpenTournamentDtoInit.setStartTime(startTime_Now.plusHours(10))
+        notOpenTournamentDtoInit.setEndTime(endTime_Now.plusHours(10))
+        notOpenTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
+        notOpenTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
+        notOpenTournamentDto = tournamentService.createTournament(user.getId(), topics, notOpenTournamentDtoInit)
+
+        when:
+        tournamentService.joinTournament(user2.getId(), notOpenTournamentDto)
+
+        then: "student cannot join"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_OPEN
+
+        and: "the tournament has no participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
+        result.size() == 0
+    }
+
+    def "Student tries to join not open (early) tournament" () {
+        given:
+        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+
+        and:
+        def notOpenTournamentDtoInit = new TournamentDto()
+        def notOpenTournamentDto = new TournamentDto()
+        notOpenTournamentDtoInit.setStartTime(startTime_Now)
+        notOpenTournamentDtoInit.setEndTime(LocalDateTime.now())
+        notOpenTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
+        notOpenTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
+        notOpenTournamentDto = tournamentService.createTournament(user.getId(), topics, notOpenTournamentDtoInit)
+        sleep(2000)
+
+        when:
+        tournamentService.joinTournament(user2.getId(), notOpenTournamentDto)
+
+        then: "student cannot join"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_OPEN
+
+        and: "the tournament has no participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
+        result.size() == 0
+    }
+
+    def "Student tries to join tournament twice" () {
+        given:
+        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+        tournamentService.joinTournament(user2.getId(), tournamentDto)
+
+        when:
+        tournamentService.joinTournament(user2.getId(), tournamentDto)
+
+        then: "student cannot join"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.DUPLICATE_TOURNAMENT_PARTICIPANT
+
+        and: "the tournament 1 participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
+        result.size() == 1
+
+        def resTournamentParticipant1 = result.get(0)
+
+        resTournamentParticipant1.getId() == user2.getId()
+        resTournamentParticipant1.getUsername() == USERNAME2
+        resTournamentParticipant1.getName() == USER_NAME2
+        resTournamentParticipant1.getRole() == User.Role.STUDENT
+
+    }
+
+    def "Non-existing student tries to join canceled tournament" () {
+        given:
+        def fakeUserId = 99
+
+        when:
+        tournamentService.joinTournament(fakeUserId, tournamentDto)
+
+        then: "student cannot join"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_FOUND
 
         and: "the tournament has no participants"
         def result = tournamentService.getTournamentParticipants(tournamentDto)

@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @Transactional

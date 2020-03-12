@@ -1,16 +1,13 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto;
 
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
-
 import java.io.Serializable;
-import java.util.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class TournamentDto implements Serializable {
@@ -38,10 +35,6 @@ public class TournamentDto implements Serializable {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public LocalDateTime getStartTime() {
@@ -80,30 +73,4 @@ public class TournamentDto implements Serializable {
         return topics;
     }
 
-    public void setTopics(List<TopicDto> topics) {
-        this.topics = topics;
-    }
-
-    public List<UserDto> getParticipants() {
-        return participants;
-    }
-
-    public void setParticipants(List<UserDto> participants) {
-        this.participants = participants;
-    }
-
-
-
-    @Override
-    public String toString() {
-        return "TournamentDto{" +
-                "id=" + id +
-                ", startTime='" + startTime + '\'' +
-                ", endTime='" + endTime + '\'' +
-                ", numberOfQuestions='" + numberOfQuestions + '\'' +
-                ", state='" + state + '\'' +
-                ", topics='" + topics + '\'' +
-                ", participants='" + participants + '\'' +
-                '}';
-    }
 }
