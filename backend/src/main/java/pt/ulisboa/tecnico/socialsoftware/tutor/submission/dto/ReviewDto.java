@@ -8,9 +8,9 @@ import java.io.Serializable;
 public class ReviewDto implements Serializable {
     private Integer id;
     private Integer key;
-    private int studentId;
-    private int teacherId;
-    private int submissionId;
+    private Integer studentId;
+    private Integer teacherId;
+    private Integer submissionId;
     private String justification;
     private ImageDto imageDto;
     private Review.Status status;
@@ -40,19 +40,17 @@ public class ReviewDto implements Serializable {
 
     public void setKey(Integer key) { this.key = key; }
 
-    public int getStudentId() { return studentId; }
+    public Integer getStudentId() { return studentId; }
 
-    public void setStudentId(int studentId) {
-        this.studentId = studentId;
-    }
+    public void setStudentId(Integer studentId) { this.studentId = studentId; }
 
-    public int getTeacherId() { return teacherId; }
+    public Integer getTeacherId() { return teacherId; }
 
-    public int getSubmissionId() {
-        return submissionId;
-    }
+    public void setTeacherId(Integer teacherId) { this.teacherId = teacherId; }
 
-    public void setSubmissionId(int submissionId) {
+    public Integer getSubmissionId() { return submissionId; }
+
+    public void setSubmissionId(Integer submissionId) {
         this.submissionId = submissionId;
     }
 

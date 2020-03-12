@@ -13,6 +13,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.ImageRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.ReviewService
@@ -22,6 +23,14 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
+import spock.lang.Unroll
+import spock.lang.Shared
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.REVIEW_MISSING_JUSTIFICATION
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.REVIEW_MISSING_SUBMISSION
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.REVIEW_MISSING_STUDENT
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.REVIEW_MISSING_STATUS
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.USER_NOT_FOUND
 
 @DataJpaTest
 class CreateReviewTest extends Specification {
@@ -60,9 +69,11 @@ class CreateReviewTest extends Specification {
     ImageRepository imageRepository
 
     def course
-    def student
     def question
+    def student
+    @Shared
     def submission
+    @Shared
     def teacher
     def image
 
@@ -96,7 +107,7 @@ class CreateReviewTest extends Specification {
         submission.setUser(student)
         submissionRepository.save(submission)
 
-        }
+    }
 
 
     def "create review to an approved review"() {
@@ -107,7 +118,7 @@ class CreateReviewTest extends Specification {
         reviewDto.setStatus(Review.Status.APPROVED)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
-        reviewDto.setStudentId(submission.getUser().getId())
+        reviewDto.setStudentId(submission.getStudentId())
 
         when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
 
@@ -124,7 +135,7 @@ class CreateReviewTest extends Specification {
         reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
-        reviewDto.setStudentId(submission.getUser().getId())
+        reviewDto.setStudentId(submission.getStudentId())
 
         when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
 
@@ -146,7 +157,7 @@ class CreateReviewTest extends Specification {
         def reviewDto = new ReviewDto()
         reviewDto.setKey(1)
         reviewDto.setSubmissionId(submission.getId())
-        reviewDto.setStudentId(submission.getUser().getId())
+        reviewDto.setStudentId(submission.getStudentId())
 
         when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
 
@@ -165,7 +176,7 @@ class CreateReviewTest extends Specification {
         reviewDto.setImageDto(new ImageDto(image))
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
-        reviewDto.setStudentId(submission.getUser().getId())
+        reviewDto.setStudentId(submission.getStudentId())
 
         when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
 
@@ -191,13 +202,41 @@ class CreateReviewTest extends Specification {
         reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
-        reviewDto.setStudentId(submission.getUser().getId())
+        reviewDto.setStudentId(submission.getStudentId())
 
         when: reviewService.reviewSubmission(student.getId(), reviewDto, Review.Status.REJECTED)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.USER_NOT_TEACHER
+
+    }
+
+    @Unroll
+    def "invalid arguments: justification=#justification | submissionId=#submissionId | student=#_student | teacherId=#teacherId | status=#status || errorMessage"(){
+
+        given: "a reviewDto"
+        def reviewDto = new ReviewDto()
+        reviewDto.setKey(1)
+        reviewDto.setJustification(justification)
+        reviewDto.setSubmissionId(submissionId)
+        if(_student != null)
+            reviewDto.setStudentId(_student.getId())
+
+        when: reviewService.reviewSubmission(teacherId, reviewDto, status)
+
+        then: "a TutorException is thrown"
+        def exception = thrown(TutorException)
+        exception.errorMessage == errorMessage
+
+        where:
+        justification        | submissionId       | _student                | teacherId        | status                 || errorMessage
+        null                 | submission.getId() | submission.getUser()    | teacher.getId()  | Review.Status.APPROVED || REVIEW_MISSING_JUSTIFICATION
+        "  "                 | submission.getId() | submission.getUser()    | teacher.getId()  | Review.Status.APPROVED || REVIEW_MISSING_JUSTIFICATION
+        REVIEW_JUSTIFICATION | null               | submission.getUser()    | teacher.getId()  | Review.Status.APPROVED || REVIEW_MISSING_SUBMISSION
+        REVIEW_JUSTIFICATION | submission.getId() | null                    | teacher.getId()  | Review.Status.APPROVED || REVIEW_MISSING_STUDENT
+        REVIEW_JUSTIFICATION | submission.getId() | submission.getUser()    | null             | Review.Status.APPROVED || USER_NOT_FOUND
+        REVIEW_JUSTIFICATION | submission.getId() | submission.getUser()    | teacher.getId()  | null                   || REVIEW_MISSING_STATUS
 
     }
 

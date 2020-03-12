@@ -16,6 +16,13 @@ public enum ErrorMessage {
     DISCUSSION_NOT_FOUND("Discussion not found with user id %d and question id %d"),
     SUBMISSION_NOT_FOUND("Submission not found with id %d"),
 
+    REVIEW_MISSING_JUSTIFICATION("Missing justification for review"),
+    REVIEW_MISSING_SUBMISSION("Missing submission for review"),
+    REVIEW_MISSING_STUDENT("Missing student for review"),
+    REVIEW_MISSING_STATUS("Missing student for review"),
+
+    SUBMISSION_MISSING_QUESTION("Missing qestion for submission"),
+    SUBMISSION_MISSING_STUDENT("Missing student for submission"),
 
     COURSE_NOT_FOUND("Course not found with name %s"),
     COURSE_NAME_IS_EMPTY("The course name is empty"),
@@ -65,7 +72,6 @@ public enum ErrorMessage {
     QUESTION_MISSING_DATA("Missing information for quiz"),
     QUESTION_MULTIPLE_CORRECT_OPTIONS("Questions can only have 1 correct option"),
     QUESTION_CHANGE_CORRECT_OPTION_HAS_ANSWERS("Can not change correct option of answered question"),
-    REVIEW_MISSING_JUSTIFICATION("Missing justification for review"),
     QUIZ_HAS_ANSWERS("Quiz already has answers"),
     QUIZ_ALREADY_COMPLETED("Quiz already completed"),
     QUIZ_QUESTION_HAS_ANSWERS("Quiz question has answers"),
