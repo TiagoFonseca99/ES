@@ -21,6 +21,7 @@ public enum ErrorMessage {
     COURSE_TYPE_NOT_DEFINED("The course type is not defined"),
     COURSE_EXECUTION_ACRONYM_IS_EMPTY("The course execution acronym is empty"),
     COURSE_EXECUTION_ACADEMIC_TERM_IS_EMPTY("The course execution academic term is empty"),
+    CANNOT_DELETE_COURSE_EXECUTION("The course execution cannot be deleted %s"),
     USERNAME_NOT_FOUND("Username %s not found"),
     TOURNAMENT_NOT_FOUND("Tournament %s not found"),
 

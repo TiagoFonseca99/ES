@@ -83,6 +83,7 @@ class GetTeacherReplyTest extends Specification {
 
         def quiz = new Quiz()
         quiz.setKey(1)
+        quiz.setType(Quiz.QuizType.TEST)
 
         def quizanswer1 = new QuizAnswer()
         def quizanswer2 = new QuizAnswer()
