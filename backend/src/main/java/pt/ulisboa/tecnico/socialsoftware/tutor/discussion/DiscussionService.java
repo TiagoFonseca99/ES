@@ -143,7 +143,7 @@ public class DiscussionService {
     }
 
     private void checkDiscussionDto(DiscussionDto discussion) {
-        if (discussion.getQuestion() == null || discussion.getUserId() == null) {
+        if (discussion.getQuestion() == null || discussion.getUserId() == null || discussion.getContent() == null || discussion.getContent().trim().length() == 0) {
             throw new TutorException(DISCUSSION_MISSING_DATA);
         }
     }
