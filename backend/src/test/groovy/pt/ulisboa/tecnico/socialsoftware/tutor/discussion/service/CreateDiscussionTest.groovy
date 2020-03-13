@@ -1,9 +1,11 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.service
 
+import org.spockframework.runtime.extension.builtin.UnrollExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import spock.lang.Shared
 import spock.lang.Specification
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
@@ -24,6 +26,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
+import spock.lang.Unroll
 
 @DataJpaTest
 class CreateDiscussionTest extends Specification {
@@ -57,9 +60,11 @@ class CreateDiscussionTest extends Specification {
     @Autowired
     UserRepository userRepository
 
+    @Shared
     def question1
     def question2
     def teacher
+    @Shared
     def student
 
     def setup(){
@@ -148,6 +153,7 @@ class CreateDiscussionTest extends Specification {
         def discussionDto = new DiscussionDto()
         and: "set teacher as creator"
         discussionDto.setUserId(teacher.getId())
+        discussionDto.setContent(DISCUSSION_CONTENT)
         discussionDto.setQuestion(new QuestionDto(question1))
 
         when: "creating discussion"
@@ -198,19 +204,27 @@ class CreateDiscussionTest extends Specification {
         exception.getErrorMessage() == ErrorMessage.DUPLICATE_DISCUSSION
     }
 
-    def "question not null"(){
+    @Unroll
+    def "invalid arguments: question=#question | userId=#userId | content=#content"(){
         given: "a discusssionDto"
         def discussionDto = new DiscussionDto()
-        discussionDto.setUserId(student.getId())
-        and: "set question as null"
-        discussionDto.setQuestion(null)
+        discussionDto.setQuestion(question)
+        discussionDto.setUserId(userId)
+        discussionDto.setContent(content)
 
         when: "creating discussion"
         discussionService.createDiscussion(discussionDto)
 
         then:
         def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.DISCUSSION_MISSING_DATA
+        exception.getErrorMessage() == errorMessage
+
+        where:
+        question                   | userId          | content            || errorMessage
+        null                       | student.getId() | DISCUSSION_CONTENT || ErrorMessage.DISCUSSION_MISSING_DATA
+        new QuestionDto(question1) | null            | DISCUSSION_CONTENT || ErrorMessage.DISCUSSION_MISSING_DATA
+        new QuestionDto(question1) | student.getId() | null               || ErrorMessage.DISCUSSION_MISSING_DATA
+        new QuestionDto(question1) | student.getId() | "          "       || ErrorMessage.DISCUSSION_MISSING_DATA
     }
 
     @TestConfiguration
