@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto;
 import java.io.Serializable;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
-import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 
 public class DiscussionDto implements Serializable {

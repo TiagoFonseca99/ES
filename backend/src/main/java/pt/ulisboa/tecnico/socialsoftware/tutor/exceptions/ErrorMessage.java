@@ -42,7 +42,6 @@ public enum ErrorMessage {
     TOURNAMENT_NOT_OPEN("Duplicate tournament not open: %s"),
     TOURNAMENT_CANCELED("Tournament canceled: %s"),
 
-
     USERS_IMPORT_ERROR("Error importing users: %s"),
     QUESTIONS_IMPORT_ERROR("Error importing questions: %s"),
     TOPICS_IMPORT_ERROR("Error importing topics: %s"),
@@ -56,6 +55,7 @@ public enum ErrorMessage {
     QUIZ_NO_LONGER_AVAILABLE("This quiz is no longer available"),
     QUIZ_NOT_YET_AVAILABLE("This quiz is not yet available"),
     TOURNAMENT_HAS_ONLY_ONE_TOPIC("This tournament has only one topic left"),
+    DISCUSSION_NOT_SUBMITTED_BY_REQUESTER("Discussion was not created by user with id %d"),
 
     NO_CORRECT_OPTION("Question does not have a correct option"),
     NOT_ENOUGH_QUESTIONS("Not enough questions to create a quiz"),

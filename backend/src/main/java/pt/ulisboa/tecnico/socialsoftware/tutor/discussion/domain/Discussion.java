@@ -5,14 +5,15 @@ import javax.persistence.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.DiscussionId;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+
+import java.io.Serializable;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Entity
 @Table(name = "discussions")
-public class Discussion {
+public class Discussion implements Serializable {
     @EmbeddedId
     private DiscussionId discussionId = new DiscussionId();
 

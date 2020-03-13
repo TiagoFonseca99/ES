@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.io.Serializable;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -24,7 +25,7 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
         indexes = {
                 @Index(name = "question_indx_0", columnList = "key")
         })
-public class Question {
+public class Question implements Serializable{
     @SuppressWarnings("unused")
     public enum Status {
         DISABLED, REMOVED, AVAILABLE, SUBMITTED
@@ -71,7 +72,7 @@ public class Question {
     private Course course;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "question", orphanRemoval = true)
-    private Set<Discussion> discussions = new HashSet<Discussion>();
+    private Set<Discussion> discussions = new HashSet<>();
 
     public Question() {
     }
