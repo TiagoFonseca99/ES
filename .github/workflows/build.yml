@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - master
+    - test
   pull_request:
     branches:
     - master
@@ -19,6 +20,13 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.11
+    - name: Cache Maven dependencies
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
     - name: Build with Maven
       run: mvn clean --file ./backend/pom.xml -Ptest test
     - name: Codecov
