@@ -113,6 +113,21 @@ public class DiscussionService {
 
     }
 
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public ReplyDto getReply(Integer userId, DiscussionDto discussionDto) {
+        checkDiscussionDto(discussionDto, userId);
+
+        User user = userRepository.findById(discussionDto.getUserId())
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, discussionDto.getUserId()));
+        Question question = questionRepository.findById(discussionDto.getQuestionId())
+                .orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, discussionDto.getQuestionId()));
+
+        checkUserAnswered(user, question);
+
+        return findDiscussionByUserIdAndQuestionId(userId, discussionDto.getQuestionId()).getReplyDto();
+    }
+
     private void checkReplyDto(ReplyDto replyDto) {
         if (replyDto.getTeacherId() == null || replyDto.getMessage() == null) {
             throw new TutorException(REPLY_MISSING_DATA);
@@ -132,7 +147,14 @@ public class DiscussionService {
         if (discussion.getQuestion() == null || discussion.getUserId() == null) {
             throw new TutorException(DISCUSSION_MISSING_DATA);
         }
+    }
 
+    private void checkDiscussionDto(DiscussionDto discussion, Integer userId) {
+        checkDiscussionDto(discussion);
+
+        if(!userId.equals(discussion.getUserId())){
+            throw new TutorException(DISCUSSION_NOT_SUBMITTED_BY_REQUESTER, userId);
+        }
     }
 
     private void checkUserAndQuestion(User user, Question question) {
@@ -144,6 +166,10 @@ public class DiscussionService {
             throw new TutorException(DUPLICATE_DISCUSSION, user.getId(), question.getId());
         }
 
+        checkUserAnswered(user, question);
+    }
+
+    private void checkUserAnswered(User user, Question question){
         if (!user.checkQuestionAnswered(question)) {
             throw new TutorException(QUESTION_NOT_ANSWERED, question.getId());
         }
