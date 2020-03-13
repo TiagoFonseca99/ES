@@ -17,7 +17,6 @@ public class TournamentDto implements Serializable {
     private Integer numberOfQuestions;
     private Tournament.Status state;
     private List<TopicDto> topics = new ArrayList<>();
-    private List<UserDto> participants = new ArrayList<>();
 
     public TournamentDto() {
     }
@@ -29,7 +28,6 @@ public class TournamentDto implements Serializable {
         this.numberOfQuestions = tournament.getNumberOfQuestions();
         this.state = tournament.getState();
         this.topics = tournament.getTopics().stream().map(TopicDto::new).collect(Collectors.toList());
-        this.participants = tournament.getParticipants().stream().map(UserDto::new).collect(Collectors.toList());
 
     }
 

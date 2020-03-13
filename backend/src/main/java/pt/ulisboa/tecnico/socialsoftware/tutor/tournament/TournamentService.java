@@ -69,7 +69,7 @@ public class TournamentService {
             topics.add(topic);
         }
 
-        if (topics.size() == 0) {
+        if (topics.isEmpty()) {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "topics");
         }
 
