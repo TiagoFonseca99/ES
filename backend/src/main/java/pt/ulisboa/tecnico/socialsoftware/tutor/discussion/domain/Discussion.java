@@ -19,11 +19,15 @@ public class Discussion {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @OneToOne
+    @JoinColumn(name = "reply")
+    private Reply reply;
+
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="question_id", insertable = false, updatable = false)
     private Question question;
 
@@ -34,7 +38,7 @@ public class Discussion {
         checkConsistentDiscussion(discussionDto);
         this.content = discussionDto.getContent();
         this.question = question;
-        question.setDiscussion(this);
+        question.addDiscussion(this);
         this.user = user;
         user.addDiscussion(this);
         discussionId.setQuestionId(question.getId());
@@ -65,6 +69,22 @@ public class Discussion {
     public void setUser(User user) {
         this.user = user;
         this.discussionId.setUserId(user.getId());
+    }
+
+    public Reply getReply() {
+        return reply;
+    }
+
+    public void setReply(Reply reply) {
+        this.reply = reply;
+    }
+
+    public DiscussionId getId() {
+        return discussionId;
+    }
+
+    public void setId(DiscussionId id) {
+        discussionId = id;
     }
 
     private void checkConsistentDiscussion(DiscussionDto discussionDto){

@@ -122,10 +122,24 @@ class CreateDiscussionTest extends Specification {
         then: "the correct discussion is inside the repository"
         discussionRepository.count() == 1L
 
-        def result = discussionRepository.findAll().get(0)
-        result.getContent() == DISCUSSION_CONTENT
-        result.getUser().getId() == student.getId()
-        result.getQuestion().getId() == question1.getId()
+        def resultRepo = discussionService.findDiscussionByUserIdAndQuestionId(student.getId(), question1.getId())
+        resultRepo.getContent() == DISCUSSION_CONTENT
+        resultRepo.getUserId() == student.getId()
+        resultRepo.getQuestion().getId() == question1.getId()
+
+        def resultUserList = discussionService.findDiscussionsByUserId(student.getId())
+        resultUserList.size() == 1
+        def resultUser = resultUserList.get(0)
+        resultUser.getContent() == DISCUSSION_CONTENT
+        resultUser.getUserId() == student.getId()
+        resultUser.getQuestion().getId() == question1.getId()
+
+        def resultQuestionList = discussionService.findDiscussionsByQuestionId(question1.getId())
+        resultQuestionList.size() == 1
+        def resultQuestion = resultQuestionList.get(0)
+        resultQuestion.getContent() == DISCUSSION_CONTENT
+        resultQuestion.getUserId() == student.getId()
+        resultQuestion.getQuestion().getId() == question1.getId()
     }
 
     def "ensure user is student"(){
@@ -140,7 +154,7 @@ class CreateDiscussionTest extends Specification {
 
         then:
         def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.DISCUSSION_NOT_TEACHER_CREATOR
+        exception.getErrorMessage() == ErrorMessage.DISCUSSION_NOT_STUDENT_CREATOR
     }
 
     def "student answered the question in discussion"(){
@@ -181,6 +195,21 @@ class CreateDiscussionTest extends Specification {
         then:
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.DUPLICATE_DISCUSSION
+    }
+
+    def "question not null"(){
+        given: "a discusssionDto"
+        def discussionDto = new DiscussionDto()
+        discussionDto.setUserId(student.getId())
+        and: "set question as null"
+        discussionDto.setQuestion(null)
+
+        when: "creating discussion"
+        discussionService.createDiscussion(discussionDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.DISCUSSION_MISSING_DATA
     }
 
     @TestConfiguration

@@ -23,6 +23,7 @@ public enum ErrorMessage {
 
     SUBMISSION_MISSING_QUESTION("Missing question for submission"),
     SUBMISSION_MISSING_STUDENT("Missing student for submission"),
+    REPLY_NOT_FOUND("Reply not found with teacher %d"),
 
     COURSE_NOT_FOUND("Course not found with name %s"),
     COURSE_NAME_IS_EMPTY("The course name is empty"),
@@ -76,10 +77,14 @@ public enum ErrorMessage {
     QUIZ_ALREADY_COMPLETED("Quiz already completed"),
     QUIZ_QUESTION_HAS_ANSWERS("Quiz question has answers"),
     DISCUSSION_MISSING_DATA("Missing information for discussion"),
-    DISCUSSION_NOT_TEACHER_CREATOR("Teacher cannot create discussion"),
+    DISCUSSION_NOT_STUDENT_CREATOR("Teacher cannot create discussion"),
     FENIX_ERROR("Fenix Error"),
     AUTHENTICATION_ERROR("Authentication Error"),
     FENIX_CONFIGURATION_ERROR("Incorrect server configuration files for fenix"),
+
+    REPLY_MISSING_DATA("Missing information for reply"),
+    REPLY_NOT_TEACHER_CREATOR("Student cannot give reply"),
+    DUPLICATE_REPLY("Duplicate Reply for teacher: %d"),
 
 
     ACCESS_DENIED("You do not have permission to view this resource"),
