@@ -29,7 +29,6 @@ public class ReviewService {
     public ReviewDto reviewSubmission(Integer teacherId, ReviewDto reviewDto, Review.Status status) {
 
         checkIfConsistentReview(reviewDto, status);
-        checkIfReviewHasJustification(reviewDto);
 
         User user = getTeacher(teacherId);
         Submission submission = getSubmission(reviewDto);
@@ -46,6 +45,8 @@ public class ReviewService {
 
 
     private void checkIfConsistentReview(ReviewDto reviewDto, Review.Status status){
+
+        checkIfReviewHasJustification(reviewDto);
 
         if(reviewDto.getSubmissionId() == null)
             throw new TutorException(REVIEW_MISSING_SUBMISSION);
