@@ -128,7 +128,7 @@ class GiveExplanationTest extends Specification {
         
 
         when: "a reply is given"
-        discussionService.giveReply(replyDto, discussion)
+        discussionService.giveReply(replyDto, new DiscussionDto(discussion))
 
         then: "the correct reply was given"
         replyRepository.count() == 1L
@@ -145,7 +145,7 @@ class GiveExplanationTest extends Specification {
         replyDto.setDate(LocalTime.now())
        
         when: "a user creates a reply"
-        discussionService.giveReply(replyDto, discussion)
+        discussionService.giveReply(replyDto, new DiscussionDto(discussion))
 
         then: "exception given"
         def exception = thrown(TutorException)
@@ -162,10 +162,10 @@ class GiveExplanationTest extends Specification {
         replyDto2.setMessage(DISCUSSION_REPLY)
         replyDto2.setTeacherId(teacher.getId())
         replyDto2.setDate(LocalTime.now())
-        discussionService.giveReply(replyDto, discussion)
+        discussionService.giveReply(replyDto, new DiscussionDto(discussion))
 
         when: "another reply is given"
-        discussionService.giveReply(replyDto2, discussion)
+        discussionService.giveReply(replyDto2, new DiscussionDto(discussion))
 
         then: 
         def exception = thrown(TutorException)

@@ -98,19 +98,22 @@ public class DiscussionService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public ReplyDto giveReply(ReplyDto replyDto, Discussion discussion) {
+    public ReplyDto giveReply(ReplyDto replyDto, DiscussionDto discussionDto) {
         checkReplyDto(replyDto);
+        checkDiscussionDto(discussionDto);
 
         User teacher = userRepository.findById(replyDto.getTeacherId())
         .orElseThrow(() -> new TutorException(USER_NOT_FOUND, replyDto.getTeacherId()));
-        checkTeacherAndDiscussion(teacher, discussion);
+        checkTeacherAndDiscussion(teacher, discussionDto);
+
+        Discussion discussion = discussionRepository.findByUserIdQuestionId(discussionDto.getUserId(), discussionDto.getQuestionId())
+                .orElseThrow(() -> new TutorException(DISCUSSION_NOT_FOUND, discussionDto.getUserId(), discussionDto.getQuestionId()));
 
         Reply reply = new Reply(teacher, discussion, replyDto);
         this.entityManager.persist(reply);
-        discussion = this.entityManager.merge(discussion);
+        this.entityManager.merge(discussion);
 
         return new ReplyDto(reply);
-
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -134,11 +137,11 @@ public class DiscussionService {
         }
     }
 
-    private void checkTeacherAndDiscussion(User teacher, Discussion discussion) {
+    private void checkTeacherAndDiscussion(User teacher, DiscussionDto discussion) {
         if(teacher.getRole() != User.Role.TEACHER) {
             throw new TutorException(REPLY_NOT_TEACHER_CREATOR);
         }
-        if(!replyRepository.findByTeacherIdDiscussionId(teacher.getId(), discussion.getId().getUserId(), discussion.getId().getQuestionId()).isEmpty()){
+        if(!replyRepository.findByTeacherIdDiscussionId(teacher.getId(), discussion.getUserId(), discussion.getQuestionId()).isEmpty()){
             throw new TutorException(DUPLICATE_REPLY, teacher.getId());
         }
     }
