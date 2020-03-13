@@ -4,11 +4,16 @@ on:
   push:
     branches:
     - master
-    - test
+    #- ddp
+    #- ppa
+    #- tdp
   pull_request:
     branches:
     - master
     - develop
+    #- ddp
+    #- ppa
+    #- tdp
 
 jobs:
   test:
