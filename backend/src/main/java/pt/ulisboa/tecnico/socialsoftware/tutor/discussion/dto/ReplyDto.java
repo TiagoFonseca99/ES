@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import java.time.LocalTime;
 
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
-import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 
 public class ReplyDto implements Serializable {
@@ -44,8 +42,8 @@ public class ReplyDto implements Serializable {
         return teacherId;
     }
 
-    public void setTeacherId(int teacher_id) {
-        this.teacherId = teacher_id;
+    public void setTeacherId(int teacherId) {
+        this.teacherId = teacherId;
     }
 
     public Integer getId() {

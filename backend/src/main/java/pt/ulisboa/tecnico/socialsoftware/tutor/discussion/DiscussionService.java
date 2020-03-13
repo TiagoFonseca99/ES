@@ -1,14 +1,11 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion;
 
 import java.sql.SQLException;
-import java.time.LocalTime;
 import java.util.stream.Collectors;
 import java.util.List;
-import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.validation.constraints.Null;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
@@ -18,7 +15,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
-import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.DiscussionId;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto;
@@ -87,9 +83,9 @@ public class DiscussionService {
 
             User teacher = userRepository.findById(discussionDto.getReplyDto().getTeacherId())
                         .orElseThrow(() -> new TutorException(USER_NOT_FOUND, discussionDto.getReplyDto().getTeacherId()));
-                        
+
             Reply reply = new Reply(teacher, discussion, discussionDto.getReplyDto());
-            this.entityManager.refresh(discussion);
+            this.entityManager.persist(discussion);
             this.entityManager.persist(reply);
 
         }

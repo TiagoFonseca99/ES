@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.DiscussionId;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 
 
