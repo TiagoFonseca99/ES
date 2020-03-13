@@ -145,7 +145,8 @@ class CreateSubmissionTest extends Specification {
         submissionService.createSubmission(question, submissionDto2)
 
         then: "exception is thrown"
-        thrown(TutorException)
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.QUESTION_ALREADY_SUBMITTED
     }
 
     def "question status is submitted" () {
