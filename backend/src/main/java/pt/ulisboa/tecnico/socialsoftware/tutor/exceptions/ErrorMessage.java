@@ -14,6 +14,15 @@ public enum ErrorMessage {
     TOPIC_CONJUNCTION_NOT_FOUND("Topic Conjunction not found with id %d"),
     COURSE_EXECUTION_NOT_FOUND("Course execution not found with name %d"),
     DISCUSSION_NOT_FOUND("Discussion not found with user id %d and question id %d"),
+    SUBMISSION_NOT_FOUND("Submission not found with id %d"),
+
+    REVIEW_MISSING_JUSTIFICATION("Missing justification for review"),
+    REVIEW_MISSING_SUBMISSION("Missing submission for review"),
+    REVIEW_MISSING_STUDENT("Missing student for review"),
+    REVIEW_MISSING_STATUS("Missing student for review"),
+
+    SUBMISSION_MISSING_QUESTION("Missing question for submission"),
+    SUBMISSION_MISSING_STUDENT("Missing student for submission"),
     REPLY_NOT_FOUND("Reply not found with teacher %d"),
 
     COURSE_NOT_FOUND("Course not found with name %s"),
@@ -21,11 +30,14 @@ public enum ErrorMessage {
     COURSE_TYPE_NOT_DEFINED("The course type is not defined"),
     COURSE_EXECUTION_ACRONYM_IS_EMPTY("The course execution acronym is empty"),
     COURSE_EXECUTION_ACADEMIC_TERM_IS_EMPTY("The course execution academic term is empty"),
+    CANNOT_DELETE_COURSE_EXECUTION("The course execution cannot be deleted %s"),
     USERNAME_NOT_FOUND("Username %s not found"),
     TOURNAMENT_NOT_FOUND("Tournament %s not found"),
 
     USER_NOT_STUDENT("Username %s is not a student"),
+    USER_NOT_TEACHER("Username %s is not a teacher"),
     QUESTION_ALREADY_SUBMITTED("User %s has already submitted this question"),
+    QUESTION_ALREADY_APPROVED("User %s has already approved this question"),
 
     QUIZ_USER_MISMATCH("Quiz %s is not assigned to student %s"),
     QUIZ_MISMATCH("Quiz Answer Quiz %d does not match Quiz Question Quiz %d"),

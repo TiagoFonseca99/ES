@@ -83,6 +83,7 @@ class GiveExplanationTest extends Specification {
 
         def quiz = new Quiz()
         quiz.setKey(1)
+        quiz.setType(Quiz.QuizType.TEST)
 
         def quizanswer = new QuizAnswer()
 

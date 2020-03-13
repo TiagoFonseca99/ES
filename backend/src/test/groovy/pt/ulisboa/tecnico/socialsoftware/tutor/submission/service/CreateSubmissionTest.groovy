@@ -14,12 +14,17 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.Submission
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Specification
+import spock.lang.Unroll
+import spock.lang.Shared
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_QUESTION
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_STUDENT
 
 @DataJpaTest
 class CreateSubmissionTest extends Specification {
@@ -32,6 +37,7 @@ class CreateSubmissionTest extends Specification {
     public static final String STUDENT_USERNAME = "joaosilva"
     public static final String TEACHER_NAME = "Ana Rita"
     public static final String TEACHER_USERNAME = "anarita"
+
     @Autowired
     SubmissionService submissionService
 
@@ -50,11 +56,13 @@ class CreateSubmissionTest extends Specification {
     @Autowired
     QuestionRepository questionRepository
 
+    @Shared
+    def student
+    @Shared
+    def question
     def course
     def courseExecution
-    def student
     def acronym
-    def question
     def teacher
 
     def setup() {
@@ -72,6 +80,7 @@ class CreateSubmissionTest extends Specification {
         question.setTitle(QUESTION_TITLE)
         question.setContent(QUESTION_CONTENT)
         question.setCourse(course)
+        question.setStatus(Question.Status.SUBMITTED)
         questionRepository.save(question)
     }
 
@@ -79,7 +88,6 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question, submissionDto)
@@ -99,7 +107,6 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto for a teacher"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(teacher.getId())
 
         when: submissionService.createSubmission(question, submissionDto)
@@ -113,7 +120,6 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question, submissionDto)
@@ -126,7 +132,6 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(student.getId())
         and: "a user with a previous submission of the question"
         student.addSubmission(new Submission(question, student, submissionDto))
@@ -140,7 +145,40 @@ class CreateSubmissionTest extends Specification {
         submissionService.createSubmission(question, submissionDto2)
 
         then: "exception is thrown"
-        thrown(TutorException)
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.QUESTION_ALREADY_SUBMITTED
+    }
+
+    def "question status is submitted" () {
+        given: "a submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setKey(1)
+        submissionDto.setStudentId(student.getId())
+
+        when: submissionService.createSubmission(question, submissionDto)
+
+        then: "question status is SUBMITTED"
+        def result = submissionRepository.findAll().get(0)
+        result.getQuestion().getStatus() == Question.Status.SUBMITTED
+    }
+
+    @Unroll
+    def "invalid arguments: studentId=#studentId | question=#_question || errorMessage"(){
+        given: "a submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setKey(1)
+        submissionDto.setStudentId(studentId)
+        when:
+        submissionService.createSubmission(_question, submissionDto)
+
+        then: "exception is thrown"
+        def exception = thrown(TutorException)
+        exception.errorMessage == errorMessage
+
+        where:
+        studentId       | _question | errorMessage
+        null            | question  | SUBMISSION_MISSING_STUDENT
+        student.getId() | null      | SUBMISSION_MISSING_QUESTION
     }
 
     @TestConfiguration

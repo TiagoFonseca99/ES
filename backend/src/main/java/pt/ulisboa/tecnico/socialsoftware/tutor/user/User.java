@@ -10,7 +10,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.Submission;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -69,8 +70,11 @@ public class User implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch=FetchType.LAZY, orphanRemoval=true)
     private Set<Submission>  submissions = new HashSet<>();
 
-    public User() {
-    }
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch=FetchType.LAZY, orphanRemoval=true)
+    private Set<Review>  reviews = new HashSet<>();
+
+
+    public User() {}
 
     public User(String name, String username, Integer key, User.Role role) {
         this.name = name;
