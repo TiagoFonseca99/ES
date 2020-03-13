@@ -7,11 +7,8 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.ReviewService
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review
@@ -22,7 +19,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Specification
 
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_QUESTION
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_STUDENT
 
 @DataJpaTest
@@ -44,9 +40,6 @@ class GetSubmissionStatusTest extends Specification {
 
     @Autowired
     SubmissionService submissionService
-    
-    @Autowired
-    ReviewService reviewService
 
     @Autowired
     CourseRepository courseRepository
@@ -111,7 +104,7 @@ class GetSubmissionStatusTest extends Specification {
         reviewDto.setJustification(REVIEW_JUSTIFICATION1)
         reviewDto.setSubmissionId(submission1.getId())
         reviewDto.setStudentId(submission1.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.IN_REVIEW)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.IN_REVIEW)
 
         when:
         def result = submissionService.getSubmissionStatus(student.getId())
@@ -133,7 +126,7 @@ class GetSubmissionStatusTest extends Specification {
         reviewDto1.setJustification(REVIEW_JUSTIFICATION1)
         reviewDto1.setSubmissionId(submission1.getId())
         reviewDto1.setStudentId(submission1.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto1, Review.Status.APPROVED)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto1, Review.Status.APPROVED)
 
         and: "another approved submission review"
         def reviewDto2 = new ReviewDto()
@@ -141,7 +134,7 @@ class GetSubmissionStatusTest extends Specification {
         reviewDto2.setJustification(REVIEW_JUSTIFICATION2)
         reviewDto2.setSubmissionId(submission2.getId())
         reviewDto2.setStudentId(submission2.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto2, Review.Status.APPROVED)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto2, Review.Status.APPROVED)
 
         when:
         def result = submissionService.getSubmissionStatus(student.getId())
@@ -169,7 +162,7 @@ class GetSubmissionStatusTest extends Specification {
         reviewDto1.setJustification(REVIEW_JUSTIFICATION1)
         reviewDto1.setSubmissionId(submission1.getId())
         reviewDto1.setStudentId(submission1.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto1, Review.Status.APPROVED)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto1, Review.Status.APPROVED)
 
         and: "a rejected submission review"
         def reviewDto2 = new ReviewDto()
@@ -177,7 +170,7 @@ class GetSubmissionStatusTest extends Specification {
         reviewDto2.setJustification(REVIEW_JUSTIFICATION2)
         reviewDto2.setSubmissionId(submission2.getId())
         reviewDto2.setStudentId(submission2.getStudentId())
-        reviewService.reviewSubmission(teacher.getId(), reviewDto2, Review.Status.REJECTED)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto2, Review.Status.REJECTED)
 
         when:
         def result = submissionService.getSubmissionStatus(student.getId())
@@ -223,16 +216,5 @@ class GetSubmissionStatusTest extends Specification {
             return new SubmissionService()
         }
     }
-
-    @TestConfiguration
-    static class ReviewServiceImplTestContextConfiguration {
-
-        @Bean
-        ReviewService reviewService() {
-            return new ReviewService()
-        }
-    }
-
-
 
 }

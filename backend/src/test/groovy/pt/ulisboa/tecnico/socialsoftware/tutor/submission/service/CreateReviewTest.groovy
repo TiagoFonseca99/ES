@@ -13,10 +13,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.ImageRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.ReviewService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto
@@ -48,7 +47,7 @@ class CreateReviewTest extends Specification {
     public static final String TEACHER_USERNAME = "anarita"
 
     @Autowired
-    ReviewService reviewService
+    SubmissionService submissionService
 
     @Autowired
     CourseRepository courseRepository
@@ -120,7 +119,7 @@ class CreateReviewTest extends Specification {
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
-        when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
+        when: submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
@@ -137,7 +136,7 @@ class CreateReviewTest extends Specification {
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
-        when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
+        when: submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
 
         then: "the service is in the repository"
         reviewRepository.count() == 1L
@@ -159,7 +158,7 @@ class CreateReviewTest extends Specification {
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
-        when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
+        when: submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
@@ -178,7 +177,7 @@ class CreateReviewTest extends Specification {
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
-        when: reviewService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
+        when: submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
 
         then: "the service is in the repository"
         reviewRepository.count() == 1L
@@ -204,7 +203,7 @@ class CreateReviewTest extends Specification {
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
-        when: reviewService.reviewSubmission(student.getId(), reviewDto, Review.Status.REJECTED)
+        when: submissionService.reviewSubmission(student.getId(), reviewDto, Review.Status.REJECTED)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
@@ -223,7 +222,7 @@ class CreateReviewTest extends Specification {
         if(_student != null)
             reviewDto.setStudentId(_student.getId())
 
-        when: reviewService.reviewSubmission(teacherId, reviewDto, status)
+        when: submissionService.reviewSubmission(teacherId, reviewDto, status)
 
         then: "a TutorException is thrown"
         def exception = thrown(TutorException)
@@ -241,11 +240,11 @@ class CreateReviewTest extends Specification {
     }
 
     @TestConfiguration
-    static class ReviewServiceImplTestContextConfiguration {
+    static class SubmissionServiceImplTestContextConfiguration {
 
         @Bean
-        ReviewService reviewService() {
-            return new ReviewService()
+        SubmissionService submissionService() {
+            return new SubmissionService()
         }
     }
 
