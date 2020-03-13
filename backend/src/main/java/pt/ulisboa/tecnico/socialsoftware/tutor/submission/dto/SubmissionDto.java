@@ -7,8 +7,8 @@ import java.io.Serializable;
 public class SubmissionDto implements Serializable {
     private Integer id;
     private Integer key;
-    private int questionId;
-    private int studentId;
+    private Integer questionId;
+    private Integer studentId;
 
 
     public SubmissionDto(){}
@@ -28,9 +28,9 @@ public class SubmissionDto implements Serializable {
 
     public void setKey(Integer key) { this.key = key; }
 
-    public void setQuestionId(int questionId) { this.questionId = questionId; }
+    public void setQuestionId(Integer questionId) { this.questionId = questionId; }
 
-    public int getStudentId() { return studentId; }
+    public Integer getStudentId() { return studentId; }
 
-    public void setStudentId(int studentId) { this.studentId = studentId; }
+    public void setStudentId(Integer studentId) { this.studentId = studentId; }
 }

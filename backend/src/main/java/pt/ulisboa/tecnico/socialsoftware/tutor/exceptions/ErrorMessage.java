@@ -21,7 +21,7 @@ public enum ErrorMessage {
     REVIEW_MISSING_STUDENT("Missing student for review"),
     REVIEW_MISSING_STATUS("Missing student for review"),
 
-    SUBMISSION_MISSING_QUESTION("Missing qestion for submission"),
+    SUBMISSION_MISSING_QUESTION("Missing question for submission"),
     SUBMISSION_MISSING_STUDENT("Missing student for submission"),
 
     COURSE_NOT_FOUND("Course not found with name %s"),

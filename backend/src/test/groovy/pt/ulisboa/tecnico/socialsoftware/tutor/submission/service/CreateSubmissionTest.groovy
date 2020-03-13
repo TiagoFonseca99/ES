@@ -20,6 +20,11 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionR
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Specification
+import spock.lang.Unroll
+import spock.lang.Shared
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_QUESTION
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_STUDENT
 
 @DataJpaTest
 class CreateSubmissionTest extends Specification {
@@ -51,11 +56,13 @@ class CreateSubmissionTest extends Specification {
     @Autowired
     QuestionRepository questionRepository
 
+    @Shared
+    def student
+    @Shared
+    def question
     def course
     def courseExecution
-    def student
     def acronym
-    def question
     def teacher
 
     def setup() {
@@ -81,7 +88,6 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question, submissionDto)
@@ -101,7 +107,6 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto for a teacher"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(teacher.getId())
 
         when: submissionService.createSubmission(question, submissionDto)
@@ -115,7 +120,6 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question, submissionDto)
@@ -128,7 +132,6 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(student.getId())
         and: "a user with a previous submission of the question"
         student.addSubmission(new Submission(question, student, submissionDto))
@@ -149,7 +152,6 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
-        submissionDto.setQuestionId(question.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question, submissionDto)
@@ -157,6 +159,25 @@ class CreateSubmissionTest extends Specification {
         then: "question status is SUBMITTED"
         def result = submissionRepository.findAll().get(0)
         result.getQuestion().getStatus() == Question.Status.SUBMITTED
+    }
+
+    @Unroll
+    def "invalid arguments: studentId=#studentId | question=#_question || errorMessage"(){
+        given: "a submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setKey(1)
+        submissionDto.setStudentId(studentId)
+        when:
+        submissionService.createSubmission(_question, submissionDto)
+
+        then: "exception is thrown"
+        def exception = thrown(TutorException)
+        exception.errorMessage == errorMessage
+
+        where:
+        studentId       | _question | errorMessage
+        null            | question  | SUBMISSION_MISSING_STUDENT
+        student.getId() | null      | SUBMISSION_MISSING_QUESTION
     }
 
     @TestConfiguration

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.ReviewService
@@ -20,6 +21,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Specification
+import spock.lang.Unroll
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_QUESTION
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_STUDENT
 
 @DataJpaTest
 class GetSubmissionStatusTest extends Specification {
@@ -200,6 +205,16 @@ class GetSubmissionStatusTest extends Specification {
 
         then: "the returned data is correct"
         result.size() == 0
+    }
+
+    @Unroll
+    def "invalid input"(){
+        when:
+        submissionService.getSubmissionStatus(null)
+
+        then: "exception is thrown"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == SUBMISSION_MISSING_STUDENT
     }
 
     @TestConfiguration

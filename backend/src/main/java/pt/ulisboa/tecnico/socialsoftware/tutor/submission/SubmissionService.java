@@ -40,6 +40,8 @@ public class SubmissionService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public SubmissionDto createSubmission(Question question, SubmissionDto submissionDto){
+        checkIfConsistentSubmission(question, submissionDto.getStudentId());
+
         User user = getStudent(submissionDto);
 
         checkIfQuestionAlreadySubmitted(question, user);
@@ -54,8 +56,17 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ReviewDto> getSubmissionStatus(int studentId) {
+    public List<ReviewDto> getSubmissionStatus(Integer studentId) {
+        if(studentId == null)
+            throw new TutorException(SUBMISSION_MISSING_STUDENT);
         return reviewRepository.getSubmissionStatus(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
+    }
+
+    private void checkIfConsistentSubmission(Question question, Integer studentId) {
+        if(question == null)
+            throw new TutorException(SUBMISSION_MISSING_QUESTION);
+        if(studentId == null)
+            throw new TutorException(SUBMISSION_MISSING_STUDENT);
     }
 
     private void checkIfQuestionAlreadySubmitted(Question question, User user) {
