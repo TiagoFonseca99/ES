@@ -6,6 +6,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
@@ -35,6 +37,9 @@ public class SubmissionService {
     private UserRepository userRepository;
 
     @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
     private ReviewRepository reviewRepository;
 
     @PersistenceContext
@@ -44,8 +49,11 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public SubmissionDto createSubmission(Question question, SubmissionDto submissionDto){
-        checkIfConsistentSubmission(question, submissionDto.getStudentId());
+    public SubmissionDto createSubmission(Integer questionId, SubmissionDto submissionDto){
+
+        checkIfConsistentSubmission(questionId, submissionDto.getStudentId());
+
+        Question question = getQuestion(questionId);
 
         User user = getStudent(submissionDto);
 
@@ -88,8 +96,8 @@ public class SubmissionService {
         return reviewRepository.getSubmissionStatus(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
     }
 
-    private void checkIfConsistentSubmission(Question question, Integer studentId) {
-        if(question == null)
+    private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
+        if(questionId == null)
             throw new TutorException(SUBMISSION_MISSING_QUESTION);
         if(studentId == null)
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
@@ -98,6 +106,10 @@ public class SubmissionService {
     private void checkIfQuestionAlreadySubmitted(Question question, User user) {
         if(user.getSubmittedQuestions().contains(question))
             throw new TutorException(QUESTION_ALREADY_SUBMITTED, user.getUsername());
+    }
+
+    private Question getQuestion(Integer questionId) {
+        return questionRepository.findById(questionId).orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
     }
 
     private User getStudent(SubmissionDto submissionDto) {

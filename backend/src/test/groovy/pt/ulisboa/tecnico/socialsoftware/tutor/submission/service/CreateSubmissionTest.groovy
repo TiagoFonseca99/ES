@@ -90,7 +90,7 @@ class CreateSubmissionTest extends Specification {
         submissionDto.setKey(1)
         submissionDto.setStudentId(student.getId())
 
-        when: submissionService.createSubmission(question, submissionDto)
+        when: submissionService.createSubmission(question.getId(), submissionDto)
 
         then: "the correct submission is in the repository"
         submissionRepository.count() == 1L
@@ -109,7 +109,7 @@ class CreateSubmissionTest extends Specification {
         submissionDto.setKey(1)
         submissionDto.setStudentId(teacher.getId())
 
-        when: submissionService.createSubmission(question, submissionDto)
+        when: submissionService.createSubmission(question.getId(), submissionDto)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
@@ -122,7 +122,7 @@ class CreateSubmissionTest extends Specification {
         submissionDto.setKey(1)
         submissionDto.setStudentId(student.getId())
 
-        when: submissionService.createSubmission(question, submissionDto)
+        when: submissionService.createSubmission(question.getId(), submissionDto)
 
         then:
         student.getEnrolledCoursesAcronyms().contains(courseExecution.getAcronym())
@@ -142,7 +142,7 @@ class CreateSubmissionTest extends Specification {
         submissionDto2.setStudentId(student.getId())
 
         when: "creating a submission with a previously submitted question"
-        submissionService.createSubmission(question, submissionDto2)
+        submissionService.createSubmission(question.getId(), submissionDto2)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
@@ -155,7 +155,7 @@ class CreateSubmissionTest extends Specification {
         submissionDto.setKey(1)
         submissionDto.setStudentId(student.getId())
 
-        when: submissionService.createSubmission(question, submissionDto)
+        when: submissionService.createSubmission(question.getId(), submissionDto)
 
         then: "question status is SUBMITTED"
         def result = submissionRepository.findAll().get(0)
@@ -163,22 +163,22 @@ class CreateSubmissionTest extends Specification {
     }
 
     @Unroll
-    def "invalid arguments: studentId=#studentId | question=#_question || errorMessage"(){
+    def "invalid arguments: studentId=#studentId | questionId=#questionId || errorMessage"(){
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setKey(1)
         submissionDto.setStudentId(studentId)
         when:
-        submissionService.createSubmission(_question, submissionDto)
+        submissionService.createSubmission(questionId, submissionDto)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
         exception.errorMessage == errorMessage
 
         where:
-        studentId       | _question | errorMessage
-        null            | question  | SUBMISSION_MISSING_STUDENT
-        student.getId() | null      | SUBMISSION_MISSING_QUESTION
+        studentId       | questionId        | errorMessage
+        null            | question.getId()  | SUBMISSION_MISSING_STUDENT
+        student.getId() | null              | SUBMISSION_MISSING_QUESTION
     }
 
     @TestConfiguration
