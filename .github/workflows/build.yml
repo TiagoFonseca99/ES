@@ -4,10 +4,16 @@ on:
   push:
     branches:
     - master
+    #- ddp
+    #- ppa
+    #- tdp
   pull_request:
     branches:
     - master
     - develop
+    #- ddp
+    #- ppa
+    #- tdp
 
 jobs:
   test:
@@ -19,14 +25,28 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.11
+    - name: Cache Maven dependencies
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
     - name: Build with Maven
       run: mvn clean --file ./backend/pom.xml -Ptest test
-    - name: Codecov
-      uses: codecov/codecov-action@v1.0.5
+    #- name: Codecov
+      #uses: codecov/codecov-action@v1.0.5
+      #with:
+        #token: ${{secrets.CODECOV_TOKEN}}
+        #file: ./backend/target/site/jacoco/jacoco.xml
+        #yml: ./backend/codecov.yml
+    - name: Cache Node dependencies
+      uses: actions/cache@v1
       with:
-        token: ${{secrets.CODECOV_TOKEN}}
-        file: ./backend/target/site/jacoco/jacoco.xml
-        yml: ./backend/codecov.yml
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
     - uses: actions/setup-node@v1
       with:
         node-version: '12.14'
@@ -35,8 +55,8 @@ jobs:
         npm i -g npm
         npm install
         npm run test:unit
-    - name: Codecov Node
-      uses: iansu/codecov-action-node@v1.0.0
-      with:
-        token: ${{secrets.CODECOV_TOKEN}}
-        file: ./frontend/coverage/clover.xml
+    #- name: Codecov Node
+      #uses: iansu/codecov-action-node@v1.0.0
+      #with:
+        #token: ${{secrets.CODECOV_TOKEN}}
+        #file: ./frontend/coverage/clover.xml
