@@ -169,9 +169,7 @@ public class Quiz {
         return type;
     }
 
-    public void setType(QuizType type) {
-    this.type = type;
-    }
+    public void setType(QuizType type) { this.type = type; }
 
     public Integer getSeries() {
     return series;

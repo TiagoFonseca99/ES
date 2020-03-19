@@ -20,6 +20,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicReposito
 import spock.lang.Specification
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @DataJpaTest
 class GetOpenedTournamentsTest extends Specification {
@@ -58,11 +59,13 @@ class GetOpenedTournamentsTest extends Specification {
     def topics2 = new ArrayList<Integer>()
     def startTime_Now = LocalDateTime.now()
     def endTime_Now = LocalDateTime.now().plusHours(2)
-
     def startTime_Later = LocalDateTime.now().plusHours(1)
     def endTime_Later = LocalDateTime.now().plusHours(2)
+    def formatter
 
     def setup() {
+        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
         userRepository.save(user)
 
@@ -81,24 +84,21 @@ class GetOpenedTournamentsTest extends Specification {
 
         topics1.add(topic1.getId())
         topics2.add(topic2.getId())
-
-
-
     }
 
     def "create 2 tournaments on time and get opened tournaments"() {
         given:
         def tournamentDto1 = new TournamentDto()
-        tournamentDto1.setStartTime(startTime_Now)
-        tournamentDto1.setEndTime(endTime_Now)
+        tournamentDto1.setStartTime(startTime_Now.format(formatter))
+        tournamentDto1.setEndTime(endTime_Now.format(formatter))
         tournamentDto1.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto1.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user.getId(), topics1, tournamentDto1)
 
         and:
         def tournamentDto2 = new TournamentDto()
-        tournamentDto2.setStartTime(startTime_Now)
-        tournamentDto2.setEndTime(endTime_Now)
+        tournamentDto2.setStartTime(startTime_Now.format(formatter))
+        tournamentDto2.setEndTime(endTime_Now.format(formatter))
         tournamentDto2.setNumberOfQuestions(NUMBER_OF_QUESTIONS2)
         tournamentDto2.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user.getId(), topics2, tournamentDto2)
@@ -111,15 +111,15 @@ class GetOpenedTournamentsTest extends Specification {
         def resTournament1 = result.get(0)
         def resTournament2 = result.get(1)
 
-        resTournament1.getStartTime() == tournamentDto1.getStartTime()
-        resTournament2.getEndTime() == tournamentDto1.getEndTime()
+        resTournament1.getStartTime() == startTime_Now.format(formatter)
+        resTournament1.getEndTime() == endTime_Now.format(formatter)
         resTournament1.getNumberOfQuestions() == tournamentDto1.getNumberOfQuestions()
         resTournament1.getState() == tournamentDto1.getState()
         def topicsResults1 = resTournament1.getTopics()
         topicsResults1.get(0).getName() == TOPIC_NAME1
 
-        resTournament2.getStartTime() == tournamentDto2.getStartTime()
-        resTournament2.getEndTime() == tournamentDto2.getEndTime()
+        resTournament2.getStartTime() == startTime_Now.format(formatter)
+        resTournament2.getEndTime() == endTime_Now.format(formatter)
         resTournament2.getNumberOfQuestions() == tournamentDto2.getNumberOfQuestions()
         resTournament2.getState() == tournamentDto2.getState()
         def topicsResults2 = resTournament2.getTopics()
@@ -131,24 +131,24 @@ class GetOpenedTournamentsTest extends Specification {
     def "create 2 tournaments on time and 1 out of time and get opened tournaments"() {
         given:
         def tournamentDto1 = new TournamentDto()
-        tournamentDto1.setStartTime(startTime_Now)
-        tournamentDto1.setEndTime(endTime_Now)
+        tournamentDto1.setStartTime(startTime_Now.format(formatter))
+        tournamentDto1.setEndTime(endTime_Now.format(formatter))
         tournamentDto1.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto1.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user.getId(), topics1, tournamentDto1)
 
         and:
         def tournamentDto2 = new TournamentDto()
-        tournamentDto2.setStartTime(startTime_Now)
-        tournamentDto2.setEndTime(endTime_Now)
+        tournamentDto2.setStartTime(startTime_Now.format(formatter))
+        tournamentDto2.setEndTime(endTime_Now.format(formatter))
         tournamentDto2.setNumberOfQuestions(NUMBER_OF_QUESTIONS2)
         tournamentDto2.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user.getId(), topics2, tournamentDto2)
 
         and:
         def tournamentDto3 = new TournamentDto()
-        tournamentDto3.setStartTime(startTime_Later)
-        tournamentDto3.setEndTime(endTime_Later)
+        tournamentDto3.setStartTime(startTime_Later.format(formatter))
+        tournamentDto3.setEndTime(endTime_Later.format(formatter))
         tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto3.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
@@ -162,15 +162,15 @@ class GetOpenedTournamentsTest extends Specification {
         def resTournament1 = result.get(0)
         def resTournament2 = result.get(1)
 
-        resTournament1.getStartTime() == tournamentDto1.getStartTime()
-        resTournament2.getEndTime() == tournamentDto1.getEndTime()
+        resTournament1.getStartTime() == startTime_Now.format(formatter)
+        resTournament1.getEndTime() == endTime_Now.format(formatter)
         resTournament1.getNumberOfQuestions() == tournamentDto1.getNumberOfQuestions()
         resTournament1.getState() == tournamentDto1.getState()
         def topicsResults1 = resTournament1.getTopics()
         topicsResults1.get(0).getName() == TOPIC_NAME1
 
-        resTournament2.getStartTime() == tournamentDto2.getStartTime()
-        resTournament2.getEndTime() == tournamentDto2.getEndTime()
+        resTournament2.getStartTime() == startTime_Now.format(formatter)
+        resTournament2.getEndTime() == endTime_Now.format(formatter)
         resTournament2.getNumberOfQuestions() == tournamentDto2.getNumberOfQuestions()
         resTournament2.getState() == tournamentDto2.getState()
         def topicsResults2 = resTournament2.getTopics()
@@ -181,24 +181,24 @@ class GetOpenedTournamentsTest extends Specification {
     def "create 2 tournaments on time and 1 canceled and get opened tournaments"() {
         given:
         def tournamentDto1 = new TournamentDto()
-        tournamentDto1.setStartTime(startTime_Now)
-        tournamentDto1.setEndTime(endTime_Now)
+        tournamentDto1.setStartTime(startTime_Now.format(formatter))
+        tournamentDto1.setEndTime(endTime_Now.format(formatter))
         tournamentDto1.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto1.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user.getId(), topics1, tournamentDto1)
 
         and:
         def tournamentDto2 = new TournamentDto()
-        tournamentDto2.setStartTime(startTime_Now)
-        tournamentDto2.setEndTime(endTime_Now)
+        tournamentDto2.setStartTime(startTime_Now.format(formatter))
+        tournamentDto2.setEndTime(endTime_Now.format(formatter))
         tournamentDto2.setNumberOfQuestions(NUMBER_OF_QUESTIONS2)
         tournamentDto2.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user.getId(), topics2, tournamentDto2)
 
         and:
         def tournamentDto3 = new TournamentDto()
-        tournamentDto3.setStartTime(startTime_Now)
-        tournamentDto3.setEndTime(endTime_Now)
+        tournamentDto3.setStartTime(startTime_Now.format(formatter))
+        tournamentDto3.setEndTime(endTime_Now.format(formatter))
         tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto3.setState(Tournament.Status.CANCELED)
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
@@ -211,15 +211,15 @@ class GetOpenedTournamentsTest extends Specification {
         def resTournament1 = result.get(0)
         def resTournament2 = result.get(1)
 
-        resTournament1.getStartTime() == tournamentDto1.getStartTime()
-        resTournament2.getEndTime() == tournamentDto1.getEndTime()
+        resTournament1.getStartTime() == startTime_Now.format(formatter)
+        resTournament1.getEndTime() == endTime_Now.format(formatter)
         resTournament1.getNumberOfQuestions() == tournamentDto1.getNumberOfQuestions()
         resTournament1.getState() == tournamentDto1.getState()
         def topicsResults1 = resTournament1.getTopics()
         topicsResults1.get(0).getName() == TOPIC_NAME1
 
-        resTournament2.getStartTime() == tournamentDto2.getStartTime()
-        resTournament2.getEndTime() == tournamentDto2.getEndTime()
+        resTournament2.getStartTime() == startTime_Now.format(formatter)
+        resTournament2.getEndTime() == endTime_Now.format(formatter)
         resTournament2.getNumberOfQuestions() == tournamentDto2.getNumberOfQuestions()
         resTournament2.getState() == tournamentDto2.getState()
         def topicsResults2 = resTournament2.getTopics()
@@ -240,8 +240,8 @@ class GetOpenedTournamentsTest extends Specification {
     def "create one out of time and get opened tournaments"() {
         given:
         def tournamentDto3 = new TournamentDto()
-        tournamentDto3.setStartTime(startTime_Later)
-        tournamentDto3.setEndTime(endTime_Later)
+        tournamentDto3.setStartTime(startTime_Later.format(formatter))
+        tournamentDto3.setEndTime(endTime_Later.format(formatter))
         tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto3.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
@@ -256,8 +256,8 @@ class GetOpenedTournamentsTest extends Specification {
     def "create one canceled and get opened tournaments"() {
         given:
         def tournamentDto3 = new TournamentDto()
-        tournamentDto3.setStartTime(startTime_Now)
-        tournamentDto3.setEndTime(endTime_Now)
+        tournamentDto3.setStartTime(startTime_Now.format(formatter))
+        tournamentDto3.setEndTime(endTime_Now.format(formatter))
         tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto3.setState(Tournament.Status.CANCELED)
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)

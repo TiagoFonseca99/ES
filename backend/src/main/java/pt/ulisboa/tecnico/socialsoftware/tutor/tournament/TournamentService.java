@@ -52,12 +52,6 @@ public class TournamentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
-        // Added 10 seconds as a buffer to take latency into consideration
-        if (!tournamentDto.getStartTime().isBefore(tournamentDto.getEndTime())
-            || tournamentDto.getStartTime().plusSeconds(10).isBefore(LocalDateTime.now())) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "date");
-        }
-
         if (tournamentDto.getNumberOfQuestions() <= 0) {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "number of questions");
         }

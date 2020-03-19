@@ -21,6 +21,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import spock.lang.Specification
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @DataJpaTest
 class StudentJoinTournamentTest extends Specification {
@@ -71,8 +72,11 @@ class StudentJoinTournamentTest extends Specification {
     def endTime_Now = LocalDateTime.now().plusHours(2)
     def tournamentDtoInit = new TournamentDto()
     def tournamentDto = new TournamentDto()
+    def formatter
 
     def setup() {
+        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
         user = userService.createUser(USER_NAME1, USERNAME1, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -91,9 +95,8 @@ class StudentJoinTournamentTest extends Specification {
         topics.add(topic1.getId())
         topics.add(topic2.getId())
 
-
-        tournamentDtoInit.setStartTime(startTime_Now)
-        tournamentDtoInit.setEndTime(endTime_Now)
+        tournamentDtoInit.setStartTime(startTime_Now.format(formatter))
+        tournamentDtoInit.setEndTime(endTime_Now.format(formatter))
         tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
         tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
@@ -244,8 +247,8 @@ class StudentJoinTournamentTest extends Specification {
         and:
         def canceledTournamentDtoInit = new TournamentDto()
         def canceledTournamentDto = new TournamentDto()
-        canceledTournamentDtoInit.setStartTime(startTime_Now)
-        canceledTournamentDtoInit.setEndTime(endTime_Now)
+        canceledTournamentDtoInit.setStartTime(startTime_Now.format(formatter))
+        canceledTournamentDtoInit.setEndTime(endTime_Now.format(formatter))
         canceledTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         canceledTournamentDtoInit.setState(Tournament.Status.CANCELED)
         canceledTournamentDto = tournamentService.createTournament(user.getId(), topics, canceledTournamentDtoInit)
@@ -269,8 +272,8 @@ class StudentJoinTournamentTest extends Specification {
         and:
         def notOpenTournamentDtoInit = new TournamentDto()
         def notOpenTournamentDto = new TournamentDto()
-        notOpenTournamentDtoInit.setStartTime(startTime_Now.plusHours(10))
-        notOpenTournamentDtoInit.setEndTime(endTime_Now.plusHours(10))
+        notOpenTournamentDtoInit.setStartTime(startTime_Now.plusHours(10).format(formatter))
+        notOpenTournamentDtoInit.setEndTime(endTime_Now.plusHours(10).format(formatter))
         notOpenTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         notOpenTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
         notOpenTournamentDto = tournamentService.createTournament(user.getId(), topics, notOpenTournamentDtoInit)
@@ -294,8 +297,8 @@ class StudentJoinTournamentTest extends Specification {
         and:
         def notOpenTournamentDtoInit = new TournamentDto()
         def notOpenTournamentDto = new TournamentDto()
-        notOpenTournamentDtoInit.setStartTime(startTime_Now)
-        notOpenTournamentDtoInit.setEndTime(LocalDateTime.now())
+        notOpenTournamentDtoInit.setStartTime(startTime_Now.format(formatter))
+        notOpenTournamentDtoInit.setEndTime(LocalDateTime.now().format(formatter))
         notOpenTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         notOpenTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
         notOpenTournamentDto = tournamentService.createTournament(user.getId(), topics, notOpenTournamentDtoInit)

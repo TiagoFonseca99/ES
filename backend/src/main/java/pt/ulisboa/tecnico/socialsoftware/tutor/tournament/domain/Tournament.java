@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
@@ -50,8 +51,8 @@ public class Tournament {
     }
 
     public Tournament(User user, List<Topic> topics, TournamentDto tournamentDto) {
-        this.startTime = tournamentDto.getStartTime();
-        this.endTime = tournamentDto.getEndTime();
+        setStartTime(tournamentDto.getStartTimeDate());
+        setEndTime(tournamentDto.getEndTimeDate());
         this.numberOfQuestions = tournamentDto.getNumberOfQuestions();
         this.state = tournamentDto.getState();
         this.creator = user;
@@ -66,8 +67,18 @@ public class Tournament {
         return startTime;
     }
 
+    public void setStartTime(LocalDateTime startTime) {
+        checkStartTime(startTime);
+        this.startTime = startTime;
+    }
+
     public LocalDateTime getEndTime() {
         return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        checkEndTime(endTime);
+        this.endTime = endTime;
     }
 
     public List<Topic> getTopics() {
@@ -115,4 +126,25 @@ public class Tournament {
         this.participants.add(user);
     }
 
+    private void checkStartTime(LocalDateTime startTime) {
+        if (startTime == null) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
+        }
+        if (endTime != null && endTime.isBefore(startTime)) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
+        }
+        // Added 30 seconds as a buffer to take latency into consideration
+        if (startTime.plusSeconds(30).isBefore(LocalDateTime.now())) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
+        }
+    }
+
+    private void checkEndTime(LocalDateTime endTime) {
+        if (endTime == null) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
+        }
+        if (startTime != null && endTime.isBefore(startTime)) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
+        }
+    }
 }
