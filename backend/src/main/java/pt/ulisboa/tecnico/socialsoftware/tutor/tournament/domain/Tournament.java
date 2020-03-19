@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -47,16 +48,21 @@ public class Tournament {
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<User> participants = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "course_execution_id")
+    private CourseExecution courseExecution;
+
     public Tournament() {
     }
 
     public Tournament(User user, List<Topic> topics, TournamentDto tournamentDto) {
         setStartTime(tournamentDto.getStartTimeDate());
         setEndTime(tournamentDto.getEndTimeDate());
-        this.numberOfQuestions = tournamentDto.getNumberOfQuestions();
+        setNumberOfQuestions(tournamentDto.getNumberOfQuestions());
         this.state = tournamentDto.getState();
         this.creator = user;
-        this.topics = topics;
+        setCourseExecution(user);
+        setTopics(topics);
     }
 
     public Integer getId() {
@@ -81,14 +87,16 @@ public class Tournament {
         this.endTime = endTime;
     }
 
-    public List<Topic> getTopics() {
-        return topics;
+    public void setNumberOfQuestions(Integer numberOfQuestions) {
+        if (numberOfQuestions <= 0) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "number of questions");
+        }
+        this.numberOfQuestions = numberOfQuestions;
     }
 
     public Integer getNumberOfQuestions() {
         return numberOfQuestions;
     }
-
     public User getCreator() {
         return creator;
     }
@@ -101,10 +109,30 @@ public class Tournament {
         return participants;
     }
 
+    private void setCourseExecution(User user) {
+        this.courseExecution = user.getCourseExecutions().stream().findFirst().get();
+    }
+
+    private CourseExecution getCourseExecution() {
+        return courseExecution;
+    }
+
+    private void setTopics(List<Topic> topics) {
+        for (Topic topic : topics) {
+            checkTopicCourse(topic);
+        }
+        this.topics = topics;
+    }
+
+    public List<Topic> getTopics() {
+        return topics;
+    }
+
     public void addTopic(Topic topic) {
         if (topics.contains(topic)) {
             throw new TutorException(DUPLICATE_TOURNAMENT_TOPIC, topic.getId());
         }
+        checkTopicCourse(topic);
 
         this.topics.add(topic);
     }
@@ -121,6 +149,11 @@ public class Tournament {
         this.topics.remove(topic);
     }
 
+    public void checkTopicCourse(Topic topic) {
+        if (topic.getCourse() != courseExecution.getCourse()) {
+            throw new TutorException(TOURNAMENT_TOPIC_COURSE);
+        }
+    }
     public void addParticipant(User user) {
 
         this.participants.add(user);
@@ -133,8 +166,8 @@ public class Tournament {
         if (endTime != null && endTime.isBefore(startTime)) {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
         }
-        // Added 30 seconds as a buffer to take latency into consideration
-        if (startTime.plusSeconds(30).isBefore(LocalDateTime.now())) {
+        // Added 1 minute as a buffer to take latency into consideration
+        if (startTime.plusMinutes(1).isBefore(LocalDateTime.now())) {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
         }
     }

@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -39,6 +41,8 @@ class StudentJoinTournamentTest extends Specification {
     public static final Integer KEY3 = 3
     public static final Integer KEY4 = 4
     public static final String COURSE_NAME = "Software Architecture"
+    public static final String ACRONYM = "AS1"
+    public static final String ACADEMIC_TERM = "1 SEM"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
     public static final int NUMBER_OF_QUESTIONS1 = 5
@@ -56,6 +60,9 @@ class StudentJoinTournamentTest extends Specification {
     CourseRepository courseRepository
 
     @Autowired
+    CourseExecutionRepository courseExecutionRepository
+
+    @Autowired
     TournamentRepository tournamentRepository
 
     @Autowired
@@ -63,12 +70,13 @@ class StudentJoinTournamentTest extends Specification {
 
     def user
     def course
+    def courseExecution
     def topic1
     def topic2
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def startTime_Now = LocalDateTime.now()
+    def startTime_Now
     def endTime_Now = LocalDateTime.now().plusHours(2)
     def tournamentDtoInit = new TournamentDto()
     def tournamentDto = new TournamentDto()
@@ -77,10 +85,17 @@ class StudentJoinTournamentTest extends Specification {
     def setup() {
         formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
-        user = userService.createUser(USER_NAME1, USERNAME1, User.Role.STUDENT)
+        user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
+
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(user)
+        courseExecutionRepository.save(courseExecution)
+
+        user.addCourse(courseExecution)
+        userRepository.save(user)
 
         topicDto1 = new TopicDto()
         topicDto1.setName(TOPIC_NAME1)
@@ -95,7 +110,7 @@ class StudentJoinTournamentTest extends Specification {
         topics.add(topic1.getId())
         topics.add(topic2.getId())
 
-        tournamentDtoInit.setStartTime(startTime_Now.format(formatter))
+        tournamentDtoInit.setStartTime(LocalDateTime.now().format(formatter))
         tournamentDtoInit.setEndTime(endTime_Now.format(formatter))
         tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
@@ -104,10 +119,14 @@ class StudentJoinTournamentTest extends Specification {
 
     def "2 student join an open tournament and get participants" () {
         given:
-        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
 
         and:
-        def user3 = userService.createUser(USER_NAME3, USERNAME3, User.Role.STUDENT)
+        def user3 = new User(USER_NAME3, USERNAME3, KEY3, User.Role.STUDENT)
+        user3.addCourse(courseExecution)
+        userRepository.save(user3)
 
         tournamentService.joinTournament(user2.getId(), tournamentDto)
         tournamentService.joinTournament(user3.getId(), tournamentDto)
@@ -134,13 +153,19 @@ class StudentJoinTournamentTest extends Specification {
 
     def "2 student and 1 teacher join an open tournament and get participants" () {
         given:
-        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
 
         and:
-        def user3 = userService.createUser(USER_NAME3, USERNAME3, User.Role.STUDENT)
+        def user3 = new User(USER_NAME3, USERNAME3, KEY3, User.Role.STUDENT)
+        user3.addCourse(courseExecution)
+        userRepository.save(user3)
 
         and:
-        def user4 = userService.createUser(USER_NAME4, USERNAME4, User.Role.TEACHER)
+        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.TEACHER)
+        user4.addCourse(courseExecution)
+        userRepository.save(user4)
 
         tournamentService.joinTournament(user2.getId(), tournamentDto)
         tournamentService.joinTournament(user3.getId(), tournamentDto)
@@ -171,13 +196,19 @@ class StudentJoinTournamentTest extends Specification {
 
     def "2 student and 1 admin join an open tournament and get participants" () {
         given:
-        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
 
         and:
-        def user3 = userService.createUser(USER_NAME3, USERNAME3, User.Role.STUDENT)
+        def user3 = new User(USER_NAME3, USERNAME3, KEY3, User.Role.STUDENT)
+        user3.addCourse(courseExecution)
+        userRepository.save(user3)
 
         and:
-        def user4 = userService.createUser(USER_NAME4, USERNAME4, User.Role.ADMIN)
+        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.ADMIN)
+        user4.addCourse(courseExecution)
+        userRepository.save(user4)
 
         tournamentService.joinTournament(user2.getId(), tournamentDto)
         tournamentService.joinTournament(user3.getId(), tournamentDto)
@@ -210,7 +241,9 @@ class StudentJoinTournamentTest extends Specification {
 
     def "1 teacher join an open tournament and get participants" () {
         given:
-        def user4 = userService.createUser(USER_NAME4, USERNAME4, User.Role.TEACHER)
+        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.TEACHER)
+        user4.addCourse(courseExecution)
+        userRepository.save(user4)
 
         when:
         tournamentService.joinTournament(user4.getId(), tournamentDto)
@@ -226,7 +259,9 @@ class StudentJoinTournamentTest extends Specification {
 
     def "1 admin join an open tournament and get participants" () {
         given:
-        def user4 = userService.createUser(USER_NAME4, USERNAME4, User.Role.ADMIN)
+        def user4 = new User(USER_NAME4, USERNAME4, KEY4, User.Role.ADMIN)
+        user4.addCourse(courseExecution)
+        userRepository.save(user4)
 
         when:
         tournamentService.joinTournament(user4.getId(), tournamentDto)
@@ -242,9 +277,12 @@ class StudentJoinTournamentTest extends Specification {
 
     def "Student tries to join canceled tournament" () {
         given:
-        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
 
         and:
+        startTime_Now = LocalDateTime.now()
         def canceledTournamentDtoInit = new TournamentDto()
         def canceledTournamentDto = new TournamentDto()
         canceledTournamentDtoInit.setStartTime(startTime_Now.format(formatter))
@@ -267,9 +305,12 @@ class StudentJoinTournamentTest extends Specification {
 
     def "Student tries to join not open (later) tournament" () {
         given:
-        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
 
         and:
+        startTime_Now = LocalDateTime.now()
         def notOpenTournamentDtoInit = new TournamentDto()
         def notOpenTournamentDto = new TournamentDto()
         notOpenTournamentDtoInit.setStartTime(startTime_Now.plusHours(10).format(formatter))
@@ -292,9 +333,12 @@ class StudentJoinTournamentTest extends Specification {
 
     def "Student tries to join not open (early) tournament" () {
         given:
-        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
 
         and:
+        startTime_Now = LocalDateTime.now()
         def notOpenTournamentDtoInit = new TournamentDto()
         def notOpenTournamentDto = new TournamentDto()
         notOpenTournamentDtoInit.setStartTime(startTime_Now.format(formatter))
@@ -318,7 +362,9 @@ class StudentJoinTournamentTest extends Specification {
 
     def "Student tries to join tournament twice" () {
         given:
-        def user2 = userService.createUser(USER_NAME2, USERNAME2, User.Role.STUDENT)
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
         tournamentService.joinTournament(user2.getId(), tournamentDto)
 
         when:

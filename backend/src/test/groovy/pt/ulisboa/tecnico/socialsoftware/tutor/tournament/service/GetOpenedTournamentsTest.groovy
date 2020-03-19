@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -29,6 +31,8 @@ class GetOpenedTournamentsTest extends Specification {
     public static final String USERNAME = "JDinis99"
     public static final Integer KEY = 1
     public static final String COURSE_NAME = "Software Architecture"
+    public static final String ACRONYM = "AS1"
+    public static final String ACADEMIC_TERM = "1 SEM"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
     public static final int NUMBER_OF_QUESTIONS1 = 5
@@ -44,6 +48,9 @@ class GetOpenedTournamentsTest extends Specification {
     CourseRepository courseRepository
 
     @Autowired
+    CourseExecutionRepository courseExecutionRepository
+
+    @Autowired
     TournamentRepository tournamentRepository
 
     @Autowired
@@ -51,13 +58,14 @@ class GetOpenedTournamentsTest extends Specification {
 
     def user
     def course
+    def courseExecution
     def topic1
     def topic2
     def topicDto1
     def topicDto2
     def topics1 = new ArrayList<Integer>()
     def topics2 = new ArrayList<Integer>()
-    def startTime_Now = LocalDateTime.now()
+    def startTime_Now
     def endTime_Now = LocalDateTime.now().plusHours(2)
     def startTime_Later = LocalDateTime.now().plusHours(1)
     def endTime_Later = LocalDateTime.now().plusHours(2)
@@ -67,10 +75,16 @@ class GetOpenedTournamentsTest extends Specification {
         formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
-        userRepository.save(user)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
+
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(user)
+        courseExecutionRepository.save(courseExecution)
+
+        user.addCourse(courseExecution)
+        userRepository.save(user)
 
         topicDto1 = new TopicDto()
         topicDto1.setName(TOPIC_NAME1)
@@ -88,6 +102,7 @@ class GetOpenedTournamentsTest extends Specification {
 
     def "create 2 tournaments on time and get opened tournaments"() {
         given:
+        startTime_Now = LocalDateTime.now()
         def tournamentDto1 = new TournamentDto()
         tournamentDto1.setStartTime(startTime_Now.format(formatter))
         tournamentDto1.setEndTime(endTime_Now.format(formatter))
@@ -130,6 +145,7 @@ class GetOpenedTournamentsTest extends Specification {
 
     def "create 2 tournaments on time and 1 out of time and get opened tournaments"() {
         given:
+        startTime_Now = LocalDateTime.now()
         def tournamentDto1 = new TournamentDto()
         tournamentDto1.setStartTime(startTime_Now.format(formatter))
         tournamentDto1.setEndTime(endTime_Now.format(formatter))
@@ -180,6 +196,7 @@ class GetOpenedTournamentsTest extends Specification {
 
     def "create 2 tournaments on time and 1 canceled and get opened tournaments"() {
         given:
+        startTime_Now = LocalDateTime.now()
         def tournamentDto1 = new TournamentDto()
         tournamentDto1.setStartTime(startTime_Now.format(formatter))
         tournamentDto1.setEndTime(endTime_Now.format(formatter))
@@ -255,6 +272,7 @@ class GetOpenedTournamentsTest extends Specification {
 
     def "create one canceled and get opened tournaments"() {
         given:
+        startTime_Now = LocalDateTime.now()
         def tournamentDto3 = new TournamentDto()
         tournamentDto3.setStartTime(startTime_Now.format(formatter))
         tournamentDto3.setEndTime(endTime_Now.format(formatter))

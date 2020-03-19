@@ -52,10 +52,6 @@ public class TournamentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
-        if (tournamentDto.getNumberOfQuestions() <= 0) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "number of questions");
-        }
-
         List<Topic> topics = new ArrayList<>();
         for (Integer topicId : topicsId) {
             Topic topic = topicRepository.findById(topicId)

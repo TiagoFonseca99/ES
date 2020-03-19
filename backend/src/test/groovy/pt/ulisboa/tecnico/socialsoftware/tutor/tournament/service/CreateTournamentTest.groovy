@@ -5,6 +5,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
@@ -28,6 +30,8 @@ class CreateTournamentTest extends Specification {
     public static final String USERNAME = "TiagoFonseca99"
     public static final Integer KEY = 1
     public static final String COURSE_NAME = "Software Architecture"
+    public static final String ACRONYM = "AS1"
+    public static final String ACADEMIC_TERM = "1 SEM"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
     public static final int NUMBER_OF_QUESTIONS = 5
@@ -42,6 +46,9 @@ class CreateTournamentTest extends Specification {
     CourseRepository courseRepository
 
     @Autowired
+    CourseExecutionRepository courseExecutionRepository
+
+    @Autowired
     TournamentRepository tournamentRepository
 
     @Autowired
@@ -49,6 +56,7 @@ class CreateTournamentTest extends Specification {
 
     def user
     def course
+    def courseExecution
     def topic1
     def topic2
     def topicDto1
@@ -62,10 +70,16 @@ class CreateTournamentTest extends Specification {
         formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
-        userRepository.save(user)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
+
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(user)
+        courseExecutionRepository.save(courseExecution)
+
+        user.addCourse(courseExecution)
+        userRepository.save(user)
 
         topicDto1 = new TopicDto()
         topicDto1.setName(TOPIC_NAME1)
@@ -124,6 +138,34 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 0L
     }
 
+    def "create tournament with existing user and topics from different courses"() {
+        given:
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime.format(formatter))
+        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+
+        and: "new course"
+        def differentCourse = new Course("TESTE", Course.Type.TECNICO)
+        courseRepository.save(differentCourse)
+
+        and: "new topic"
+        def topicDto3 = new TopicDto()
+        topicDto3.setName("TOPIC3")
+        def topic3 = new Topic(differentCourse, topicDto3)
+        topicRepository.save(topic3)
+        topics.add(topic3.getId())
+
+        when:
+        tournamentService.createTournament(user.getId(), topics, tournamentDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_TOPIC_COURSE
+        tournamentRepository.count() == 0L
+    }
+
     def "start time is lower then current time"() {
         given:
         def tournamentDto = new TournamentDto()
@@ -176,7 +218,7 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 0L
     }
 
-    def "add topic"() {
+    def "add topic of same course"() {
         given: "a tournament"
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(startTime.format(formatter))
@@ -198,6 +240,36 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
         result.getTopics() == [topic1, topic2, topic3]
+    }
+
+    def "add topic of different course"() {
+        given: "a tournament"
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime.format(formatter))
+        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
+
+        and: "new course"
+        def differentCourse = new Course("TESTE", Course.Type.TECNICO)
+        courseRepository.save(differentCourse)
+
+        and: "new topic"
+        def topicDto3 = new TopicDto()
+        topicDto3.setName("TOPIC3")
+        def topic3 = new Topic(differentCourse, topicDto3)
+        topicRepository.save(topic3)
+
+        when:
+        tournamentService.addTopic(topic3.getId(), tournamentDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_TOPIC_COURSE
+        tournamentRepository.count() == 1L
+        def result = tournamentRepository.findAll().get(0)
+        result.getTopics() == [topic1, topic2]
     }
 
     def "add duplicate topic"() {
