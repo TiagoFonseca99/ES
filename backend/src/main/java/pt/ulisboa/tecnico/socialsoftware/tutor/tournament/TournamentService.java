@@ -114,7 +114,7 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                 .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
 
-        if (LocalDateTime.now().isBefore(tournament.getStartTime()) || LocalDateTime.now().isAfter(tournament.getEndTime())) {
+        if (LocalDateTime.now().isAfter(tournament.getEndTime())) {
             throw new TutorException(TOURNAMENT_NOT_OPEN, tournament.getId());
         }
 
@@ -128,6 +128,9 @@ public class TournamentService {
 
         if (tournament.getParticipants().contains(user)) {
             throw new TutorException(DUPLICATE_TOURNAMENT_PARTICIPANT, user.getUsername());
+        }
+        if (!user.getCourseExecutions().contains(tournament.getCourseExecution())) {
+            throw new TutorException(STUDENT_NO_COURSE_EXECUTION);
         }
 
         tournament.addParticipant(user);

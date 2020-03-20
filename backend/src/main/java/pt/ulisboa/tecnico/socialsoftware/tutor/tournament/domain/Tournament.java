@@ -109,11 +109,11 @@ public class Tournament {
         return participants;
     }
 
-    private void setCourseExecution(User user) {
+    public void setCourseExecution(User user) {
         this.courseExecution = user.getCourseExecutions().stream().findFirst().get();
     }
 
-    private CourseExecution getCourseExecution() {
+    public CourseExecution getCourseExecution() {
         return courseExecution;
     }
 
