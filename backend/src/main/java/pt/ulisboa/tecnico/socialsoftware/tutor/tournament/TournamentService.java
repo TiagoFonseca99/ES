@@ -8,8 +8,14 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
@@ -23,6 +29,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -40,6 +47,15 @@ public class TournamentService {
 
     @Autowired
     private TopicRepository topicRepository;
+
+    @Autowired
+    private QuizRepository quizRepository;
+
+
+    private QuestionService questionService;
+
+
+    private QuizService quizService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -130,10 +146,43 @@ public class TournamentService {
             throw new TutorException(DUPLICATE_TOURNAMENT_PARTICIPANT, user.getUsername());
         }
         if (!user.getCourseExecutions().contains(tournament.getCourseExecution())) {
-            throw new TutorException(STUDENT_NO_COURSE_EXECUTION);
+            throw new TutorException(STUDENT_NO_COURSE_EXECUTION, user.getId());
         }
 
         tournament.addParticipant(user);
+        /*
+        // QUIZ GENERATION
+        QuizDto quizDto = tournament.generateQuiz();
+        if (quizDto != null){
+
+            List<QuestionDto> finalQuestions = new ArrayList<>();
+            List<QuestionDto> questions = questionService.findQuestions(tournament.getCourseExecution().getCourse().getId());
+            int i;
+
+            for (i = 0; i < tournament.getNumberOfQuestions(); i++) {
+                finalQuestions.add(questions.get(i));
+            }
+
+
+            QuizDto quizDto1 = quizService.createQuiz(tournament.getCourseExecution().getId(), quizDto);
+            Quiz quiz = quizRepository.findByKey(quizDto1.getKey()).orElse(null);
+            tournament.setQuiz(quiz);
+        }
+        */
+
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public QuizDto getQuiz(TournamentDto tournamentDto) {
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+        if (tournament.getQuiz() == null) {
+            new TutorException(TOURNAMENT_NO_QUIZ, tournamentDto.getId());
+        }
+        return new QuizDto(tournament.getQuiz(), true);
     }
 
     @Retryable(

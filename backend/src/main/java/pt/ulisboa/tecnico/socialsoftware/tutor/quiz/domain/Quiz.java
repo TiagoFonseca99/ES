@@ -76,7 +76,7 @@ public class Quiz {
 
     public Quiz(QuizDto quizDto) {
         checkQuestions(quizDto.getQuestions());
-
+        //this.id = quizDto.getId();
         this.key = quizDto.getKey();
         setTitle(quizDto.getTitle());
         this.type = quizDto.getType();

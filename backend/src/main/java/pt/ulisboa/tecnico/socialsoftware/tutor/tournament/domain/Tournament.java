@@ -3,11 +3,13 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 
 import javax.persistence.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.time.LocalDateTime;
 
@@ -51,6 +53,10 @@ public class Tournament {
     @ManyToOne
     @JoinColumn(name = "course_execution_id")
     private CourseExecution courseExecution;
+
+    @ManyToOne
+    @JoinColumn(name = "quiz_id")
+    private Quiz quiz;
 
     public Tournament() {
     }
@@ -117,6 +123,14 @@ public class Tournament {
         return courseExecution;
     }
 
+    public Quiz getQuiz() {
+        return quiz;
+    }
+
+    public void setQuiz(Quiz quiz) {
+        this.quiz = quiz;
+    }
+
     private void setTopics(List<Topic> topics) {
         for (Topic topic : topics) {
             checkTopicCourse(topic);
@@ -180,4 +194,30 @@ public class Tournament {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
         }
     }
+    public QuizDto generateQuiz() {
+        if (this.quiz != null){
+            return null;
+        }
+        QuizDto quizDto = new QuizDto();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        if (LocalDateTime.now().isBefore(this.startTime)){
+            quizDto.setAvailableDate(this.startTime.format(formatter));
+        }
+        else {
+            quizDto.setAvailableDate(LocalDateTime.now().format(formatter));
+        }
+        quizDto.setConclusionDate(this.endTime.format(formatter));
+        quizDto.setScramble(true);
+        quizDto.setOneWay(true);
+        quizDto.setQrCodeOnly(false);
+        quizDto.setSeries(1);
+        quizDto.setVersion("A");
+
+        String title = "tournament Quizz nº" + this.id.toString();
+        quizDto.setTitle(title);
+        quizDto.setType(Quiz.QuizType.GENERATED);
+
+        return quizDto;
+    }
+
 }
