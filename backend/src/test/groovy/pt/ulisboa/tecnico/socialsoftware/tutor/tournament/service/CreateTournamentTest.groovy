@@ -116,6 +116,7 @@ class CreateTournamentTest extends Specification {
         result.getNumberOfQuestions() == NUMBER_OF_QUESTIONS
         result.getState() == Tournament.Status.NOT_CANCELED
         result.getCreator() == user
+        result.getCourseExecution() == courseExecution
     }
 
     def "create tournament with not existing user"() {

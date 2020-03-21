@@ -2,7 +2,6 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
@@ -32,7 +31,7 @@ public class Tournament {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Topic> topics = new ArrayList<>();
 
     @Column(name = "number_of_questions")
@@ -45,7 +44,7 @@ public class Tournament {
     @Enumerated(EnumType.STRING)
     private Status state;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<User> participants = new ArrayList<>();
 
     @ManyToOne
@@ -63,6 +62,7 @@ public class Tournament {
         this.creator = user;
         setCourseExecution(user);
         setTopics(topics);
+        topicsAddTournament(topics, this);
     }
 
     public Integer getId() {
@@ -97,6 +97,7 @@ public class Tournament {
     public Integer getNumberOfQuestions() {
         return numberOfQuestions;
     }
+
     public User getCreator() {
         return creator;
     }
@@ -109,11 +110,11 @@ public class Tournament {
         return participants;
     }
 
-    private void setCourseExecution(User user) {
-        this.courseExecution = user.getCourseExecutions().stream().findFirst().get();
+    public void setCourseExecution(User user) {
+        this.courseExecution = user.getCourseExecutions().iterator().next();
     }
 
-    private CourseExecution getCourseExecution() {
+    public CourseExecution getCourseExecution() {
         return courseExecution;
     }
 
@@ -154,20 +155,25 @@ public class Tournament {
             throw new TutorException(TOURNAMENT_TOPIC_COURSE);
         }
     }
-    public void addParticipant(User user) {
 
+    public void topicsAddTournament(List<Topic> topics, Tournament tournament) {
+        for (Topic topic : topics) {
+            topic.addTournament(tournament);
+        }
+    }
+
+    public void addParticipant(User user) {
         this.participants.add(user);
+        user.addTournament(this);
     }
 
     private void checkStartTime(LocalDateTime startTime) {
         if (startTime == null) {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
         }
-        if (endTime != null && endTime.isBefore(startTime)) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
-        }
         // Added 1 minute as a buffer to take latency into consideration
-        if (startTime.plusMinutes(1).isBefore(LocalDateTime.now())) {
+        if (endTime != null && endTime.isBefore(startTime) ||
+                startTime.plusMinutes(1).isBefore(LocalDateTime.now())) {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
         }
     }
@@ -179,5 +185,16 @@ public class Tournament {
         if (startTime != null && endTime.isBefore(startTime)) {
             throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
         }
+    }
+
+    public void remove() {
+        creator = null;
+        courseExecution = null;
+
+        getTopics().forEach(topic -> topic.getTournaments().remove(this));
+        getTopics().clear();
+
+        getParticipants().forEach(participant -> participant.getTournaments().remove(this));
+        getParticipants().clear();
     }
 }
