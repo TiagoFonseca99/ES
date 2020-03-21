@@ -303,35 +303,7 @@ class StudentJoinTournamentTest extends Specification {
         result.size() == 0
     }
 
-    def "Student tries to join not open (later) tournament" () {
-        given:
-        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
-        user2.addCourse(courseExecution)
-        userRepository.save(user2)
-
-        and:
-        startTime_Now = LocalDateTime.now()
-        def notOpenTournamentDtoInit = new TournamentDto()
-        def notOpenTournamentDto = new TournamentDto()
-        notOpenTournamentDtoInit.setStartTime(startTime_Now.plusHours(10).format(formatter))
-        notOpenTournamentDtoInit.setEndTime(endTime_Now.plusHours(10).format(formatter))
-        notOpenTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
-        notOpenTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
-        notOpenTournamentDto = tournamentService.createTournament(user.getId(), topics, notOpenTournamentDtoInit)
-
-        when:
-        tournamentService.joinTournament(user2.getId(), notOpenTournamentDto)
-
-        then: "student cannot join"
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_OPEN
-
-        and: "the tournament has no participants"
-        def result = tournamentService.getTournamentParticipants(tournamentDto)
-        result.size() == 0
-    }
-
-    def "Student tries to join not open (early) tournament" () {
+    def "Student tries to join not open tournament" () {
         given:
         def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
         user2.addCourse(courseExecution)
@@ -402,6 +374,36 @@ class StudentJoinTournamentTest extends Specification {
         def result = tournamentService.getTournamentParticipants(tournamentDto)
         result.size() == 0
     }
+
+    def "Student with wrong execution course tries to join" () {
+        given:
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        userRepository.save(user2)
+
+        and:
+        def course2 = new Course("Engenharia de Software", Course.Type.TECNICO)
+        courseRepository.save(course2)
+
+        and:
+        def courseExecution2 = new CourseExecution(course2, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution2.addUser(user2)
+        courseExecutionRepository.save(courseExecution2)
+        user2.addCourse(courseExecution2)
+
+
+        when:
+        tournamentService.joinTournament(user2.getId(), tournamentDto)
+
+        then: "student cannot join"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.STUDENT_NO_COURSE_EXECUTION
+
+        and: "the tournament has no participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
+        result.size() == 0
+
+    }
+
 
     @TestConfiguration
     static class TournamentServiceImplTestContextConfiguration {
