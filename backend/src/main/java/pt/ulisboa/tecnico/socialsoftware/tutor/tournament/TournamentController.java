@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -37,9 +36,17 @@ public class TournamentController {
         return tournamentService.createTournament(user.getId(), topicsId, tournamentDto);
     }
 
-    @GetMapping("/tournaments")
+    @GetMapping(value = "/tournaments/getOpenTournaments")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
-    public List<TournamentDto> getOpenTournaments() {
+    public List<TournamentDto> getOpenTournaments(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
         return tournamentService.getOpenedTournaments();
     }
+
+
 }
