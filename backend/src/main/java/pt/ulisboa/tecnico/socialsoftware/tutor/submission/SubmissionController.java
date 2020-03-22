@@ -12,6 +12,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 
 import javax.validation.Valid;
 
@@ -41,4 +43,17 @@ public class SubmissionController {
 
         return submissionService.createSubmission(question.getId(), submissionDto);
     }
+
+    @PostMapping(value = "/submissions/reviews")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ReviewDto createReview(Principal principal, @RequestBody ReviewDto reviewDto, @RequestBody Review.Status status) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return submissionService.reviewSubmission(user.getId(), reviewDto, status);
+    }
 }
+
