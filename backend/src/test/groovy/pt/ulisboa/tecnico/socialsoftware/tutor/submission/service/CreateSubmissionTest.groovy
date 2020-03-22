@@ -138,7 +138,6 @@ class CreateSubmissionTest extends Specification {
         and: "another submissionDto"
         def submissionDto2 = new SubmissionDto()
         submissionDto2.setKey(2)
-        submissionDto2.setQuestionId(question.getId())
         submissionDto2.setStudentId(student.getId())
 
         when: "creating a submission with a previously submitted question"
