@@ -15,9 +15,6 @@ public class Submission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique=true, nullable = false)
-    private Integer key;
-
     @OneToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval=true)
     private Question question;
 
@@ -31,8 +28,6 @@ public class Submission {
     public Submission() {}
 
     public Submission(Question question, User user, SubmissionDto submissionDto){
-        this.id = submissionDto.getId();
-        this.key = submissionDto.getKey();
         this.question = question;
         this.user = user;
         user.addSubmission(this);
@@ -41,10 +36,6 @@ public class Submission {
     public Integer getId() { return id; }
 
     public void setId(Integer id) { this.id = id; }
-
-    public Integer getKey() { return key; }
-
-    public void setKey(Integer key) { this.key = key; }
 
     public Question getQuestion() { return question; }
 

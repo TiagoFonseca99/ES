@@ -87,7 +87,7 @@ class CreateSubmissionTest extends Specification {
     def "create submission with question not null"(){
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
-        submissionDto.setKey(1)
+        submissionDto.setCourseId(course.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question.getId(), submissionDto)
@@ -96,17 +96,17 @@ class CreateSubmissionTest extends Specification {
         submissionRepository.count() == 1L
         def result = submissionRepository.findAll().get(0)
         result.getId() != null
-        result.getKey() == 1
         result.getUser() == student
         result.getQuestion() != null
         result.getQuestion() == question
+        result.getQuestion().getCourse().getId() == course.getId()
     }
 
 
     def "user is not a student"(){
         given: "a submissionDto for a teacher"
         def submissionDto = new SubmissionDto()
-        submissionDto.setKey(1)
+        submissionDto.setCourseId(course.getId())
         submissionDto.setStudentId(teacher.getId())
 
         when: submissionService.createSubmission(question.getId(), submissionDto)
@@ -119,7 +119,7 @@ class CreateSubmissionTest extends Specification {
     def "student that submits a question enrolled in course"(){
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
-        submissionDto.setKey(1)
+        submissionDto.setCourseId(course.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question.getId(), submissionDto)
@@ -131,13 +131,13 @@ class CreateSubmissionTest extends Specification {
     def "student submits the same question"(){
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
-        submissionDto.setKey(1)
+        submissionDto.setCourseId(course.getId())
         submissionDto.setStudentId(student.getId())
         and: "a user with a previous submission of the question"
         student.addSubmission(new Submission(question, student, submissionDto))
         and: "another submissionDto"
         def submissionDto2 = new SubmissionDto()
-        submissionDto2.setKey(2)
+        submissionDto2.setCourseId(course.getId())
         submissionDto2.setStudentId(student.getId())
 
         when: "creating a submission with a previously submitted question"
@@ -151,7 +151,7 @@ class CreateSubmissionTest extends Specification {
     def "question status is submitted" () {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
-        submissionDto.setKey(1)
+        submissionDto.setCourseId(course.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question.getId(), submissionDto)
@@ -165,7 +165,7 @@ class CreateSubmissionTest extends Specification {
     def "invalid arguments: studentId=#studentId | questionId=#questionId || errorMessage"(){
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
-        submissionDto.setKey(1)
+        submissionDto.setCourseId(course.getId())
         submissionDto.setStudentId(studentId)
         when:
         submissionService.createSubmission(questionId, submissionDto)

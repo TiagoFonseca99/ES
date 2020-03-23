@@ -84,13 +84,11 @@ class GetSubmissionStatusTest extends Specification {
         question2.setStatus(Question.Status.SUBMITTED)
         questionRepository.save(question2)
         submission1 = new Submission()
-        submission1.setKey(1)
         submission1.setQuestion(question1)
         submission1.setUser(student)
         student.addSubmission(submission1)
         submissionRepository.save(submission1)
         submission2 = new Submission()
-        submission2.setKey(2)
         submission2.setQuestion(question2)
         submission2.setUser(student)
         student.addSubmission(submission2)
@@ -100,7 +98,6 @@ class GetSubmissionStatusTest extends Specification {
     def "submission in review and check review status"(){
         given: "a review"
         def reviewDto = new ReviewDto()
-        reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION1)
         reviewDto.setSubmissionId(submission1.getId())
         reviewDto.setStudentId(submission1.getStudentId())
@@ -112,7 +109,6 @@ class GetSubmissionStatusTest extends Specification {
         then: "the returned data is correct"
         result.size() == 1
         def subStatus = result.get(0)
-        subStatus.getKey() == 1
         subStatus.getJustification() == REVIEW_JUSTIFICATION1
         subStatus.getStatus() == Review.Status.IN_REVIEW
         subStatus.getTeacherId() == teacher.getId()
@@ -122,7 +118,6 @@ class GetSubmissionStatusTest extends Specification {
     def "approve 2 submissions and check review status"(){
         given: "an approved submission review"
         def reviewDto1 = new ReviewDto()
-        reviewDto1.setKey(1)
         reviewDto1.setJustification(REVIEW_JUSTIFICATION1)
         reviewDto1.setSubmissionId(submission1.getId())
         reviewDto1.setStudentId(submission1.getStudentId())
@@ -130,7 +125,6 @@ class GetSubmissionStatusTest extends Specification {
 
         and: "another approved submission review"
         def reviewDto2 = new ReviewDto()
-        reviewDto2.setKey(2)
         reviewDto2.setJustification(REVIEW_JUSTIFICATION2)
         reviewDto2.setSubmissionId(submission2.getId())
         reviewDto2.setStudentId(submission2.getStudentId())
@@ -143,8 +137,6 @@ class GetSubmissionStatusTest extends Specification {
         result.size() == 2
         def subStatus1 = result.get(0)
         def subStatus2 = result.get(1)
-        subStatus1.getKey() == 1
-        subStatus2.getKey() == 2
         subStatus1.getJustification() == REVIEW_JUSTIFICATION1
         subStatus2.getJustification() == REVIEW_JUSTIFICATION2
         subStatus1.getStatus() == Review.Status.APPROVED
@@ -158,7 +150,6 @@ class GetSubmissionStatusTest extends Specification {
     def "approve 1 submission and reject 1 submission and check review status"(){
         given: "an approved submission review"
         def reviewDto1 = new ReviewDto()
-        reviewDto1.setKey(1)
         reviewDto1.setJustification(REVIEW_JUSTIFICATION1)
         reviewDto1.setSubmissionId(submission1.getId())
         reviewDto1.setStudentId(submission1.getStudentId())
@@ -166,7 +157,6 @@ class GetSubmissionStatusTest extends Specification {
 
         and: "a rejected submission review"
         def reviewDto2 = new ReviewDto()
-        reviewDto2.setKey(2)
         reviewDto2.setJustification(REVIEW_JUSTIFICATION2)
         reviewDto2.setSubmissionId(submission2.getId())
         reviewDto2.setStudentId(submission2.getStudentId())
@@ -179,8 +169,6 @@ class GetSubmissionStatusTest extends Specification {
         result.size() == 2
         def subStatus1 = result.get(0)
         def subStatus2 = result.get(1)
-        subStatus1.getKey() == 1
-        subStatus2.getKey() == 2
         subStatus1.getJustification() == REVIEW_JUSTIFICATION1
         subStatus2.getJustification() == REVIEW_JUSTIFICATION2
         subStatus1.getStatus() == Review.Status.APPROVED
