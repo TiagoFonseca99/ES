@@ -68,6 +68,10 @@ public class TournamentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
+        if (user.getRole() != User.Role.STUDENT) {
+            throw  new TutorException(USER_NOT_STUDENT, user.getId());
+        }
+
         List<Topic> topics = new ArrayList<>();
         for (Integer topicId : topicsId) {
             Topic topic = topicRepository.findById(topicId)
