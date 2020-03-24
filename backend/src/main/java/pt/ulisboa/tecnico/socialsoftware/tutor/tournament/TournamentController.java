@@ -36,6 +36,18 @@ public class TournamentController {
 
         return tournamentService.createTournament(user.getId(), topicsId, tournamentDto);
     }
+    
+    @GetMapping(value = "/tournaments/getTournaments")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
+    public List<TournamentDto> getTournaments(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return tournamentService.getTournaments();
+    }
 
     @GetMapping(value = "/tournaments/getOpenTournaments")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
