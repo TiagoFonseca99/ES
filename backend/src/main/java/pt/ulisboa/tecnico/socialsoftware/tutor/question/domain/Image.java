@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.question.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 
@@ -7,7 +9,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "images")
-public class Image {
+public class Image implements DomainEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -32,6 +34,11 @@ public class Image {
     public Review getReview() { return review; }
 
     public void setReview(Review review) { this.review = review; }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visitImage(this);
+    }
 
     public Integer getId() {
         return id;
