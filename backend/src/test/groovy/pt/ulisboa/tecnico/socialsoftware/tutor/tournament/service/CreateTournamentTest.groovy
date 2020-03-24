@@ -95,7 +95,7 @@ class CreateTournamentTest extends Specification {
         topics.add(topic2.getId())
     }
 
-    def "create tournament with existing user"() {
+    def "create tournament with existing user (student)"() {
         given:
         def tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(startTime.format(formatter))
@@ -117,6 +117,54 @@ class CreateTournamentTest extends Specification {
         result.getState() == Tournament.Status.NOT_CANCELED
         result.getCreator() == user
         result.getCourseExecution() == courseExecution
+    }
+
+    def "create tournament with existing user (teacher)" () {
+        given:
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime.format(formatter))
+        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+
+        and:
+        def teacher = new User("Teste", "Teste", 2, User.Role.TEACHER)
+        courseExecution.addUser(teacher)
+        courseExecutionRepository.save(courseExecution)
+        teacher.addCourse(courseExecution)
+        userRepository.save(teacher)
+
+        when:
+        tournamentService.createTournament(teacher.getId(), topics, tournamentDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+        tournamentRepository.count() == 0L
+    }
+
+    def "create tournament with existing user (admin)" () {
+        given:
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTime.format(formatter))
+        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+
+        and:
+        def admin = new User("Teste", "Teste", 2, User.Role.ADMIN)
+        courseExecution.addUser(admin)
+        courseExecutionRepository.save(courseExecution)
+        admin.addCourse(courseExecution)
+        userRepository.save(admin)
+
+        when:
+        tournamentService.createTournament(admin.getId(), topics, tournamentDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+        tournamentRepository.count() == 0L
     }
 
     def "create tournament with not existing user"() {

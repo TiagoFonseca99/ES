@@ -26,7 +26,7 @@ public class TournamentController {
     private TournamentService tournamentService;
 
     @PostMapping(value = "/tournaments")
-    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
     public TournamentDto createTournament(Principal principal, @RequestParam List<Integer> topicsId, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
