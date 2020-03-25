@@ -62,6 +62,16 @@ public class SubmissionController {
         return submissionService.reviewSubmission(user.getId(), reviewDto, status);
     }
 
+    @GetMapping(value = "/submissions/status")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') or hasRole('ROLE_TEACHER')")
+    public List<ReviewDto> getSubmissionStatus(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        return submissionService.getSubmissionStatus(user.getId());
+    }
 
 }
 
