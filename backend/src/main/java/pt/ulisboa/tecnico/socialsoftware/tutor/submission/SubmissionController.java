@@ -3,10 +3,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.submission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
@@ -44,9 +41,9 @@ public class SubmissionController {
         return submissionService.createSubmission(question.getId(), submissionDto);
     }
 
-    @PostMapping(value = "/submissions/reviews")
+    @PostMapping(value = "/submissions/reviews/{status}")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ReviewDto createReview(Principal principal, @RequestBody ReviewDto reviewDto, @RequestBody Review.Status status) {
+    public ReviewDto createReview(Principal principal, @RequestBody ReviewDto reviewDto, @PathVariable Review.Status status) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
