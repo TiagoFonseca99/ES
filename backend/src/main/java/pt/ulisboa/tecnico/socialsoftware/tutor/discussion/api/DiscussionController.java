@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService;
@@ -52,5 +53,23 @@ public class DiscussionController {
         }
 
         return discussionService.getReply(user.getId(), discussion);
+    }
+
+    @PostMapping(value = "/discussions/replies")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ReplyDto createReply(Principal principal, @Valid @RequestParam String message, @Valid @RequestBody DiscussionDto discussion){
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        ReplyDto reply = new ReplyDto();
+
+        reply.setMessage(message);
+
+        if (user == null) {
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        reply.setTeacherId(user.getId());
+
+        return discussionService.giveReply(reply, discussion);
     }
 }
