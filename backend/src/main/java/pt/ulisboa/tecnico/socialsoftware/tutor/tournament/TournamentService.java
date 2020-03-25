@@ -174,25 +174,6 @@ public class TournamentService {
         }
 
         tournament.addParticipant(user);
-        /*
-        // QUIZ GENERATION
-        QuizDto quizDto = tournament.generateQuiz();
-        if (quizDto != null){
-
-            List<QuestionDto> finalQuestions = new ArrayList<>();
-            List<QuestionDto> questions = questionService.findQuestions(tournament.getCourseExecution().getCourse().getId());
-            int i;
-
-            for (i = 0; i < tournament.getNumberOfQuestions(); i++) {
-                finalQuestions.add(questions.get(i));
-            }
-
-
-            QuizDto quizDto1 = quizService.createQuiz(tournament.getCourseExecution().getId(), quizDto);
-            Quiz quiz = quizRepository.findByKey(quizDto1.getKey()).orElse(null);
-            tournament.setQuiz(quiz);
-        }
-        */
 
     }
 
