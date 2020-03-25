@@ -21,7 +21,7 @@ public class Discussion implements Serializable {
     private String content;
 
     @OneToOne
-    @JoinColumn(name = "reply")
+    @JoinColumn(name = "reply_id")
     private Reply reply;
 
     @ManyToOne(cascade = CascadeType.ALL)
