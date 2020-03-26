@@ -8,12 +8,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService;
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
@@ -29,7 +25,6 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -50,12 +45,6 @@ public class TournamentService {
 
     @Autowired
     private QuizRepository quizRepository;
-
-
-    private QuestionService questionService;
-
-
-    private QuizService quizService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -159,11 +148,11 @@ public class TournamentService {
         }
 
         if (tournament.getState() == Tournament.Status.CANCELED) {
-            throw  new TutorException(TOURNAMENT_CANCELED, tournament.getId());
+            throw new TutorException(TOURNAMENT_CANCELED, tournament.getId());
         }
 
         if (user.getRole() != User.Role.STUDENT) {
-            throw  new TutorException(USER_NOT_STUDENT, user.getId());
+            throw new TutorException(USER_NOT_STUDENT, user.getId());
         }
 
         if (tournament.getParticipants().contains(user)) {
@@ -185,7 +174,7 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                 .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
         if (tournament.getQuiz() == null) {
-            new TutorException(TOURNAMENT_NO_QUIZ, tournamentDto.getId());
+            throw new TutorException(TOURNAMENT_NO_QUIZ, tournamentDto.getId());
         }
         return new QuizDto(tournament.getQuiz(), true);
     }
