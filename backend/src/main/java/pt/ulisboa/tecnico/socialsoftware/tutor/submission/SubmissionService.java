@@ -102,7 +102,7 @@ public class SubmissionService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<ReviewDto> getSubmissionStatus(Integer submissionId) {
         if(submissionId == null)
-            throw new TutorException(SUBMISSION_NOT_FOUND, submissionId);
+            throw new TutorException(SUBMISSION_NOT_FOUND, 0);
 
         return reviewRepository.getSubmissionStatus(submissionId).stream().map(ReviewDto::new).collect(Collectors.toList());
     }

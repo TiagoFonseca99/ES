@@ -29,6 +29,11 @@
             <stringProp name="Argument.value">8080</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="submissionId" elementType="Argument">
+            <stringProp name="Argument.name">submissionId</stringProp>
+            <stringProp name="Argument.value">10000</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </Arguments>
       <hashTree/>
@@ -68,7 +73,7 @@
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
-          <stringProp name="query">WITH quest AS (INSERT INTO questions (course_id, key) VALUES (2, 1200) RETURNING id) INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676);
+          <stringProp name="query">WITH quest AS (INSERT INTO questions (course_id, key) VALUES (2, 1200) RETURNING id) INSERT INTO submissions (id, question_id, user_id) VALUES (10000, (SELECT id FROM quest), 676);
 </stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
@@ -237,7 +242,7 @@
               <stringProp name="HTTPSampler.port">${port}</stringProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
               <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-              <stringProp name="HTTPSampler.path">/submissions/status</stringProp>
+              <stringProp name="HTTPSampler.path">/submissions/${submissionId}/status</stringProp>
               <stringProp name="HTTPSampler.method">GET</stringProp>
               <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
               <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
