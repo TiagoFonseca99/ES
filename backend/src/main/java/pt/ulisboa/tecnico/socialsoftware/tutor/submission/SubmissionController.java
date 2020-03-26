@@ -63,7 +63,7 @@ public class SubmissionController {
     }
 
     @GetMapping(value = "/submissions/status")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') or hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT')")
     public List<ReviewDto> getSubmissionStatus(Principal principal) {
         User user = (User) ((Authentication) principal).getPrincipal();
 

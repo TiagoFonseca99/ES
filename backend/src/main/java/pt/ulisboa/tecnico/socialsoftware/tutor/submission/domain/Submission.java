@@ -50,5 +50,3 @@ public class Submission {
     public int getStudentId() { return this.user.getId(); }
 
 }
-
-
