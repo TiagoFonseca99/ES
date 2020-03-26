@@ -8,10 +8,13 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -20,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class User implements UserDetails, DomainEntity {
     public enum Role {STUDENT, TEACHER, ADMIN, DEMO_ADMIN}
 
     @Id
@@ -73,6 +76,8 @@ public class User implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch=FetchType.LAZY, orphanRemoval=true)
     private Set<Review>  reviews = new HashSet<>();
 
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "participants")
+    private List<Tournament> tournaments = new ArrayList<>();
 
     public User() {}
 
@@ -91,6 +96,11 @@ public class User implements UserDetails {
         this.numberOfCorrectTeacherAnswers = 0;
         this.numberOfCorrectInClassAnswers = 0;
         this.numberOfCorrectStudentAnswers = 0;
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visitUser(this);
     }
 
     public Integer getId() {
@@ -174,6 +184,10 @@ public class User implements UserDetails {
             questions.add(submission.getQuestion());
 
         return questions;
+    }
+
+    public List<Tournament> getTournaments() {
+        return tournaments;
     }
 
     public void setCourseExecutions(Set<CourseExecution> courseExecutions) {
@@ -375,6 +389,8 @@ public class User implements UserDetails {
     }
 
     public void addSubmission(Submission submission) { this.submissions.add(submission); }
+
+    public void addTournament(Tournament tournament) { this.tournaments.add(tournament); }
 
     public Boolean isStudent(){ return this.role == User.Role.STUDENT; }
 

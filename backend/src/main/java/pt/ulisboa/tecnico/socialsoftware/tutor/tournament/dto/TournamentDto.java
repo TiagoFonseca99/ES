@@ -1,33 +1,45 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto;
 
+import org.springframework.data.annotation.Transient;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class TournamentDto implements Serializable {
     private Integer id;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private String startTime = null;
+    private String endTime = null;
     private Integer numberOfQuestions;
     private Tournament.Status state;
     private List<TopicDto> topics = new ArrayList<>();
+    private List<UserDto> participants = new ArrayList<>();
+
+    @Transient
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
 
     public TournamentDto() {
     }
 
     public TournamentDto(Tournament tournament) {
         this.id = tournament.getId();
-        this.startTime = tournament.getStartTime();
-        this.endTime = tournament.getEndTime();
+        if(tournament.getStartTime() != null) {
+            this.startTime = tournament.getStartTime().format(formatter);
+        }
+        if(tournament.getEndTime() != null) {
+            this.endTime = tournament.getEndTime().format(formatter);
+        }
         this.numberOfQuestions = tournament.getNumberOfQuestions();
         this.state = tournament.getState();
         this.topics = tournament.getTopics().stream().map(TopicDto::new).collect(Collectors.toList());
+        this.participants = tournament.getParticipants().stream().map(UserDto::new).collect(Collectors.toList());
 
     }
 
@@ -35,19 +47,19 @@ public class TournamentDto implements Serializable {
         return id;
     }
 
-    public LocalDateTime getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
 
@@ -71,4 +83,21 @@ public class TournamentDto implements Serializable {
         return topics;
     }
 
+    public List<UserDto> getParticipants() {
+        return participants;
+    }
+
+    public LocalDateTime getStartTimeDate() {
+        if (getStartTime() == null || getStartTime().isEmpty()) {
+            return null;
+        }
+        return LocalDateTime.parse(getStartTime(), formatter);
+    }
+
+    public LocalDateTime getEndTimeDate() {
+        if (getEndTime() == null || getEndTime().isEmpty()) {
+            return null;
+        }
+        return LocalDateTime.parse(getEndTime(), formatter);
+    }
 }

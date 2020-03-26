@@ -78,7 +78,6 @@ public class Quiz implements DomainEntity {
 
     public Quiz(QuizDto quizDto) {
         checkQuestions(quizDto.getQuestions());
-
         this.key = quizDto.getKey();
         setTitle(quizDto.getTitle());
         this.type = quizDto.getType();
@@ -176,9 +175,7 @@ public class Quiz implements DomainEntity {
         return type;
     }
 
-    public void setType(QuizType type) {
-    this.type = type;
-    }
+    public void setType(QuizType type) { this.type = type; }
 
     public Integer getSeries() {
     return series;
