@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.service
 
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -10,10 +9,11 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.ReplyRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
@@ -23,15 +23,14 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
-import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 @DataJpaTest
-class CreateDiscussionPerformanceTest extends Specification {
+class GetReplyPerformanceTest extends Specification {
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
+    public static final String REPLY_MESSAGE = "reply message"
     public static final String USER_USERNAME = "user username"
     public static final String USER_NAME = "user name"
 
@@ -51,19 +50,25 @@ class CreateDiscussionPerformanceTest extends Specification {
     QuizRepository quizRepository
 
     @Autowired
-    QuizAnswerRepository quizAnswerRepository;
+    QuizAnswerRepository quizAnswerRepository
 
     @Autowired
-    QuizQuestionRepository quizQuestionRepository;
+    QuizQuestionRepository quizQuestionRepository
 
     @Autowired
     UserRepository userRepository
 
+    @Autowired
+    ReplyRepository replyRepository
 
-    def "performance test to create 5000 discussions"(){
+    def "performance test to get 5000 replies"(){
         given: "a student"
         def student = new User(USER_NAME, USER_USERNAME, 1, User.Role.STUDENT)
         userRepository.save(student)
+
+        and: "a teacher"
+        def teacher = new User(USER_NAME+1, USER_USERNAME+1, 2, User.Role.TEACHER)
+        userRepository.save(teacher)
 
         and: "a quiz"
         def quiz = new Quiz()
@@ -105,12 +110,22 @@ class CreateDiscussionPerformanceTest extends Specification {
             student.addQuizAnswer(quizanswer)
             userRepository.save(student)
 
-            def discussion = new DiscussionDto()
-            discussion.setUserId(student.getId())
-            discussion.setQuestion(new QuestionDto(question))
+            def discussion = new Discussion()
+            discussion.setUser(student)
+            discussion.setQuestion(question)
             discussion.setContent(DISCUSSION_CONTENT)
+            discussionRepository.save(discussion)
 
-            discussionService.createDiscussion(discussion)
+            def reply = new Reply()
+            reply.setMessage(REPLY_MESSAGE)
+            reply.setTeacher(teacher)
+            reply.setDiscussion(discussion)
+            replyRepository.save(reply)
+
+            discussion.setReply(reply)
+            discussionRepository.save(discussion)
+
+            discussionService.getReply(student.getId(), new DiscussionDto(discussion))
         }
         )
 
@@ -125,6 +140,4 @@ class CreateDiscussionPerformanceTest extends Specification {
             return new DiscussionService()
         }
     }
-
-
 }
