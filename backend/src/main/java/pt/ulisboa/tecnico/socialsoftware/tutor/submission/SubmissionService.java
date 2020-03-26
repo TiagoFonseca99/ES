@@ -6,7 +6,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
@@ -55,7 +54,7 @@ public class SubmissionService {
 
         Question question = getQuestion(questionId);
 
-        User user = getStudent(submissionDto);
+        User user = getStudent(submissionDto.getStudentId());
 
         checkIfQuestionAlreadySubmitted(question, user);
 
@@ -90,10 +89,22 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ReviewDto> getSubmissionStatus(Integer studentId) {
+    public List<SubmissionDto> getSubmissions(Integer studentId) {
         if(studentId == null)
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
-        return reviewRepository.getSubmissionStatus(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
+
+        return userRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<ReviewDto> getSubmissionStatus(Integer submissionId) {
+        if(submissionId == null)
+            throw new TutorException(SUBMISSION_NOT_FOUND, submissionId);
+
+        return reviewRepository.getSubmissionStatus(submissionId).stream().map(ReviewDto::new).collect(Collectors.toList());
     }
 
     private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
@@ -112,8 +123,7 @@ public class SubmissionService {
         return questionRepository.findById(questionId).orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
     }
 
-    private User getStudent(SubmissionDto submissionDto) {
-        int userId = submissionDto.getStudentId();
+    private User getStudent(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
         if(user.isStudent() != null && !user.isStudent())
             throw new TutorException(USER_NOT_STUDENT, user.getUsername());

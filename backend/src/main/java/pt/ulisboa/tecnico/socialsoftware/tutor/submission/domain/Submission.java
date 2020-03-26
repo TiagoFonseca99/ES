@@ -5,6 +5,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -22,8 +24,8 @@ public class Submission {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval=true)
-    private Review review;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy="submission", fetch=FetchType.LAZY, orphanRemoval=true)
+    private Set<Review> reviews = new HashSet<>();
 
     public Submission() {}
 

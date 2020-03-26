@@ -33,7 +33,7 @@ public class Review {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="submission_id")
     private Submission submission;
 
