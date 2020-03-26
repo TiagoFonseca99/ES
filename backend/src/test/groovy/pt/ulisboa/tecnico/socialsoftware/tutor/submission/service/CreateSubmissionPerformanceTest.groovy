@@ -75,7 +75,7 @@ class CreateSubmissionPerformanceTest extends Specification {
         submissionDto.setStudentId(student.getId())
 
         when:
-        1.upto(10000, {
+        1.upto(1, {
             question = new Question()
             question.setKey(1)
             question.setTitle(QUESTION_TITLE)

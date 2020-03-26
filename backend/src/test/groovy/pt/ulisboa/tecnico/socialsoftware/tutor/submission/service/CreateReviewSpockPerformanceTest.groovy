@@ -1,4 +1,4 @@
-package pt.ulisboa.tecnico.socialsoftware.tutor.administration.service
+package pt.ulisboa.tecnico.socialsoftware.tutor.submission.service
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -74,7 +74,7 @@ class CreateReviewPerformanceTest extends Specification {
         submissionRepository.save(submission)
 
         when:
-        1.upto(500000, {
+        1.upto(1, {
             def reviewDto = new ReviewDto()
             reviewDto.setJustification(REVIEW_JUSTIFICATION)
             reviewDto.setSubmissionId(submission.getId())
