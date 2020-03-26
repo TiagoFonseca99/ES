@@ -82,7 +82,7 @@ class GiveExplanationPerformanceTest extends Specification {
         quiz.setType(Quiz.QuizType.TEST)
 
         when:
-        1.upto(1000, {
+        1.upto(1, {
             def question = new Question()
             question.setKey(1)
             question.setTitle(QUESTION_TITLE)
