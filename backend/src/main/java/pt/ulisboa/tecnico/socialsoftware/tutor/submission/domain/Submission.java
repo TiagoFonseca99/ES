@@ -24,7 +24,7 @@ public class Submission {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy="submission", fetch=FetchType.LAZY, orphanRemoval=true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "submission", fetch=FetchType.LAZY, orphanRemoval=true)
     private Set<Review> reviews = new HashSet<>();
 
     public Submission() {}
@@ -50,5 +50,3 @@ public class Submission {
     public int getStudentId() { return this.user.getId(); }
 
 }
-
-

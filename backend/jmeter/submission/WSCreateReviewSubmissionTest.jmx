@@ -76,7 +76,7 @@
           <stringProp name="query">WITH quest AS
 	(INSERT INTO questions (course_id, key) VALUES (2, 1200) RETURNING id)
 
-INSERT INTO submissions (id, question_id, user_id) VALUES (500, (SELECT id from quest), 643);</stringProp>
+INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 643);</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
@@ -179,6 +179,56 @@ INSERT INTO submissions (id, question_id, user_id) VALUES (500, (SELECT id from 
             </collectionProp>
           </HeaderManager>
           <hashTree/>
+          <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="JDBC Connection Configuration" enabled="true">
+            <boolProp name="autocommit">true</boolProp>
+            <stringProp name="checkQuery"></stringProp>
+            <stringProp name="connectionAge">5000</stringProp>
+            <stringProp name="connectionProperties"></stringProp>
+            <stringProp name="dataSource">sampleReq</stringProp>
+            <stringProp name="dbUrl">jdbc:postgresql://localhost:5432/tutordb?autoReconnect=true</stringProp>
+            <stringProp name="driver">org.postgresql.Driver</stringProp>
+            <stringProp name="initQuery"></stringProp>
+            <boolProp name="keepAlive">true</boolProp>
+            <stringProp name="password">fartodisto</stringProp>
+            <stringProp name="poolMax">0</stringProp>
+            <boolProp name="preinit">false</boolProp>
+            <stringProp name="timeout">10000</stringProp>
+            <stringProp name="transactionIsolation">DEFAULT</stringProp>
+            <stringProp name="trimInterval">60000</stringProp>
+            <stringProp name="username">tomas</stringProp>
+          </JDBCDataSource>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
+            <stringProp name="dataSource">sampleReq</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">SELECT id from submissions where user_id = 643;</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable">sub_id</stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+            <stringProp name="BeanShellAssertion.query">if(ResponseCode.equals(&quot;200&quot;)) {
+	Failure=false;
+	
+	int ID = vars.getObject(&quot;sub_id&quot;).get(0).get(&quot;id&quot;);
+	//System.out.println(ID);
+	vars.putObject(&quot;id&quot;, ID);
+	//vars.put(ID, vars.getObject(&quot;sub_id&quot;).get(0).get(&quot;id&quot;));
+	
+} else {
+	Failure=true;
+	prev.setStopThread(true); 
+}</stringProp>
+            <stringProp name="BeanShellAssertion.filename"></stringProp>
+            <stringProp name="BeanShellAssertion.parameters"></stringProp>
+            <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+          </BeanShellAssertion>
+          <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request to create review" enabled="true">
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
@@ -186,9 +236,8 @@ INSERT INTO submissions (id, question_id, user_id) VALUES (500, (SELECT id from 
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-	&quot;id&quot;: 1500,&#xd;
 	&quot;studentId&quot;: 643,&#xd;
-	&quot;submissionId&quot;: 500,&#xd;
+	&quot;submissionId&quot;: &quot;${id}&quot;,&#xd;
 	&quot;justification&quot;: &quot;Porque me apeteceu&quot;,&#xd;
 	&quot;status&quot;: &quot;REJECTED&quot;&#xd;
 }&#xd;
@@ -360,9 +409,9 @@ INSERT INTO submissions (id, question_id, user_id) VALUES (500, (SELECT id from 
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
-          <stringProp name="query">DELETE FROM reviews WHERE submission_id = 500;
-DELETE FROM submissions WHERE id = 500;
-DELETE FROM questions WHERE key = 1200 RETURNING id;
+          <stringProp name="query">DELETE FROM reviews WHERE user_id = 677;
+DELETE FROM submissions WHERE user_id = 643;
+DELETE FROM questions WHERE key = 1200;
 </stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
