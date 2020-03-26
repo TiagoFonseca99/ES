@@ -77,6 +77,8 @@ public class SubmissionService {
 
         checkIfSubmissionIsApproved(reviewDto, teacherId);
 
+        reviewDto.setStatus(status);
+
         Review review = new Review(user, submission, reviewDto);
 
         entityManager.persist(review);
