@@ -315,9 +315,6 @@ if ((high - low) != 0) {
 else {
 	result = 0;
 	}
-	
-int ele = myList.get(result);
-
 
 vars.putObject(&quot;di&quot;, myList.get(result));
 </stringProp>
