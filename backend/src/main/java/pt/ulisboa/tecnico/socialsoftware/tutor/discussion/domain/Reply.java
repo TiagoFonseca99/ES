@@ -1,7 +1,5 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,7 +16,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 @Entity
 @Table(name = "replies")
-public class Reply implements Serializable {
+public class Reply {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
