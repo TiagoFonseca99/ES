@@ -1,10 +1,11 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -15,9 +16,6 @@ public class Submission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique=true, nullable = false)
-    private Integer key;
-
     @OneToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval=true)
     private Question question;
 
@@ -25,14 +23,12 @@ public class Submission {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval=true)
-    private Review review;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "submission", fetch=FetchType.LAZY, orphanRemoval=true)
+    private Set<Review> reviews = new HashSet<>();
 
     public Submission() {}
 
-    public Submission(Question question, User user, SubmissionDto submissionDto){
-        this.id = submissionDto.getId();
-        this.key = submissionDto.getKey();
+    public Submission(Question question, User user){
         this.question = question;
         this.user = user;
         user.addSubmission(this);
@@ -41,10 +37,6 @@ public class Submission {
     public Integer getId() { return id; }
 
     public void setId(Integer id) { this.id = id; }
-
-    public Integer getKey() { return key; }
-
-    public void setKey(Integer key) { this.key = key; }
 
     public Question getQuestion() { return question; }
 
@@ -57,5 +49,3 @@ public class Submission {
     public int getStudentId() { return this.user.getId(); }
 
 }
-
-

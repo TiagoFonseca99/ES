@@ -6,8 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 
 
-import java.util.Optional;
-
 @Repository
 @Transactional
 public interface SubmissionRepository extends JpaRepository<Submission, Integer> {

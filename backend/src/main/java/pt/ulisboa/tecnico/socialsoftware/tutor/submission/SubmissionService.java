@@ -6,6 +6,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
@@ -35,6 +36,9 @@ public class SubmissionService {
     private UserRepository userRepository;
 
     @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
     private ReviewRepository reviewRepository;
 
     @PersistenceContext
@@ -44,14 +48,17 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public SubmissionDto createSubmission(Question question, SubmissionDto submissionDto){
-        checkIfConsistentSubmission(question, submissionDto.getStudentId());
+    public SubmissionDto createSubmission(Integer questionId, SubmissionDto submissionDto){
 
-        User user = getStudent(submissionDto);
+        checkIfConsistentSubmission(questionId, submissionDto.getStudentId());
+
+        Question question = getQuestion(questionId);
+
+        User user = getStudent(submissionDto.getStudentId());
 
         checkIfQuestionAlreadySubmitted(question, user);
 
-        Submission submission = new Submission(question, user, submissionDto);
+        Submission submission = new Submission(question, user);
 
         entityManager.persist(submission);
         return new SubmissionDto(submission);
@@ -71,7 +78,6 @@ public class SubmissionService {
         checkIfSubmissionIsApproved(reviewDto, teacherId);
 
         reviewDto.setStatus(status);
-
         Review review = new Review(user, submission, reviewDto);
 
         entityManager.persist(review);
@@ -82,14 +88,26 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ReviewDto> getSubmissionStatus(Integer studentId) {
+    public List<SubmissionDto> getSubmissions(Integer studentId) {
         if(studentId == null)
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
-        return reviewRepository.getSubmissionStatus(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
+
+        return userRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
 
-    private void checkIfConsistentSubmission(Question question, Integer studentId) {
-        if(question == null)
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<ReviewDto> getSubmissionStatus(Integer submissionId) {
+        if(submissionId == null)
+            throw new TutorException(SUBMISSION_NOT_FOUND, 0);
+
+        return reviewRepository.getSubmissionStatus(submissionId).stream().map(ReviewDto::new).collect(Collectors.toList());
+    }
+
+    private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
+        if(questionId == null)
             throw new TutorException(SUBMISSION_MISSING_QUESTION);
         if(studentId == null)
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
@@ -100,8 +118,11 @@ public class SubmissionService {
             throw new TutorException(QUESTION_ALREADY_SUBMITTED, user.getUsername());
     }
 
-    private User getStudent(SubmissionDto submissionDto) {
-        int userId = submissionDto.getStudentId();
+    private Question getQuestion(Integer questionId) {
+        return questionRepository.findById(questionId).orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
+    }
+
+    private User getStudent(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
         if(user.isStudent() != null && !user.isStudent())
             throw new TutorException(USER_NOT_STUDENT, user.getUsername());
