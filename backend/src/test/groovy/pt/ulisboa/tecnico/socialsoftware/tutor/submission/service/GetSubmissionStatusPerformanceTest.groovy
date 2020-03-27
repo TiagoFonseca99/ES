@@ -72,7 +72,7 @@ class GetSubmissionStatusPerformanceTest extends Specification {
     def "performance testing to get 1000 submission reviews"(){
 
         when:
-        1.upto(1000, {
+        1.upto(1, {
             question1 = new Question()
             question1.setKey(1)
             question1.setTitle(QUESTION_TITLE1)
