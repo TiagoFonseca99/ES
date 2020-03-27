@@ -58,7 +58,7 @@ public class SubmissionService {
 
         checkIfQuestionAlreadySubmitted(question, user);
 
-        Submission submission = new Submission(question, user, submissionDto);
+        Submission submission = new Submission(question, user);
 
         entityManager.persist(submission);
         return new SubmissionDto(submission);

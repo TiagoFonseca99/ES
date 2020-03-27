@@ -1,7 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
@@ -29,7 +28,7 @@ public class Submission {
 
     public Submission() {}
 
-    public Submission(Question question, User user, SubmissionDto submissionDto){
+    public Submission(Question question, User user){
         this.question = question;
         this.user = user;
         user.addSubmission(this);

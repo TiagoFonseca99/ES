@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.service
 
-import org.h2.engine.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -134,7 +133,7 @@ class CreateSubmissionTest extends Specification {
         submissionDto.setCourseId(course.getId())
         submissionDto.setStudentId(student.getId())
         and: "a user with a previous submission of the question"
-        student.addSubmission(new Submission(question, student, submissionDto))
+        student.addSubmission(new Submission(question, student))
         and: "another submissionDto"
         def submissionDto2 = new SubmissionDto()
         submissionDto2.setCourseId(course.getId())

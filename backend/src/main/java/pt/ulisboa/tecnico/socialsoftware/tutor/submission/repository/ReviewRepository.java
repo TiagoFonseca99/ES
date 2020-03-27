@@ -8,7 +8,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @Transactional
