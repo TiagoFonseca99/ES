@@ -4,8 +4,6 @@ import java.security.Principal;
 
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -24,8 +22,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 @RestController
 public class DiscussionController {
-    private static Logger logger = LoggerFactory.getLogger(DiscussionController.class);
-
     @Autowired
     private DiscussionService discussionService;
 

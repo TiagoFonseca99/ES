@@ -7,13 +7,11 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 
-import java.io.Serializable;
-
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Entity
 @Table(name = "discussions")
-public class Discussion implements Serializable {
+public class Discussion {
     @EmbeddedId
     private DiscussionId discussionId = new DiscussionId();
 
