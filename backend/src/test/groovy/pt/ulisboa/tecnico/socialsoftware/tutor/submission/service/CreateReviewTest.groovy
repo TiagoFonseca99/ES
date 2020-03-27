@@ -101,7 +101,6 @@ class CreateReviewTest extends Specification {
         imageRepository.save(image)
 
         submission = new Submission()
-        submission.setKey(1)
         submission.setQuestion(question)
         submission.setUser(student)
         submissionRepository.save(submission)
@@ -113,7 +112,6 @@ class CreateReviewTest extends Specification {
 
         given: "a review"
         def reviewDto = new ReviewDto()
-        reviewDto.setKey(1)
         reviewDto.setStatus(Review.Status.APPROVED)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
@@ -131,7 +129,6 @@ class CreateReviewTest extends Specification {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
-        reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
@@ -142,7 +139,6 @@ class CreateReviewTest extends Specification {
         reviewRepository.count() == 1L
         def result = reviewRepository.findAll().get(0)
         result.getId() != null
-        result.getKey() == 1
         result.getJustification() == REVIEW_JUSTIFICATION
         result.getStatus() == Review.Status.APPROVED
         result.getSubmission() == submission
@@ -154,7 +150,6 @@ class CreateReviewTest extends Specification {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
-        reviewDto.setKey(1)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
@@ -171,7 +166,6 @@ class CreateReviewTest extends Specification {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
-        reviewDto.setKey(1)
         reviewDto.setImageDto(new ImageDto(image))
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
@@ -183,7 +177,6 @@ class CreateReviewTest extends Specification {
         reviewRepository.count() == 1L
         def result = reviewRepository.findAll().get(0)
         result.getId() != null
-        result.getKey() == 1
         result.getJustification() == REVIEW_JUSTIFICATION
         result.getImage().getId() != null
         result.getImage().getUrl() == IMAGE_URL
@@ -198,7 +191,6 @@ class CreateReviewTest extends Specification {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
-        reviewDto.setKey(1)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
@@ -216,7 +208,6 @@ class CreateReviewTest extends Specification {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
-        reviewDto.setKey(1)
         reviewDto.setJustification(justification)
         reviewDto.setSubmissionId(submissionId)
         if(_student != null)

@@ -7,7 +7,6 @@ import java.io.Serializable;
 
 public class ReviewDto implements Serializable {
     private Integer id;
-    private Integer key;
     private Integer studentId;
     private Integer teacherId;
     private Integer submissionId;
@@ -20,7 +19,6 @@ public class ReviewDto implements Serializable {
 
     public ReviewDto(Review review){
         this.id = review.getId();
-        this.key = review.getKey();
         this.studentId = review.getStudentId();
         this.teacherId = review.getTeacherId();
         this.submissionId = review.getSubmission().getId();
@@ -35,10 +33,6 @@ public class ReviewDto implements Serializable {
     public Integer getId() { return id; }
 
     public void setId(Integer id) { this.id = id; }
-
-    public Integer getKey() { return key; }
-
-    public void setKey(Integer key) { this.key = key; }
 
     public Integer getStudentId() { return studentId; }
 

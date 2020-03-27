@@ -20,9 +20,6 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique = true, nullable = false)
-    private Integer key;
-
     @Column
     private Integer studentId;
 
@@ -36,7 +33,7 @@ public class Review {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="submission_id")
     private Submission submission;
 
@@ -47,8 +44,6 @@ public class Review {
     public Review() {}
 
     public Review(User user, Submission submission, ReviewDto reviewDto) {
-        this.id = reviewDto.getId();
-        this.key = reviewDto.getKey();
         this.justification = reviewDto.getJustification();
         this.status = reviewDto.getStatus();
         this.user = user;
@@ -71,14 +66,6 @@ public class Review {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getKey() {
-        return key;
-    }
-
-    public void setKey(Integer key) {
-        this.key = key;
     }
 
     public Integer getStudentId() {
