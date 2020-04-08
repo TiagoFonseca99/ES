@@ -196,7 +196,14 @@ let router = new Router({
             requiredAuth: 'Student'
           }
         },
-
+        {
+          path: 'open',
+          name: 'open-tournament',
+          component: OpenTournamentView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Tournament',
+            requiredAuth: 'Student'
+          }
         }
       ]
     },
