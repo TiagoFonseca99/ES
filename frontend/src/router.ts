@@ -24,6 +24,7 @@ import NotFoundView from './views/NotFoundView.vue';
 import ImpExpView from '@/views/teacher/impexp/ImpExpView.vue';
 import AssessmentsView from '@/views/teacher/assessments/AssessmentsView.vue';
 import CreateQuizzesView from '@/views/student/CreateQuizzesView.vue';
+import SubmissionView from './views/student/questions/SubmissionView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
 
 Vue.use(Router);
@@ -182,6 +183,15 @@ let router = new Router({
           component: ScanView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Scan',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'submissions',
+          name: 'submissions',
+          component: SubmissionView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Create Submission',
             requiredAuth: 'Student'
           }
         }

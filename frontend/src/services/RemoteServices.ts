@@ -14,6 +14,7 @@ import AuthDto from '@/models/user/AuthDto';
 import StatementAnswer from '@/models/statement/StatementAnswer';
 import { QuizAnswer } from '@/models/management/QuizAnswer';
 import { QuizAnswers } from '@/models/management/QuizAnswers';
+import Submission from '@/models/management/Submission';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 10000;
@@ -540,6 +541,30 @@ export default class RemoteServices {
       .post('/admin/courses/executions', course)
       .then(response => {
         return new Course(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async submitQuestion(submission: Submission): Promise<Submission> {
+    return httpClient
+      .post('/student/submissions', submission)
+      .then(response => {
+        return new Submission(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getSubmissions(): Promise<Submission[]> {
+    return httpClient
+      .get('/student/submissions')
+      .then(response => {
+        return response.data.map((submission: any) => {
+          return new Submission(submission);
+        });
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
