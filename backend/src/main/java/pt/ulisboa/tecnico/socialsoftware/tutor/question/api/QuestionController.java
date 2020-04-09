@@ -101,7 +101,7 @@ public class QuestionController {
     }
 
     @PutMapping("/questions/{questionId}/image")
-    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#questionId, 'QUESTION.ACCESS')")
+    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#questionId, 'QUESTION.ACCESS') or hasRole('ROLE_STUDENT')")
     public String uploadImage(@PathVariable Integer questionId, @RequestParam("file") MultipartFile file) throws IOException {
         logger.debug("uploadImage  questionId: {}: , filename: {}", questionId, file.getContentType());
 
