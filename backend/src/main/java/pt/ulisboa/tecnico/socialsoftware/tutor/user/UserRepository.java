@@ -20,6 +20,4 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query(value = "select MAX(id) from users", nativeQuery = true)
     Integer getMaxUserNumber();
 
-    @Query(value = "select * from users u where u.id = :userId", nativeQuery = true)
-    List<Submission> getSubmissions(Integer userId);
 }
