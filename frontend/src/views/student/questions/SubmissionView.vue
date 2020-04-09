@@ -93,7 +93,7 @@ import EditSubmissionDialog from '@/views/student/questions/EditSubmissionDialog
     'edit-submission-dialog': EditSubmissionDialog
   }
 })
-export default class QuestionsView extends Vue {
+export default class SubmissionView extends Vue {
   submissions: Submission[] = [];
   currentQuestion: Question | null = null;
   editSubmissionDialog: boolean = false;
