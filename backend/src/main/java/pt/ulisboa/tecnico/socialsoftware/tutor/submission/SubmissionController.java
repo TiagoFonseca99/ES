@@ -44,7 +44,7 @@ public class SubmissionController {
         return submissionService.createSubmission(question.getId(), submissionDto);
     }
 
-    @PostMapping(value = "/submissions/reviews/{status}")
+    @PostMapping(value = "/management/reviews/{status}")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ReviewDto createReview(Principal principal, @RequestBody ReviewDto reviewDto, @PathVariable Review.Status status) {
         User user = (User) ((Authentication) principal).getPrincipal();
