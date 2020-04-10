@@ -28,7 +28,9 @@
 
       <template v-slot:item.questionDto.content="{ item }">
         <p
-          v-html="convertMarkDownNoFigure(item.questionDto.content, null)"
+          v-html="
+            convertMarkDown(item.questionDto.content, item.questionDto.image)
+          "
           @click="showQuestionDialog(item.questionDto)"
       /></template>
 
@@ -81,7 +83,7 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
-import { convertMarkDownNoFigure } from '@/services/ConvertMarkdownService';
+import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
 import Image from '@/models/management/Image';
@@ -150,8 +152,8 @@ export default class SubmissionView extends Vue {
     );
   }
 
-  convertMarkDownNoFigure(text: string, image: Image | null = null): string {
-    return convertMarkDownNoFigure(text, image);
+  convertMarkDown(text: string, image: Image | null = null): string {
+    return convertMarkDown(text, image);
   }
 
   async handleFileUpload(event: File, question: Question) {

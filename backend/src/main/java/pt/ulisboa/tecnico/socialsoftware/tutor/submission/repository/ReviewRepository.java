@@ -15,6 +15,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     @Query(value = "SELECT * FROM reviews r WHERE r.submission_id = :submissionId", nativeQuery = true)
     List<Review> getSubmissionStatus(int submissionId);
 
-    @Query(value = "SELECT * FROM reviews r WHERE r.studentId = :studentId", nativeQuery = true)
+    @Query(value = "SELECT * FROM reviews r WHERE r.student_id = :studentId", nativeQuery = true)
     List<Review> getSubmissionReviews(int studentId);
 }
