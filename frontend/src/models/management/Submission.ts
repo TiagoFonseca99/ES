@@ -6,7 +6,6 @@ export default class Submission {
   questionDto!: Question;
   studentId: number | null = null;
 
-
   constructor(jsonObj?: Submission) {
     if (jsonObj) {
       this.id = jsonObj.id;
