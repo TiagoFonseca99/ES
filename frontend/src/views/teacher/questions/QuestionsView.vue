@@ -88,7 +88,7 @@
           </template>
           <span>Show Question</span>
         </v-tooltip>
-        <v-tooltip bottom>
+        <v-tooltip bottom v-if="item.numberOfAnswers === 0">
           <template v-slot:activator="{ on }">
             <v-icon small class="mr-2" v-on="on" @click="editQuestion(item)"
               >edit</v-icon
@@ -131,7 +131,7 @@
     />
     <show-question-dialog
       v-if="currentQuestion"
-      :dialog="questionDialog"
+      v-model="questionDialog"
       :question="currentQuestion"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
     />
@@ -163,7 +163,7 @@ export default class QuestionsView extends Vue {
   editQuestionDialog: boolean = false;
   questionDialog: boolean = false;
   search: string = '';
-  statusList = ['DISABLED', 'AVAILABLE', 'REMOVED'];
+  statusList = ['DISABLED', 'AVAILABLE', 'REMOVED', 'SUBMITTED'];
 
   headers: object = [
     { text: 'Title', value: 'title', align: 'center' },
@@ -273,6 +273,7 @@ export default class QuestionsView extends Vue {
   getStatusColor(status: string) {
     if (status === 'REMOVED') return 'red';
     else if (status === 'DISABLED') return 'orange';
+    else if (status === 'SUBMITTED') return 'pink';
     else return 'green';
   }
 

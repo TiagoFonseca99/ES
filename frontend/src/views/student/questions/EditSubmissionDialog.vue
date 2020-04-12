@@ -9,11 +9,7 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          {{
-            editQuestion && editQuestion.id === null
-              ? 'New Question'
-              : 'Edit Question'
-          }}
+          {{ 'Submit Question' }}
         </span>
       </v-card-title>
 
@@ -28,7 +24,7 @@
                 outline
                 rows="10"
                 v-model="editQuestion.content"
-                label="Question"
+                label="Content"
               ></v-textarea>
             </v-flex>
             <v-flex
@@ -47,7 +43,7 @@
                 outline
                 rows="10"
                 v-model="editQuestion.options[index - 1].content"
-                :label="`Option ${index}`"
+                label="Content"
               ></v-textarea>
             </v-flex>
           </v-layout>
@@ -59,7 +55,7 @@
         <v-btn color="blue darken-1" @click="$emit('dialog', false)"
           >Cancel</v-btn
         >
-        <v-btn color="blue darken-1" @click="saveQuestion">Save</v-btn>
+        <v-btn color="blue darken-1" @click="submitQuestion">Submit</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -69,28 +65,23 @@
 import { Component, Model, Prop, Vue } from 'vue-property-decorator';
 import Question from '@/models/management/Question';
 import RemoteServices from '@/services/RemoteServices';
+import Submission from '@/models/management/Submission';
 
 @Component
-export default class EditQuestionDialog extends Vue {
+export default class EditSubmissionDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
   @Prop({ type: Question, required: true }) readonly question!: Question;
 
   editQuestion!: Question;
+  currentSubmission!: Submission;
 
   created() {
     this.editQuestion = new Question(this.question);
+    this.editQuestion.status = 'SUBMITTED';
+    this.currentSubmission = new Submission();
   }
 
-  // TODO use EasyMDE with these configs
-  // markdownConfigs: object = {
-  //   status: false,
-  //   spellChecker: false,
-  //   insertTexts: {
-  //     image: ['![image][image]', '']
-  //   }
-  // };
-
-  async saveQuestion() {
+  async submitQuestion() {
     if (
       this.editQuestion &&
       (!this.editQuestion.title || !this.editQuestion.content)
@@ -102,20 +93,15 @@ export default class EditQuestionDialog extends Vue {
       return;
     }
 
-    if (this.editQuestion && this.editQuestion.id != null) {
-      try {
-        const result = await RemoteServices.updateQuestion(this.editQuestion);
-        this.$emit('save-question', result);
-      } catch (error) {
-        await this.$store.dispatch('error', error);
-      }
-    } else if (this.editQuestion) {
-      try {
-        const result = await RemoteServices.createQuestion(this.editQuestion);
-        this.$emit('save-question', result);
-      } catch (error) {
-        await this.$store.dispatch('error', error);
-      }
+    try {
+      this.currentSubmission.questionDto = this.editQuestion;
+      this.currentSubmission.courseId = this.$store.getters.getCurrentCourse.courseId;
+      const result = await RemoteServices.submitQuestion(
+        this.currentSubmission
+      );
+      this.$emit('submit-question', result);
+    } catch (error) {
+      await this.$store.dispatch('error', error);
     }
   }
 }

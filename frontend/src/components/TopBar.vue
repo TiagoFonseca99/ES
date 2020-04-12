@@ -147,6 +147,29 @@
           </v-list>
         </v-menu>
 
+        <!-- ---- PPA ---- -->
+
+        <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" text dark>
+              Questions
+              <v-icon>fas fa-question-circle</v-icon>
+            </v-btn>
+          </template>
+          <v-list dense>
+            <v-list-item to="/student/submissions">
+              <v-list-item-action>
+                <v-icon>fas fa-user-edit</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Submissions</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
+        <!-- ------------- -->
+
         <v-btn to="/student/stats" v-if="isStudent && currentCourse" text dark>
           Stats
           <v-icon>fas fa-user</v-icon>
@@ -332,6 +355,17 @@
             </v-list-item-action>
             <v-list-item-content>Solved Quizzes</v-list-item-content>
           </v-list-item>
+
+          <!-- ----PPA---- -->
+
+          <v-list-item to="/student/submissions">
+            <v-list-item-action>
+              <v-icon>fas fa-user-edit</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Submissions</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
 
           <v-list-item to="/student/stats">
             <v-list-item-action>

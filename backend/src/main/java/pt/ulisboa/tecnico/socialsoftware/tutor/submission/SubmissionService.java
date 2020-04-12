@@ -92,7 +92,7 @@ public class SubmissionService {
         if(studentId == null)
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
 
-        return userRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
+        return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
 
     @Retryable(
