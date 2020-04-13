@@ -590,6 +590,20 @@ export default class RemoteServices {
       });
   }
 
+  static async getDiscussion(
+    userId: number,
+    questionId: number
+  ): Promise<Discussion> {
+    return httpClient
+      .get('/discussions?userId=' + userId + '&questionId=' + questionId)
+      .then(response => {
+        return new Discussion(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async exportAll() {
     return httpClient
       .get('/admin/export', {

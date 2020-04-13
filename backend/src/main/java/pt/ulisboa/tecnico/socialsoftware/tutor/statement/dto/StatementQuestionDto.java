@@ -1,15 +1,17 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 public class StatementQuestionDto implements Serializable {
-    private Integer questionId;
+    private QuestionDto question;
+    private DiscussionDto discussion;
     private Integer quizQuestionId;
     private String content;
     private List<StatementOptionDto> options;
@@ -21,29 +23,45 @@ public class StatementQuestionDto implements Serializable {
         if (questionAnswer.getQuizQuestion().getQuestion().getImage() != null) {
             this.image = new ImageDto(questionAnswer.getQuizQuestion().getQuestion().getImage());
         }
-        this.questionId = questionAnswer.getQuizQuestion().getQuestion().getId();
+        this.setQuestion(new QuestionDto(questionAnswer.getQuizQuestion().getQuestion()));
         this.quizQuestionId = questionAnswer.getQuizQuestion().getId();
-        this.options = questionAnswer.getQuizQuestion().getQuestion().getOptions().stream().map(StatementOptionDto::new).collect(Collectors.toList());
+        this.options = questionAnswer.getQuizQuestion().getQuestion().getOptions().stream().map(StatementOptionDto::new)
+                .collect(Collectors.toList());
         this.sequence = questionAnswer.getSequence();
+
+        // There will be only 1 due to restrictions on the database, findFirst is correct
+        this.discussion = questionAnswer.getQuizQuestion().getQuestion().getDiscussions().stream()
+                .filter(questionAnswer.getQuizAnswer().getUser().getDiscussions()::contains)
+            .map(DiscussionDto::new)
+            .findFirst()
+            .orElse(null);
+    }
+
+    public DiscussionDto getDiscussion() {
+        return discussion;
+    }
+
+    public void setDiscussion(DiscussionDto discussion) {
+        this.discussion = discussion;
+    }
+
+    public QuestionDto getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(QuestionDto question) {
+        this.question = question;
     }
 
     public Integer getQuizQuestionId() {
-		return quizQuestionId;
-	}
+        return quizQuestionId;
+    }
 
-	public void setQuizQuestionId(Integer quizQuestionId) {
-		this.quizQuestionId = quizQuestionId;
-	}
+    public void setQuizQuestionId(Integer quizQuestionId) {
+        this.quizQuestionId = quizQuestionId;
+    }
 
-	public Integer getQuestionId() {
-		return questionId;
-	}
-
-	public void setQuestionId(Integer questionId) {
-		this.questionId = questionId;
-	}
-
-	public String getContent() {
+    public String getContent() {
         return content;
     }
 
@@ -77,11 +95,7 @@ public class StatementQuestionDto implements Serializable {
 
     @Override
     public String toString() {
-        return "StatementQuestionDto{" +
-                ", content='" + content + '\'' +
-                ", options=" + options +
-                ", image=" + image +
-                ", sequence=" + sequence +
-                '}';
+        return "StatementQuestionDto{" + ", content='" + content + '\'' + ", options=" + options + ", image=" + image
+                + ", sequence=" + sequence + '}';
     }
 }

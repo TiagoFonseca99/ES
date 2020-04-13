@@ -64,7 +64,7 @@ public class User implements UserDetails, DomainEntity {
     @ManyToMany
     private Set<CourseExecution> courseExecutions = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "question", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Discussion> discussions = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "teacher", fetch=FetchType.LAZY, orphanRemoval=true)
@@ -481,7 +481,11 @@ public class User implements UserDetails, DomainEntity {
     }
 
     public void addDiscussion(Discussion discussion){
-        discussions.add(discussion);
+        this.discussions.add(discussion);
+    }
+
+    public Set<Discussion> getDiscussions() {
+        return this.discussions;
     }
 
     public void addReply(Reply reply) {

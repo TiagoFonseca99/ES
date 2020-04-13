@@ -37,11 +37,11 @@ public class Discussion {
         checkConsistentDiscussion(discussionDto);
         this.content = discussionDto.getContent();
         this.question = question;
-        question.addDiscussion(this);
         this.user = user;
-        user.addDiscussion(this);
         discussionId.setQuestionId(question.getId());
         discussionId.setUserId(user.getId());
+        question.addDiscussion(this);
+        user.addDiscussion(this);
     }
 
     public String getContent() {
@@ -90,5 +90,13 @@ public class Discussion {
         if(discussionDto.getContent().trim().length() == 0){
             throw new TutorException(DISCUSSION_MISSING_DATA);
         }
+    }
+
+    public boolean equals(Object o) {
+        if (o instanceof Discussion) {
+            return this.discussionId.equals(((Discussion) o).getId()) && this.content == ((Discussion) o).getContent();
+        }
+
+        return false;
     }
 }
