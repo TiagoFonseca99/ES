@@ -20,7 +20,11 @@
           />
 
           <v-spacer />
-          <v-btn color="primary" dark @click="submitQuestion"
+          <v-btn
+            color="primary"
+            dark
+            @click="submitQuestion"
+            data-cy="submitQuestion"
             >Submit Question</v-btn
           >
         </v-card-title>

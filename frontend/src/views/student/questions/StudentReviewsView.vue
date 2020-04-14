@@ -5,6 +5,7 @@
       <li class="list-header">
         <div class="col">Question Title</div>
         <div class="col">Creation Date</div>
+        <div class="col">Review Date</div>
         <div class="col">Status</div>
         <div class="col">Justification</div>
       </li>
@@ -14,6 +15,9 @@
         </div>
         <div class="col" @click="showQuestionDialog(getSubmission(review))">
           {{ getSubmission(review).creationDate }}
+        </div>
+        <div class="col" @click="showQuestionDialog(getSubmission(review))">
+          {{ review.creationDate }}
         </div>
         <div class="col" @click="showQuestionDialog(getSubmission(review))">
           <v-chip :color="getStatusColor(review.status)" small>
@@ -74,7 +78,7 @@ export default class ReviewView extends Vue {
         RemoteServices.getSubmissionReviews(),
         RemoteServices.getSubmissions()
       ]);
-      this.reviews.sort((a, b) => (a.status > b.status ? 1 : -1));
+      this.reviews.sort((a, b) => (a.creationDate < b.creationDate ? 1 : -1));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

@@ -31,6 +31,35 @@ Cypress.Commands.add('demoAdminLogin', () => {
     cy.contains('Manage Courses').click()
 })
 
+Cypress.Commands.add('demoStudentLogin1', () => {
+    cy.visit('/')
+    cy.get('[data-cy="studentButton"]').click()
+    cy.contains('Questions').click()
+    cy.contains('Submissions').click()
+})
+
+
+Cypress.Commands.add('submitQuestion', (title, content, opt1, opt2, opt3, opt4) => {
+
+    cy.get('[data-cy="submitQuestion"]').click()
+    cy.get('[data-cy="QuestionTitle"]').type(title)
+    cy.get('[data-cy="QuestionContent"]').type(content)
+    cy.get('[data-cy="Switch1"]').click( {force: true})
+    cy.get('[data-cy="Option1"]').type(opt1)
+    cy.get('[data-cy="Option2"]').type(opt2)
+    cy.get('[data-cy="Option3"]').type(opt3)
+    cy.get('[data-cy="Option4"]').type(opt4)
+    cy.get('[data-cy="submitButton"]').click()
+})
+
+Cypress.Commands.add('submitInvalidQuestion', (title, content) => {
+
+    cy.get('[data-cy="submitQuestion"]').click()
+    cy.get('[data-cy="QuestionTitle"]').type(title)
+    cy.get('[data-cy="QuestionContent"]').type(content)
+    cy.get('[data-cy="submitButton"]').click()
+})
+
 Cypress.Commands.add('createCourseExecution', (name, acronym, academicTerm) => {
     cy.get('[data-cy="createButton"]').click()
     cy.get('[data-cy="Name"]').type(name)

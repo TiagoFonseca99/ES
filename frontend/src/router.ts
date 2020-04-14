@@ -25,7 +25,7 @@ import ImpExpView from '@/views/teacher/impexp/ImpExpView.vue';
 import AssessmentsView from '@/views/teacher/assessments/AssessmentsView.vue';
 import CreateQuizzesView from '@/views/student/CreateQuizzesView.vue';
 import SubmissionView from './views/student/questions/SubmissionView.vue';
-import ReviewView from './views/student/questions/ReviewView.vue';
+import ReviewView from './views/student/questions/StudentReviewsView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
 
 Vue.use(Router);
