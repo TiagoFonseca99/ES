@@ -163,7 +163,7 @@ export default class QuestionsView extends Vue {
   editQuestionDialog: boolean = false;
   questionDialog: boolean = false;
   search: string = '';
-  statusList = ['DISABLED', 'AVAILABLE', 'REMOVED', 'SUBMITTED'];
+  statusList = ['DISABLED', 'AVAILABLE', 'REMOVED'];
 
   headers: object = [
     { text: 'Title', value: 'title', align: 'center' },
@@ -220,6 +220,7 @@ export default class QuestionsView extends Vue {
         RemoteServices.getTopics(),
         RemoteServices.getQuestions()
       ]);
+      this.questions = this.questions.filter(q => q.status !== 'SUBMITTED');
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -273,7 +274,6 @@ export default class QuestionsView extends Vue {
   getStatusColor(status: string) {
     if (status === 'REMOVED') return 'red';
     else if (status === 'DISABLED') return 'orange';
-    else if (status === 'SUBMITTED') return 'pink';
     else return 'green';
   }
 

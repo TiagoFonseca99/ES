@@ -5,7 +5,7 @@
       <v-data-table
         :headers="headers"
         :search="searchSubmissions"
-        :items="submissions"
+        :items="submissions.filter(s => s.questionDto.status === 'SUBMITTED')"
         :mobile-breakpoint="0"
         :items-per-page="4"
         multi-sort
