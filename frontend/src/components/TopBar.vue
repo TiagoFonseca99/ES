@@ -175,6 +175,33 @@
           <v-icon>fas fa-user</v-icon>
         </v-btn>
 
+        <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" text dark>
+              Tournaments
+              <v-icon>fas fa-trophy</v-icon>
+            </v-btn>
+          </template>
+          <v-list dense>
+            <v-list-item to="/student/open">
+              <v-list-item-action>
+                <v-icon>fas fa-medal</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Open</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item to="/student/all">
+              <v-list-item-action>
+                <v-icon>fas fa-calendar</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>All</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
         <v-btn
           v-if="isLoggedIn && moreThanOneCourse"
           to="/courses"
@@ -336,6 +363,24 @@
               <v-icon>fas fa-user-edit</v-icon>
             </v-list-item-action>
             <v-list-item-content>Submissions</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
+
+          <!-- ----TDP---- -->
+
+          <v-list-item to="/student/open">
+            <v-list-item-action>
+              <v-icon>fas fa-medal</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Open Tournaments</v-list-item-content>
+          </v-list-item>
+
+          <v-list-item to="/student/all">
+            <v-list-item-action>
+              <v-icon>fas fa-calendar</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>All Tournaments</v-list-item-content>
           </v-list-item>
 
           <!-- ----------- -->

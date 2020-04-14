@@ -12,6 +12,9 @@ import TopicsView from '@/views/teacher/TopicsView.vue';
 import QuizzesView from '@/views/teacher/quizzes/QuizzesView.vue';
 import StudentsView from '@/views/teacher/students/StudentsView.vue';
 import StudentView from '@/views/student/StudentView.vue';
+
+import AllTournamentView from './views/student/tournament/AllTournamentView.vue';
+import OpenTournamentView from './views/student/tournament/OpenTournamentView.vue';
 import AvailableQuizzesView from '@/views/student/AvailableQuizzesView.vue';
 import SolvedQuizzesView from '@/views/student/SolvedQuizzesView.vue';
 import QuizView from '@/views/student/quiz/QuizView.vue';
@@ -183,6 +186,24 @@ let router = new Router({
           component: ScanView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Scan',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'all',
+          name: 'all-tournament',
+          component: AllTournamentView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Tournament',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'open',
+          name: 'open-tournament',
+          component: OpenTournamentView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Tournament',
             requiredAuth: 'Student'
           }
         },
