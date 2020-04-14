@@ -367,6 +367,24 @@
 
           <!-- ----------- -->
 
+          <!-- ----TDP---- -->
+
+          <v-list-item to="/student/open">
+            <v-list-item-action>
+              <v-icon>fas fa-medal</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Open Tournaments</v-list-item-content>
+          </v-list-item>
+
+          <v-list-item to="/student/all">
+            <v-list-item-action>
+              <v-icon>fas fa-calendar</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>All Tournaments</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
+
           <v-list-item to="/student/stats">
             <v-list-item-action>
               <v-icon>fas fa-user</v-icon>
