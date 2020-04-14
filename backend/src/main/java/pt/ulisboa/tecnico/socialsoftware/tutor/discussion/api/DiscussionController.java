@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.api;
 
 import java.security.Principal;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -71,7 +72,7 @@ public class DiscussionController {
 
     @GetMapping(value = "/discussions")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public DiscussionDto getDiscussion(Principal principal, @Valid @RequestParam Integer userId, @Valid @RequestParam Integer questionId){
+    public List<DiscussionDto> getDiscussions(Principal principal, @Valid @RequestParam Integer userId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
@@ -80,6 +81,6 @@ public class DiscussionController {
             throw new TutorException(ErrorMessage.DISCUSSION_NOT_SUBMITTED_BY_REQUESTER, user.getId());
         }
 
-        return discussionService.findDiscussionByUserIdAndQuestionId(userId, questionId);
+        return discussionService.findDiscussionsByUserId(userId);
     }
 }
