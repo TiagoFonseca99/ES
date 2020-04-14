@@ -68,4 +68,18 @@ public class DiscussionController {
 
         return discussionService.giveReply(reply, discussion);
     }
+
+    @GetMapping(value = "/discussions")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public DiscussionDto getDiscussion(Principal principal, @Valid @RequestParam Integer userId, @Valid @RequestParam Integer questionId){
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }else if(!user.getId().equals(userId)){
+            throw new TutorException(ErrorMessage.DISCUSSION_NOT_SUBMITTED_BY_REQUESTER, user.getId());
+        }
+
+        return discussionService.findDiscussionByUserIdAndQuestionId(userId, questionId);
+    }
 }

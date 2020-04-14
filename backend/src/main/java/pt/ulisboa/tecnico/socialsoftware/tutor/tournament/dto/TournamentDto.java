@@ -20,6 +20,7 @@ public class TournamentDto implements Serializable {
     private Tournament.Status state;
     private List<TopicDto> topics = new ArrayList<>();
     private List<UserDto> participants = new ArrayList<>();
+    private String courseAcronym = null;
 
     @Transient
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -40,6 +41,7 @@ public class TournamentDto implements Serializable {
         this.state = tournament.getState();
         this.topics = tournament.getTopics().stream().map(TopicDto::new).collect(Collectors.toList());
         this.participants = tournament.getParticipants().stream().map(UserDto::new).collect(Collectors.toList());
+        this.courseAcronym = tournament.getCourseExecution().getAcronym();
 
     }
 
@@ -85,6 +87,14 @@ public class TournamentDto implements Serializable {
 
     public List<UserDto> getParticipants() {
         return participants;
+    }
+
+    public String getCourseAcronym() {
+        return courseAcronym;
+    }
+
+    public void setCourseAcronym(String couseAcronym) {
+        this.courseAcronym = couseAcronym;
     }
 
     public LocalDateTime getStartTimeDate() {

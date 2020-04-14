@@ -61,7 +61,7 @@ public class TournamentController {
         return tournamentService.getOpenedTournaments();
     }
 
-    @GetMapping(value = "/tournaments/joinTournament")
+    @PostMapping(value = "/tournaments/joinTournament")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
     public void joinTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
