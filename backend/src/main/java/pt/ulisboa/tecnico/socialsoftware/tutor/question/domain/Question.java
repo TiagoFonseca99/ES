@@ -352,4 +352,7 @@ public class Question implements DomainEntity {
         this.discussions.add(discussion);
     }
 
+    public Set<Discussion> getDiscussions() {
+        return this.discussions;
+    }
 }

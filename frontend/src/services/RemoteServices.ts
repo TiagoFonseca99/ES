@@ -14,6 +14,7 @@ import AuthDto from '@/models/user/AuthDto';
 import StatementAnswer from '@/models/statement/StatementAnswer';
 import { QuizAnswers } from '@/models/management/QuizAnswers';
 import Submission from '@/models/management/Submission';
+import Discussion from '@/models/management/Discussion';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 10000;
@@ -573,6 +574,31 @@ export default class RemoteServices {
   static async deleteCourse(courseExecutionId: number | undefined) {
     return httpClient
       .delete('/admin/courses/executions/' + courseExecutionId)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async createDiscussion(discussion: Discussion): Promise<Discussion> {
+    return httpClient
+      .post('/discussions', discussion)
+      .then(response => {
+        return new Discussion(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getDiscussion(
+    userId: number,
+    questionId: number
+  ): Promise<Discussion> {
+    return httpClient
+      .get('/discussions?userId=' + userId + '&questionId=' + questionId)
+      .then(response => {
+        return new Discussion(response.data);
+      })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });

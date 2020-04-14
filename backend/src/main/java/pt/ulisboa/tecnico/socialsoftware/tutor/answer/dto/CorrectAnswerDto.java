@@ -7,13 +7,23 @@ import java.io.Serializable;
 public class CorrectAnswerDto implements Serializable {
     private Integer correctOptionId;
     private Integer sequence;
+    private Integer quizQuestionId;
 
     public CorrectAnswerDto(QuestionAnswer questionAnswer) {
         this.correctOptionId = questionAnswer.getQuizQuestion().getQuestion().getCorrectOptionId();
         this.sequence = questionAnswer.getSequence();
+        this.setQuizQuestionId(questionAnswer.getQuizQuestion().getId());
     }
 
-    public Integer getCorrectOptionId() {
+    public Integer getQuizQuestionId() {
+		return quizQuestionId;
+	}
+
+	public void setQuizQuestionId(Integer quizQuestionId) {
+		this.quizQuestionId = quizQuestionId;
+	}
+
+	public Integer getCorrectOptionId() {
         return correctOptionId;
     }
 

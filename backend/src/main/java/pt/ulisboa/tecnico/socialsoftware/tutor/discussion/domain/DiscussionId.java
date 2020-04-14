@@ -35,13 +35,11 @@ public class DiscussionId implements Serializable {
     }
 
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (!(o instanceof DiscussionId)) {
+        if (!(o instanceof DiscussionId)) {
             return false;
         }
 
-        return ((DiscussionId) o).getQuestionId() == questionId && ((DiscussionId) o).getUserId() == userId;
+        return ((DiscussionId) o).getQuestionId() == this.questionId && ((DiscussionId) o).getUserId() == this.userId;
     }
 
     public int hashCode() {
