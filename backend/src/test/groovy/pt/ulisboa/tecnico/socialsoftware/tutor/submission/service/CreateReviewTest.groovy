@@ -35,6 +35,8 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.US
 class CreateReviewTest extends Specification {
 
     public static final String COURSE_NAME = "Arquitetura de Software"
+    public static final String APPROVED = 'APPROVED'
+    public static final String REJECTED = 'REJECTED'
     public static final String QUESTION_TITLE = 'question title'
     public static final String QUESTION_CONTENT = 'question content'
     public static final String OPTION_CONTENT = "optionId content"
@@ -107,33 +109,16 @@ class CreateReviewTest extends Specification {
 
     }
 
-
-    def "create review to an approved review"() {
-
-        given: "a review"
-        def reviewDto = new ReviewDto()
-        reviewDto.setStatus(Review.Status.APPROVED)
-        reviewDto.setJustification(REVIEW_JUSTIFICATION)
-        reviewDto.setSubmissionId(submission.getId())
-        reviewDto.setStudentId(submission.getStudentId())
-
-        when: submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
-
-        then: "exception is thrown"
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.QUESTION_ALREADY_APPROVED
-
-    }
-
     def "create review that approves question with justification"() {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
+        reviewDto.setStatus(APPROVED)
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
-        when: submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.APPROVED)
+        when: submissionService.reviewSubmission(teacher.getId(), reviewDto)
 
         then: "the service is in the repository"
         reviewRepository.count() == 1L
@@ -150,10 +135,11 @@ class CreateReviewTest extends Specification {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
+        reviewDto.setStatus(APPROVED)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
-        when: submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
+        when: submissionService.reviewSubmission(teacher.getId(), reviewDto)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
@@ -166,12 +152,13 @@ class CreateReviewTest extends Specification {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
+        reviewDto.setStatus(REJECTED)
         reviewDto.setImageDto(new ImageDto(image))
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
-        when: submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED)
+        when: submissionService.reviewSubmission(teacher.getId(), reviewDto)
 
         then: "the service is in the repository"
         reviewRepository.count() == 1L
@@ -192,10 +179,11 @@ class CreateReviewTest extends Specification {
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
         reviewDto.setJustification(REVIEW_JUSTIFICATION)
+        reviewDto.setStatus(REJECTED)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
 
-        when: submissionService.reviewSubmission(student.getId(), reviewDto, Review.Status.REJECTED)
+        when: submissionService.reviewSubmission(student.getId(), reviewDto)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
@@ -208,25 +196,26 @@ class CreateReviewTest extends Specification {
 
         given: "a reviewDto"
         def reviewDto = new ReviewDto()
+        reviewDto.setStatus(status)
         reviewDto.setJustification(justification)
         reviewDto.setSubmissionId(submissionId)
         if(_student != null)
             reviewDto.setStudentId(_student.getId())
 
-        when: submissionService.reviewSubmission(teacherId, reviewDto, status)
+        when: submissionService.reviewSubmission(teacherId, reviewDto)
 
         then: "a TutorException is thrown"
         def exception = thrown(TutorException)
         exception.errorMessage == errorMessage
 
         where:
-        justification        | submissionId       | _student                | teacherId        | status                 || errorMessage
-        null                 | submission.getId() | submission.getUser()    | teacher.getId()  | Review.Status.APPROVED || REVIEW_MISSING_JUSTIFICATION
-        "  "                 | submission.getId() | submission.getUser()    | teacher.getId()  | Review.Status.APPROVED || REVIEW_MISSING_JUSTIFICATION
-        REVIEW_JUSTIFICATION | null               | submission.getUser()    | teacher.getId()  | Review.Status.APPROVED || REVIEW_MISSING_SUBMISSION
-        REVIEW_JUSTIFICATION | submission.getId() | null                    | teacher.getId()  | Review.Status.APPROVED || REVIEW_MISSING_STUDENT
-        REVIEW_JUSTIFICATION | submission.getId() | submission.getUser()    | null             | Review.Status.APPROVED || USER_NOT_FOUND
-        REVIEW_JUSTIFICATION | submission.getId() | submission.getUser()    | teacher.getId()  | null                   || REVIEW_MISSING_STATUS
+        justification        | submissionId       | _student                | teacherId        | status   || errorMessage
+        null                 | submission.getId() | submission.getUser()    | teacher.getId()  | APPROVED || REVIEW_MISSING_JUSTIFICATION
+        "  "                 | submission.getId() | submission.getUser()    | teacher.getId()  | APPROVED || REVIEW_MISSING_JUSTIFICATION
+        REVIEW_JUSTIFICATION | null               | submission.getUser()    | teacher.getId()  | APPROVED || REVIEW_MISSING_SUBMISSION
+        REVIEW_JUSTIFICATION | submission.getId() | null                    | teacher.getId()  | APPROVED || REVIEW_MISSING_STUDENT
+        REVIEW_JUSTIFICATION | submission.getId() | submission.getUser()    | null             | APPROVED || USER_NOT_FOUND
+        REVIEW_JUSTIFICATION | submission.getId() | submission.getUser()    | teacher.getId()  | null     || REVIEW_MISSING_STATUS
 
     }
 

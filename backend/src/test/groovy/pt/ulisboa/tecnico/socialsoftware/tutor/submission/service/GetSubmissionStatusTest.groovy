@@ -24,6 +24,8 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SU
 @DataJpaTest
 class GetSubmissionStatusTest extends Specification {
     public static final String COURSE_NAME = "Software Architecture"
+    public static final String APPROVED = 'APPROVED'
+    public static final String REJECTED = 'REJECTED'
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String QUESTION_TITLE1 = "Question1?"
@@ -89,13 +91,14 @@ class GetSubmissionStatusTest extends Specification {
         submissionRepository.save(submission)
     }
 
-    def "submission in review and check review status"(){
+    def "submission accepted and check review status"(){
         given: "a review"
         def reviewDto = new ReviewDto()
+        reviewDto.setStatus(APPROVED)
         reviewDto.setJustification(REVIEW_JUSTIFICATION1)
         reviewDto.setSubmissionId(submission.getId())
         reviewDto.setStudentId(submission.getStudentId())
-        submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.IN_REVIEW)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto,)
 
         when:
         def result = submissionService.getSubmissionStatus(submission.getId())
@@ -104,7 +107,7 @@ class GetSubmissionStatusTest extends Specification {
         result.size() == 1
         def subStatus = result.get(0)
         subStatus.getJustification() == REVIEW_JUSTIFICATION1
-        subStatus.getStatus() == Review.Status.IN_REVIEW
+        subStatus.getStatus() == APPROVED
         subStatus.getTeacherId() == teacher.getId()
         subStatus.getStudentId() == submission.getStudentId()
     }
@@ -112,17 +115,19 @@ class GetSubmissionStatusTest extends Specification {
     def "teacher approves submission twice and check review status"(){
         given: "an approved submission review"
         def reviewDto1 = new ReviewDto()
+        reviewDto1.setStatus(APPROVED)
         reviewDto1.setJustification(REVIEW_JUSTIFICATION1)
         reviewDto1.setSubmissionId(submission.getId())
         reviewDto1.setStudentId(submission.getStudentId())
-        submissionService.reviewSubmission(teacher.getId(), reviewDto1, Review.Status.APPROVED)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto1)
 
         and: "another approved submission review"
         def reviewDto2 = new ReviewDto()
+        reviewDto2.setStatus(APPROVED)
         reviewDto2.setJustification(REVIEW_JUSTIFICATION2)
         reviewDto2.setSubmissionId(submission.getId())
         reviewDto2.setStudentId(submission.getStudentId())
-        submissionService.reviewSubmission(teacher.getId(), reviewDto2, Review.Status.APPROVED)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto2)
 
         when:
         def result = submissionService.getSubmissionStatus(submission.getId())
@@ -133,8 +138,8 @@ class GetSubmissionStatusTest extends Specification {
         def subStatus2 = result.get(1)
         subStatus1.getJustification() == REVIEW_JUSTIFICATION1
         subStatus2.getJustification() == REVIEW_JUSTIFICATION2
-        subStatus1.getStatus() == Review.Status.APPROVED
-        subStatus2.getStatus() == Review.Status.APPROVED
+        subStatus1.getStatus() == APPROVED
+        subStatus2.getStatus() == APPROVED
         subStatus1.getTeacherId() == teacher.getId()
         subStatus2.getTeacherId() == teacher.getId()
         subStatus1.getStudentId() == submission.getStudentId()
@@ -144,17 +149,19 @@ class GetSubmissionStatusTest extends Specification {
     def "teacher approves and rejects 1 submission and check review status"(){
         given: "an approved submission review"
         def reviewDto1 = new ReviewDto()
+        reviewDto1.setStatus(APPROVED)
         reviewDto1.setJustification(REVIEW_JUSTIFICATION1)
         reviewDto1.setSubmissionId(submission.getId())
         reviewDto1.setStudentId(submission.getStudentId())
-        submissionService.reviewSubmission(teacher.getId(), reviewDto1, Review.Status.APPROVED)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto1)
 
         and: "a rejected submission review"
         def reviewDto2 = new ReviewDto()
+        reviewDto2.setStatus(REJECTED)
         reviewDto2.setJustification(REVIEW_JUSTIFICATION2)
         reviewDto2.setSubmissionId(submission.getId())
         reviewDto2.setStudentId(submission.getStudentId())
-        submissionService.reviewSubmission(teacher.getId(), reviewDto2, Review.Status.REJECTED)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto2)
 
         when:
         def result = submissionService.getSubmissionStatus(submission.getId())
@@ -165,8 +172,8 @@ class GetSubmissionStatusTest extends Specification {
         def subStatus2 = result.get(1)
         subStatus1.getJustification() == REVIEW_JUSTIFICATION1
         subStatus2.getJustification() == REVIEW_JUSTIFICATION2
-        subStatus1.getStatus() == Review.Status.APPROVED
-        subStatus2.getStatus() == Review.Status.REJECTED
+        subStatus1.getStatus() == APPROVED
+        subStatus2.getStatus() == REJECTED
         subStatus1.getTeacherId() == teacher.getId()
         subStatus2.getTeacherId() == teacher.getId()
         subStatus1.getStudentId() == submission.getStudentId()

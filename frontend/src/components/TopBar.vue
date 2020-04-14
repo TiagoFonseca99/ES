@@ -61,6 +61,14 @@
                 <v-list-item-title>Questions</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item to="/management/reviews">
+              <v-list-item-action>
+                <v-icon>create</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Reviews</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item to="/management/topics">
               <v-list-item-action>
                 <v-icon>category</v-icon>
@@ -163,6 +171,14 @@
               </v-list-item-action>
               <v-list-item-content>
                 <v-list-item-title>Submissions</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item to="/student/reviews">
+              <v-list-item-action>
+                <v-icon>fas fa-user-check</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Reviews</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list>
@@ -273,6 +289,14 @@
               <v-list-item-title>Questions</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+          <v-list-item to="/management/reviews">
+            <v-list-item-action>
+              <v-icon>create</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Reviews</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
           <v-list-item to="/management/topics">
             <v-list-item-action>
               <v-icon>category</v-icon>
@@ -363,6 +387,13 @@
               <v-icon>fas fa-user-edit</v-icon>
             </v-list-item-action>
             <v-list-item-content>Submissions</v-list-item-content>
+          </v-list-item>
+
+          <v-list-item to="/student/reviews">
+            <v-list-item-action>
+              <v-icon>fas fa-user-check</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Reviews</v-list-item-content>
           </v-list-item>
 
           <!-- ----------- -->

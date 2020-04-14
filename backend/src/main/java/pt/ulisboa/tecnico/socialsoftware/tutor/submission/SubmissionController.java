@@ -44,17 +44,44 @@ public class SubmissionController {
         return submissionService.createSubmission(question.getId(), submissionDto);
     }
 
-    @PostMapping(value = "/management/reviews/{status}")
+    @PostMapping(value = "/management/reviews")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public ReviewDto createReview(Principal principal, @RequestBody ReviewDto reviewDto, @PathVariable Review.Status status) {
+    public ReviewDto createReview(Principal principal, @RequestBody ReviewDto reviewDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        return submissionService.reviewSubmission(user.getId(), reviewDto, status);
+        reviewDto.setTeacherId(user.getId());
+
+        return submissionService.reviewSubmission(user.getId(), reviewDto);
     }
+
+    @GetMapping(value = "/management/reviews")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public List<SubmissionDto> getSubsToTeacher(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return submissionService.getSubsToTeacher();
+    }
+
+    @GetMapping(value = "/management/reviews/showReviews")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public List<ReviewDto> getReviewsToTeacher(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return submissionService.getReviewsToTeacher();
+    }
+
 
     @GetMapping(value = "/student/submissions/{submissionId}")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
@@ -65,6 +92,17 @@ public class SubmissionController {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
         return submissionService.getSubmissionStatus(submissionId);
+    }
+
+    @GetMapping(value = "/student/reviews")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public List<ReviewDto> getSubmissionReviews(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        return submissionService.getSubmissionReviews(user.getId());
     }
 
     @GetMapping(value = "/student/submissions")

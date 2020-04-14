@@ -20,7 +20,11 @@
           />
 
           <v-spacer />
-          <v-btn color="primary" dark @click="submitQuestion"
+          <v-btn
+            color="primary"
+            dark
+            @click="submitQuestion"
+            data-cy="submitQuestion"
             >Submit Question</v-btn
           >
         </v-card-title>
@@ -28,7 +32,9 @@
 
       <template v-slot:item.questionDto.content="{ item }">
         <p
-          v-html="convertMarkDownNoFigure(item.questionDto.content, null)"
+          v-html="
+            convertMarkDown(item.questionDto.content, item.questionDto.image)
+          "
           @click="showQuestionDialog(item.questionDto)"
       /></template>
 
@@ -81,7 +87,7 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
-import { convertMarkDownNoFigure } from '@/services/ConvertMarkdownService';
+import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
 import Image from '@/models/management/Image';
@@ -93,7 +99,7 @@ import EditSubmissionDialog from '@/views/student/questions/EditSubmissionDialog
     'edit-submission-dialog': EditSubmissionDialog
   }
 })
-export default class QuestionsView extends Vue {
+export default class SubmissionView extends Vue {
   submissions: Submission[] = [];
   currentQuestion: Question | null = null;
   editSubmissionDialog: boolean = false;
@@ -150,8 +156,8 @@ export default class QuestionsView extends Vue {
     );
   }
 
-  convertMarkDownNoFigure(text: string, image: Image | null = null): string {
-    return convertMarkDownNoFigure(text, image);
+  convertMarkDown(text: string, image: Image | null = null): string {
+    return convertMarkDown(text, image);
   }
 
   async handleFileUpload(event: File, question: Question) {

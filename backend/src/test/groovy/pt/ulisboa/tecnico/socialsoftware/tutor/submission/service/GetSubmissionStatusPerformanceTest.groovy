@@ -21,6 +21,8 @@ import spock.lang.Specification
 @DataJpaTest
 class GetSubmissionStatusPerformanceTest extends Specification {
     public static final String COURSE_NAME = "Software Architecture"
+    public static final String APPROVED = 'APPROVED'
+    public static final String REJECTED = 'REJECTED'
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String QUESTION_TITLE1 = "Question1?"
@@ -98,15 +100,18 @@ class GetSubmissionStatusPerformanceTest extends Specification {
             student.addSubmission(submission2)
             submissionRepository.save(submission2)
             def reviewDto1 = new ReviewDto()
+            reviewDto1.setStatus(APPROVED);
             reviewDto1.setJustification(REVIEW_JUSTIFICATION1)
             reviewDto1.setSubmissionId(submission1.getId())
             reviewDto1.setStudentId(submission1.getStudentId())
-            submissionService.reviewSubmission(teacher.getId(), reviewDto1, Review.Status.APPROVED)
+            submissionService.reviewSubmission(teacher.getId(), reviewDto1)
             def reviewDto2 = new ReviewDto()
+            reviewDto2.setStatus(APPROVED);
             reviewDto2.setJustification(REVIEW_JUSTIFICATION2)
             reviewDto2.setSubmissionId(submission2.getId())
             reviewDto2.setStudentId(submission2.getStudentId())
-            submissionService.reviewSubmission(teacher.getId(), reviewDto2, Review.Status.APPROVED)
+            submissionService.reviewSubmission(teacher.getId(), reviewDto2)
+
             submissionService.getSubmissionStatus(student.getId())
         })
 

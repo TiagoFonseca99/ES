@@ -1,7 +1,7 @@
 import Question from '@/models/management/Question';
 
 export default class Submission {
-  id: number | null = null;
+  id!: number;
   courseId: number | null = null;
   questionDto!: Question;
   studentId: number | null = null;

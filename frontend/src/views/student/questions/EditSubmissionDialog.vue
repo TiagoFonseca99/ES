@@ -17,7 +17,11 @@
         <v-container grid-list-md fluid>
           <v-layout column wrap>
             <v-flex xs24 sm12 md8>
-              <v-text-field v-model="editQuestion.title" label="Title" />
+              <v-text-field
+                v-model="editQuestion.title"
+                label="Title"
+                data-cy="QuestionTitle"
+              />
             </v-flex>
             <v-flex xs24 sm12 md12>
               <v-textarea
@@ -25,6 +29,7 @@
                 rows="10"
                 v-model="editQuestion.content"
                 label="Content"
+                data-cy="QuestionContent"
               ></v-textarea>
             </v-flex>
             <v-flex
@@ -38,12 +43,14 @@
                 v-model="editQuestion.options[index - 1].correct"
                 class="ma-4"
                 label="Correct"
+                v-bind:data-cy="'Switch' + index"
               />
               <v-textarea
                 outline
                 rows="10"
                 v-model="editQuestion.options[index - 1].content"
                 label="Content"
+                v-bind:data-cy="'Option' + index"
               ></v-textarea>
             </v-flex>
           </v-layout>
@@ -52,10 +59,18 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn color="blue darken-1" @click="$emit('dialog', false)"
+        <v-btn
+          color="blue darken-1"
+          @click="$emit('dialog', false)"
+          data-cy="cancelButton"
           >Cancel</v-btn
         >
-        <v-btn color="blue darken-1" @click="submitQuestion">Submit</v-btn>
+        <v-btn
+          color="blue darken-1"
+          @click="submitQuestion"
+          data-cy="submitButton"
+          >Submit</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-dialog>

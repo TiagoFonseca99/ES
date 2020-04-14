@@ -28,6 +28,8 @@ import ImpExpView from '@/views/teacher/impexp/ImpExpView.vue';
 import AssessmentsView from '@/views/teacher/assessments/AssessmentsView.vue';
 import CreateQuizzesView from '@/views/student/CreateQuizzesView.vue';
 import SubmissionView from './views/student/questions/SubmissionView.vue';
+import ReviewsView from './views/teacher/reviews/ReviewsView.vue';
+import StudentReviews from './views/student/questions/StudentReviewsView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
 
 Vue.use(Router);
@@ -71,6 +73,15 @@ let router = new Router({
           component: QuestionsView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Questions',
+            requiredAuth: 'Teacher'
+          }
+        },
+        {
+          path: 'reviews',
+          name: 'reviews-management',
+          component: ReviewsView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Reviews',
             requiredAuth: 'Teacher'
           }
         },
@@ -212,7 +223,16 @@ let router = new Router({
           name: 'submissions',
           component: SubmissionView,
           meta: {
-            title: process.env.VUE_APP_NAME + ' - Create Submission',
+            title: process.env.VUE_APP_NAME + ' - Create Submissions',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'reviews',
+          name: 'reviews',
+          component: StudentReviews,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Submission Reviews',
             requiredAuth: 'Student'
           }
         }

@@ -6,6 +6,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
@@ -21,6 +22,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,20 +71,65 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public ReviewDto reviewSubmission(Integer teacherId, ReviewDto reviewDto, Review.Status status) {
+    public ReviewDto reviewSubmission(Integer teacherId, ReviewDto reviewDto) {
 
-        checkIfConsistentReview(reviewDto, status);
+        checkIfConsistentReview(reviewDto);
 
         User user = getTeacher(teacherId);
         Submission submission = getSubmission(reviewDto);
 
-        checkIfSubmissionIsApproved(reviewDto, teacherId);
+        if (reviewDto.getCreationDate() == null) {
+            reviewDto.setCreationDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        }
 
-        reviewDto.setStatus(status);
+        if (reviewDto.getStatus().equals("APPROVED")){
+            updateQuestionStatus(submission);
+        }
+
         Review review = new Review(user, submission, reviewDto);
 
         entityManager.persist(review);
         return new ReviewDto(review);
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<ReviewDto> getSubmissionStatus(Integer submissionId) {
+        if(submissionId == null)
+            throw new TutorException(SUBMISSION_NOT_FOUND, 0);
+
+        return reviewRepository.getSubmissionStatus(submissionId).stream().map(ReviewDto::new).collect(Collectors.toList());
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<ReviewDto> getSubmissionReviews(Integer studentId) {
+        if(studentId == null)
+            throw new TutorException(REVIEW_MISSING_STUDENT);
+
+        return reviewRepository.getSubmissionReviews(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<SubmissionDto> getSubsToTeacher() {
+
+        return submissionRepository.findAll().stream().map(SubmissionDto::new).collect(Collectors.toList());
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<ReviewDto> getReviewsToTeacher() {
+
+        return reviewRepository.findAll().stream().map(ReviewDto::new).collect(Collectors.toList());
     }
 
     @Retryable(
@@ -95,15 +143,9 @@ public class SubmissionService {
         return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
 
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ReviewDto> getSubmissionStatus(Integer submissionId) {
-        if(submissionId == null)
-            throw new TutorException(SUBMISSION_NOT_FOUND, 0);
-
-        return reviewRepository.getSubmissionStatus(submissionId).stream().map(ReviewDto::new).collect(Collectors.toList());
+    private void updateQuestionStatus(Submission submission) {
+        Question question = getQuestion(submission.getQuestion().getId());
+        question.setStatus("AVAILABLE");
     }
 
     private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
@@ -129,7 +171,7 @@ public class SubmissionService {
         return user;
     }
 
-    private void checkIfConsistentReview(ReviewDto reviewDto, Review.Status status){
+    private void checkIfConsistentReview(ReviewDto reviewDto){
 
         checkIfReviewHasJustification(reviewDto);
 
@@ -137,7 +179,7 @@ public class SubmissionService {
             throw new TutorException(REVIEW_MISSING_SUBMISSION);
         if(reviewDto.getStudentId() == null)
             throw new TutorException(REVIEW_MISSING_STUDENT);
-        if(status == null)
+        if(reviewDto.getStatus() == null)
             throw new TutorException(REVIEW_MISSING_STATUS);
     }
 
@@ -167,10 +209,4 @@ public class SubmissionService {
         }
     }
 
-    private void checkIfSubmissionIsApproved(ReviewDto reviewDto, Integer teacherId) {
-
-        if (reviewDto.getStatus() == Review.Status.APPROVED) {
-            throw new TutorException(QUESTION_ALREADY_APPROVED, teacherId);
-        }
-    }
 }

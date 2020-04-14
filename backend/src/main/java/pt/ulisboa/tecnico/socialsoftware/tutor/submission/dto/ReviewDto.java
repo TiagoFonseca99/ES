@@ -4,6 +4,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto;
 
 import java.io.Serializable;
+import java.time.format.DateTimeFormatter;
 
 public class ReviewDto implements Serializable {
     private Integer id;
@@ -12,7 +13,8 @@ public class ReviewDto implements Serializable {
     private Integer submissionId;
     private String justification;
     private ImageDto imageDto;
-    private Review.Status status;
+    private String status;
+    private String creationDate;
 
 
     public ReviewDto(){}
@@ -23,13 +25,14 @@ public class ReviewDto implements Serializable {
         this.teacherId = review.getTeacherId();
         this.submissionId = review.getSubmission().getId();
         this.justification = review.getJustification();
-        this.status = review.getStatus();
+        this.status = review.getStatus().name();
 
         if (review.getImage() != null)
             this.imageDto = new ImageDto(review.getImage());
 
+        if (review.getCreationDate() != null)
+            this.creationDate = review.getCreationDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
-
     public Integer getId() { return id; }
 
     public void setId(Integer id) { this.id = id; }
@@ -44,33 +47,21 @@ public class ReviewDto implements Serializable {
 
     public Integer getSubmissionId() { return submissionId; }
 
-    public void setSubmissionId(Integer submissionId) {
-        this.submissionId = submissionId;
-    }
+    public void setSubmissionId(Integer submissionId) { this.submissionId = submissionId; }
 
-    public String getJustification() {
-        return justification;
-    }
+    public String getJustification() { return justification; }
 
-    public void setJustification(String justification) {
-        this.justification = justification;
-    }
+    public void setJustification(String justification) { this.justification = justification; }
 
-    public ImageDto getImageDto() {
-        return imageDto;
-    }
+    public ImageDto getImageDto() { return imageDto; }
 
-    public void setImageDto(ImageDto imageDto) {
-        this.imageDto = imageDto;
-    }
+    public void setImageDto(ImageDto imageDto) { this.imageDto = imageDto; }
 
-    public Review.Status getStatus() {
-        return status;
-    }
+    public String getStatus() { return status; }
 
-    public void setStatus(Review.Status status) {
-        this.status = status;
-    }
+    public void setStatus(String status) { this.status = status; }
 
+    public String getCreationDate() { return creationDate; }
 
+    public void setCreationDate(String creationDate) { this.creationDate = creationDate; }
 }

@@ -19,6 +19,7 @@ import spock.lang.Specification
 @DataJpaTest
 class CreateReviewPerformanceTest extends Specification {
     public static final String REVIEW_JUSTIFICATION = 'Porque me apeteceu'
+    public static final String REJECTED = 'REJECTED'
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String COURSE_NAME = "Arquitetura de Software"
@@ -76,11 +77,12 @@ class CreateReviewPerformanceTest extends Specification {
         when:
         1.upto(1, {
             def reviewDto = new ReviewDto()
+            reviewDto.setStatus(REJECTED);
             reviewDto.setJustification(REVIEW_JUSTIFICATION)
             reviewDto.setSubmissionId(submission.getId())
             reviewDto.setStudentId(submission.getStudentId())
 
-            submissionService.reviewSubmission(teacher.getId(), reviewDto, Review.Status.REJECTED);
+            submissionService.reviewSubmission(teacher.getId(), reviewDto);
 
         })
 

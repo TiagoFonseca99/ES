@@ -156,6 +156,10 @@ public class Question implements DomainEntity {
         this.status = status;
     }
 
+    public void setStatus(String status) {
+        this.status = Status.valueOf(status);
+    }
+
     public List<Option> getOptions() {
         return options;
     }
