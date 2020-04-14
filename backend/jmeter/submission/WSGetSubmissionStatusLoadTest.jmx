@@ -396,7 +396,8 @@
           <stringProp name="queryType">Update Statement</stringProp>
           <stringProp name="query">DELETE FROM reviews WHERE user_id=677;
 WITH sub AS(DELETE FROM submissions WHERE user_id = 676 RETURNING question_id)
-DELETE FROM questions WHERE id IN (SELECT * FROM sub);
+DELETE FROM options WHERE question_id IN (SELECT * FROM sub);
+DELETE FROM questions WHERE key = 1200;
 
 </stringProp>
           <stringProp name="queryArguments"></stringProp>

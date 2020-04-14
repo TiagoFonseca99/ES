@@ -77,8 +77,13 @@ public class SubmissionService {
 
         User user = getTeacher(teacherId);
         Submission submission = getSubmission(reviewDto);
+
         if (reviewDto.getCreationDate() == null) {
             reviewDto.setCreationDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        }
+
+        if (reviewDto.getStatus().equals("APPROVED")){
+            updateQuestionStatus(submission);
         }
 
         Review review = new Review(user, submission, reviewDto);
@@ -136,6 +141,11 @@ public class SubmissionService {
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
 
         return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
+    }
+
+    private void updateQuestionStatus(Submission submission) {
+        Question question = getQuestion(submission.getQuestion().getId());
+        question.setStatus("AVAILABLE");
     }
 
     private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
