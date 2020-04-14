@@ -47,6 +47,23 @@
       @increase-order="increaseOrder"
       @decrease-order="decreaseOrder"
     />
+    <discussion-component
+      :question="
+        statementManager.statementQuiz.questions[questionOrder].question
+      "
+      :discussion="
+        statementManager.statementQuiz.questions[questionOrder].discussion
+      "
+      :hasDiscussion="
+        statementManager.statementQuiz.questions[questionOrder].discussion !=
+          null
+      "
+      :answered="
+        statementManager.statementQuiz.answers[questionOrder].optionId != null
+      "
+      v-on:message="updateMessage"
+      @submit-discussion="submitDiscussion"
+    />
   </div>
 </template>
 
@@ -54,15 +71,20 @@
 import { Component, Vue } from 'vue-property-decorator';
 import StatementManager from '@/models/statement/StatementManager';
 import ResultComponent from '@/views/student/quiz/ResultComponent.vue';
+import DiscussionComponent from '@/views/student/quiz/DiscussionComponent.vue';
+import Discussion from '@/models/management/Discussion';
+import RemoteServices from '@/services/RemoteServices';
 
 @Component({
   components: {
-    'result-component': ResultComponent
+    'result-component': ResultComponent,
+    'discussion-component': DiscussionComponent
   }
 })
 export default class ResultsView extends Vue {
   statementManager: StatementManager = StatementManager.getInstance;
   questionOrder: number = 0;
+  discussion!: Discussion;
 
   async created() {
     if (this.statementManager.isEmpty()) {
@@ -75,6 +97,8 @@ export default class ResultsView extends Vue {
 
       await this.$store.dispatch('clearLoading');
     }
+
+    this.updateDiscussion();
   }
 
   increaseOrder(): void {
@@ -84,18 +108,62 @@ export default class ResultsView extends Vue {
     ) {
       this.questionOrder += 1;
     }
+
+    this.updateDiscussion();
   }
 
   decreaseOrder(): void {
     if (this.questionOrder > 0) {
       this.questionOrder -= 1;
     }
+
+    this.updateDiscussion();
   }
 
   changeOrder(n: number): void {
     if (n >= 0 && n < +this.statementManager.statementQuiz!.questions.length) {
       this.questionOrder = n;
     }
+
+    this.updateDiscussion();
+  }
+
+  async submitDiscussion() {
+    if (this.discussion!.content === '') {
+      await this.$store.dispatch('error', 'Discussion must have content');
+      return;
+    }
+
+    try {
+      const question = this.statementManager.statementQuiz!.questions[
+        this.questionOrder
+      ].question;
+      this.discussion!.question = question;
+      this.discussion!.questionId = question.id!;
+
+      const result = await RemoteServices.createDiscussion(this.discussion!);
+      this.statementManager.statementQuiz!.questions[
+        this.questionOrder
+      ].discussion = this.discussion;
+      this.$emit('submit-discussion', result);
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  updateDiscussion() {
+    let disc: Discussion | null = this.statementManager.statementQuiz!
+      .questions[this.questionOrder].discussion;
+
+    if (disc == null) {
+      this.discussion = new Discussion();
+    } else {
+      this.discussion = disc;
+    }
+  }
+
+  updateMessage(message: string) {
+    this.discussion!.content = message;
   }
 }
 </script>

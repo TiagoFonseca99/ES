@@ -9,19 +9,29 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class AuthUserDto implements Serializable {
+    private Integer userId;
     private String name;
     private String username;
     private User.Role role;
     private Map<String, List<CourseDto>> courses;
 
     public AuthUserDto(User user) {
+        this.userId = user.getId();
         this.name = user.getName();
         this.username = user.getUsername();
         this.role = user.getRole();
         this.courses = getActiveAndInactiveCourses(user, new ArrayList<>());
     }
 
-    public AuthUserDto(User user, List<CourseDto> currentCourses) {
+    public Integer getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
+
+	public AuthUserDto(User user, List<CourseDto> currentCourses) {
         this.name = user.getName();
         this.username = user.getUsername();
         this.role = user.getRole();
