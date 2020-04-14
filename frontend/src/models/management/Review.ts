@@ -8,6 +8,7 @@ export default class Review {
   justification!: string;
   imageDto: Image | null = null;
   status!: string;
+  creationDate!: string;
 
   constructor(jsonObj?: Review) {
     if (jsonObj) {
@@ -18,6 +19,7 @@ export default class Review {
       this.justification = jsonObj.justification;
       this.imageDto = jsonObj.imageDto;
       this.status = jsonObj.status;
+      this.creationDate = jsonObj.creationDate;
     }
   }
 }

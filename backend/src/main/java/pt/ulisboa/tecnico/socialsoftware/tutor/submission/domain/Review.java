@@ -1,10 +1,13 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "reviews")
@@ -29,6 +32,9 @@ public class Review {
     @Enumerated(EnumType.STRING)
     private Review.Status status = Review.Status.IN_REVIEW;
 
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -49,6 +55,7 @@ public class Review {
         this.user = user;
         this.submission = submission;
         this.studentId = submission.getStudentId();
+        this.creationDate = LocalDateTime.parse(reviewDto.getCreationDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
         if (reviewDto.getImageDto() != null) {
             Image img = new Image(reviewDto.getImageDto());
@@ -107,4 +114,8 @@ public class Review {
     public void setImage(Image image) {
         this.image = image;
     }
+
+    public LocalDateTime getCreationDate() { return creationDate; }
+
+    public void setCreationDate(LocalDateTime creationDate) { this.creationDate = creationDate; }
 }

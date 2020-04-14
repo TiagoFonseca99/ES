@@ -4,6 +4,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto;
 
 import java.io.Serializable;
+import java.time.format.DateTimeFormatter;
 
 public class ReviewDto implements Serializable {
     private Integer id;
@@ -13,6 +14,7 @@ public class ReviewDto implements Serializable {
     private String justification;
     private ImageDto imageDto;
     private Review.Status status;
+    private String creationDate;
 
 
     public ReviewDto(){}
@@ -28,6 +30,8 @@ public class ReviewDto implements Serializable {
         if (review.getImage() != null)
             this.imageDto = new ImageDto(review.getImage());
 
+        if (review.getCreationDate() != null)
+            this.creationDate = review.getCreationDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
     public Integer getId() { return id; }
@@ -72,5 +76,7 @@ public class ReviewDto implements Serializable {
         this.status = status;
     }
 
+    public String getCreationDate() { return creationDate; }
 
+    public void setCreationDate(String creationDate) { this.creationDate = creationDate; }
 }
