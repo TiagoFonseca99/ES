@@ -70,20 +70,12 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public ReviewDto reviewSubmission(Integer teacherId, ReviewDto reviewDto, Review.Status status) {
+    public ReviewDto reviewSubmission(Integer teacherId, ReviewDto reviewDto) {
 
-        checkIfConsistentReview(reviewDto, status);
+        checkIfConsistentReview(reviewDto);
 
         User user = getTeacher(teacherId);
         Submission submission = getSubmission(reviewDto);
-
-        checkIfSubmissionIsApproved(reviewDto, teacherId);
-
-        reviewDto.setStatus(status);
-
-        if (reviewDto.getCreationDate() == null) {
-            reviewDto.setCreationDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-        }
 
         Review review = new Review(user, submission, reviewDto);
 
@@ -111,6 +103,24 @@ public class SubmissionService {
             throw new TutorException(REVIEW_MISSING_STUDENT);
 
         return reviewRepository.getSubmissionReviews(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<SubmissionDto> getSubsToTeacher() {
+
+        return submissionRepository.findAll().stream().map(SubmissionDto::new).collect(Collectors.toList());
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<ReviewDto> getReviewsToTeacher() {
+
+        return reviewRepository.findAll().stream().map(ReviewDto::new).collect(Collectors.toList());
     }
 
     @Retryable(
@@ -147,7 +157,7 @@ public class SubmissionService {
         return user;
     }
 
-    private void checkIfConsistentReview(ReviewDto reviewDto, Review.Status status){
+    private void checkIfConsistentReview(ReviewDto reviewDto){
 
         checkIfReviewHasJustification(reviewDto);
 
@@ -155,7 +165,7 @@ public class SubmissionService {
             throw new TutorException(REVIEW_MISSING_SUBMISSION);
         if(reviewDto.getStudentId() == null)
             throw new TutorException(REVIEW_MISSING_STUDENT);
-        if(status == null)
+        if(reviewDto.getStatus() == null)
             throw new TutorException(REVIEW_MISSING_STATUS);
     }
 
@@ -185,10 +195,4 @@ public class SubmissionService {
         }
     }
 
-    private void checkIfSubmissionIsApproved(ReviewDto reviewDto, Integer teacherId) {
-
-        if (reviewDto.getStatus() == Review.Status.APPROVED) {
-            throw new TutorException(QUESTION_ALREADY_APPROVED, teacherId);
-        }
-    }
 }
