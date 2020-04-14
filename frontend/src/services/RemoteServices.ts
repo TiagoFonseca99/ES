@@ -608,6 +608,19 @@ export default class RemoteServices {
         });
   }
 
+  static async getSubmissionReviews(): Promise<Review[]> {
+    return httpClient
+      .get('/student/reviews')
+      .then(response => {
+        return response.data.map((review: any) => {
+          return new Review(review);
+        });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async deleteCourse(courseExecutionId: number | undefined) {
     return httpClient
       .delete('/admin/courses/executions/' + courseExecutionId)

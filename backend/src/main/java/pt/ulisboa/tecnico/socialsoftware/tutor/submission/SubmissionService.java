@@ -85,11 +85,22 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<SubmissionDto> getSubmissions(Integer studentId) {
-        if(studentId == null)
-            throw new TutorException(SUBMISSION_MISSING_STUDENT);
+    public List<ReviewDto> getSubmissionStatus(Integer submissionId) {
+        if(submissionId == null)
+            throw new TutorException(SUBMISSION_NOT_FOUND, 0);
 
-        return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
+        return reviewRepository.getSubmissionStatus(submissionId).stream().map(ReviewDto::new).collect(Collectors.toList());
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<ReviewDto> getSubmissionReviews(Integer studentId) {
+        if(studentId == null)
+            throw new TutorException(REVIEW_MISSING_STUDENT);
+
+        return reviewRepository.getSubmissionReviews(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
     }
 
     @Retryable(
@@ -114,11 +125,11 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ReviewDto> getSubmissionStatus(Integer submissionId) {
-        if(submissionId == null)
-            throw new TutorException(SUBMISSION_NOT_FOUND, 0);
+    public List<SubmissionDto> getSubmissions(Integer studentId) {
+        if(studentId == null)
+            throw new TutorException(SUBMISSION_MISSING_STUDENT);
 
-        return reviewRepository.getSubmissionStatus(submissionId).stream().map(ReviewDto::new).collect(Collectors.toList());
+        return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
 
     private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
