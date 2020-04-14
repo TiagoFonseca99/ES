@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
@@ -12,7 +13,7 @@ import javax.persistence.*;
 public class Review {
 
     public enum Status {
-        APPROVED, REJECTED, IN_REVIEW
+        APPROVED, REJECTED
     }
 
 
@@ -27,7 +28,7 @@ public class Review {
     private String justification;
 
     @Enumerated(EnumType.STRING)
-    private Review.Status status = Review.Status.IN_REVIEW;
+    private Review.Status status = null;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -45,17 +46,10 @@ public class Review {
 
     public Review(User user, Submission submission, ReviewDto reviewDto) {
         this.justification = reviewDto.getJustification();
-        this.status = reviewDto.getStatus();
+        this.status = Status.valueOf(reviewDto.getStatus());
         this.user = user;
         this.submission = submission;
         this.studentId = submission.getStudentId();
-
-        if (reviewDto.getImageDto() != null) {
-            Image img = new Image(reviewDto.getImageDto());
-            setImage(img);
-            img.setReview(this);
-        }
-
     }
 
     public int getTeacherId() { return this.user.getId(); }

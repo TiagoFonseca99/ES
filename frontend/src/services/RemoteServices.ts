@@ -12,9 +12,9 @@ import { Student } from '@/models/management/Student';
 import Assessment from '@/models/management/Assessment';
 import AuthDto from '@/models/user/AuthDto';
 import StatementAnswer from '@/models/statement/StatementAnswer';
-import { QuizAnswer } from '@/models/management/QuizAnswer';
 import { QuizAnswers } from '@/models/management/QuizAnswers';
 import Submission from '@/models/management/Submission';
+import Review from '@/models/management/Review';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 10000;
@@ -560,15 +560,52 @@ export default class RemoteServices {
 
   static async getSubmissions(): Promise<Submission[]> {
     return httpClient
-      .get('/student/submissions')
-      .then(response => {
-        return response.data.map((submission: any) => {
-          return new Submission(submission);
+        .get('/student/submissions')
+        .then(response => {
+          return response.data.map((submission: any) => {
+            return new Submission(submission);
+          });
+        })
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
         });
-      })
-      .catch(async error => {
-        throw Error(await this.errorMessage(error));
-      });
+  }
+
+  static async createReview(review: Review): Promise<Review> {
+    return httpClient
+        .post('/management/reviews', review)
+        .then(response => {
+          return new Review(response.data);
+        })
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        });
+  }
+
+  static async getSubsToTeacher(): Promise<Submission[]> {
+    return httpClient
+        .get('/management/reviews')
+        .then(response => {
+          return response.data.map((submission: any) => {
+            return new Submission(submission);
+          });
+        })
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        });
+  }
+
+  static async getReviewsToTeacher(): Promise<Review[]> {
+    return httpClient
+        .get('/management/reviews/showReviews')
+        .then(response => {
+          return response.data.map((review: any) => {
+            return new Review(review);
+          });
+        })
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        });
   }
 
   static async deleteCourse(courseExecutionId: number | undefined) {
