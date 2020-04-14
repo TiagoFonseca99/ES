@@ -9,47 +9,161 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          New Course
+          <b>New Tournament</b>
         </span>
       </v-card-title>
 
-      <v-card-text class="text-left" v-if="editCourse">
+      <v-card-text class="text-left" v-if="editTournament">
         <v-container grid-list-md fluid>
           <v-layout column wrap>
             <v-flex xs24 sm12 md8>
-              <p><b>Course Type:</b> {{ editCourse.courseType }}</p>
+              <b>Date:</b>
             </v-flex>
-            <v-flex xs24 sm12 md8>
-              <p v-if="isCreateCourse"><b>Name:</b> {{ editCourse.name }}</p>
-              <v-text-field
-                v-if="!isCreateCourse"
-                v-model="editCourse.name"
-                label="Name"
-                data-cy="Name"
-              />
-            </v-flex>
+            <v-row>
+              <v-col cols="12" sm="6">
+                <v-datetime-picker
+                  label="Start Time"
+                  format="yyyy-MM-dd HH:mm"
+                  v-model="editTournament.startTime"
+                  date-format="yyyy-MM-dd"
+                  time-format="HH:mm"
+                >
+                </v-datetime-picker>
+              </v-col>
+              <v-spacer></v-spacer>
+              <v-col cols="12" sm="6">
+                <v-datetime-picker
+                  label="End Time"
+                  format="yyyy-MM-dd HH:mm"
+                  v-model="editTournament.endTime"
+                  date-format="yyyy-MM-dd"
+                  time-format="HH:mm"
+                >
+                </v-datetime-picker>
+              </v-col>
+            </v-row>
             <v-flex xs24 sm12 md8>
               <p>
-                <b>Course Execution Type:</b>
-                {{ editCourse.courseExecutionType }}
+                <b>Number Of Questions:</b>
+                {{ editTournament.numberOfQuestions }}
               </p>
-            </v-flex>
-            <v-flex xs24 sm12 md8>
               <v-text-field
-                v-model="editCourse.acronym"
-                label="Acronym"
-                data-cy="Acronym"
-              />
-            </v-flex>
-            <v-flex xs24 sm12 md8>
-              <v-text-field
-                v-model="editCourse.academicTerm"
-                label="Academic Term"
-                data-cy="AcademicTerm"
+                min="1"
+                step="1"
+                type="number"
+                v-model="editTournament.numberOfQuestions"
+                label="Number Of Questions"
+                data-cy="NumberOfQuestions"
               />
             </v-flex>
           </v-layout>
         </v-container>
+      </v-card-text>
+      <v-card-text class="text-center" v-if="editTournament">
+        <v-row>
+          <v-col cols="12" sm="6" class="light-green lighten-4">
+            <v-data-table
+              :headers="topicHeaders"
+              :custom-filter="topicFilter"
+              :items="currentTopics"
+              :search="JSON.stringify(currentTopicsSearch)"
+              :mobile-breakpoint="0"
+              :items-per-page="5"
+              :footer-props="{ itemsPerPageOptions: [5, 10, 15] }"
+            >
+              <template v-slot:top>
+                <h2>Currently selected</h2>
+                <v-autocomplete
+                  v-model="currentTopicsSearch"
+                  label="Search"
+                  :items="allTopics"
+                  :filter="topicSearch"
+                  :search-input.sync="currentTopicsSearchText"
+                  @change="currentTopicsSearchText = ''"
+                  item-text="name"
+                  return-object
+                  chips
+                  small-chips
+                  clearable
+                  deletable-chips
+                  multiple
+                  dense
+                  class="mx-4"
+                >
+                </v-autocomplete>
+              </template>
+              <template v-slot:item.topics="{ item }">
+                {{ item.name }}
+              </template>
+              <template v-slot:item.action="{ item }">
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-icon
+                      small
+                      class="mr-2"
+                      v-on="on"
+                      @click="removeTopic(item)"
+                    >
+                      remove</v-icon
+                    >
+                  </template>
+                  <span>Remove from Tournament</span>
+                </v-tooltip>
+              </template>
+            </v-data-table>
+          </v-col>
+          <v-col cols="12" sm="6" class="red lighten-4">
+            <v-data-table
+              :headers="topicHeaders"
+              :custom-filter="topicFilter"
+              :items="availableTopics"
+              :search="JSON.stringify(allTopicsSearch)"
+              :mobile-breakpoint="0"
+              :items-per-page="5"
+              :footer-props="{ itemsPerPageOptions: [5, 10, 15] }"
+            >
+              <template v-slot:top>
+                <h2>Available topics</h2>
+                <v-autocomplete
+                  v-model="allTopicsSearch"
+                  label="Search"
+                  :items="allTopics"
+                  :filter="topicSearch"
+                  :search-input.sync="allTopicsSearchText"
+                  @change="allTopicsSearchText = ''"
+                  item-text="name"
+                  return-object
+                  chips
+                  small-chips
+                  clearable
+                  deletable-chips
+                  multiple
+                  dense
+                  class="mx-4"
+                >
+                </v-autocomplete>
+              </template>
+              <template v-slot:item.topics="{ item }">
+                {{ item.name }}
+              </template>
+              <template v-slot:item.action="{ item }">
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-icon
+                      small
+                      class="mr-2"
+                      v-on="on"
+                      @click="addTopic(item)"
+                    >
+                      add</v-icon
+                    >
+                  </template>
+                  <span>Add to Tournament</span>
+                </v-tooltip>
+              </template>
+            </v-data-table>
+          </v-col>
+        </v-row>
       </v-card-text>
 
       <v-card-actions>
@@ -60,7 +174,10 @@
           data-cy="cancelButton"
           >Cancel</v-btn
         >
-        <v-btn color="blue darken-1" @click="saveCourse" data-cy="saveButton"
+        <v-btn
+          color="blue darken-1"
+          @click="saveTournament"
+          data-cy="saveButton"
           >Save</v-btn
         >
       </v-card-actions>
@@ -71,43 +188,130 @@
 <script lang="ts">
 import { Component, Model, Prop, Vue } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
-import Course from '@/models/user/Course';
+import Tournament from '@/models/user/Tournament';
+import Topic from '@/models/management/Topic';
 
 @Component
 export default class EditTournamentDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
-  @Prop({ type: Course, required: true }) readonly course!: Course;
+  @Prop({ type: Tournament, required: true }) readonly tournament!: Tournament;
 
-  editCourse!: Course;
-  isCreateCourse: boolean = false;
+  editTournament!: Tournament;
+  currentTopicsSearch: string = '';
+  currentTopicsSearchText: string = '';
+  allTopicsSearch: string = '';
+  allTopicsSearchText: string = '';
 
-  created() {
-    this.editCourse = new Course(this.course);
-    this.isCreateCourse = !!this.editCourse.name;
+  allTopics: Topic[] = [];
+
+  currentTopics: Topic[] = [];
+  availableTopics: Topic[] = [];
+
+  topicsID: Number[] = [];
+
+  topicHeaders: object = [
+    {
+      text: 'Topics',
+      value: 'topics',
+      align: 'left',
+      sortable: false
+    },
+    {
+      text: 'Actions',
+      value: 'action',
+      align: 'center',
+      width: '150px',
+      sortable: false
+    }
+  ];
+
+  async created() {
+    this.editTournament = new Tournament(this.tournament);
+
+    await this.$store.dispatch('loading');
+    try {
+      [this.allTopics] = await Promise.all([RemoteServices.getTopics()]);
+      this.availableTopics = this.allTopics;
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+    await this.$store.dispatch('clearLoading');
   }
 
-  async saveCourse() {
+  async saveTournament() {
     if (
-      this.editCourse &&
-      (!this.editCourse.name ||
-        !this.editCourse.acronym ||
-        !this.editCourse.academicTerm)
+      this.editTournament &&
+      (!this.editTournament.startTime ||
+        !this.editTournament.endTime ||
+        !this.editTournament.numberOfQuestions ||
+        !this.editTournament.topics)
     ) {
       await this.$store.dispatch(
         'error',
-        'Course must have name, acronym and academicTerm'
+        'Tournament must have Start Time, End Time, Number Of Questions and Topics'
       );
       return;
     }
 
-    if (this.editCourse && this.editCourse.courseExecutionId == null) {
+    if (this.editTournament && this.editTournament.id == null) {
+      const enrolled = this.editTournament.enrolled;
+      const topics = this.editTournament.topics;
+      this.editTournament.enrolled = undefined;
+      this.editTournament.topics = undefined;
+      this.editTournament.state = 'NOT_CANCELED';
+
+      this.topicsID = this.currentTopics.map(topic => {
+        return topic.id;
+      });
+
       try {
-        const result = await RemoteServices.createCourse(this.editCourse);
-        this.$emit('new-course', result);
+        const result = await RemoteServices.createTournament(
+          this.topicsID,
+          this.editTournament
+        );
+        this.$emit('new-tournament', result);
       } catch (error) {
         await this.$store.dispatch('error', error);
+        this.editTournament.enrolled = enrolled;
+        this.editTournament.topics = topics;
       }
+      this.editTournament.enrolled = enrolled;
+      this.editTournament.topics = topics;
     }
+  }
+
+  topicFilter(value: string, search: string, topic: Topic) {
+    let searchTopics = JSON.parse(search);
+
+    if (searchTopics !== '') {
+      return searchTopics
+        .map((searchTopic: Topic) => searchTopic.name)
+        .every((t: string) => topic.name.includes(t));
+    }
+    return true;
+  }
+
+  topicSearch(topic: Topic, search: string) {
+    return (
+      search != null &&
+      topic.name.toLowerCase().indexOf(search.toLowerCase()) !== -1
+    );
+  }
+
+  removeTopic(topic: Topic) {
+    this.availableTopics.push(topic);
+    this.availableTopics.sort((a, b) => {
+      let result = a.name.localeCompare(b.name);
+      return result === 0 ? 0 : result > 0 ? 1 : -1;});
+    this.currentTopics = this.currentTopics.filter(t => t.id != topic.id);
+  }
+
+  addTopic(topic: Topic) {
+    this.currentTopics.push(topic);
+    this.currentTopics.sort((a, b) => {
+      let result = a.name.localeCompare(b.name);
+      return result === 0 ? 0 : result > 0 ? 1 : -1;});
+    this.availableTopics = this.availableTopics.filter(t => t.id != topic.id);
   }
 }
 </script>

@@ -62,7 +62,6 @@
 import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
-// TODO neste momento é copia do editCoutseDialog
 import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
 
 @Component({
@@ -139,7 +138,6 @@ export default class AllTournamentView extends Vue {
     await this.$store.dispatch('clearLoading');
   }
 
-  // TODO neste momento e uma copia modificada do course
   newTournament() {
     this.currentTournament = new Tournament();
     this.editTournamentDialog = true;

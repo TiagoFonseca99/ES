@@ -643,6 +643,22 @@ export default class RemoteServices {
     }
   }
 
+  static async createTournament(topicsID: Number[], tournament: Tournament): Promise<Tournament> {
+    let path: string = '/tournaments?';
+    for (let topicID of topicsID) {
+      path += 'topicsId=' + topicID + '&';
+    }
+    path = path.substring(0, path.length - 1);
+    return httpClient
+      .post(path, tournament)
+      .then(response => {
+        return new Tournament(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static getTournaments(): Promise<Tournament[]> {
     return httpClient
       .get('/tournaments/getTournaments')
