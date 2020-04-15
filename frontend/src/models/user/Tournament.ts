@@ -8,8 +8,8 @@ export default class Tournament {
   state!: string | undefined;
   courseAcronym!: string | undefined;
   enrolled!: boolean | undefined;
-  topics!: Array<string> | undefined;
-  participants!: Array<User> | undefined;
+  topics!: String[];
+  participants!: User[];
 
   constructor(jsonObj?: Tournament, user?: User) {
     if (jsonObj) {
@@ -19,27 +19,24 @@ export default class Tournament {
       this.numberOfQuestions = jsonObj.numberOfQuestions;
       this.state = jsonObj.state;
       this.courseAcronym = jsonObj.courseAcronym;
-      this.topics = new Array<string>(0);
+      this.topics = [];
 
-      const t = jsonObj.topics;
-      // @ts-ignore
-      for (var i=0; i<t?.length; i++){
-        if (t) {
-          this.topics?.push(' ' + t[i].name);
+      const t: String[] = jsonObj.topics!;
+      if (t) {
+        for (let i = 0; i < t.length; i++) {
+          this.topics.push(' ' + t[i]);
         }
       }
-      const p = jsonObj.participants;
+      const p: User[] = jsonObj.participants;
       if (user) {
-        // @ts-ignore
-        for (var i=0; i<p?.length; i++){
-          if (user.id == !(p) || p[i].id) {
+        for (let i = 0; i < p!.length; i++) {
+          if (user.id == p![i].id) {
             this.enrolled = true;
             return;
           }
         }
         this.enrolled = false;
-      }
-      else {
+      } else {
         this.enrolled = false;
       }
     }

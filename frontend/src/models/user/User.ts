@@ -5,7 +5,7 @@ interface CourseMap {
 }
 
 export default class User {
-  userId!: number;
+  id!: number;
   name!: string;
   username!: string;
   role!: string;
@@ -14,7 +14,7 @@ export default class User {
 
   constructor(jsonObj?: User) {
     if (jsonObj) {
-      this.userId = jsonObj.userId;
+      this.id = jsonObj.id;
       this.name = jsonObj.name;
       this.username = jsonObj.username;
       this.role = jsonObj.role;

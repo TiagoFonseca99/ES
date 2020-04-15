@@ -234,6 +234,4 @@ class CreateDiscussionTest extends Specification {
             return new DiscussionService()
         }
     }
-
-
 }
