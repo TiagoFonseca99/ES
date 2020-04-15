@@ -23,6 +23,13 @@
             />
           </v-card-title>
         </template>
+        <template v-slot:item.questionDto.content="{ item }">
+          <p
+            v-html="
+              convertMarkDown(item.questionDto.content, item.questionDto.image)
+            "
+            @click="showQuestionDialog(item.questionDto)"
+        /></template>
         <template v-slot:item.questionDto.status="{ item }">
           <v-chip color="pink" small>
             <span>{{ item.questionDto.status }}</span>
@@ -79,7 +86,17 @@
           <span> {{ getSubmission(item).title }}</span>
         </template>
         <template v-slot:item.questionDto.content="{ item }">
-          <span> {{ getSubmission(item).content }}</span>
+          <p
+            v-html="
+              convertMarkDown(
+                getSubmission(item).content,
+                getSubmission(item).image
+              )
+            "
+            @click="showQuestionDialog(getSubmission(item))"
+          >
+            <span> {{ getSubmission(item).content }}</span>
+          </p>
         </template>
         <template v-slot:item.questionDto.creationDate="{ item }">
           <v-chip small>
@@ -98,20 +115,29 @@
         </template>
       </v-data-table>
     </v-card>
+    <show-question-dialog
+      v-if="currentQuestion"
+      v-model="questionDialog"
+      :question="currentQuestion"
+      v-on:close-show-question-dialog="onCloseShowQuestionDialog"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Submission from '@/models/management/Submission';
 import RemoteServices from '@/services/RemoteServices';
 import Question from '@/models/management/Question';
 import Image from '@/models/management/Image';
 import EditReview from '@/views/teacher/reviews/EditReview.vue';
 import Review from '@/models/management/Review';
+import ShowQuestionDialog from '@/views/teacher/questions/ShowQuestionDialog.vue';
 
 @Component({
   components: {
+    'show-question-dialog': ShowQuestionDialog,
     'edit-reviews': EditReview
   }
 })
@@ -120,6 +146,9 @@ export default class ReviewsView extends Vue {
   currentSubmission: Submission | null = null;
   editReview: boolean = false;
   searchSubmissions: string = '';
+  currentQuestion: Question | null = null;
+  questionDialog: boolean = false;
+
   headers: object = [
     { text: 'Title', value: 'questionDto.title', align: 'center' },
     { text: 'Question', value: 'questionDto.content', align: 'left' },
@@ -152,6 +181,7 @@ export default class ReviewsView extends Vue {
       [this.submissions] = await Promise.all([
         RemoteServices.getSubsToTeacher()
       ]);
+      this.submissions.sort((a, b) => this.sortNewestSubmissionFirst(a, b));
       [this.reviews] = await Promise.all([
         RemoteServices.getReviewsToTeacher()
       ]);
@@ -190,14 +220,36 @@ export default class ReviewsView extends Vue {
     this.currentSubmission = null;
     this.reviews = [];
     try {
+      [this.submissions] = await Promise.all([
+        RemoteServices.getSubsToTeacher()
+      ]);
       [this.reviews] = await Promise.all([
         RemoteServices.getReviewsToTeacher()
       ]);
+
       this.reviews.sort((a, b) => (a.creationDate < b.creationDate ? 1 : -1));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
+  }
+
+  sortNewestSubmissionFirst(a: Submission, b: Submission) {
+    if (a.questionDto.creationDate && b.questionDto.creationDate)
+      return a.questionDto.creationDate < b.questionDto.creationDate ? 1 : -1;
+    else return 0;
+  }
+  showQuestionDialog(question: Question) {
+    this.currentQuestion = question;
+    this.questionDialog = true;
+  }
+
+  onCloseShowQuestionDialog() {
+    this.questionDialog = false;
+  }
+
+  convertMarkDown(text: string, image: Image | null = null): string {
+    return convertMarkDown(text, image);
   }
 
   getSubmission(review: Review) {

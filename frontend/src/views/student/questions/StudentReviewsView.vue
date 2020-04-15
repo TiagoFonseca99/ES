@@ -17,7 +17,9 @@
           {{ getSubmission(review).creationDate }}
         </div>
         <div class="col" @click="showQuestionDialog(getSubmission(review))">
-          {{ review.creationDate }}
+          <v-chip small>
+            <span>{{ review.creationDate }}</span>
+          </v-chip>
         </div>
         <div class="col" @click="showQuestionDialog(getSubmission(review))">
           <v-chip :color="getStatusColor(review.status)" small>
