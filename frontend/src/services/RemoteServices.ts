@@ -591,7 +591,7 @@ export default class RemoteServices {
       });
   }
 
-  static async getDiscussion(userId: number): Promise<Discussion> {
+  static async getDiscussions(userId: number): Promise<Discussion[]> {
     return httpClient
       .get('/discussions?userId=' + userId)
       .then(response => {
@@ -642,7 +642,10 @@ export default class RemoteServices {
     }
   }
 
-  static async createTournament(topicsID: Number[], tournament: Tournament): Promise<Tournament> {
+  static async createTournament(
+    topicsID: Number[],
+    tournament: Tournament
+  ): Promise<Tournament> {
     let path: string = '/tournaments?';
     for (let topicID of topicsID) {
       path += 'topicsId=' + topicID + '&';

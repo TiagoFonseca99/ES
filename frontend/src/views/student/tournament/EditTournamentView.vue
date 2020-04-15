@@ -257,7 +257,7 @@ export default class EditTournamentDialog extends Vue {
       const enrolled = this.editTournament.enrolled;
       const topics = this.editTournament.topics;
       this.editTournament.enrolled = undefined;
-      this.editTournament.topics = undefined;
+      this.editTournament.topics = [];
       this.editTournament.state = 'NOT_CANCELED';
 
       this.topicsID = this.currentTopics.map(topic => {
@@ -302,7 +302,8 @@ export default class EditTournamentDialog extends Vue {
     this.availableTopics.push(topic);
     this.availableTopics.sort((a, b) => {
       let result = a.name.localeCompare(b.name);
-      return result === 0 ? 0 : result > 0 ? 1 : -1;});
+      return result === 0 ? 0 : result > 0 ? 1 : -1;
+    });
     this.currentTopics = this.currentTopics.filter(t => t.id != topic.id);
   }
 
@@ -310,7 +311,8 @@ export default class EditTournamentDialog extends Vue {
     this.currentTopics.push(topic);
     this.currentTopics.sort((a, b) => {
       let result = a.name.localeCompare(b.name);
-      return result === 0 ? 0 : result > 0 ? 1 : -1;});
+      return result === 0 ? 0 : result > 0 ? 1 : -1;
+    });
     this.availableTopics = this.availableTopics.filter(t => t.id != topic.id);
   }
 }

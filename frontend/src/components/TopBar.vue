@@ -170,7 +170,12 @@
 
         <!-- ------------- -->
 
-        <v-btn to="/student/discussions" v-if="isStudent && currentCourse" text dark>
+        <v-btn
+          to="/student/discussions"
+          v-if="isStudent && currentCourse"
+          text
+          dark
+        >
           Discussions
           <v-icon>fas fa-comment-alt</v-icon>
         </v-btn>

@@ -157,8 +157,8 @@ export default class AllTournamentView extends Vue {
   async joinTournament(tournamentToJoin: Tournament) {
     const enrolled = tournamentToJoin.enrolled;
     const topics = tournamentToJoin.topics;
-    tournamentToJoin.enrolled = undefined;
-    tournamentToJoin.topics = undefined;
+    tournamentToJoin.enrolled = false;
+    tournamentToJoin.topics = [];
     try {
       await RemoteServices.joinTournament(tournamentToJoin);
     } catch (error) {

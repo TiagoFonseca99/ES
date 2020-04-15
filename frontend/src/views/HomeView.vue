@@ -15,7 +15,13 @@
       <v-btn depressed small color="primary" @click="demoTeacher">
         <i class="fa fa-graduation-cap" />Demo as teacher
       </v-btn>
-      <v-btn depressed small color="primary" @click="demoAdmin" data-cy="adminButton">
+      <v-btn
+        depressed
+        small
+        color="primary"
+        @click="demoAdmin"
+        data-cy="adminButton"
+      >
         <i class="fa fa-user-cog" />Demo as administrator
       </v-btn>
     </div>
@@ -60,7 +66,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import Store from '@/store';
-import RemoteServices from '@/services/RemoteServices';
 
 @Component
 export default class HomeView extends Vue {
