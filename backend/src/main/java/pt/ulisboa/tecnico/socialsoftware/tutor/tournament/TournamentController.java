@@ -14,6 +14,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.security.Principal;
 
@@ -34,6 +36,7 @@ public class TournamentController {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
+        formatDates(tournamentDto);
         return tournamentService.createTournament(user.getId(), topicsId, tournamentDto);
     }
     
@@ -81,6 +84,16 @@ public class TournamentController {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
         return tournamentService.getTournamentParticipants(tournamentDto);
+    }
+
+    private void formatDates(TournamentDto tournamentDto) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        if (tournamentDto.getStartTime() != null && !tournamentDto.getStartTime().matches("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2})")){
+            tournamentDto.setStartTime(LocalDateTime.parse(tournamentDto.getStartTime().replaceAll(".$", ""), DateTimeFormatter.ISO_DATE_TIME).format(formatter));
+        }
+        if (tournamentDto.getEndTime() !=null && !tournamentDto.getEndTime().matches("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2})"))
+            tournamentDto.setEndTime(LocalDateTime.parse(tournamentDto.getEndTime().replaceAll(".$", ""), DateTimeFormatter.ISO_DATE_TIME).format(formatter));
     }
 
 }

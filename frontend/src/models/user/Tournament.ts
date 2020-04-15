@@ -1,17 +1,16 @@
-import Topic from '@/models/management/Topic';
 import User from '@/models/user/User';
 
 export default class Tournament {
-  id: number | undefined;
-  startTime: string | undefined;
-  endTime: string | undefined;
-  numberOfQuestions: number | undefined;
-  state: string | undefined;
-  courseAcronym: string | undefined;
-  //topics: Array<Topic> = new Array<string>(0);
-  enrolled: boolean | undefined;
-  topics: Array<string> | undefined;
-  participants: Array<User> | undefined;
+  id!: number | undefined;
+  startTime!: string | undefined;
+  endTime!: string | undefined;
+  numberOfQuestions!: number | undefined;
+  state!: string | undefined;
+  courseAcronym!: string | undefined;
+  enrolled!: boolean | undefined;
+  topics!: Array<string> | undefined;
+  participants!: Array<User> | undefined;
+
   constructor(jsonObj?: Tournament, user?: User) {
     if (jsonObj) {
       this.id = jsonObj.id;
@@ -21,8 +20,6 @@ export default class Tournament {
       this.state = jsonObj.state;
       this.courseAcronym = jsonObj.courseAcronym;
       this.topics = new Array<string>(0);
-      //this.topics = jsonObj.topics;
-      //this.participants = jsonObj.participants;
 
       const t = jsonObj.topics;
       // @ts-ignore
@@ -45,9 +42,6 @@ export default class Tournament {
       else {
         this.enrolled = false;
       }
-
-
-
     }
   }
 }
