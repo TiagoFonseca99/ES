@@ -562,52 +562,52 @@ export default class RemoteServices {
 
   static async getSubmissions(): Promise<Submission[]> {
     return httpClient
-        .get('/student/submissions')
-        .then(response => {
-          return response.data.map((submission: any) => {
-            return new Submission(submission);
-          });
-        })
-        .catch(async error => {
-          throw Error(await this.errorMessage(error));
+      .get('/student/submissions')
+      .then(response => {
+        return response.data.map((submission: any) => {
+          return new Submission(submission);
         });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async createReview(review: Review): Promise<Review> {
     return httpClient
-        .post('/management/reviews', review)
-        .then(response => {
-          return new Review(response.data);
-        })
-        .catch(async error => {
-          throw Error(await this.errorMessage(error));
-        });
+      .post('/management/reviews', review)
+      .then(response => {
+        return new Review(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async getSubsToTeacher(): Promise<Submission[]> {
     return httpClient
-        .get('/management/reviews')
-        .then(response => {
-          return response.data.map((submission: any) => {
-            return new Submission(submission);
-          });
-        })
-        .catch(async error => {
-          throw Error(await this.errorMessage(error));
+      .get('/management/reviews')
+      .then(response => {
+        return response.data.map((submission: any) => {
+          return new Submission(submission);
         });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async getReviewsToTeacher(): Promise<Review[]> {
     return httpClient
-        .get('/management/reviews/showReviews')
-        .then(response => {
-          return response.data.map((review: any) => {
-            return new Review(review);
-          });
-        })
-        .catch(async error => {
-          throw Error(await this.errorMessage(error));
+      .get('/management/reviews/showReviews')
+      .then(response => {
+        return response.data.map((review: any) => {
+          return new Review(review);
         });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async getSubmissionReviews(): Promise<Review[]> {

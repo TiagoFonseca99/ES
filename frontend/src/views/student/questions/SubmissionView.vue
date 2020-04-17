@@ -39,11 +39,15 @@
       /></template>
 
       <template v-slot:item.questionDto.status="{ item }">
-        <v-chip color="pink" small>
+        <v-chip :color="getStatusColor(item.questionDto.status)" small>
           <span>{{ item.questionDto.status }}</span>
         </v-chip>
       </template>
-
+      <template v-slot:item.questionDto.creationDate="{ item }">
+        <v-chip small>
+          <span> {{ item.questionDto.creationDate }}</span>
+        </v-chip>
+      </template>
       <template v-slot:item.questionDto.image="{ item }">
         <v-file-input
           show-size
@@ -77,7 +81,7 @@
     />
     <show-question-dialog
       v-if="currentQuestion"
-      :dialog="questionDialog"
+      v-model="questionDialog"
       :question="currentQuestion"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
     />
@@ -140,10 +144,17 @@ export default class SubmissionView extends Vue {
     await this.$store.dispatch('loading');
     try {
       [this.submissions] = await Promise.all([RemoteServices.getSubmissions()]);
+      this.submissions.sort((a, b) => this.sortNewestFirst(a, b));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
+  }
+
+  sortNewestFirst(a: Submission, b: Submission) {
+    if (a.questionDto.creationDate && b.questionDto.creationDate)
+      return a.questionDto.creationDate < b.questionDto.creationDate ? 1 : -1;
+    else return 0;
   }
 
   customFilter(value: string, search: string, question: Question) {
@@ -185,6 +196,11 @@ export default class SubmissionView extends Vue {
   submitQuestion() {
     this.currentQuestion = new Question();
     this.editSubmissionDialog = true;
+  }
+
+  getStatusColor(status: string) {
+    if (status === 'AVAILABLE') return 'green';
+    else return 'pink';
   }
 
   async onSaveQuestion(submission: Submission) {
