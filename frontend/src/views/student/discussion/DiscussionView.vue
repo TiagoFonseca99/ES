@@ -29,8 +29,8 @@
       <template v-slot:expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           {{ convertToMarkdown(item.content) }}
-          <p v-if="item.reply !== undefined">
-            <b>Reply:</b>{{ convertToMarkdown(item.reply.content) }}
+          <p v-if="item.replyDto !== undefined">
+            <b>Reply:</b>{{ convertToMarkdown(item.replyDto.message) }}
           </p>
         </td>
       </template>
@@ -82,7 +82,7 @@ export default class DiscussionView extends Vue {
   customFilter() {
     if (this.filterLabel == FilterState.REPLY) {
       this.items = this.discussions.filter(discussion => {
-        return discussion.reply!;
+        return discussion.replyDto!;
       });
     } else {
       this.items = this.discussions;
