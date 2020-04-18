@@ -650,14 +650,13 @@ export default class RemoteServices {
       });
   }
 
-  static async getDiscussion(
-    userId: number,
-    questionId: number
-  ): Promise<Discussion> {
+  static async getDiscussions(userId: number): Promise<Discussion[]> {
     return httpClient
-      .get('/discussions?userId=' + userId + '&questionId=' + questionId)
+      .get('/discussions?userId=' + userId)
       .then(response => {
-        return new Discussion(response.data);
+        return response.data.map((discussion: any) => {
+          return new Discussion(discussion);
+        });
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
