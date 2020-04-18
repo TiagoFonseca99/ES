@@ -26,6 +26,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,6 +48,12 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.QU
 
 @Service
 public class QuestionService {
+
+    @Autowired
+    private SubmissionRepository submissionRepository;
+
+    @Autowired
+    private SubmissionService submissionService;
 
     @Autowired
     private CourseRepository courseRepository;
@@ -140,6 +149,10 @@ public class QuestionService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void removeQuestion(Integer questionId) {
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
+        Submission submission = submissionRepository.findByQuestionId(questionId).orElse(null);
+
+        deleteSubmission(submission);
+
         question.remove();
         questionRepository.delete(question);
     }
@@ -280,6 +293,10 @@ public class QuestionService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteQuestion(Question question) {
         for (Option option : question.getOptions()) {
+            Submission submission = submissionRepository.findByQuestionId(question.getId()).orElse(null);
+
+            deleteSubmission(submission);
+
             option.remove();
             optionRepository.delete(option);
         }
@@ -293,6 +310,12 @@ public class QuestionService {
 
         questionRepository.delete(question);
 
+    }
+
+    public void deleteSubmission(Submission submission) {
+        if (submission != null) {
+            submissionService.removeSubmission(submission.getId());
+        }
     }
 }
 
