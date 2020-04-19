@@ -92,7 +92,7 @@
                 >
                 </v-autocomplete>
               </template>
-              <template v-slot:item.topics="{ item }">
+              <template v-slot:item.topicsCreate="{ item }">
                 {{ item.name }}
               </template>
               <template v-slot:item.action="{ item }">
@@ -103,6 +103,7 @@
                       class="mr-2"
                       v-on="on"
                       @click="removeTopic(item)"
+                      data-cy="removeTopic"
                     >
                       remove</v-icon
                     >
@@ -121,6 +122,7 @@
               :mobile-breakpoint="0"
               :items-per-page="5"
               :footer-props="{ itemsPerPageOptions: [5, 10, 15] }"
+              data-cy="Topics"
             >
               <template v-slot:top>
                 <h2>Available topics</h2>
@@ -143,7 +145,7 @@
                 >
                 </v-autocomplete>
               </template>
-              <template v-slot:item.topics="{ item }">
+              <template v-slot:item.topicsCreate="{ item }">
                 {{ item.name }}
               </template>
               <template v-slot:item.action="{ item }">
@@ -154,6 +156,7 @@
                       class="mr-2"
                       v-on="on"
                       @click="addTopic(item)"
+                      data-cy="addTopic"
                     >
                       add</v-icon
                     >
@@ -212,7 +215,7 @@ export default class EditTournamentDialog extends Vue {
   topicHeaders: object = [
     {
       text: 'Topics',
-      value: 'topics',
+      value: 'topicsCreate',
       align: 'left',
       sortable: false
     },
@@ -302,7 +305,8 @@ export default class EditTournamentDialog extends Vue {
     this.availableTopics.push(topic);
     this.availableTopics.sort((a, b) => {
       let result = a.name.localeCompare(b.name);
-      return result === 0 ? 0 : result > 0 ? 1 : -1;});
+      return result === 0 ? 0 : result > 0 ? 1 : -1;
+    });
     this.currentTopics = this.currentTopics.filter(t => t.id != topic.id);
   }
 
@@ -310,7 +314,8 @@ export default class EditTournamentDialog extends Vue {
     this.currentTopics.push(topic);
     this.currentTopics.sort((a, b) => {
       let result = a.name.localeCompare(b.name);
-      return result === 0 ? 0 : result > 0 ? 1 : -1;});
+      return result === 0 ? 0 : result > 0 ? 1 : -1;
+    });
     this.availableTopics = this.availableTopics.filter(t => t.id != topic.id);
   }
 }

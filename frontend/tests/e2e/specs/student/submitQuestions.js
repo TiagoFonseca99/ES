@@ -1,6 +1,6 @@
 describe('Student walkthrough', () => {
   beforeEach(() => {
-    cy.demoStudentLogin1()
+    cy.demoStudentLogin()
   })
 
   afterEach(() => {

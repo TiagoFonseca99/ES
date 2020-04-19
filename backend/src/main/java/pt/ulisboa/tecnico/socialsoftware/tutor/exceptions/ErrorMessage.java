@@ -51,7 +51,7 @@ public enum ErrorMessage {
     DUPLICATE_DISCUSSION("Duplicate discussion for user id %d and question id %d"),
     DUPLICATE_TOURNAMENT_TOPIC("Duplicate tournament topic: %s"),
     DUPLICATE_TOURNAMENT_PARTICIPANT("Duplicate tournament participant: %s"),
-    TOURNAMENT_NOT_OPEN("Duplicate tournament not open: %s"),
+    TOURNAMENT_NOT_OPEN("Tournament not open: %s"),
     TOURNAMENT_CANCELED("Tournament canceled: %s"),
     STUDENT_NO_COURSE_EXECUTION("Student has no matching course execution : %s"),
     TOURNAMENT_NO_QUIZ("Tournament has no quiz: %s"),

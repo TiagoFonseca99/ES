@@ -346,7 +346,9 @@
           v-if="isStudent && currentCourse"
         >
           <template v-slot:activator>
-            <v-list-item-title>Student</v-list-item-title>
+            <v-list-item-title data-cy="Student"
+              >Student</v-list-item-title
+            >
           </template>
 
           <v-list-item
