@@ -3,7 +3,7 @@ import Image from '@/models/management/Image';
 import Topic from '@/models/management/Topic';
 
 export default class Question {
-  id!: number;
+  id: number | null = null;
   title: string = '';
   status: string = 'AVAILABLE';
   numberOfAnswers!: number;
