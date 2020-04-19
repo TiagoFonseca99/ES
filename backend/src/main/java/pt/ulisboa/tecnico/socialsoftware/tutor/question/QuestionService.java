@@ -26,8 +26,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
 
 import java.io.ByteArrayOutputStream;
@@ -53,7 +54,7 @@ public class QuestionService {
     private SubmissionRepository submissionRepository;
 
     @Autowired
-    private SubmissionService submissionService;
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private CourseRepository courseRepository;
@@ -314,7 +315,11 @@ public class QuestionService {
 
     public void deleteSubmission(Submission submission) {
         if (submission != null) {
-            submissionService.removeSubmission(submission.getId());
+            List<Review> reviews = new ArrayList<>(reviewRepository.findBySubmissionId(submission.getId()));
+            for (Review review : reviews) {
+                reviewRepository.delete(review);
+            }
+            submissionRepository.delete(submission);
         }
     }
 }

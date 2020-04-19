@@ -142,20 +142,7 @@ public class SubmissionService {
 
         return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
-
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void removeSubmission(Integer submissionId) {
-        Submission submission = submissionRepository.findById(submissionId).orElseThrow(() -> new TutorException(SUBMISSION_NOT_FOUND, submissionId));
-        List<Review> reviews = new ArrayList<>(reviewRepository.findBySubmissionId(submissionId));
-        for (Review review : reviews) {
-            reviewRepository.delete(review);
-        }
-        submissionRepository.delete(submission);
-    }
-
+    
     private void updateQuestionStatus(Submission submission) {
         Question question = getQuestion(submission.getQuestion().getId());
         question.setStatus("AVAILABLE");
