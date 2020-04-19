@@ -24,6 +24,11 @@ public enum ErrorMessage {
     SUBMISSION_MISSING_QUESTION("Missing question for submission"),
     SUBMISSION_MISSING_STUDENT("Missing student for submission"),
     REPLY_NOT_FOUND("Reply not found with teacher %d"),
+    USER_MISSING("Missing student"),
+
+    TOURNAMENT_MISSING_START_TIME("Missing start time for tournament"),
+    TOURNAMENT_MISSING_END_TIME("Missing end time for tournament"),
+    TOURNAMENT_MISSING_NUMBER_OF_QUESTIONS("Missing number of questions for tournament"),
 
     COURSE_NOT_FOUND("Course not found with name %s"),
     COURSE_NAME_IS_EMPTY("The course name is empty"),
