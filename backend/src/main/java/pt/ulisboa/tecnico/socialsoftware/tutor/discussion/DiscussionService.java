@@ -128,7 +128,7 @@ public class DiscussionService {
     }
 
     private void checkReplyDto(ReplyDto replyDto) {
-        if (replyDto.getTeacherId() == null || replyDto.getMessage() == null) {
+        if (replyDto.getTeacherId() == null || replyDto.getMessage() == null || replyDto.getMessage() == "") {
             throw new TutorException(REPLY_MISSING_DATA);
         }
     }
