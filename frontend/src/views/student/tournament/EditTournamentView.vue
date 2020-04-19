@@ -260,7 +260,7 @@ export default class EditTournamentDialog extends Vue {
       const enrolled = this.editTournament.enrolled;
       const topics = this.editTournament.topics;
       this.editTournament.enrolled = undefined;
-      this.editTournament.topics = undefined;
+      this.editTournament.topics = [];
       this.editTournament.state = 'NOT_CANCELED';
 
       this.topicsID = this.currentTopics.map(topic => {
