@@ -13,7 +13,7 @@ export default class Discussion {
       this.content = jsonObj.content;
       this.questionId = jsonObj.questionId;
       this.question = new Question(jsonObj.question);
-      if(jsonObj.replyDto!) {
+      if (jsonObj.replyDto!) {
         this.replyDto = new Reply(jsonObj.replyDto);
       }
       this.userId = jsonObj.userId;

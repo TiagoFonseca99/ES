@@ -5,7 +5,7 @@ export default class Reply {
   date!: string | null;
 
   constructor(jsonObj?: Reply) {
-    if(jsonObj) {
+    if (jsonObj) {
       this.id = jsonObj.id;
       this.teacherId = jsonObj.teacherId;
       this.message = jsonObj.message;

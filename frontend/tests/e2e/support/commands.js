@@ -38,9 +38,12 @@ Cypress.Commands.add('demoStudentLogin1', () => {
     cy.contains('Submissions').click()
 })
 
+Cypress.Commands.add('demoStudentLogin', () => {
+    cy.visit('/')
+    cy.get('[data-cy="studentButton"]').click()
+})
 
 Cypress.Commands.add('submitQuestion', (title, content, opt1, opt2, opt3, opt4) => {
-
     cy.get('[data-cy="submitQuestion"]').click()
     cy.get('[data-cy="QuestionTitle"]').type(title)
     cy.get('[data-cy="QuestionContent"]').type(content)
@@ -66,6 +69,43 @@ Cypress.Commands.add('createCourseExecution', (name, acronym, academicTerm) => {
     cy.get('[data-cy="Acronym"]').type(acronym)
     cy.get('[data-cy="AcademicTerm"]').type(academicTerm)
     cy.get('[data-cy="saveButton"]').click()
+})
+
+Cypress.Commands.add('answerQuiz', (n) => {
+    cy.get('[data-cy="quizzes"]').click()
+    cy.get('[data-cy="availableQuizzes"]').click()
+    cy.get('[data-cy="quizNo' + n + '"]').click()
+    cy.get('[data-cy="optionNo1"]').click()
+    cy.get('[data-cy="nextQuestion"]').click()
+    cy.get('[data-cy="optionNo0"]').click()
+    cy.get('[data-cy="nextQuestion"]').click()
+    cy.get('[data-cy="optionNo2"]').click()
+    cy.get('[data-cy="nextQuestion"]').click()
+    cy.get('[data-cy="optionNo3"]').click()
+    cy.get('[data-cy="nextQuestion"]').click()
+    cy.get('[data-cy="optionNo1"]').click()
+    cy.get('[data-cy="endQuiz"]').click()
+    cy.get('[data-cy="confirmEndQuiz"]').click()
+})
+
+Cypress.Commands.add('writeDiscussion', (content) => {
+    cy.get('[data-cy="discussionText"]').type(content)
+    cy.get('[data-cy="createDiscussion"]').click()
+})
+
+Cypress.Commands.add('viewMyDiscussions', () => {
+    cy.get('[data-cy="discussions"]').click()
+})
+
+Cypress.Commands.add('replyDiscussion', (content) => {
+  cy.exec(
+    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH rep AS (INSERT INTO replies (discussion_user_id, teacher_id, message, date) VALUES (676, 677, \'' +
+      content +
+      '\', \'2020-01-01 00:00:01\') RETURNING id) UPDATE discussions SET reply_id = (SELECT id FROM rep) WHERE user_id = 676;"')
+})
+
+Cypress.Commands.add('openDiscussion', (n) => {
+    cy.get('tbody > :nth-child(' + n + 1 + ') > .text-start').click()
 })
 
 Cypress.Commands.add('closeErrorMessage', (name, acronym, academicTerm) => {
