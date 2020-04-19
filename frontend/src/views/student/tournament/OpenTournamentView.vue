@@ -158,7 +158,7 @@ export default class OpenTournamentView extends Vue {
     const enrolled = tournamentToJoin.enrolled;
     const topics = tournamentToJoin.topics;
     tournamentToJoin.enrolled = undefined;
-    tournamentToJoin.topics = undefined;
+    tournamentToJoin.topics = [];
     try {
       await RemoteServices.joinTournament(tournamentToJoin);
     } catch (error) {
