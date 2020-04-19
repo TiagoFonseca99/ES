@@ -36,6 +36,12 @@ Cypress.Commands.add('demoStudentLogin', () => {
     cy.get('[data-cy="studentButton"]').click();
 });
 
+Cypress.Commands.add('demoTeacherLogin', () => {
+    cy.visit('/');
+    cy.get('[data-cy="teacherButton"]').click();
+    cy.contains('Management').click();
+});
+
 Cypress.Commands.add(
     'openSubmissions',
     () => {
@@ -108,6 +114,32 @@ Cypress.Commands.add('createCourseExecution', (name, acronym, academicTerm) => {
     cy.get('[data-cy="Acronym"]').type(acronym);
     cy.get('[data-cy="AcademicTerm"]').type(academicTerm);
     cy.get('[data-cy="saveButton"]').click();
+});
+
+Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
+    cy.contains('Review').click();
+    cy.get('[data-cy="Search"]').click();
+    cy.get('[data-cy="createReview"]').click();
+    cy.get('[data-cy="Justification"]').type(justification);
+    cy.get('[data-cy="Approve"]').click();
+});
+
+Cypress.Commands.add('RejectSubmissions', (title, justification) => {
+    cy.contains('Review').click();
+    cy.get('[data-cy="Search"]').click();
+    cy.get('[data-cy="createReview"]').click();
+    cy.get('[data-cy="Justification"]').type(justification);
+    cy.get('[data-cy="Reject"]').click();
+});
+
+Cypress.Commands.add('TeacherDeleteSubmission', title => {
+    cy.contains(title)
+        .parent()
+        .should('have.length', 1)
+        .children()
+        .should('have.length', 6)
+        .find('[data-cy="deleteSubmission"]')
+        .click();
 });
 
 Cypress.Commands.add('getSubmissionStatus', (title, status, justification) => {
