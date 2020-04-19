@@ -18,10 +18,7 @@
         <v-spacer />
         <v-btn dark color="blue darken-1" @click="$emit('dialog')">close</v-btn>
       </v-card-actions>
-      <reply-component
-        :discussions = "discussions"
-      />
-
+      <reply-component :discussions="discussions" />
     </v-card>
   </v-dialog>
 </template>
@@ -45,7 +42,6 @@ export default class ShowQuestionDialog extends Vue {
   @Prop({ type: Question, required: true }) readonly question!: Question;
   discussions: Discussion[] = [];
 
-  
   async created() {
     await this.getDiscussions();
   }
@@ -56,7 +52,7 @@ export default class ShowQuestionDialog extends Vue {
       [this.discussions] = await Promise.all([
         RemoteServices.getDiscussionsByQuestion(this.question.id!)
       ]);
-    } catch(error) {
+    } catch (error) {
       await this.$store.dispatch('error', error);
     }
   }

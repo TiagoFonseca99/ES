@@ -26,6 +26,7 @@
       <li
         v-for="(n, index) in question.options.length"
         :key="index"
+        :data-cy="'optionNo' + index"
         v-bind:class="[
           'option',
           optionId === question.options[index].optionId ? 'selected' : ''

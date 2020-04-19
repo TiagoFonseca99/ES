@@ -4,9 +4,9 @@
       <v-card-title class="justify-left headline comp-title">
         Discussions
       </v-card-title>
-      <div class ="discussion">
-        <ul >
-          <li v-for="discussion in discussions" :key="discussion.content">  
+      <div class="discussion">
+        <ul>
+          <li v-for="discussion in discussions" :key="discussion.content">
             <span v-html="convertMarkDown(discussion.content)" />
             <div v-if="discussion.replyDto === undefined" class="reply-message">
               <v-textarea
@@ -21,7 +21,14 @@
               ></v-textarea>
               <v-card-actions>
                 <v-spacer />
-                <v-btn color="blue darken-1" @click="setDiscussion(discussion); submitReply()">Submit</v-btn>
+                <v-btn
+                  color="blue darken-1"
+                  @click="
+                    setDiscussion(discussion);
+                    submitReply();
+                  "
+                  >Submit</v-btn
+                >
               </v-card-actions>
             </div>
             <div v-else class="text-left reply">
@@ -35,11 +42,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit, Watch } from 'vue-property-decorator';
+import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
-import Question from '@/models/management/Question';
 import Discussion from '@/models/management/Discussion';
-import Reply from '@/models/management/Reply';
 import RemoteServices from '../../../services/RemoteServices';
 
 @Component
@@ -51,11 +56,13 @@ export default class ReplyComponent extends Vue {
   @Emit()
   async submitReply() {
     try {
-      this.discussion.replyDto = await RemoteServices.createReply(this.replyMessages.get(this.discussion.userId!)!, this.discussion!);
-    } catch(error) {
+      this.discussion.replyDto = await RemoteServices.createReply(
+        this.replyMessages.get(this.discussion.userId!)!,
+        this.discussion!
+      );
+    } catch (error) {
       await this.$store.dispatch('error', error);
     }
-    
   }
 
   setReplyMessage(message: string) {
@@ -69,7 +76,6 @@ export default class ReplyComponent extends Vue {
   convertMarkDown(text: string) {
     return convertMarkDown(text, null);
   }
-
 }
 </script>
 
@@ -97,7 +103,6 @@ export default class ReplyComponent extends Vue {
     width: 95%;
     margin: 5px auto auto;
 
-
     .text {
       user-select: text;
       margin: 0 auto -30px;
@@ -119,6 +124,5 @@ export default class ReplyComponent extends Vue {
     padding: 15px;
     border-top: #1e88e5 solid 2px;
   }
-
 }
 </style>

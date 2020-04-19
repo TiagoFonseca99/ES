@@ -656,7 +656,9 @@ export default class RemoteServices {
       });
   }
 
-  static async getDiscussionsByQuestion(questionId: number): Promise<Discussion[]> {
+  static async getDiscussionsByQuestion(
+    questionId: number
+  ): Promise<Discussion[]> {
     return httpClient
       .get('/discussions/question?questionId=' + questionId)
       .then(response => {
@@ -668,8 +670,11 @@ export default class RemoteServices {
         throw Error(await this.errorMessage(error));
       });
   }
-  
-  static async createReply(message: string, discussion: Discussion): Promise<Reply> {
+
+  static async createReply(
+    message: string,
+    discussion: Discussion
+  ): Promise<Reply> {
     return httpClient
       .post('/discussions/replies?message=' + message, discussion)
       .then(response => {

@@ -29,8 +29,9 @@
       <template v-slot:expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           {{ convertToMarkdown(item.content) }}
-          <p v-if="item.replyDto !== undefined">
-            <b>Reply:</b>{{ convertToMarkdown(item.replyDto.message) }}
+          <p v-if="item.replyDto !== undefined" class="justify-left">
+            <b>Reply by user with id {{ item.replyDto.teacherId }}:</b
+            >{{ convertToMarkdown(item.replyDto.message) }}
           </p>
         </td>
       </template>
