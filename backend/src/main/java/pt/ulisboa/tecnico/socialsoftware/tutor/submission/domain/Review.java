@@ -1,8 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 

@@ -23,7 +23,6 @@ import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -142,7 +141,7 @@ public class SubmissionService {
 
         return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
-    
+
     private void updateQuestionStatus(Submission submission) {
         Question question = getQuestion(submission.getQuestion().getId());
         question.setStatus("AVAILABLE");
