@@ -24,6 +24,11 @@ public enum ErrorMessage {
     SUBMISSION_MISSING_QUESTION("Missing question for submission"),
     SUBMISSION_MISSING_STUDENT("Missing student for submission"),
     REPLY_NOT_FOUND("Reply not found with teacher %d"),
+    USER_MISSING("Missing student"),
+
+    TOURNAMENT_MISSING_START_TIME("Missing start time for tournament"),
+    TOURNAMENT_MISSING_END_TIME("Missing end time for tournament"),
+    TOURNAMENT_MISSING_NUMBER_OF_QUESTIONS("Missing number of questions for tournament"),
 
     COURSE_NOT_FOUND("Course not found with name %s"),
     COURSE_NAME_IS_EMPTY("The course name is empty"),
@@ -51,7 +56,7 @@ public enum ErrorMessage {
     DUPLICATE_DISCUSSION("Duplicate discussion for user id %d and question id %d"),
     DUPLICATE_TOURNAMENT_TOPIC("Duplicate tournament topic: %s"),
     DUPLICATE_TOURNAMENT_PARTICIPANT("Duplicate tournament participant: %s"),
-    TOURNAMENT_NOT_OPEN("Duplicate tournament not open: %s"),
+    TOURNAMENT_NOT_OPEN("Tournament not open: %s"),
     TOURNAMENT_CANCELED("Tournament canceled: %s"),
     STUDENT_NO_COURSE_EXECUTION("Student has no matching course execution : %s"),
     TOURNAMENT_NO_QUIZ("Tournament has no quiz: %s"),

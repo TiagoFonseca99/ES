@@ -13,6 +13,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto
@@ -20,9 +21,15 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentR
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.TOURNAMENT_MISSING_NUMBER_OF_QUESTIONS
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.TOURNAMENT_MISSING_START_TIME
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.TOURNAMENT_MISSING_END_TIME
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.USER_MISSING
 
 @DataJpaTest
 class CreateTournamentTest extends Specification {
@@ -438,6 +445,30 @@ class CreateTournamentTest extends Specification {
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NOT_CONSISTENT
         tournamentRepository.count() == 0L
+    }
+
+    @Unroll
+    def "invalid arguments: userId=#userId | num=#num | startTimeE=#startTimeE | endTimeE=#endTimeE || errorMessage"(){
+        given: "a tournamentDto"
+        def tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(startTimeE)
+        tournamentDto.setEndTime(endTimeE)
+        tournamentDto.setNumberOfQuestions(num)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+
+        when:
+        tournamentService.createTournament(userId, topics, tournamentDto)
+
+        then: "exception is thrown"
+        def exception = thrown(TutorException)
+        exception.errorMessage == errorMessage
+
+        where:
+        userId            | num                 | startTimeE          | endTimeE            | errorMessage
+        null              | NUMBER_OF_QUESTIONS | "2020-12-20 12:12"  | "2020-12-24 12:12"  | USER_MISSING
+        1                 | null                | "2020-12-20 12:12"  | "2020-12-24 12:12"  | TOURNAMENT_MISSING_NUMBER_OF_QUESTIONS
+        1                 | NUMBER_OF_QUESTIONS | null                | "2020-12-24 12:12"  | TOURNAMENT_MISSING_START_TIME
+        1                 | NUMBER_OF_QUESTIONS | "2020-12-20 12:12"  | null                | TOURNAMENT_MISSING_END_TIME
     }
 
     @TestConfiguration

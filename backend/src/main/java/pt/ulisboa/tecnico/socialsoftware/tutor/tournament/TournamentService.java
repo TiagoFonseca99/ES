@@ -54,6 +54,7 @@ public class TournamentService {
       backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public TournamentDto createTournament(Integer userId, List<Integer> topicsId, TournamentDto tournamentDto) {
+        checkInput(userId, tournamentDto);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
@@ -76,6 +77,7 @@ public class TournamentService {
         this.entityManager.persist(tournament);
         return new TournamentDto(tournament);
     }
+
 
     @Retryable(
       value = { SQLException.class },
@@ -189,6 +191,21 @@ public class TournamentService {
 
         return tournament.getParticipants().stream().map(UserDto::new).collect(Collectors.toList());
 
+    }
+
+    private void checkInput(Integer userId, TournamentDto tournamentDto) {
+        if (userId == null) {
+            throw new TutorException(USER_MISSING);
+        }
+        if (tournamentDto.getStartTime() == null) {
+            throw new TutorException(TOURNAMENT_MISSING_START_TIME);
+        }
+        if (tournamentDto.getEndTime() == null) {
+            throw new TutorException(TOURNAMENT_MISSING_END_TIME);
+        }
+        if (tournamentDto.getNumberOfQuestions() == null) {
+            throw new TutorException(TOURNAMENT_MISSING_NUMBER_OF_QUESTIONS);
+        }
     }
 
 }

@@ -8,6 +8,7 @@
       :hide-default-footer="true"
       :mobile-breakpoint="0"
       multi-sort
+      data-cy="allTournaments"
     >
       <template v-slot:top>
         <v-card-title>
@@ -18,7 +19,7 @@
             class="mx-2"
           />
           <v-spacer />
-          <v-btn to="/student/open" color="primary" dark data-cy="createButton"
+          <v-btn to="/student/open" color="primary" dark data-cy="changeButton"
             >See Open Tournaments
           </v-btn>
           <v-btn
