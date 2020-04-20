@@ -119,7 +119,13 @@ Cypress.Commands.add('createCourseExecution', (name, acronym, academicTerm) => {
 Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
     cy.contains('Review').click();
     cy.get('[data-cy="Search"]').click();
-    cy.get('[data-cy="createReview"]').click();
+    cy.contains(title)
+        .parent()
+        .should('have.length', 1)
+        .children()
+        .should('have.length', 6)
+        .find('[data-cy="createReview"]')
+        .click();
     cy.get('[data-cy="Justification"]').type(justification);
     cy.get('[data-cy="Approve"]').click();
 });
@@ -127,7 +133,13 @@ Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
 Cypress.Commands.add('RejectSubmissions', (title, justification) => {
     cy.contains('Review').click();
     cy.get('[data-cy="Search"]').click();
-    cy.get('[data-cy="createReview"]').click();
+    cy.contains(title)
+        .parent()
+        .should('have.length', 1)
+        .children()
+        .should('have.length', 6)
+        .find('[data-cy="createReview"]')
+        .click();
     cy.get('[data-cy="Justification"]').type(justification);
     cy.get('[data-cy="Reject"]').click();
 });

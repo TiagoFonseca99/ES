@@ -2,7 +2,7 @@ describe('Teacher walkthrough', () => {
     beforeEach(() => {
         cy.demoTeacherLogin();
         cy.log('student submits a question');
-        cy.exec('PGPASSWORD=your_pass psql -d tutordb -U your_user -h localhost -c "WITH quest AS (insert into questions (creation_date, content, title, status, course_id, key) VALUES (current_timestamp, \'OLA?\', \'OIOI\', \'SUBMITTED\', 2, 200) returning id) insert into submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" ');
+        cy.exec('PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH quest AS (insert into questions (creation_date, content, title, status, course_id, key) VALUES (current_timestamp, \'OLA?\', \'OIOI\', \'SUBMITTED\', 2, 200) returning id) insert into submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" ');
 
     })
 
@@ -10,22 +10,23 @@ describe('Teacher walkthrough', () => {
         cy.contains('Logout').click()
     })
 
-    it('login, approves a submission', () => {
+    it('login approves a submission', () => {
 
         cy.ApproveSubmissions('OIOI','Excelente Pergunta');
-
-        cy.exec('PGPASSWORD=your_pass psql -d tutordb -U your_user -h localhost -c "With rev as (delete from reviews where user_id = 677 returning submission_id), subs as (delete from submissions where id = (select id from rev) returning question_id) delete from questions where id = (select question_id from subs);"');
+        cy.log('delete student submited question');
+        cy.wait(3000);
+        cy.exec('PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "With rev as (delete from reviews where user_id = 677 returning submission_id) delete from submissions where id = (select submission_id from rev); delete from questions where title = \'OIOI\'"');
 
     });
 
-    it('login, rejects a submission', () => {
+    it('login rejects a submission', () => {
 
         cy.RejectSubmissions('OIOI','Porque me apeteceu');
         cy.TeacherDeleteSubmission('OIOI');
         
     });
 
-    it('login, reviews submisssion without justification', () => {
+    it('login reviews submisssion without justification', () => {
         cy.log('missing information');
         cy.ApproveSubmissions('OIOI',' ');
 
