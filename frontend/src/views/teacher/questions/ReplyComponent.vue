@@ -57,7 +57,7 @@ export default class ReplyComponent extends Vue {
 
   @Emit('submit')
   async submitReply() {
-    try {      
+    try {
       if (this.replyMessages.get(this.discussion.userId!) === undefined) {
         this.replyMessages.set(this.discussion.userId!, '');
       }
