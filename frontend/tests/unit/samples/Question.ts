@@ -57,7 +57,9 @@ export const questionWithFigure = new Question({
       numberOfQuestions: 94
     }
   ],
-  sequence: null
+  sequence: null,
+  hasAllReplies: false,
+  hasDiscussions: false
 });
 
 export const questionWithoutFigure = new Question({
@@ -114,5 +116,7 @@ export const questionWithoutFigure = new Question({
       numberOfQuestions: 94
     }
   ],
-  sequence: null
+  sequence: null,
+  hasAllReplies: false,
+  hasDiscussions: false
 });

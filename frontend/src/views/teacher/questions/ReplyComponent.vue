@@ -53,7 +53,7 @@ export default class ReplyComponent extends Vue {
   discussion!: Discussion;
   replyMessages: Map<number, string> = new Map();
 
-  @Emit()
+  @Emit('submit')
   async submitReply() {
     try {
       this.discussion.replyDto = await RemoteServices.createReply(
@@ -62,7 +62,17 @@ export default class ReplyComponent extends Vue {
       );
     } catch (error) {
       await this.$store.dispatch('error', error);
+
+      return false;
     }
+
+    for (let i = 0; i < this.discussions.length; i++) {
+      if (!this.discussions[i].replyDto!) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   setReplyMessage(message: string) {

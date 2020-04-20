@@ -18,13 +18,23 @@
         <v-spacer />
         <v-btn dark color="blue darken-1" @click="$emit('dialog')">close</v-btn>
       </v-card-actions>
-      <reply-component :discussions="discussions" />
+      <reply-component
+        :discussions="discussions"
+        v-on:submit="submittedDiscussion"
+      />
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Model, Watch } from 'vue-property-decorator';
+import {
+  Component,
+  Vue,
+  Prop,
+  Model,
+  Watch,
+  Emit
+} from 'vue-property-decorator';
 import Question from '@/models/management/Question';
 import ShowQuestion from '@/views/teacher/questions/ShowQuestion.vue';
 import ReplyComponent from '@/views/teacher/questions/ReplyComponent.vue';
@@ -55,6 +65,11 @@ export default class ShowQuestionDialog extends Vue {
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
+  }
+
+  @Emit('submittedDiscussion')
+  submittedDiscussion(all: boolean) {
+    return all;
   }
 }
 </script>

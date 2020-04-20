@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.question.dto;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
@@ -28,11 +29,13 @@ public class QuestionDto implements Serializable {
     private ImageDto image;
     private List<TopicDto> topics = new ArrayList<>();
     private Integer sequence;
+    private boolean hasDiscussions;
+    private boolean hasAllReplies;
 
     public QuestionDto() {
     }
 
-    public QuestionDto(Question question) {
+	public QuestionDto(Question question) {
         this.id = question.getId();
         this.title = question.getTitle();
         this.content = question.getContent();
@@ -54,6 +57,18 @@ public class QuestionDto implements Serializable {
             this.image = new ImageDto(question.getImage());
         if (question.getCreationDate() != null)
             this.creationDate = question.getCreationDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+        this.hasDiscussions = !question.getDiscussions().isEmpty();
+
+        if (this.hasDiscussions) {
+            this.hasAllReplies = true;
+            for (Discussion d : question.getDiscussions()) {
+                if (d.getReply() == null) {
+                    this.hasAllReplies = false;
+                    break;
+                }
+            }
+        }
     }
 
     public Integer getId() {
@@ -167,6 +182,22 @@ public class QuestionDto implements Serializable {
     public void setTopics(List<TopicDto> topics) {
         this.topics = topics;
     }
+
+    public boolean isHasAllReplies() {
+		return hasAllReplies;
+	}
+
+	public void setHasAllReplies(boolean hasAllReplies) {
+		this.hasAllReplies = hasAllReplies;
+	}
+
+	public boolean isHasDiscussions() {
+		return hasDiscussions;
+	}
+
+	public void setHasDiscussions(boolean hasDiscussions) {
+		this.hasDiscussions = hasDiscussions;
+	}
 
     public Integer getSequence() {
         return sequence;
