@@ -18,11 +18,13 @@
                 rows="2"
                 label="Message"
                 class="text"
+                data-cy="ReplyMessage"
               ></v-textarea>
               <v-card-actions>
                 <v-spacer />
                 <v-btn
                   color="blue darken-1"
+                  data-cy="submitReply"
                   @click="
                     setDiscussion(discussion);
                     submitReply();
@@ -55,7 +57,10 @@ export default class ReplyComponent extends Vue {
 
   @Emit('submit')
   async submitReply() {
-    try {
+    try {      
+      if (this.replyMessages.get(this.discussion.userId!) === undefined) {
+        this.replyMessages.set(this.discussion.userId!, '');
+      }
       this.discussion.replyDto = await RemoteServices.createReply(
         this.replyMessages.get(this.discussion.userId!)!,
         this.discussion!
