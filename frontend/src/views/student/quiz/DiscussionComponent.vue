@@ -14,10 +14,16 @@
           rows="2"
           label="Message"
           class="text"
+          data-cy="discussionText"
         ></v-textarea>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="blue darken-1" @click="submitDiscussion">Submit</v-btn>
+          <v-btn
+            color="blue darken-1"
+            data-cy="createDiscussion"
+            @click="submitDiscussion"
+            >Submit</v-btn
+          >
         </v-card-actions>
       </div>
       <div v-else class="text-left discussion">

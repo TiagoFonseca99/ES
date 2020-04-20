@@ -17,6 +17,7 @@ import Tournament from '@/models/user/Tournament';
 import Submission from '@/models/management/Submission';
 import Review from '@/models/management/Review';
 import Discussion from '@/models/management/Discussion';
+import Reply from '@/models/management/Reply';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 10000;
@@ -573,6 +574,14 @@ export default class RemoteServices {
       });
   }
 
+  static async deleteSubmission(questionId: number) {
+    return httpClient
+      .delete(`/student/submissions/${questionId}`)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async createReview(review: Review): Promise<Review> {
     return httpClient
       .post('/management/reviews', review)
@@ -649,6 +658,35 @@ export default class RemoteServices {
         return response.data.map((discussion: any) => {
           return new Discussion(discussion);
         });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getDiscussionsByQuestion(
+    questionId: number
+  ): Promise<Discussion[]> {
+    return httpClient
+      .get('/discussions/question?questionId=' + questionId)
+      .then(response => {
+        return response.data.map((discussion: any) => {
+          return new Discussion(discussion);
+        });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async createReply(
+    message: string,
+    discussion: Discussion
+  ): Promise<Reply> {
+    return httpClient
+      .post('/discussions/replies?message=' + message, discussion)
+      .then(response => {
+        return new Reply(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));

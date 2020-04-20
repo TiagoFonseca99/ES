@@ -77,7 +77,7 @@ public class QuestionController {
     }
 
     @DeleteMapping("/questions/{questionId}")
-    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#questionId, 'QUESTION.ACCESS')")
+    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#questionId, 'QUESTION.ACCESS') or hasRole('ROLE_STUDENT')")
     public ResponseEntity removeQuestion(@PathVariable Integer questionId) throws IOException {
         logger.debug("removeQuestion questionId: {}: ", questionId);
         QuestionDto questionDto = questionService.findQuestionById(questionId);

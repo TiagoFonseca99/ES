@@ -11,7 +11,7 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn dark color="blue darken-1" @click="closeReviewDialog"
+        <v-btn data-cy="close" dark color="blue darken-1" @click="closeReviewDialog"
           >close</v-btn
         >
       </v-card-actions>

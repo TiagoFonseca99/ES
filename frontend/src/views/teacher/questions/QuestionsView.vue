@@ -3,7 +3,7 @@
     <v-data-table
       :headers="headers"
       :custom-filter="customFilter"
-      :items="questions"
+      :items="items"
       :search="search"
       multi-sort
       :mobile-breakpoint="0"
@@ -20,6 +20,9 @@
           />
 
           <v-spacer />
+          <v-btn color="primary" dark @click="toggleFilter">{{
+            filterLabel
+          }}</v-btn>
           <v-btn color="primary" dark @click="newQuestion">New Question</v-btn>
           <v-btn color="primary" dark @click="exportCourseQuestions"
             >Export Questions</v-btn
@@ -134,6 +137,7 @@
       v-model="questionDialog"
       :question="currentQuestion"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
+      v-on:submittedDiscussion="updateQuestion"
     />
   </v-card>
 </template>
@@ -149,6 +153,12 @@ import ShowQuestionDialog from '@/views/teacher/questions/ShowQuestionDialog.vue
 import EditQuestionDialog from '@/views/teacher/questions/EditQuestionDialog.vue';
 import EditQuestionTopics from '@/views/teacher/questions/EditQuestionTopics.vue';
 
+enum FilterState {
+  DISCUSSION = 'See questions with unanswered discussions',
+  NO_ANSWER = 'See all questions',
+  ALL = 'See questions with discussion'
+}
+
 @Component({
   components: {
     'show-question-dialog': ShowQuestionDialog,
@@ -157,6 +167,7 @@ import EditQuestionTopics from '@/views/teacher/questions/EditQuestionTopics.vue
   }
 })
 export default class QuestionsView extends Vue {
+  items: Question[] = [];
   questions: Question[] = [];
   topics: Topic[] = [];
   currentQuestion: Question | null = null;
@@ -164,6 +175,7 @@ export default class QuestionsView extends Vue {
   questionDialog: boolean = false;
   search: string = '';
   statusList = ['DISABLED', 'AVAILABLE', 'REMOVED'];
+  filterLabel: FilterState = FilterState.ALL;
 
   headers: object = [
     { text: 'Title', value: 'title', align: 'center' },
@@ -224,6 +236,9 @@ export default class QuestionsView extends Vue {
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
+
+    this.discussionFilter();
+
     await this.$store.dispatch('clearLoading');
   }
 
@@ -351,6 +366,40 @@ export default class QuestionsView extends Vue {
         await this.$store.dispatch('error', error);
       }
     }
+  }
+
+  @Watch('filterLabel')
+  discussionFilter() {
+    if (this.filterLabel == FilterState.DISCUSSION) {
+      this.items = this.questions.filter(question => {
+        return question.hasDiscussions;
+      });
+    } else if (this.filterLabel == FilterState.NO_ANSWER) {
+      this.items = this.questions.filter(question => {
+        return question.hasDiscussions && !question.hasAllReplies;
+      });
+    } else {
+      this.items = this.questions;
+    }
+  }
+
+  toggleFilter() {
+    switch (this.filterLabel) {
+      case FilterState.ALL:
+        this.filterLabel = FilterState.DISCUSSION;
+        break;
+      case FilterState.DISCUSSION:
+        this.filterLabel = FilterState.NO_ANSWER;
+        break;
+      case FilterState.NO_ANSWER:
+      default:
+        this.filterLabel = FilterState.ALL;
+    }
+  }
+
+  updateQuestion(allReplies: boolean) {
+    this.currentQuestion!.hasAllReplies = allReplies;
+    this.discussionFilter();
   }
 }
 </script>
