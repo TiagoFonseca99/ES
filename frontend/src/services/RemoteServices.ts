@@ -574,6 +574,14 @@ export default class RemoteServices {
       });
   }
 
+  static async deleteSubmission(questionId: number) {
+    return httpClient
+      .delete(`/student/submissions/${questionId}`)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async createReview(review: Review): Promise<Review> {
     return httpClient
       .post('/management/reviews', review)

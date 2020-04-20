@@ -27,7 +27,7 @@
           </v-chip>
         </div>
         <div class="col">
-          <v-btn small color="primary" dark @click="showReviewDialog(review)"
+          <v-btn small color="primary" data-cy="view" dark @click="showReviewDialog(review)"
             >View</v-btn
           >
         </div>

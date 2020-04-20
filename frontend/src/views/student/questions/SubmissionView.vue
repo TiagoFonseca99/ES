@@ -66,10 +66,25 @@
               class="mr-2"
               v-on="on"
               @click="showQuestionDialog(item.questionDto)"
+              data-cy="viewQuestion"
               >visibility</v-icon
             >
           </template>
           <span>Show Question</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              small
+              class="mr-2"
+              v-on="on"
+              @click="deleteSubmission(item)"
+              color="red"
+              data-cy="deleteSubmission"
+              >delete</v-icon
+            >
+          </template>
+          <span>Delete Question</span>
         </v-tooltip>
       </template>
     </v-data-table>
@@ -208,6 +223,23 @@ export default class SubmissionView extends Vue {
     this.submissions.unshift(submission);
     this.editSubmissionDialog = false;
     this.currentQuestion = null;
+  }
+
+  async deleteSubmission(toDeletesubmission: Submission) {
+    if (
+      toDeletesubmission.id &&
+      confirm('Are you sure you want to delete this question?')
+    ) {
+      try {
+        let questionId = toDeletesubmission.questionDto.id;
+        if (questionId != null) await RemoteServices.deleteQuestion(questionId);
+        this.submissions = this.submissions.filter(
+          submission => submission.id != toDeletesubmission.id
+        );
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+      }
+    }
   }
 }
 </script>

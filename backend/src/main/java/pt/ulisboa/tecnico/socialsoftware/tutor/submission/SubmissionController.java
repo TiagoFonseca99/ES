@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -9,7 +10,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
-import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 
 import javax.validation.Valid;
@@ -30,10 +30,10 @@ public class SubmissionController {
 
     @PostMapping(value = "/student/submissions")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public SubmissionDto createSubmission(Principal principal, @Valid @RequestBody SubmissionDto submissionDto){
+    public SubmissionDto createSubmission(Principal principal, @Valid @RequestBody SubmissionDto submissionDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
-        if(user == null){
+        if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
@@ -49,7 +49,7 @@ public class SubmissionController {
     public ReviewDto createReview(Principal principal, @RequestBody ReviewDto reviewDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
-        if(user == null){
+        if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
@@ -88,7 +88,7 @@ public class SubmissionController {
     public List<ReviewDto> getSubmissionStatus(Principal principal, @PathVariable int submissionId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
-        if(user == null){
+        if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
         return submissionService.getSubmissionStatus(submissionId);
@@ -99,7 +99,7 @@ public class SubmissionController {
     public List<ReviewDto> getSubmissionReviews(Principal principal) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
-        if(user == null){
+        if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
         return submissionService.getSubmissionReviews(user.getId());
@@ -115,4 +115,5 @@ public class SubmissionController {
         }
         return submissionService.getSubmissions(user.getId());
     }
+
 }
