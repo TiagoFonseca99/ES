@@ -15,4 +15,10 @@ describe('Student discussion walkthrough', () => {
     cy.viewMyDiscussions()
     cy.openDiscussion(0)
   })
+
+  it('login answer quiz create empty discussion', () => {
+    cy.answerQuiz(0)
+    cy.writeDiscussion(' ')
+    cy.closeErrorMessage()
+  })
 })
