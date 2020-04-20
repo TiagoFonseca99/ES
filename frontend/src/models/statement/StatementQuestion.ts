@@ -15,11 +15,13 @@ export default class StatementQuestion {
 
   constructor(jsonObj?: StatementQuestion) {
     if (jsonObj) {
-      this.question = jsonObj.question;
+      this.question = new Question(jsonObj.question);
       this.quizQuestionId = jsonObj.quizQuestionId;
       this.content = jsonObj.content;
       this.image = jsonObj.image;
-      this.discussion = jsonObj.discussion;
+      if (jsonObj.discussion!) {
+        this.discussion = new Discussion(jsonObj.discussion!);
+      }
 
       if (jsonObj.options) {
         this.options = _.shuffle(
