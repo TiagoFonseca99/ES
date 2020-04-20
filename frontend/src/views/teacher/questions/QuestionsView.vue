@@ -17,12 +17,15 @@
             append-icon="search"
             label="Search"
             class="mx-2"
+            data-cy="searchQuestion"
           />
 
           <v-spacer />
-          <v-btn color="primary" dark @click="toggleFilter">{{
-            filterLabel
-          }}</v-btn>
+          <v-btn 
+            color="primary" dark 
+            data-cy="filterDiscussions"
+            @click="toggleFilter">{{filterLabel }}          
+          </v-btn>
           <v-btn color="primary" dark @click="newQuestion">New Question</v-btn>
           <v-btn color="primary" dark @click="exportCourseQuestions"
             >Export Questions</v-btn
@@ -86,6 +89,7 @@
               class="mr-2"
               v-on="on"
               @click="showQuestionDialog(item)"
+              data-cy="showQuestionDialog"
               >visibility</v-icon
             >
           </template>
