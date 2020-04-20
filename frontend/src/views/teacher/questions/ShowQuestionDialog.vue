@@ -16,7 +16,13 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn data-cy="close" dark color="blue darken-1" @click="$emit('dialog')">close</v-btn>
+        <v-btn
+          data-cy="close"
+          dark
+          color="blue darken-1"
+          @click="$emit('dialog')"
+          >close</v-btn
+        >
       </v-card-actions>
       <reply-component
         v-if="this.$store.getters.isTeacher"

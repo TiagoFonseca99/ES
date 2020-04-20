@@ -51,23 +51,28 @@
           />
         </template>
         <template v-slot:item.action="{ item }">
-          <v-btn color="primary" small @click="createReview(item)" data-cy="createReview">
+          <v-btn
+            color="primary"
+            small
+            @click="createReview(item)"
+            data-cy="createReview"
+          >
             Create
           </v-btn>
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-icon
-                    small
-                    class="mr-2"
-                    v-on="on"
-                    @click="deleteSubmission(item)"
-                    color="red"
-                    data-cy="deleteSubmission"
-            >delete</v-icon
-            >
-          </template>
-          <span>Delete Question</span>
-        </v-tooltip>
+                small
+                class="mr-2"
+                v-on="on"
+                @click="deleteSubmission(item)"
+                color="red"
+                data-cy="deleteSubmission"
+                >delete</v-icon
+              >
+            </template>
+            <span>Delete Question</span>
+          </v-tooltip>
         </template>
       </v-data-table>
       <edit-reviews
@@ -279,19 +284,18 @@ export default class ReviewsView extends Vue {
 
   async deleteSubmission(toDeletesubmission: Submission) {
     if (
-            toDeletesubmission.id &&
-            confirm('Are you sure you want to delete this question?')
+      toDeletesubmission.id &&
+      confirm('Are you sure you want to delete this question?')
     ) {
       try {
         let questionId = toDeletesubmission.questionDto.id;
         if (questionId != null) await RemoteServices.deleteQuestion(questionId);
         this.submissions = this.submissions.filter(
-                submission => submission.id != toDeletesubmission.id
+          submission => submission.id != toDeletesubmission.id
         );
         this.reviews = this.reviews.filter(
-                review => review.submissionId != toDeletesubmission.id
+          review => review.submissionId != toDeletesubmission.id
         );
-
       } catch (error) {
         await this.$store.dispatch('error', error);
       }
