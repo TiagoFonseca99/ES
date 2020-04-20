@@ -1,5 +1,5 @@
 <template>
-  <v-card class="table">
+  <v-card class="table container">
     <v-data-table
       :headers="headers"
       :items="items"
@@ -8,6 +8,7 @@
       show-expand
       single-expand
       :expanded.sync="expanded"
+      :mobile-breakpoint="0"
       :items-per-page="15"
       :footer-props="{ itemsPerPageOptions: [15, 30, 50, 100] }"
       item-key="questionId"
@@ -26,13 +27,32 @@
           }}</v-btn>
         </v-card-title>
       </template>
+      <template v-slot:item.content="{ item }">
+        <td class="justify-center">
+          {{
+            item.content.length > 70
+              ? item.content.substring(0, 70) + '...'
+              : item.content
+          }}
+        </td>
+      </template>
+      <template v-slot:item.replyDto="{ item }">
+        <td>
+          <v-icon v-if="item.replyDto !== undefined" style="color: #1ea62b"
+            >fas fa-check</v-icon
+          >
+          <v-icon v-else style="color: #fc0b03">fas fa-times</v-icon>
+        </td>
+      </template>
       <template v-slot:expanded-item="{ headers, item }">
-        <td :colspan="headers.length">
-          {{ convertToMarkdown(item.content) }}
-          <p v-if="item.replyDto !== undefined" class="justify-left">
-            <b>Reply by user with id {{ item.replyDto.teacherId }}:</b
-            >{{ convertToMarkdown(item.replyDto.message) }}
-          </p>
+        <td :colspan="headers.length" class="text-left">
+          <div class="container" style="margin: 10px; width: 90%">
+            <p v-html="convertToMarkdown(item.content)" />
+            <p v-if="item.replyDto !== undefined">
+              <b>Reply by user with id {{ item.replyDto.teacherId }}: </b
+              >{{ convertToMarkdown(item.replyDto.message) }}
+            </p>
+          </div>
         </td>
       </template>
     </v-data-table>
@@ -59,9 +79,17 @@ export default class DiscussionView extends Vue {
   expanded = [];
 
   headers: object = [
-    { text: 'Question Title', value: 'question.content', align: 'center' },
-    { text: 'Discussion Content', value: 'content', align: 'center' },
-    { text: 'Question Id', value: 'question.id', align: 'center' },
+    {
+      text: 'Question Title',
+      value: 'question.title',
+      align: 'center'
+    },
+    {
+      text: 'Discussion Content',
+      value: 'content',
+      align: 'center'
+    },
+    { text: 'Reply?', value: 'replyDto', align: 'center' },
     { text: '', value: 'data-table-expand' }
   ];
 

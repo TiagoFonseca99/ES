@@ -186,6 +186,8 @@
 
         <!-- ------------- -->
 
+        <!-- ---- DDP ---- -->
+
         <v-btn
           to="/student/discussions"
           v-if="isStudent && currentCourse"
@@ -196,6 +198,8 @@
           Discussions
           <v-icon>fas fa-comment-alt</v-icon>
         </v-btn>
+
+        <!-- ------------- -->
 
         <v-btn to="/student/stats" v-if="isStudent && currentCourse" text dark>
           Stats
@@ -405,6 +409,17 @@
               <v-icon>fas fa-user-check</v-icon>
             </v-list-item-action>
             <v-list-item-content>Reviews</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
+
+          <!-- ----DDP---- -->
+
+          <v-list-item to="/student/discussions">
+            <v-list-item-action>
+              <v-icon>fas fa-comment-alt</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Discussions</v-list-item-content>
           </v-list-item>
 
           <!-- ----------- -->
