@@ -37,9 +37,24 @@ Cypress.Commands.add('demoStudentLogin', () => {
 });
 
 Cypress.Commands.add('demoTeacherLogin', () => {
-    cy.visit('/');
-    cy.get('[data-cy="teacherButton"]').click();
-    cy.contains('Management').click();
+  cy.visit('/');
+  cy.get('[data-cy="teacherButton"]').click();
+  cy.contains('Management').click();
+});
+
+Cypress.Commands.add('submitReply', (message) => {
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="showQuestionDialog"]').first().click();
+  cy.get('[data-cy="ReplyMessage"]').type(message);
+  cy.get('[data-cy="submitReply"]').click();
+});
+
+Cypress.Commands.add('submitEmptyReply', () => {
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="showQuestionDialog"]').first().click();
+  cy.get('[data-cy="submitReply"]').click();
 });
 
 Cypress.Commands.add(
@@ -49,6 +64,10 @@ Cypress.Commands.add(
         cy.contains('Submissions').click();
     }
 );
+
+Cypress.Commands.add('openTeacherQuestions', () => {
+  cy.contains('Questions').click()
+})
 
 Cypress.Commands.add(
     'submitQuestion',
