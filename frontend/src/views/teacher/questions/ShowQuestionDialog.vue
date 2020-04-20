@@ -19,6 +19,7 @@
         <v-btn data-cy="close" dark color="blue darken-1" @click="$emit('dialog')">close</v-btn>
       </v-card-actions>
       <reply-component
+        v-if="this.$store.getters.isTeacher"
         :discussions="discussions"
         v-on:submit="submittedDiscussion"
       />
@@ -53,17 +54,21 @@ export default class ShowQuestionDialog extends Vue {
   discussions: Discussion[] = [];
 
   async created() {
-    await this.getDiscussions();
+    if (this.$store.getters.isTeacher) {
+      await this.getDiscussions();
+    }
   }
 
   @Watch('question')
   async getDiscussions() {
-    try {
-      [this.discussions] = await Promise.all([
-        RemoteServices.getDiscussionsByQuestion(this.question.id!)
-      ]);
-    } catch (error) {
-      await this.$store.dispatch('error', error);
+    if (this.$store.getters.isTeacher) {
+      try {
+        [this.discussions] = await Promise.all([
+          RemoteServices.getDiscussionsByQuestion(this.question.id!)
+        ]);
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+      }
     }
   }
 

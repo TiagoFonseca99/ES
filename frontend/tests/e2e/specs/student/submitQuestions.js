@@ -29,7 +29,7 @@ describe('Student walkthrough', () => {
     cy.submitQuestion('Test Question','How many years will this pandemic last?','1','2','3','300');
 
     cy.log('teacher reviews submission')
-    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(creation_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" ')
+    cy.exec('PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(creation_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" ')
 
     cy.getSubmissionStatus('Test Question', 'APPROVED','Excelente Pergunta');
 
