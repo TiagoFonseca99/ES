@@ -112,23 +112,8 @@ public class DiscussionService {
         return new ReplyDto(reply);
     }
 
-    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public ReplyDto getReply(Integer userId, DiscussionDto discussionDto) {
-        checkDiscussionDto(discussionDto, userId);
-
-        User user = userRepository.findById(discussionDto.getUserId())
-                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, discussionDto.getUserId()));
-        Question question = questionRepository.findById(discussionDto.getQuestionId())
-                .orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, discussionDto.getQuestionId()));
-
-        checkUserAnswered(user, question);
-
-        return findDiscussionByUserIdAndQuestionId(userId, discussionDto.getQuestionId()).getReplyDto();
-    }
-
     private void checkReplyDto(ReplyDto replyDto) {
-        if (replyDto.getTeacherId() == null || replyDto.getMessage() == null) {
+        if (replyDto.getTeacherId() == null || replyDto.getMessage() == null || replyDto.getMessage() == "") {
             throw new TutorException(REPLY_MISSING_DATA);
         }
     }

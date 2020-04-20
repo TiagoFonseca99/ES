@@ -10,7 +10,7 @@
       </li>
       <li
         class="list-row"
-        v-for="quiz in quizzes"
+        v-for="(quiz, index) in quizzes"
         :key="quiz.quizAnswerId"
         @click="solveQuiz(quiz)"
       >
@@ -23,7 +23,7 @@
         <div class="col">
           {{ quiz.conclusionDate }}
         </div>
-        <div class="col last-col">
+        <div class="col last-col" :data-cy="'quizNo' + index">
           <i class="fas fa-chevron-circle-right"></i>
         </div>
       </li>

@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.api;
 
 import java.security.Principal;
+import java.time.LocalTime;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -40,18 +41,6 @@ public class DiscussionController {
         return discussionService.createDiscussion(discussion);
     }
 
-    @GetMapping(value = "/discussions/reply")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public ReplyDto getReply(Principal principal, @Valid @RequestBody DiscussionDto discussion){
-        User user = (User) ((Authentication) principal).getPrincipal();
-
-        if(user == null){
-            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
-        }
-
-        return discussionService.getReply(user.getId(), discussion);
-    }
-
     @PostMapping(value = "/discussions/replies")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ReplyDto createReply(Principal principal, @Valid @RequestParam String message, @Valid @RequestBody DiscussionDto discussion){
@@ -66,8 +55,10 @@ public class DiscussionController {
         }
 
         reply.setTeacherId(user.getId());
+        reply.setDate(LocalTime.now());
 
         return discussionService.giveReply(reply, discussion);
+        
     }
 
     @GetMapping(value = "/discussions")
@@ -82,5 +73,17 @@ public class DiscussionController {
         }
 
         return discussionService.findDiscussionsByUserId(userId);
+    }
+
+    @GetMapping(value = "/discussions/question")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public List<DiscussionDto> getDiscussionsByQuestions(Principal principal, @Valid @RequestParam Integer questionId) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        return discussionService.findDiscussionsByQuestionId(questionId);
     }
 }

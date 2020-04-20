@@ -200,3 +200,117 @@ Cypress.Commands.add(
         cy.get('[data-cy="saveButton"]').click();
     }
 );
+
+Cypress.Commands.add('createTournament', numberOfQuestions => {
+  cy.get('[data-cy="createButton"]')
+    .should('be.visible')
+    .click({ force: true });
+  cy.time();
+  cy.get('[data-cy="NumberOfQuestions"]').type(numberOfQuestions, { force: true });
+  cy.selectTopic('Adventure Builder');
+  cy.selectTopic('Architectural Style');
+  cy.get('[data-cy="saveButton"]').click();
+});
+
+Cypress.Commands.add('time', () => {
+  cy.get('label')
+    .contains('Start Time')
+    .click({ force: true });
+  cy.get('.v-date-picker-header')
+    .should('have.length', 1)
+    .children()
+    .should('have.length', 3)
+    .eq(2)
+    .click()
+    .wait(500);
+  cy.get('.v-date-picker-table')
+    .should('have.length', 1)
+    .contains('16')
+    .click()
+    .get('.v-card__actions')
+    .contains('OK')
+    .click()
+    .should('not.be.visible');
+
+  cy.get('label')
+    .contains('End Time')
+    .click({ force: true });
+  cy.get('.v-date-picker-header:visible')
+    .should('have.length', 1)
+    .children()
+    .should('have.length', 3)
+    .eq(2)
+    .click()
+    .wait(500);
+  cy.get('.v-date-picker-table:visible')
+    .should('have.length', 1)
+    .contains('18')
+    .click()
+    .get('.v-card__actions:visible')
+    .contains('OK')
+    .click()
+    .should('not.be.visible');
+});
+
+Cypress.Commands.add('selectTopic', topic => {
+  cy.get('[data-cy="Topics"]')
+    .should('be.visible')
+    .should('have.length', 1)
+    .children()
+    .should('have.length', 4)
+    .contains(topic)
+    .parent()
+    .should('have.length', 1)
+    .children()
+    .should('have.length', 2)
+    .find('[data-cy="addTopic"]')
+    .click();
+});
+
+Cypress.Commands.add('joinTournament', (tournament) => {
+  cy.get('tbody')
+    .children()
+    .eq(tournament)
+    .children()
+    .should('have.length', 9)
+    .eq(8)
+    .find('[data-cy="JoinTournament"]')
+    .click({ force: true });
+});
+
+Cypress.Commands.add('answerQuiz', (n) => {
+    cy.get('[data-cy="quizzes"]').click()
+    cy.get('[data-cy="availableQuizzes"]').click()
+    cy.get('[data-cy="quizNo' + n + '"]').click()
+    cy.get('[data-cy="optionNo1"]').click()
+    cy.get('[data-cy="nextQuestion"]').click()
+    cy.get('[data-cy="optionNo0"]').click()
+    cy.get('[data-cy="nextQuestion"]').click()
+    cy.get('[data-cy="optionNo2"]').click()
+    cy.get('[data-cy="nextQuestion"]').click()
+    cy.get('[data-cy="optionNo3"]').click()
+    cy.get('[data-cy="nextQuestion"]').click()
+    cy.get('[data-cy="optionNo1"]').click()
+    cy.get('[data-cy="endQuiz"]').click()
+    cy.get('[data-cy="confirmEndQuiz"]').click()
+})
+
+Cypress.Commands.add('writeDiscussion', (content) => {
+    cy.get('[data-cy="discussionText"]').type(content)
+    cy.get('[data-cy="createDiscussion"]').click()
+})
+
+Cypress.Commands.add('viewMyDiscussions', () => {
+    cy.get('[data-cy="discussions"]').click()
+})
+
+Cypress.Commands.add('replyDiscussion', (content) => {
+  cy.exec(
+    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH rep AS (INSERT INTO replies (discussion_user_id, teacher_id, message, date) VALUES (676, 677, \'' +
+      content +
+      '\', \'2020-01-01 00:00:01\') RETURNING id) UPDATE discussions SET reply_id = (SELECT id FROM rep) WHERE user_id = 676;"')
+})
+
+Cypress.Commands.add('openDiscussion', (n) => {
+    cy.get('tbody > :nth-child(' + n + 1 + ') > .text-start').click()
+})

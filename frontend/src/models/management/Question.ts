@@ -15,6 +15,8 @@ export default class Question {
   creationDate!: string | null;
   image: Image | null = null;
   sequence: number | null = null;
+  hasDiscussions!: boolean;
+  hasAllReplies!: boolean;
 
   options: Option[] = [new Option(), new Option(), new Option(), new Option()];
   topics: Topic[] = [];
@@ -38,6 +40,8 @@ export default class Question {
       );
 
       this.topics = jsonObj.topics.map((topic: Topic) => new Topic(topic));
+      this.hasDiscussions = jsonObj.hasDiscussions;
+      this.hasAllReplies = jsonObj.hasAllReplies;
     }
   }
 }
