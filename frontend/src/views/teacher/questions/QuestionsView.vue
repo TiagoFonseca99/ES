@@ -25,6 +25,13 @@
           <v-btn
             color="primary"
             dark
+            data-cy="filterDiscussions"
+            @click="toggleFilter"
+            >{{ filterLabel }}
+          </v-btn>
+          <v-btn
+            color="primary"
+            dark
             @click="newQuestion"
             data-cy="NewQuestionButton"
             >New Question</v-btn

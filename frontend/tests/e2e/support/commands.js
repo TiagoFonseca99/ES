@@ -49,7 +49,8 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('openTeacherQuestions', () => {
-    cy.contains('Questions').click()
+    cy.get('[data-cy="Management"]').click()
+    cy.get('[data-cy="Questions"]').click()
 })
 
 Cypress.Commands.add(
@@ -119,7 +120,8 @@ Cypress.Commands.add('createCourseExecution', (name, acronym, academicTerm) => {
 });
 
 Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
-    cy.contains('Review').click();
+    cy.get('[data-cy="Management"]').click();
+    cy.get('[data-cy="Reviews"]').click();
     cy.get('[data-cy="Search"]').click();
     cy.contains(title)
         .parent()
@@ -133,7 +135,8 @@ Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
 });
 
 Cypress.Commands.add('RejectSubmissions', (title, justification) => {
-    cy.contains('Review').click();
+    cy.get('[data-cy="Management"]').click();
+    cy.get('[data-cy="Reviews"]').click();
     cy.get('[data-cy="Search"]').click();
     cy.contains(title)
         .parent()

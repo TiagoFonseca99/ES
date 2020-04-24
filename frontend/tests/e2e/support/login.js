@@ -10,7 +10,7 @@ Cypress.Commands.add('demoTeacherLogin', () => {
 
 Cypress.Commands.add('demoStudentLogin', () => {
   cy.visit('/');
-  cy.get('[data-cy="demoStudnetLoginButton"]').click();
+  cy.get('[data-cy="demoStudentLoginButton"]').click();
 });
 
 Cypress.Commands.add('logout', () => {

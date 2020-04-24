@@ -16,7 +16,7 @@
         <span v-if="!hideTime">{{ submissionTimer }}</span>
       </span>
       <span class="end-quiz" @click="confirmationDialog = true"
-        ><i class="fas fa-times" />End Quiz</span
+        ><i class="fas fa-times" data-cy="endQuiz" />End Quiz</span
       >
     </header>
 
@@ -33,12 +33,6 @@
         >
           {{ index }}
         </span>
-        <span
-          class="end-quiz"
-          @click="confirmationDialog = true"
-          data-cy="endQuiz"
-          ><i class="fas fa-times" />End Quiz</span
-        >
       </div>
       <span
         class="left-button"
@@ -99,7 +93,12 @@
           <v-btn color="secondary" text @click="confirmationDialog = false">
             Cancel
           </v-btn>
-          <v-btn color="primary" text @click="concludeQuiz">
+          <v-btn
+            color="primary"
+            text
+            @click="concludeQuiz"
+            data-cy="confirmEndQuiz"
+          >
             I'm sure
           </v-btn>
         </v-card-actions>

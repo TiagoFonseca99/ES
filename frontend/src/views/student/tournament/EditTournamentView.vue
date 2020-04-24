@@ -21,25 +21,19 @@
             </v-flex>
             <v-row>
               <v-col cols="12" sm="6">
-                <v-datetime-picker
-                  label="Start Time"
-                  format="yyyy-MM-dd HH:mm"
+                <VueCtkDateTimePicker
+                  label="*Start Time"
                   v-model="editTournament.startTime"
-                  date-format="yyyy-MM-dd"
-                  time-format="HH:mm"
-                >
-                </v-datetime-picker>
+                  format="YYYY-MM-DD HH:mm"
+                ></VueCtkDateTimePicker>
               </v-col>
               <v-spacer></v-spacer>
               <v-col cols="12" sm="6">
-                <v-datetime-picker
-                  label="End Time"
-                  format="yyyy-MM-dd HH:mm"
+                <VueCtkDateTimePicker
+                  label="*End Time"
                   v-model="editTournament.endTime"
-                  date-format="yyyy-MM-dd"
-                  time-format="HH:mm"
-                >
-                </v-datetime-picker>
+                  format="YYYY-MM-DD HH:mm"
+                ></VueCtkDateTimePicker>
               </v-col>
             </v-row>
             <v-flex xs24 sm12 md8>
