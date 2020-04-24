@@ -25,152 +25,13 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 /// <reference types="Cypress" />
 
-Cypress.Commands.add('submitReply', (message) => {
-    cy.get('[data-cy="filterDiscussions"]').click();
-    cy.get('[data-cy="filterDiscussions"]').click();
-    cy.get('[data-cy="showQuestionDialog"]').first().click();
-    cy.get('[data-cy="ReplyMessage"]').type(message);
-    cy.get('[data-cy="submitReply"]').click();
-});
-
-Cypress.Commands.add('submitEmptyReply', () => {
-    cy.get('[data-cy="filterDiscussions"]').click();
-    cy.get('[data-cy="filterDiscussions"]').click();
-    cy.get('[data-cy="showQuestionDialog"]').first().click();
-    cy.get('[data-cy="submitReply"]').click();
-});
-
-Cypress.Commands.add(
-    'openSubmissions',
-    () => {
-        cy.contains('Questions').click();
-        cy.contains('Submissions').click();
-    }
-);
-
-Cypress.Commands.add('openTeacherQuestions', () => {
-    cy.get('[data-cy="Management"]').click()
-    cy.get('[data-cy="Questions"]').click()
-})
-
-Cypress.Commands.add(
-    'submitQuestion',
-    (title, content, opt1, opt2, opt3, opt4) => {
-        cy.openSubmissions();
-        cy.get('[data-cy="submitQuestion"]').click();
-        cy.get('[data-cy="QuestionTitle"]').type(title);
-        cy.get('[data-cy="QuestionContent"]').type(content);
-        cy.get('[data-cy="Switch1"]').click({ force: true });
-        cy.get('[data-cy="Option1"]').type(opt1);
-        cy.get('[data-cy="Option2"]').type(opt2);
-        cy.get('[data-cy="Option3"]').type(opt3);
-        cy.get('[data-cy="Option4"]').type(opt4);
-        cy.get('[data-cy="submitButton"]').click();
-        cy.contains(title)
-            .parent()
-            .should('have.length', 1)
-            .children()
-            .should('have.length', 6);
-        cy.wait(500);
-    }
-);
-
-Cypress.Commands.add(
-    'viewQuestion',
-    (title) => {
-        cy.contains(title)
-            .parent()
-            .should('have.length', 1)
-            .children()
-            .should('have.length', 6)
-            .find('[data-cy="viewQuestion"]')
-            .click();
-        cy.get('[data-cy="close"]').click();
-    }
-);
-
-Cypress.Commands.add('submitInvalidQuestion', (title, content) => {
-    cy.openSubmissions();
-    cy.get('[data-cy="submitQuestion"]').click();
-    cy.get('[data-cy="QuestionTitle"]').type(title);
-    cy.get('[data-cy="QuestionContent"]').type(content);
-    cy.get('[data-cy="submitButton"]').click();
-});
-
-Cypress.Commands.add('deleteSubmission', title => {
-    cy.contains(title)
-        .parent()
-        .should('have.length', 1)
-        .children()
-        .should('have.length', 6)
-        .find('[data-cy="deleteSubmission"]')
-        .click();
-});
-
-Cypress.Commands.add('teacherReviewsSubmission', () => {
-    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(current_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" ')
-});
 
 Cypress.Commands.add('createCourseExecution', (name, acronym, academicTerm) => {
     cy.get('[data-cy="createButton"]').click();
-    cy.get('[data-cy="Name"]').type(name);
-    cy.get('[data-cy="Acronym"]').type(acronym);
-    cy.get('[data-cy="AcademicTerm"]').type(academicTerm);
+    cy.get('[data-cy="courseExecutionNameInput"]').type(name);
+    cy.get('[data-cy="courseExecutionAcronymInput"]').type(acronym);
+    cy.get('[data-cy="courseExecutionAcademicTermInput"]').type(academicTerm);
     cy.get('[data-cy="saveButton"]').click();
-});
-
-Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
-    cy.get('[data-cy="Management"]').click();
-    cy.get('[data-cy="Reviews"]').click();
-    cy.get('[data-cy="Search"]').click();
-    cy.contains(title)
-        .parent()
-        .should('have.length', 1)
-        .children()
-        .should('have.length', 6)
-        .find('[data-cy="createReview"]')
-        .click();
-    cy.get('[data-cy="Justification"]').type(justification);
-    cy.get('[data-cy="Approve"]').click();
-});
-
-Cypress.Commands.add('RejectSubmissions', (title, justification) => {
-    cy.get('[data-cy="Management"]').click();
-    cy.get('[data-cy="Reviews"]').click();
-    cy.get('[data-cy="Search"]').click();
-    cy.contains(title)
-        .parent()
-        .should('have.length', 1)
-        .children()
-        .should('have.length', 6)
-        .find('[data-cy="createReview"]')
-        .click();
-    cy.get('[data-cy="Justification"]').type(justification);
-    cy.get('[data-cy="Reject"]').click();
-});
-
-Cypress.Commands.add('TeacherDeleteSubmission', title => {
-    cy.contains(title)
-        .parent()
-        .should('have.length', 1)
-        .children()
-        .should('have.length', 6)
-        .find('[data-cy="deleteSubmission"]')
-        .click();
-});
-
-Cypress.Commands.add('getSubmissionStatus', (title, status, justification) => {
-    cy.contains('Questions').click();
-    cy.contains('Reviews').click();
-    cy.contains(status);
-    cy.contains(title)
-        .parent()
-        .should('have.length', 1)
-        .children()
-        .should('have.length', 5)
-        .find('[data-cy="view"]')
-        .click();
-    cy.get('[data-cy="close"]').click();
 });
 
 Cypress.Commands.add('closeErrorMessage', (name, acronym, academicTerm) => {
@@ -191,19 +52,19 @@ Cypress.Commands.add('deleteCourseExecution', acronym => {
 });
 
 Cypress.Commands.add(
-    'createFromCourseExecution',
-    (name, acronym, academicTerm) => {
-        cy.contains(name)
-            .parent()
-            .should('have.length', 1)
-            .children()
-            .should('have.length', 7)
-            .find('[data-cy="createFromCourse"]')
-            .click();
-        cy.get('[data-cy="Acronym"]').type(acronym);
-        cy.get('[data-cy="AcademicTerm"]').type(academicTerm);
-        cy.get('[data-cy="saveButton"]').click();
-    }
+  'createFromCourseExecution',
+  (name, acronym, academicTerm) => {
+    cy.contains(name)
+      .parent()
+      .should('have.length', 1)
+      .children()
+      .should('have.length', 7)
+      .find('[data-cy="createFromCourse"]')
+      .click();
+    cy.get('[data-cy="courseExecutionAcronymInput"]').type(acronym);
+    cy.get('[data-cy="courseExecutionAcademicTermInput"]').type(academicTerm);
+    cy.get('[data-cy="saveButton"]').click();
+  }
 );
 
 Cypress.Commands.add('createTournament', numberOfQuestions => {
@@ -319,3 +180,143 @@ Cypress.Commands.add('replyDiscussion', (content) => {
 Cypress.Commands.add('openDiscussion', (n) => {
     cy.get('tbody > :nth-child(' + n + 1 + ') > .text-start').click()
 })
+
+Cypress.Commands.add('submitReply', (message) => {
+    cy.get('[data-cy="filterDiscussions"]').click();
+    cy.get('[data-cy="filterDiscussions"]').click();
+    cy.get('[data-cy="showQuestionDialog"]').first().click();
+    cy.get('[data-cy="ReplyMessage"]').type(message);
+    cy.get('[data-cy="submitReply"]').click();
+});
+
+Cypress.Commands.add('submitEmptyReply', () => {
+    cy.get('[data-cy="filterDiscussions"]').click();
+    cy.get('[data-cy="filterDiscussions"]').click();
+    cy.get('[data-cy="showQuestionDialog"]').first().click();
+    cy.get('[data-cy="submitReply"]').click();
+});
+
+Cypress.Commands.add(
+  'openSubmissions',
+  () => {
+      cy.contains('Questions').click();
+      cy.contains('Submissions').click();
+  }
+);
+
+Cypress.Commands.add('openTeacherQuestions', () => {
+    cy.get('[data-cy="Management"]').click()
+    cy.get('[data-cy="Questions"]').click()
+})
+
+Cypress.Commands.add(
+  'submitQuestion',
+  (title, content, opt1, opt2, opt3, opt4) => {
+      cy.openSubmissions();
+      cy.get('[data-cy="submitQuestion"]').click();
+      cy.get('[data-cy="QuestionTitle"]').type(title);
+      cy.get('[data-cy="QuestionContent"]').type(content);
+      cy.get('[data-cy="Switch1"]').click({ force: true });
+      cy.get('[data-cy="Option1"]').type(opt1);
+      cy.get('[data-cy="Option2"]').type(opt2);
+      cy.get('[data-cy="Option3"]').type(opt3);
+      cy.get('[data-cy="Option4"]').type(opt4);
+      cy.get('[data-cy="submitButton"]').click();
+      cy.contains(title)
+        .parent()
+        .should('have.length', 1)
+        .children()
+        .should('have.length', 6);
+      cy.wait(500);
+  }
+);
+
+Cypress.Commands.add(
+  'viewQuestion',
+  (title) => {
+      cy.contains(title)
+        .parent()
+        .should('have.length', 1)
+        .children()
+        .should('have.length', 6)
+        .find('[data-cy="viewQuestion"]')
+        .click();
+      cy.get('[data-cy="close"]').click();
+  }
+);
+
+Cypress.Commands.add('submitInvalidQuestion', (title, content) => {
+    cy.openSubmissions();
+    cy.get('[data-cy="submitQuestion"]').click();
+    cy.get('[data-cy="QuestionTitle"]').type(title);
+    cy.get('[data-cy="QuestionContent"]').type(content);
+    cy.get('[data-cy="submitButton"]').click();
+});
+
+Cypress.Commands.add('deleteSubmission', title => {
+    cy.contains(title)
+      .parent()
+      .should('have.length', 1)
+      .children()
+      .should('have.length', 6)
+      .find('[data-cy="deleteSubmission"]')
+      .click();
+});
+
+Cypress.Commands.add('teacherReviewsSubmission', () => {
+    cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(current_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" ')
+});
+
+Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
+    cy.get('[data-cy="Management"]').click();
+    cy.get('[data-cy="Reviews"]').click();
+    cy.get('[data-cy="Search"]').click();
+    cy.contains(title)
+      .parent()
+      .should('have.length', 1)
+      .children()
+      .should('have.length', 6)
+      .find('[data-cy="createReview"]')
+      .click();
+    cy.get('[data-cy="Justification"]').type(justification);
+    cy.get('[data-cy="Approve"]').click();
+});
+
+Cypress.Commands.add('RejectSubmissions', (title, justification) => {
+    cy.get('[data-cy="Management"]').click();
+    cy.get('[data-cy="Reviews"]').click();
+    cy.get('[data-cy="Search"]').click();
+    cy.contains(title)
+      .parent()
+      .should('have.length', 1)
+      .children()
+      .should('have.length', 6)
+      .find('[data-cy="createReview"]')
+      .click();
+    cy.get('[data-cy="Justification"]').type(justification);
+    cy.get('[data-cy="Reject"]').click();
+});
+
+Cypress.Commands.add('TeacherDeleteSubmission', title => {
+    cy.contains(title)
+      .parent()
+      .should('have.length', 1)
+      .children()
+      .should('have.length', 6)
+      .find('[data-cy="deleteSubmission"]')
+      .click();
+});
+
+Cypress.Commands.add('getSubmissionStatus', (title, status, justification) => {
+    cy.contains('Questions').click();
+    cy.contains('Reviews').click();
+    cy.contains(status);
+    cy.contains(title)
+      .parent()
+      .should('have.length', 1)
+      .children()
+      .should('have.length', 5)
+      .find('[data-cy="view"]')
+      .click();
+    cy.get('[data-cy="close"]').click();
+});
