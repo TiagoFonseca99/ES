@@ -22,24 +22,19 @@ public enum ErrorMessage {
     INVALID_TYPE_FOR_QUIZ("Invalid type for quiz"),
     INVALID_QUESTION_SEQUENCE_FOR_QUIZ("Invalid question sequence for quiz"),
 
-    ASSESSMENT_NOT_FOUND("Assessment not found with id %d"),
     COURSE_EXECUTION_NOT_FOUND("Course execution not found with id %d"),
     OPTION_NOT_FOUND("Option not found with id %d"),
     QUESTION_ANSWER_NOT_FOUND("Question answer not found with id %d"),
     QUESTION_NOT_FOUND("Question not found with id %d"),
     QUESTION_NOT_ANSWERED("Question not answered with id %d"),
     USER_NOT_FOUND("User not found with id %d"),
-    TOPIC_NOT_FOUND("Topic not found with id %d"),
     ASSESSMENT_NOT_FOUND("Assessment not found with id %d"),
     TOPIC_CONJUNCTION_NOT_FOUND("Topic Conjunction not found with id %d"),
-    COURSE_EXECUTION_NOT_FOUND("Course execution not found with name %d"),
 
     QUIZ_ANSWER_NOT_FOUND("Quiz answer not found with id %d"),
     QUIZ_NOT_FOUND("Quiz not found with id %d"),
     QUIZ_QUESTION_NOT_FOUND("Quiz question not found with id %d"),
-    TOPIC_CONJUNCTION_NOT_FOUND("Topic Conjunction not found with id %d"),
     TOPIC_NOT_FOUND("Topic not found with id %d"),
-    USER_NOT_FOUND("User not found with id %d"),
     DISCUSSION_NOT_FOUND("Discussion not found with user id %d and question id %d"),
     SUBMISSION_NOT_FOUND("Submission not found with id %d"),
 
@@ -116,7 +111,6 @@ public enum ErrorMessage {
     REPLY_MISSING_DATA("Missing information for reply"),
     REPLY_NOT_TEACHER_CREATOR("Student cannot give reply"),
     DUPLICATE_REPLY("Duplicate Reply for teacher: %d"),
-
 
     ACCESS_DENIED("You do not have permission to view this resource"),
     CANNOT_OPEN_FILE("Cannot open file");
