@@ -1,13 +1,13 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.question.dto;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion;
 
 import java.io.Serializable;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -23,7 +23,7 @@ public class QuestionDto implements Serializable {
     private int numberOfGeneratedQuizzes = 0;
     private int numberOfNonGeneratedQuizzes = 0;
     private int numberOfCorrect;
-    private String creationDate = null;
+    private String creationDate;
     private String status;
     private List<OptionDto> options = new ArrayList<>();
     private ImageDto image;
@@ -56,7 +56,7 @@ public class QuestionDto implements Serializable {
         if (question.getImage() != null)
             this.image = new ImageDto(question.getImage());
         if (question.getCreationDate() != null)
-            this.creationDate = question.getCreationDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            this.creationDate = DateHandler.toISOString(question.getCreationDate());
 
         this.hasDiscussions = !question.getDiscussions().isEmpty();
 
@@ -73,10 +73,6 @@ public class QuestionDto implements Serializable {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public Integer getKey() {
