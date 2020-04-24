@@ -14,7 +14,6 @@
         small
         color="primary"
         @click="demoStudent"
-        data-cy="studentButton"
         data-cy="demoStudentLoginButton"
       >
         <i class="fa fa-graduation-cap" />Demo as student

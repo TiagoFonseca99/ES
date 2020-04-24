@@ -39,7 +39,6 @@
           data-cy="endQuiz"
           ><i class="fas fa-times" />End Quiz</span
         >
-      </header>
       </div>
       <span
         class="left-button"
