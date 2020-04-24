@@ -8,10 +8,15 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
@@ -31,6 +36,7 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Service
 public class TournamentService {
+
     @Autowired
     private TournamentRepository tournamentRepository;
 
@@ -45,6 +51,9 @@ public class TournamentService {
 
     @Autowired
     private QuizRepository quizRepository;
+
+    @Autowired
+    private StatementService statementService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -165,6 +174,32 @@ public class TournamentService {
         }
 
         tournament.addParticipant(user);
+
+        /*
+        // QUIZ GENERATION
+        QuizDto quizDto = tournament.generateQuiz();
+        if (quizDto != null){
+            int courseId = Integer.parseInt(tournament.getCourseExecution().getId().toString());
+
+            // GERACAO DE PERGUNTAS
+
+            ArrayList<QuestionDto> finalQuestions = new ArrayList<>();
+            List<QuestionDto> questions = questionService.findQuestions(courseId);
+            int i;
+
+            for (i = 0; i < tournament.getNumberOfQuestions(); i++) {
+                finalQuestions.add(questions.get(i));
+            }
+            quizDto.setQuestions(finalQuestions);
+
+
+
+            QuizDto quizDto1 = quizService.createQuiz(courseId, quizDto);
+            Quiz quiz = quizRepository.findByKey(quizDto1.getKey()).orElse(null);
+            tournament.setQuiz(quiz);
+        }
+
+        */
 
     }
 

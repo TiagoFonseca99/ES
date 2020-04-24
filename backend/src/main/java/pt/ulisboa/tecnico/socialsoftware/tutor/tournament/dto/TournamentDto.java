@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Transient;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -42,7 +43,6 @@ public class TournamentDto implements Serializable {
         this.topics = tournament.getTopics().stream().map(TopicDto::new).collect(Collectors.toList());
         this.participants = tournament.getParticipants().stream().map(UserDto::new).collect(Collectors.toList());
         this.courseAcronym = tournament.getCourseExecution().getAcronym();
-
     }
 
     public Integer getId() {
@@ -110,4 +110,5 @@ public class TournamentDto implements Serializable {
         }
         return LocalDateTime.parse(getEndTime(), formatter);
     }
+
 }
