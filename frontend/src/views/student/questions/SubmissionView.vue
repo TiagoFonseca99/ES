@@ -20,6 +20,9 @@
           />
 
           <v-spacer />
+          <v-btn to="/student/reviews" color="primary" dark data-cy="submissionsStatus">
+            Submissions Status
+          </v-btn>
           <v-btn
             color="primary"
             dark
@@ -113,7 +116,7 @@ import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
 import Image from '@/models/management/Image';
-import ShowQuestionDialog from '@/views/teacher/questions/ShowQuestionDialog.vue';
+import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
 import EditSubmissionDialog from '@/views/student/questions/EditSubmissionDialog.vue';
 @Component({
   components: {
