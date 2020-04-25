@@ -30,12 +30,11 @@
         </v-card-title>
       </template>
 
-      <template v-slot:item.questionDto.content="{ item }">
+      <template v-slot:item.questionDto.title="{ item }">
         <p
           v-html="
             convertMarkDown(item.questionDto.content, item.questionDto.image)
-          "
-          @click="showQuestionDialog(item.questionDto)"
+          "@click="showQuestionDialog(item.questionDto)"
       /></template>
 
       <template v-slot:item.questionDto.status="{ item }">
@@ -62,7 +61,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="showQuestionDialog(item.questionDto)"
@@ -75,7 +74,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="deleteSubmission(item)"
@@ -88,6 +87,10 @@
         </v-tooltip>
       </template>
     </v-data-table>
+    <footer>
+      <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to view
+      it.
+    </footer>
     <edit-submission-dialog
       v-if="currentQuestion"
       v-model="editSubmissionDialog"
@@ -126,8 +129,14 @@ export default class SubmissionView extends Vue {
   search: string = '';
 
   headers: object = [
+    {
+      text: 'Actions',
+      value: 'action',
+      align: 'left',
+      width: '15%',
+      sortable: false
+    },
     { text: 'Title', value: 'questionDto.title', align: 'center' },
-    { text: 'Question', value: 'questionDto.content', align: 'left' },
     { text: 'Status', value: 'questionDto.status', align: 'center' },
     {
       text: 'Creation Date',
@@ -137,12 +146,6 @@ export default class SubmissionView extends Vue {
     {
       text: 'Image',
       value: 'questionDto.image',
-      align: 'center',
-      sortable: false
-    },
-    {
-      text: 'Actions',
-      value: 'action',
       align: 'center',
       sortable: false
     }

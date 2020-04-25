@@ -24,7 +24,7 @@
             />
           </v-card-title>
         </template>
-        <template v-slot:item.questionDto.content="{ item }">
+        <template v-slot:item.questionDto.title="{ item }">
           <p
             v-html="
               convertMarkDown(item.questionDto.content, item.questionDto.image)
@@ -50,7 +50,7 @@
             accept="image/*"
           />
         </template>
-        <template v-slot:item.action="{ item }">
+        <template v-slot:item.review="{ item }">
           <v-btn
             color="primary"
             small
@@ -59,22 +59,41 @@
           >
             Create
           </v-btn>
+        </template>
+        <template v-slot:item.action="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-icon
-                small
-                class="mr-2"
-                v-on="on"
-                @click="deleteSubmission(item)"
-                color="red"
-                data-cy="deleteSubmission"
-                >delete</v-icon
+                      large
+                      class="mr-2"
+                      v-on="on"
+                      @click="showQuestionDialog(item.questionDto)"
+                      data-cy="viewQuestion"
+              >visibility</v-icon
+              >
+            </template>
+            <span>Show Question</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-icon
+                      large
+                      class="mr-2"
+                      v-on="on"
+                      @click="deleteSubmission(item)"
+                      color="red"
+                      data-cy="deleteSubmission"
+              >delete</v-icon
               >
             </template>
             <span>Delete Question</span>
           </v-tooltip>
         </template>
       </v-data-table>
+      <footer>
+        <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to view
+        it.
+      </footer>
       <edit-reviews
         v-if="currentSubmission"
         v-model="editReview"
@@ -103,20 +122,11 @@
           </v-card-title>
         </template>
         <template v-slot:item.questionDto.title="{ item }">
-          <span> {{ getSubmission(item).title }}</span>
-        </template>
-        <template v-slot:item.questionDto.content="{ item }">
-          <p
-            v-html="
-              convertMarkDown(
-                getSubmission(item).content,
-                getSubmission(item).image
-              )
-            "
-            @click="showQuestionDialog(getSubmission(item))"
-          >
-            <span> {{ getSubmission(item).content }}</span>
+          <span>
+          <p v-html="convertMarkDown(getSubmission(item).title, getSubmission(item).image)" @click="showQuestionDialog(getSubmission(item))">
+            {{ getSubmission(item).title }}
           </p>
+          </span>
         </template>
         <template v-slot:item.questionDto.creationDate="{ item }">
           <v-chip small>
@@ -133,7 +143,26 @@
             <span>{{ item.justification }}</span>
           </v-chip>
         </template>
+        <template v-slot:item.action="{ item }">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-icon
+                      large
+                      class="mr-2"
+                      v-on="on"
+                      @click="showQuestionDialog(getSubmission(item))"
+                      data-cy="viewQuestion"
+              >visibility</v-icon
+              >
+            </template>
+            <span>Show Question</span>
+          </v-tooltip>
+        </template>
       </v-data-table>
+      <footer>
+        <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to view
+        it.
+      </footer>
     </v-card>
     <show-question-dialog
       v-if="currentQuestion"
@@ -170,8 +199,14 @@ export default class ReviewsView extends Vue {
   questionDialog: boolean = false;
 
   headers: object = [
+    {
+      text: 'Actions',
+      value: 'action',
+      align: 'left',
+      width: '15%',
+      sortable: false
+    },
     { text: 'Title', value: 'questionDto.title', align: 'center' },
-    { text: 'Question', value: 'questionDto.content', align: 'left' },
     {
       text: 'Creation Date',
       value: 'questionDto.creationDate',
@@ -179,13 +214,19 @@ export default class ReviewsView extends Vue {
     },
     { text: 'Status', value: 'questionDto.status', align: 'center' },
     { text: 'Image', value: 'questionDto.image', align: 'center' },
-    { text: 'Review', value: 'action', align: 'center' }
+    { text: 'Review', value: 'review', align: 'center' }
   ];
   searchReviews: string = '';
   reviews: Review[] = [];
   headers2: object = [
+    {
+      text: 'Actions',
+      value: 'action',
+      align: 'left',
+      width: '15%',
+      sortable: false
+    },
     { text: 'Title', value: 'questionDto.title', align: 'center' },
-    { text: 'Question', value: 'questionDto.content', align: 'left' },
     {
       text: 'Creation Date',
       value: 'questionDto.creationDate',

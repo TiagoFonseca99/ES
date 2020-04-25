@@ -14,7 +14,9 @@
           {{ getSubmission(review).title }}
         </div>
         <div class="col" @click="showQuestionDialog(getSubmission(review))">
-          {{ getSubmission(review).creationDate }}
+          <v-chip small>
+            <span> {{ getSubmission(review).creationDate }} </span>
+          </v-chip>
         </div>
         <div class="col" @click="showQuestionDialog(getSubmission(review))">
           <v-chip small>
@@ -36,6 +38,9 @@
             >View</v-btn
           >
         </div>
+      </li>
+      <li class="list-header" >
+        <div class="col" style="color: white"><v-icon class="mr-2" color="white">mouse</v-icon>Left-click on question's title to view it.</div>
       </li>
     </ul>
     <show-review-dialog
