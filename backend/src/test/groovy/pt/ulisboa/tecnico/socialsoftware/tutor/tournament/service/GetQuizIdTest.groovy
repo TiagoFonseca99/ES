@@ -151,7 +151,7 @@ class GetQuizIdTest extends Specification {
         tournamentService.joinTournament(user2.getId(), tournamentDto)
 
         when:
-        def result = tournamentService.getQuiz(tournamentDto);
+        def result = tournamentService.solveQuiz(user2.getId(), tournamentDto);
 
         then:
         result != null;
@@ -173,7 +173,7 @@ class GetQuizIdTest extends Specification {
         tournamentService.joinTournament(user3.getId(), tournamentDto)
 
         when:
-        def result = tournamentService.getQuiz(tournamentDto);
+        def result = tournamentService.solveQuiz(user2.getId(), tournamentDto);
 
         then:
         result != null;
@@ -181,9 +181,13 @@ class GetQuizIdTest extends Specification {
     }
 
     def "0 student join an open tournament check Quiz" () {
+        given:
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
 
         when:
-        def result = tournamentService.getQuiz(tournamentDto);
+        def result = tournamentService.solveQuiz(user2.getId(), tournamentDto);
 
         then:
         def exception = thrown(TutorException)
