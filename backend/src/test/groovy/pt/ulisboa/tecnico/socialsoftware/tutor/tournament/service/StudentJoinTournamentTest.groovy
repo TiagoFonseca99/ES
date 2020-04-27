@@ -11,6 +11,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -50,7 +52,7 @@ class StudentJoinTournamentTest extends Specification {
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
-    public static final int NUMBER_OF_QUESTIONS1 = 5
+    public static final int NUMBER_OF_QUESTIONS1 = 1
 
     @Autowired
     UserService userService
@@ -73,6 +75,9 @@ class StudentJoinTournamentTest extends Specification {
     @Autowired
     TopicRepository topicRepository
 
+    @Autowired
+    QuestionRepository questionRepository
+
     def user
     def course
     def courseExecution
@@ -86,6 +91,7 @@ class StudentJoinTournamentTest extends Specification {
     def tournamentDtoInit = new TournamentDto()
     def tournamentDto = new TournamentDto()
     def formatter
+    def questionOne
 
     def setup() {
         formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
@@ -93,9 +99,13 @@ class StudentJoinTournamentTest extends Specification {
         user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+
+        course.addCourseExecution(courseExecution)
+        courseExecution.setCourse(course)
+
         courseRepository.save(course)
 
-        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
         courseExecution.addUser(user)
         courseExecutionRepository.save(courseExecution)
 
@@ -120,6 +130,16 @@ class StudentJoinTournamentTest extends Specification {
         tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
         tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
+
+        questionOne = new Question()
+        questionOne.setKey(1)
+        questionOne.setContent("Question Content")
+        questionOne.setTitle("Question Title")
+        questionOne.setStatus(Question.Status.AVAILABLE)
+        questionOne.setCourse(course)
+        questionOne.addTopic(topic1)
+        questionRepository.save(questionOne)
+
     }
 
     def "2 student join an open tournament and get participants" () {

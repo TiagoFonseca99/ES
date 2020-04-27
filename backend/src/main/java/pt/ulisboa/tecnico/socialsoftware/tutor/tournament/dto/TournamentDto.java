@@ -97,6 +97,8 @@ public class TournamentDto implements Serializable {
         this.courseAcronym = couseAcronym;
     }
 
+
+
     public LocalDateTime getStartTimeDate() {
         if (getStartTime() == null || getStartTime().isEmpty()) {
             return null;

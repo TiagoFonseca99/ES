@@ -227,6 +227,13 @@ public class Tournament {
         return quizDto;
     }
 
+    public boolean hasQuiz() {
+        if (this.quiz != null){
+            return true;
+        }
+        return false;
+    }
+
 
     public void remove() {
         creator = null;
