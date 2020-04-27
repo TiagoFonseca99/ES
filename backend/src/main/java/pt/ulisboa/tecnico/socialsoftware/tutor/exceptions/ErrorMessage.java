@@ -49,6 +49,7 @@ public enum ErrorMessage {
     QUESTION_OPTION_MISMATCH("Question %d does not have option %d"),
     COURSE_EXECUTION_MISMATCH("Course Execution %d does not have quiz %d"),
     TOURNAMENT_TOPIC_MISMATCH("Tournament %s does not have topic %d"),
+    TOURNAMENT_CREATOR("User %s can not cancel this tournament"),
 
     DUPLICATE_TOPIC("Duplicate topic: %s"),
     DUPLICATE_USER("Duplicate user: %s"),

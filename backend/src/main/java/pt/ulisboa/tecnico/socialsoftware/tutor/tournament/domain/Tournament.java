@@ -113,6 +113,8 @@ public class Tournament {
         return state;
     }
 
+    public void setState(Status status) { this.state = status; }
+
     public List<User> getParticipants() {
         return participants;
     }
