@@ -224,9 +224,16 @@ public class Tournament {
 
         String title = "tournament Quizz nº" + this.id.toString();
         quizDto.setTitle(title);
-        quizDto.setType(Quiz.QuizType.GENERATED);
+        quizDto.setType("GENERATED");
 
         return quizDto;
+    }
+
+    public boolean hasQuiz() {
+        if (this.quiz != null){
+            return true;
+        }
+        return false;
     }
 
 

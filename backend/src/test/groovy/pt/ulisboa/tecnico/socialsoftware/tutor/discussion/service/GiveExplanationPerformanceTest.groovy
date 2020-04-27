@@ -76,10 +76,8 @@ class GiveExplanationPerformanceTest extends Specification {
         and: "a quiz"
         def quiz = new Quiz()
         quiz.setKey(1)
-        quiz.setType(Quiz.QuizType.TEST)
+        quiz.setType("TEST")
         quizRepository.save(quiz)
-        quiz.setKey(1)
-        quiz.setType(Quiz.QuizType.TEST)
 
         when:
         1.upto(1, {

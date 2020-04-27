@@ -21,25 +21,23 @@
             </v-flex>
             <v-row>
               <v-col cols="12" sm="6">
-                <v-datetime-picker
+                <VueCtkDateTimePicker
                   label="Start Time"
-                  format="yyyy-MM-dd HH:mm"
+                  id="startTimeInput"
                   v-model="newStartTime"
-                  date-format="yyyy-MM-dd"
-                  time-format="HH:mm"
+                  format="YYYY-MM-DDTHH:mm:ssZ"
                 >
-                </v-datetime-picker>
+                </VueCtkDateTimePicker>
               </v-col>
               <v-spacer></v-spacer>
               <v-col cols="12" sm="6">
-                <v-datetime-picker
+                <VueCtkDateTimePicker
                   label="End Time"
-                  format="yyyy-MM-dd HH:mm"
+                  id="endTimeInput"
                   v-model="newEndTime"
-                  date-format="yyyy-MM-dd"
-                  time-format="HH:mm"
+                  format="YYYY-MM-DDTHH:mm:ssZ"
                 >
-                </v-datetime-picker>
+                </VueCtkDateTimePicker>
               </v-col>
             </v-row>
             <v-flex xs24 sm12 md8>
@@ -193,6 +191,10 @@ import { Component, Model, Prop, Vue } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
 import Tournament from '@/models/user/Tournament';
 import Topic from '@/models/management/Topic';
+import VueCtkDateTimePicker from 'vue-ctk-date-time-picker';
+import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css';
+
+Vue.component('VueCtkDateTimePicker', VueCtkDateTimePicker);
 
 @Component
 export default class EditTournamentDialog extends Vue {
