@@ -6,6 +6,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
@@ -70,12 +71,31 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public SubmissionDto resubmitQuestion(Integer submissionId, Integer studentId, QuestionDto questionDto){
+        Submission submission = getSubmission(submissionId);
+        checkIfConsistentReSubmission(submission.getQuestion(), studentId);
+
+        Question question = getQuestion(submission.getQuestion().getId());
+        question.update(questionDto);
+
+        User user = getStudent(studentId);
+
+        submission = new Submission(question, user);
+
+        entityManager.persist(submission);
+        return new SubmissionDto(submission);
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ReviewDto reviewSubmission(Integer teacherId, ReviewDto reviewDto) {
 
         checkIfConsistentReview(reviewDto);
 
         User user = getTeacher(teacherId);
-        Submission submission = getSubmission(reviewDto);
+        Submission submission = getSubmission(reviewDto.getSubmissionId());
 
         if (reviewDto.getCreationDate() == null) {
             reviewDto.setCreationDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
@@ -154,6 +174,13 @@ public class SubmissionService {
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
     }
 
+    private void checkIfConsistentReSubmission(Question question, Integer studentId) {
+        if(question == null)
+            throw new TutorException(SUBMISSION_MISSING_QUESTION);
+        if(studentId == null)
+            throw new TutorException(SUBMISSION_MISSING_STUDENT);
+    }
+
     private void checkIfQuestionAlreadySubmitted(Question question, User user) {
         if(user.getSubmittedQuestions().contains(question))
             throw new TutorException(QUESTION_ALREADY_SUBMITTED, user.getUsername());
@@ -193,9 +220,7 @@ public class SubmissionService {
     }
 
 
-    private Submission getSubmission(ReviewDto reviewDto){
-
-        int submissionId = reviewDto.getSubmissionId();
+    private Submission getSubmission(Integer submissionId){
         return submissionRepository.findById(submissionId).orElseThrow(() -> new TutorException(SUBMISSION_NOT_FOUND, submissionId));
     }
 
