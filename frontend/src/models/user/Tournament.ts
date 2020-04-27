@@ -25,7 +25,9 @@ export default class Tournament {
       if (jsonObj.topics) {
         // @ts-ignore
         jsonObj.topics.forEach((topic: Topic) => {
-          this.topics.push(topic.name);
+          if (!this.topics.includes(topic.name)) {
+            this.topics.push(topic.name);
+          }
         });
       }
 
