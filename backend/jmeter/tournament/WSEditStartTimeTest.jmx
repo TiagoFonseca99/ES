@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.2.1">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Web Service joinTournament" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Load Test Web Service createTournament" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
@@ -31,12 +31,17 @@
           </elementProp>
           <elementProp name="startTime" elementType="Argument">
             <stringProp name="Argument.name">startTime</stringProp>
-            <stringProp name="Argument.value">${__time(yyyy-MM-dd HH:mm)}</stringProp>
+            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd HH:mm,,P1D,,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="endTime" elementType="Argument">
             <stringProp name="Argument.name">endTime</stringProp>
             <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd HH:mm,,P2D,,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="newStartTime" elementType="Argument">
+            <stringProp name="Argument.name">newStartTime</stringProp>
+            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd HH:mm,,P1DT1H,,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -106,7 +111,7 @@
                   <stringProp name="Argument.value">{&#xd;
 	&quot;startTime&quot;: &quot;${startTime}&quot;,&#xd;
 	&quot;endTime&quot;: &quot;${endTime}&quot;,&#xd;
-	&quot;numberOfQuestions&quot;: 1,&#xd;
+	&quot;numberOfQuestions&quot;: 2,&#xd;
 	&quot;state&quot;: &quot;NOT_CANCELED&quot;&#xd;
 }&#xd;
 </stringProp>
@@ -149,7 +154,7 @@
             <hashTree/>
             <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert numberOfQuestions" enabled="true">
               <stringProp name="JSON_PATH">$.numberOfQuestions</stringProp>
-              <stringProp name="EXPECTED_VALUE">1</stringProp>
+              <stringProp name="EXPECTED_VALUE">2</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>
@@ -166,7 +171,7 @@
             </JSONPathAssertion>
             <hashTree/>
           </hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request to Join Tournament" enabled="true">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request to edit start time" enabled="true">
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
@@ -176,7 +181,7 @@
 	&quot;id&quot;: 1,&#xd;
 	&quot;startTime&quot;: &quot;${startTime}&quot;,&#xd;
 	&quot;endTime&quot;: &quot;${endTime}&quot;,&#xd;
-	&quot;numberOfQuestions&quot;: 1,&#xd;
+	&quot;numberOfQuestions&quot;: 2,&#xd;
 	&quot;state&quot;: &quot;NOT_CANCELED&quot;&#xd;
 }&#xd;
 </stringProp>
@@ -188,7 +193,7 @@
             <stringProp name="HTTPSampler.port">${port}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/tournaments/joinTournament</stringProp>
+            <stringProp name="HTTPSampler.path">/tournaments/editStartTime?startTime=${newStartTime}</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -299,13 +304,13 @@
           <stringProp name="driver">org.postgresql.Driver</stringProp>
           <stringProp name="initQuery"></stringProp>
           <boolProp name="keepAlive">true</boolProp>
-          <stringProp name="password">rodrod</stringProp>
+          <stringProp name="password"></stringProp>
           <stringProp name="poolMax">0</stringProp>
           <boolProp name="preinit">false</boolProp>
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">jdinis</stringProp>
+          <stringProp name="username">ars</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
