@@ -786,4 +786,15 @@ export default class RemoteServices {
         throw Error(await this.errorMessage(error));
       });
   }
+
+  static solveTournament(tournament: Tournament) {
+    return httpClient
+      .post('tournaments/solveQuiz', tournament)
+      .then(response => {
+        return new StatementQuiz(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
 }
