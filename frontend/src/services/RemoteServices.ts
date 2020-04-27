@@ -750,6 +750,130 @@ export default class RemoteServices {
       });
   }
 
+  static async editTournament(
+    startTime: String,
+    endTime: String,
+    numberOfQuestions: number,
+    topicsToAdd: Number[],
+    topicsToRemove: Number[],
+    tournament: Tournament
+  ): Promise<Tournament> {
+    let result: Tournament = tournament;
+    if (
+      tournament.startTime &&
+      startTime.valueOf() != tournament.startTime.valueOf()
+    ) {
+      result = await this.editStartTime(startTime, result);
+    }
+    if (
+      tournament.endTime &&
+      endTime.valueOf() != tournament.endTime.valueOf()
+    ) {
+      result = await this.editEndTime(endTime, result);
+    }
+    if (
+      tournament.numberOfQuestions &&
+      numberOfQuestions != tournament.numberOfQuestions
+    ) {
+      result = await this.editNumberOfQuestions(
+        tournament.numberOfQuestions,
+        tournament
+      );
+    }
+    if (topicsToAdd.length > 0) {
+      result = await this.addTopics(topicsToAdd, result);
+    }
+    if (topicsToRemove.length > 0) {
+      result = await this.removeTopics(topicsToRemove, result);
+    }
+    return new Tournament(result);
+  }
+
+  static async editStartTime(
+    startTime: String,
+    tournament: Tournament
+  ): Promise<Tournament> {
+    let path: string = '/tournaments/editStartTime?startTime=' + startTime;
+    return httpClient
+      .post(path, tournament)
+      .then(response => {
+        return new Tournament(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async editEndTime(
+    endTime: String,
+    tournament: Tournament
+  ): Promise<Tournament> {
+    let path: string = '/tournaments/editEndTime?endTime=' + endTime;
+    return httpClient
+      .post(path, tournament)
+      .then(response => {
+        return new Tournament(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async editNumberOfQuestions(
+    numberOfQuestions: Number,
+    tournament: Tournament
+  ): Promise<Tournament> {
+    let path: string =
+      '/tournaments/editNumberOfQuestions?numberOfQuestions=' +
+      numberOfQuestions.toString();
+    return httpClient
+      .post(path, tournament)
+      .then(response => {
+        return new Tournament(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async addTopics(
+    topicsID: Number[],
+    tournament: Tournament
+  ): Promise<Tournament> {
+    let path: string = '/tournaments/addTopics?';
+    for (let topicID of topicsID) {
+      path += 'topicsId=' + topicID + '&';
+    }
+    path = path.substring(0, path.length - 1);
+    return httpClient
+      .post(path, tournament)
+      .then(response => {
+        return new Tournament(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async removeTopics(
+    topicsID: Number[],
+    tournament: Tournament
+  ): Promise<Tournament> {
+    let path: string = '/tournaments/removeTopics?';
+    for (let topicID of topicsID) {
+      path += 'topicsId=' + topicID + '&';
+    }
+    path = path.substring(0, path.length - 1);
+    return httpClient
+      .post(path, tournament)
+      .then(response => {
+        return new Tournament(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static getTournaments(): Promise<Tournament[]> {
     return httpClient
       .get('/tournaments/getTournaments')
@@ -776,12 +900,30 @@ export default class RemoteServices {
       });
   }
 
+  static getUserTournaments(): Promise<Tournament[]> {
+    return httpClient
+      .get('/tournaments/getUserTournaments')
+      .then(response => {
+        return response.data.map((tournament: any) => {
+          return new Tournament(tournament, Store.getters.getUser);
+        });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static joinTournament(tournament: Tournament) {
     return httpClient
       .post('tournaments/joinTournament', tournament)
-      .then(response => {
-        return new Question(response.data);
-      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static cancelTournament(tournament: Tournament) {
+    return httpClient
+      .post('tournaments/cancelTournament', tournament)
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });

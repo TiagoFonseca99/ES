@@ -1,4 +1,5 @@
 import User from '@/models/user/User';
+import Topic from '@/models/management/Topic';
 
 export default class Tournament {
   id!: number | undefined;
@@ -21,23 +22,28 @@ export default class Tournament {
       this.courseAcronym = jsonObj.courseAcronym;
       this.topics = [];
 
-      const t: String[] = jsonObj.topics!;
-      if (t) {
-        for (let i = 0; i < t.length; i++) {
-          this.topics.push(' ' + t[i]);
-        }
+      if (jsonObj.topics) {
+        // @ts-ignore
+        jsonObj.topics.forEach((topic: Topic) => {
+          this.topics.push(topic.name);
+        });
       }
+
       const p: User[] = jsonObj.participants;
+      this.enrolled = false;
       if (user) {
+        p.forEach(pUser => {
+          if (user.id == pUser.id) {
+            this.enrolled = true;
+            return;
+          }
+        });
         for (let i = 0; i < p!.length; i++) {
           if (user.id == p![i].id) {
             this.enrolled = true;
             return;
           }
         }
-        this.enrolled = false;
-      } else {
-        this.enrolled = false;
       }
     }
   }

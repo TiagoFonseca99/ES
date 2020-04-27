@@ -195,7 +195,7 @@ import Tournament from '@/models/user/Tournament';
 import Topic from '@/models/management/Topic';
 
 @Component
-export default class EditTournamentDialog extends Vue {
+export default class CreateTournamentDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
   @Prop({ type: Tournament, required: true }) readonly tournament!: Tournament;
 
