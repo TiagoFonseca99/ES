@@ -44,6 +44,18 @@ public class SubmissionController {
         return submissionService.createSubmission(question.getId(), submissionDto);
     }
 
+    @PutMapping("/student/reviews/{submissionId}")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public SubmissionDto resubmitQuestion(Principal principal, @PathVariable Integer submissionId, @Valid @RequestBody QuestionDto question) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return submissionService.resubmitQuestion(submissionId, user.getId(), question);
+    }
+
     @PostMapping(value = "/management/reviews")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ReviewDto createReview(Principal principal, @RequestBody ReviewDto reviewDto) {

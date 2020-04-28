@@ -144,9 +144,9 @@ public class QuestionService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void removeQuestion(Integer questionId) {
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
-        Submission submission = submissionRepository.findByQuestionId(questionId).orElse(null);
+        List<Submission> submissions = new ArrayList<>(submissionRepository.findByQuestionId(question.getId()));
 
-        deleteSubmission(submission);
+        deleteSubmissions(submissions);
 
         question.remove();
         questionRepository.delete(question);
@@ -286,11 +286,10 @@ public class QuestionService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteQuestion(Question question) {
+        List<Submission> submissions = new ArrayList<>(submissionRepository.findByQuestionId(question.getId()));
+        deleteSubmissions(submissions);
+
         for (Option option : question.getOptions()) {
-            Submission submission = submissionRepository.findByQuestionId(question.getId()).orElse(null);
-
-            deleteSubmission(submission);
-
             option.remove();
             optionRepository.delete(option);
         }
@@ -306,8 +305,8 @@ public class QuestionService {
 
     }
 
-    public void deleteSubmission(Submission submission) {
-        if (submission != null) {
+    public void deleteSubmissions(List<Submission> submissions) {
+        for(Submission submission : submissions){
             List<Review> reviews = new ArrayList<>(reviewRepository.findBySubmissionId(submission.getId()));
             for (Review review : reviews) {
                 reviewRepository.delete(review);
