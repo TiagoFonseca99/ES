@@ -45,6 +45,19 @@
           </template>
           <span>Join Tournament</span>
         </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              small
+              class="mr-2"
+              v-on="on"
+              @click="solveQuiz(item)"
+              data-cy="SolveQuiz"
+              >fas fa-pencil-alt</v-icon
+            >
+          </template>
+          <span>Solve Quiz</span>
+        </v-tooltip>
       </template>
     </v-data-table>
 
@@ -62,6 +75,9 @@
 import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
+import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
+import StatementQuiz from '@/models/statement/StatementQuiz';
+import StatementManager from '@/models/statement/StatementManager';
 import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
 
 @Component({
@@ -169,6 +185,19 @@ export default class OpenTournamentView extends Vue {
     }
     tournamentToJoin.enrolled = true;
     tournamentToJoin.topics = topics;
+  }
+
+  async solveQuiz(tournament: Tournament) {
+    const enrolled = tournament.enrolled;
+    const topics = tournament.topics;
+    tournament.enrolled = undefined;
+    tournament.topics = [];
+    let quiz: StatementQuiz = (await RemoteServices.solveTournament(tournament));
+    tournament.enrolled = enrolled;
+    tournament.topics = topics;
+    let statementManager: StatementManager = StatementManager.getInstance;
+    statementManager.statementQuiz = quiz;
+    await this.$router.push({ name: 'solve-quiz' });
   }
 }
 </script>

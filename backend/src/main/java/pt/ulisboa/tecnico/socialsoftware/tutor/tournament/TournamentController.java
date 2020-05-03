@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementQuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -173,15 +174,15 @@ public class TournamentController {
         return tournamentService.getTournamentParticipants(tournamentDto);
     }
 
-    @GetMapping(value = "/tournaments/getQuiz")
+    @PostMapping(value = "/tournaments/solveQuiz")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
-    public QuizDto getQuiz(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
+    public StatementQuizDto solveQuiz(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
             throw new TutorException(AUTHENTICATION_ERROR);
         }
-        return tournamentService.getQuiz(tournamentDto);
+        return tournamentService.solveQuiz(user.getId(), tournamentDto);
     }
 
     private void formatDates(TournamentDto tournamentDto) {
