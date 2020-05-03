@@ -24,7 +24,7 @@
                 <VueCtkDateTimePicker
                   label="Start Time"
                   id="startTimeInput"
-                  v-model="editTournament.startTime"
+                  v-model="newStartTime"
                   format="YYYY-MM-DDTHH:mm:ssZ"
                 >
                 </VueCtkDateTimePicker>
@@ -34,7 +34,7 @@
                 <VueCtkDateTimePicker
                   label="End Time"
                   id="endTimeInput"
-                  v-model="editTournament.endTime"
+                  v-model="newEndTime"
                   format="YYYY-MM-DDTHH:mm:ssZ"
                 >
                 </VueCtkDateTimePicker>
@@ -212,6 +212,9 @@ export default class CreateTournamentDialog extends Vue {
   currentTopics: Topic[] = [];
   availableTopics: Topic[] = [];
 
+  newStartTime: string = '';
+  newEndTime: string = '';
+
   topicsID: Number[] = [];
 
   topicHeaders: object = [
@@ -244,6 +247,9 @@ export default class CreateTournamentDialog extends Vue {
   }
 
   async saveTournament() {
+    this.editTournament.startTime = this.newStartTime;
+    this.editTournament.endTime = this.newEndTime;
+
     if (
       this.editTournament &&
       (!this.editTournament.startTime ||

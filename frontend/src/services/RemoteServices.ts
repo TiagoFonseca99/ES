@@ -751,8 +751,8 @@ export default class RemoteServices {
   }
 
   static async editTournament(
-    startTime: String,
-    endTime: String,
+    startTime: string,
+    endTime: string,
     numberOfQuestions: number,
     topicsToAdd: Number[],
     topicsToRemove: Number[],
@@ -760,24 +760,24 @@ export default class RemoteServices {
   ): Promise<Tournament> {
     let result: Tournament = tournament;
     if (
-      tournament.startTime &&
-      startTime.valueOf() != tournament.startTime.valueOf()
+      result.endTime &&
+      endTime != result.endTime
     ) {
-      result = await this.editStartTime(startTime, result);
+      result = await this.editEndTime(result);
     }
     if (
-      tournament.endTime &&
-      endTime.valueOf() != tournament.endTime.valueOf()
+      result.startTime &&
+      startTime != result.startTime
     ) {
-      result = await this.editEndTime(endTime, result);
+      result = await this.editStartTime(result);
     }
     if (
-      tournament.numberOfQuestions &&
+      result.numberOfQuestions &&
       numberOfQuestions != tournament.numberOfQuestions
     ) {
       result = await this.editNumberOfQuestions(
-        tournament.numberOfQuestions,
-        tournament
+        result.numberOfQuestions,
+        result
       );
     }
     if (topicsToAdd.length > 0) {
@@ -790,12 +790,10 @@ export default class RemoteServices {
   }
 
   static async editStartTime(
-    startTime: String,
     tournament: Tournament
   ): Promise<Tournament> {
-    let path: string = '/tournaments/editStartTime?startTime=' + startTime;
     return httpClient
-      .post(path, tournament)
+      .post('/tournaments/editStartTime', tournament)
       .then(response => {
         return new Tournament(response.data);
       })
@@ -805,12 +803,10 @@ export default class RemoteServices {
   }
 
   static async editEndTime(
-    endTime: String,
     tournament: Tournament
   ): Promise<Tournament> {
-    let path: string = '/tournaments/editEndTime?endTime=' + endTime;
     return httpClient
-      .post(path, tournament)
+      .post('/tournaments/editEndTime', tournament)
       .then(response => {
         return new Tournament(response.data);
       })

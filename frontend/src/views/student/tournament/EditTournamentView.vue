@@ -282,13 +282,17 @@ export default class EditTournamentDialog extends Vue {
     );
     this.$emit('close-dialog');
   }
+
   async saveTournament() {
+    this.editTournament.startTime = this.newStartTime;
+    this.editTournament.endTime = this.newEndTime;
+
     if (
       this.editTournament &&
       (!this.editTournament.startTime ||
         !this.editTournament.endTime ||
         !this.editTournament.numberOfQuestions ||
-        !this.editTournament.topics)
+        this.currentTopics.length == 0)
     ) {
       await this.$store.dispatch(
         'error',
@@ -314,20 +318,13 @@ export default class EditTournamentDialog extends Vue {
 
       try {
         const result = await RemoteServices.editTournament(
-          this.newStartTime,
-          this.newEndTime,
+          this.oldStartTime,
+          this.oldEndTime,
           this.oldNumberOfQuestions,
           topicsToAddID,
           topicsToRemoveID,
           this.editTournament
         );
-
-        /*if (this.oldTopics != this.editTournament.topics) {
-          const result = await RemoteServices.editTopics(
-            this.editTournament.topics,
-            this.editTournament
-          );
-        }*/
         console.log('Resultado: ' + result.topics);
         this.$emit('edit-tournament', result);
       } catch (error) {

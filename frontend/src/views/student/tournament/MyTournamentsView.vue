@@ -43,7 +43,7 @@
               class="mr-2"
               v-on="on"
               @click="cancelTournament(item)"
-              data-cy="cancelTournament"
+              data-cy="CancelTournament"
               >cancel</v-icon
             >
           </template>

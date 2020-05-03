@@ -5,6 +5,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
@@ -25,9 +26,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentR
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @DataJpaTest
 class EditTournamentTest extends Specification {
@@ -70,14 +68,11 @@ class EditTournamentTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def startTime = LocalDateTime.now().plusHours(1)
-    def endTime = LocalDateTime.now().plusHours(2)
-    def formatter
+    def startTime = DateHandler.now().plusHours(1)
+    def endTime = DateHandler.now().plusHours(2)
     def tournamentDto
 
     def setup() {
-        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-
         user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -104,8 +99,8 @@ class EditTournamentTest extends Specification {
         topics.add(topic2.getId())
 
         tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
     }
@@ -116,14 +111,15 @@ class EditTournamentTest extends Specification {
 
         and: "new startTime"
         def newStartTime = startTime.plusMinutes(10)
+        tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
 
         when:
-        tournamentService.editStartTime(user.getId(), tournamentDto, newStartTime)
+        tournamentService.editStartTime(user.getId(), tournamentDto)
 
         then:
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
-        result.getStartTime().format(formatter) == newStartTime.format(formatter)
+        DateHandler.toISOString(result.getStartTime()) == DateHandler.toISOString(newStartTime)
     }
 
     def "user that created tournament changes end time"() {
@@ -132,14 +128,15 @@ class EditTournamentTest extends Specification {
 
         and: "new endTime"
         def newEndTime = startTime.plusMinutes(10)
+        tournamentDto.setEndTime(DateHandler.toISOString(newEndTime));
 
         when:
-        tournamentService.editEndTime(user.getId(), tournamentDto, newEndTime)
+        tournamentService.editEndTime(user.getId(), tournamentDto)
 
         then:
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
-        result.getEndTime().format(formatter) == newEndTime.format(formatter)
+        DateHandler.toISOString(result.getEndTime()) == DateHandler.toISOString(newEndTime)
     }
 
     def "user that created tournament changes number of questions"() {
@@ -281,16 +278,17 @@ class EditTournamentTest extends Specification {
 
         and: "new startTime"
         def newStartTime = startTime.plusMinutes(10)
+        tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
 
         when:
-        tournamentService.editStartTime(user2.getId(), tournamentDto, newStartTime)
+        tournamentService.editStartTime(user2.getId(), tournamentDto)
 
         then:
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.TOURNAMENT_CREATOR
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
-        result.getStartTime().format(formatter) == startTime.format(formatter)
+        DateHandler.toISOString(result.getStartTime()) == DateHandler.toISOString(startTime)
     }
 
     def "user that not created tournament changes end time"() {
@@ -307,16 +305,17 @@ class EditTournamentTest extends Specification {
 
         and: "new endTime"
         def newEndTime = startTime.plusMinutes(10)
+        tournamentDto.setEndTime(DateHandler.toISOString(newEndTime));
 
         when:
-        tournamentService.editEndTime(user2.getId(), tournamentDto, newEndTime)
+        tournamentService.editEndTime(user2.getId(), tournamentDto)
 
         then:
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.TOURNAMENT_CREATOR
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
-        result.getEndTime().format(formatter) == endTime.format(formatter)
+        DateHandler.toISOString(result.getEndTime()) == DateHandler.toISOString(endTime)
     }
 
     def "user that not created tournament changes number of questions"() {
