@@ -22,7 +22,6 @@ export default class Tournament {
       if (jsonObj.endTime) {
         this.endTime = ISOtoString(jsonObj.endTime);
       }
-      this.endTime = jsonObj.endTime;
       this.numberOfQuestions = jsonObj.numberOfQuestions;
       this.state = jsonObj.state;
       this.courseAcronym = jsonObj.courseAcronym;

@@ -67,6 +67,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
 import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
+import { ISOtoString } from '@/services/ConvertDateService';
 
 @Component({
   components: {
@@ -136,9 +137,6 @@ export default class MyTournamentsView extends Vue {
     await this.$store.dispatch('loading');
     try {
       this.tournaments = await RemoteServices.getUserTournaments();
-      if (this.tournaments) {
-        console.log('Li isto: ' + this.tournaments[0].topics);
-      }
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -152,11 +150,11 @@ export default class MyTournamentsView extends Vue {
 
   async onEditTournament(tournament: Tournament) {
     this.currentTournament = tournament;
-    this.editTournamentDialog = false;
-    this.currentTournament = null;
-  }
-
-  onCloseDialog() {
+    try {
+      this.tournaments = await RemoteServices.getUserTournaments();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
     this.editTournamentDialog = false;
     this.currentTournament = null;
   }
@@ -176,6 +174,12 @@ export default class MyTournamentsView extends Vue {
     }
     tournamentToCancel.enrolled = true;
     tournamentToCancel.topics = topics;
+    tournamentToCancel.state = 'CANCELED';
+  }
+  
+  onCloseDialog() {
+    this.editTournamentDialog = false;
+    this.currentTournament = null;
   }
 }
 </script>
