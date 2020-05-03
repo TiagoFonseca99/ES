@@ -5,6 +5,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
@@ -23,9 +24,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentR
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @DataJpaTest
 class CreateTournamentPerformanceTest extends Specification {
@@ -65,13 +63,10 @@ class CreateTournamentPerformanceTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def startTime = LocalDateTime.now().plusHours(1)
-    def endTime = LocalDateTime.now().plusHours(2)
-    def formatter
+    def startTime = DateHandler.now().plusHours(1)
+    def endTime = DateHandler.now().plusHours(2)
 
     def setup() {
-        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -101,8 +96,8 @@ class CreateTournamentPerformanceTest extends Specification {
     def "performance testing to create 500 000 Tournaments"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 

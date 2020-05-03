@@ -6,6 +6,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
@@ -29,13 +30,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.time.LocalDateTime;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -182,7 +179,7 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                 .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
 
-        if (LocalDateTime.now().isAfter(tournament.getEndTime())) {
+        if (DateHandler.now().isAfter(tournament.getEndTime())) {
             throw new TutorException(TOURNAMENT_NOT_OPEN, tournament.getId());
         }
 
@@ -213,7 +210,7 @@ public class TournamentService {
                     .orElseThrow(() -> new TutorException(QUIZ_NOT_FOUND, statementQuizDto.getId()));
 
 
-            if (LocalDateTime.now().isBefore(tournament.getStartTime())){
+            if (DateHandler.now().isBefore(tournament.getStartTime())){
                 quiz.setAvailableDate(tournament.getStartTime());
             }
             tournament.setQuiz(quiz);
@@ -245,7 +242,7 @@ public class TournamentService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void editStartTime(Integer userId, TournamentDto tournamentDto, LocalDateTime startTime) {
+    public void editStartTime(Integer userId, TournamentDto tournamentDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
@@ -256,14 +253,15 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
         }
 
-        tournament.setStartTime(startTime);
+        if (DateHandler.isValidDateFormat(tournamentDto.getStartTime()))
+            tournament.setStartTime(DateHandler.toLocalDateTime(tournamentDto.getStartTime()));
     }
 
     @Retryable(
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void editEndTime(Integer userId, TournamentDto tournamentDto, LocalDateTime endTime) {
+    public void editEndTime(Integer userId, TournamentDto tournamentDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
@@ -274,7 +272,8 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
         }
 
-        tournament.setEndTime(endTime);
+        if (DateHandler.isValidDateFormat(tournamentDto.getEndTime()))
+            tournament.setEndTime(DateHandler.toLocalDateTime(tournamentDto.getEndTime()));
     }
 
     @Retryable(

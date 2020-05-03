@@ -1,14 +1,12 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto;
 
-import org.springframework.data.annotation.Transient;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,21 +21,13 @@ public class TournamentDto implements Serializable {
     private List<UserDto> participants = new ArrayList<>();
     private String courseAcronym = null;
 
-    @Transient
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-
     public TournamentDto() {
     }
 
     public TournamentDto(Tournament tournament) {
         this.id = tournament.getId();
-        if(tournament.getStartTime() != null) {
-            this.startTime = tournament.getStartTime().format(formatter);
-        }
-        if(tournament.getEndTime() != null) {
-            this.endTime = tournament.getEndTime().format(formatter);
-        }
+        this.startTime = DateHandler.toISOString(tournament.getStartTime());
+        this.endTime = DateHandler.toISOString(tournament.getEndTime());
         this.numberOfQuestions = tournament.getNumberOfQuestions();
         this.state = tournament.getState();
         this.topics = tournament.getTopics().stream().map(TopicDto::new).collect(Collectors.toList());
@@ -96,21 +86,4 @@ public class TournamentDto implements Serializable {
     public void setCourseAcronym(String couseAcronym) {
         this.courseAcronym = couseAcronym;
     }
-
-
-
-    public LocalDateTime getStartTimeDate() {
-        if (getStartTime() == null || getStartTime().isEmpty()) {
-            return null;
-        }
-        return LocalDateTime.parse(getStartTime(), formatter);
-    }
-
-    public LocalDateTime getEndTimeDate() {
-        if (getEndTime() == null || getEndTime().isEmpty()) {
-            return null;
-        }
-        return LocalDateTime.parse(getEndTime(), formatter);
-    }
-
 }

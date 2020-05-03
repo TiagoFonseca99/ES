@@ -5,12 +5,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
@@ -25,9 +24,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentR
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @DataJpaTest
 class GetUserTournamentsTest extends Specification {
@@ -71,13 +67,10 @@ class GetUserTournamentsTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def startTime = LocalDateTime.now().plusHours(1)
-    def endTime = LocalDateTime.now().plusHours(2)
-    def formatter
+    def startTime = DateHandler.now().plusHours(1)
+    def endTime = DateHandler.now().plusHours(2)
 
     def setup() {
-        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-
         user1 = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
         user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
 
@@ -112,16 +105,16 @@ class GetUserTournamentsTest extends Specification {
     def "user creates two tournaments"() {
         given: "a tournament"
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user1.getId(), topics, tournamentDto)
 
         and: "another tournament"
         def tournamentDto2 = new TournamentDto()
-        tournamentDto2.setStartTime(startTime.format(formatter))
-        tournamentDto2.setEndTime(endTime.format(formatter))
+        tournamentDto2.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto2.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto2.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto2.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user1.getId(), topics, tournamentDto2)
@@ -137,24 +130,24 @@ class GetUserTournamentsTest extends Specification {
     def "user creates two tournaments and other user creates one tournament"() {
         given: "a tournament"
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user1.getId(), topics, tournamentDto)
 
         and: "another tournament"
         def tournamentDto2 = new TournamentDto()
-        tournamentDto2.setStartTime(startTime.format(formatter))
-        tournamentDto2.setEndTime(endTime.format(formatter))
+        tournamentDto2.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto2.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto2.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto2.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user1.getId(), topics, tournamentDto2)
 
         and: "new user creates another tournament"
         def tournamentDto3 = new TournamentDto()
-        tournamentDto3.setStartTime(startTime.format(formatter))
-        tournamentDto3.setEndTime(endTime.format(formatter))
+        tournamentDto3.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto3.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto3.setState(Tournament.Status.NOT_CANCELED)
         tournamentService.createTournament(user2.getId(), topics, tournamentDto3)

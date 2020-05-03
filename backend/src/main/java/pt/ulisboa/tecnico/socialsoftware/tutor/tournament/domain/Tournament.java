@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
@@ -62,8 +63,8 @@ public class Tournament {
     }
 
     public Tournament(User user, List<Topic> topics, TournamentDto tournamentDto) {
-        setStartTime(tournamentDto.getStartTimeDate());
-        setEndTime(tournamentDto.getEndTimeDate());
+        setStartTime(DateHandler.toLocalDateTime(tournamentDto.getStartTime()));
+        setEndTime(DateHandler.toLocalDateTime(tournamentDto.getEndTime()));
         setNumberOfQuestions(tournamentDto.getNumberOfQuestions());
         this.state = tournamentDto.getState();
         this.creator = user;
@@ -81,7 +82,15 @@ public class Tournament {
     }
 
     public void setStartTime(LocalDateTime startTime) {
-        checkStartTime(startTime);
+        if (startTime == null) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
+        }
+        // Added 1 minute as a buffer to take latency into consideration
+        if (this.endTime != null && this.endTime.isBefore(startTime) ||
+                startTime.plusMinutes(1).isBefore(DateHandler.now())) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
+        }
+
         this.startTime = startTime;
     }
 
@@ -90,7 +99,13 @@ public class Tournament {
     }
 
     public void setEndTime(LocalDateTime endTime) {
-        checkEndTime(endTime);
+        if (endTime == null) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
+        }
+        if (this.startTime != null && endTime.isBefore(this.startTime)) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
+        }
+
         this.endTime = endTime;
     }
 
@@ -184,36 +199,17 @@ public class Tournament {
         user.addTournament(this);
     }
 
-    private void checkStartTime(LocalDateTime startTime) {
-        if (startTime == null) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
-        }
-        // Added 1 minute as a buffer to take latency into consideration
-        if (endTime != null && endTime.isBefore(startTime) ||
-                startTime.plusMinutes(1).isBefore(LocalDateTime.now())) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
-        }
-    }
-
-    private void checkEndTime(LocalDateTime endTime) {
-        if (endTime == null) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
-        }
-        if (startTime != null && endTime.isBefore(startTime)) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
-        }
-    }
     public QuizDto generateQuiz() {
         if (this.quiz != null){
             return null;
         }
         QuizDto quizDto = new QuizDto();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        if (LocalDateTime.now().isBefore(this.startTime)){
+        if (DateHandler.now().isBefore(this.startTime)){
             quizDto.setAvailableDate(this.startTime.format(formatter));
         }
         else {
-            quizDto.setAvailableDate(LocalDateTime.now().format(formatter));
+            quizDto.setAvailableDate(DateHandler.now().format(formatter));
         }
         quizDto.setConclusionDate(this.endTime.format(formatter));
         quizDto.setScramble(true);

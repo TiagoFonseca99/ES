@@ -5,6 +5,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
@@ -27,9 +28,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.TOURNAMENT_MISSING_NUMBER_OF_QUESTIONS
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.TOURNAMENT_MISSING_START_TIME
@@ -74,13 +72,10 @@ class CreateTournamentTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def startTime = LocalDateTime.now().plusHours(1)
-    def endTime = LocalDateTime.now().plusHours(2)
-    def formatter
+    def startTime = DateHandler.now().plusHours(1)
+    def endTime = DateHandler.now().plusHours(2)
 
     def setup() {
-        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -110,8 +105,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with existing user (student)"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -122,8 +117,8 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
         result.getId() != null
-        result.getStartTime().format(formatter) == startTime.format(formatter)
-        result.getEndTime().format(formatter) == endTime.format(formatter)
+        DateHandler.toISOString(result.getStartTime()) == DateHandler.toISOString(startTime)
+        DateHandler.toISOString(result.getEndTime()) == DateHandler.toISOString(endTime)
         result.getTopics() == [topic1, topic2]
         result.getNumberOfQuestions() == NUMBER_OF_QUESTIONS
         result.getState() == Tournament.Status.NOT_CANCELED
@@ -134,8 +129,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with existing user (teacher)" () {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -158,8 +153,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with existing user (admin)" () {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -182,8 +177,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with not existing user"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -202,8 +197,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with existing user and topics from different courses"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -230,8 +225,8 @@ class CreateTournamentTest extends Specification {
     def "start time is lower then current time"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(LocalDateTime.now().minusHours(2).format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(DateHandler.now().minusHours(2)))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -247,8 +242,8 @@ class CreateTournamentTest extends Specification {
     def "start time is higher then end time"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(LocalDateTime.now().plusHours(2).format(formatter))
-        tournamentDto.setEndTime(LocalDateTime.now().format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(DateHandler.now().plusHours(2)))
+        tournamentDto.setEndTime(DateHandler.toISOString(DateHandler.now()))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -264,8 +259,8 @@ class CreateTournamentTest extends Specification {
     def "0 topics"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
         topics = new ArrayList<Integer>()
@@ -282,8 +277,8 @@ class CreateTournamentTest extends Specification {
     def "number of questions is negative"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(-1)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -299,8 +294,8 @@ class CreateTournamentTest extends Specification {
     def "number of questions is zero"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(0)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 

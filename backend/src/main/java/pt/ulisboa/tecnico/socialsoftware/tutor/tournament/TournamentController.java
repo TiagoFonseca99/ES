@@ -1,7 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
@@ -16,9 +16,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.security.Principal;
 
@@ -103,28 +100,26 @@ public class TournamentController {
 
     @PostMapping(value = "/tournaments/editStartTime")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public void editStartTime(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam String startTime) {
+    public void editStartTime(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        LocalDateTime startDate = formatDate(startTime);
-        tournamentService.editStartTime(user.getId(), tournamentDto, startDate);
+        tournamentService.editStartTime(user.getId(), tournamentDto);
     }
 
     @PostMapping(value = "/tournaments/editEndTime")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public void editEndTime(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam String endTime) {
+    public void editEndTime(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        LocalDateTime endDate = formatDate(endTime);
-        tournamentService.editEndTime(user.getId(), tournamentDto, endDate);
+        tournamentService.editEndTime(user.getId(), tournamentDto);
     }
 
     @PostMapping(value = "/tournaments/editNumberOfQuestions")
@@ -190,24 +185,10 @@ public class TournamentController {
     }
 
     private void formatDates(TournamentDto tournamentDto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        if (tournamentDto.getStartTime() != null && !DateHandler.isValidDateFormat(tournamentDto.getStartTime()))
+            tournamentDto.setStartTime(DateHandler.toISOString(DateHandler.toLocalDateTime(tournamentDto.getStartTime())));
 
-        if (tournamentDto.getStartTime() != null && !tournamentDto.getStartTime().matches("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2})")){
-            tournamentDto.setStartTime(LocalDateTime.parse(tournamentDto.getStartTime().replaceAll(".$", ""), DateTimeFormatter.ISO_DATE_TIME).format(formatter));
-        }
-        if (tournamentDto.getEndTime() !=null && !tournamentDto.getEndTime().matches("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2})"))
-            tournamentDto.setEndTime(LocalDateTime.parse(tournamentDto.getEndTime().replaceAll(".$", ""), DateTimeFormatter.ISO_DATE_TIME).format(formatter));
-    }
-
-    private LocalDateTime formatDate(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-        if (date != null && !date.matches("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2})")) {
-            date = LocalDateTime.parse(date.replaceAll(".$", ""), DateTimeFormatter.ISO_DATE_TIME).format(formatter);
-        }
-
-        LocalDateTime newDate = LocalDateTime.parse(date, formatter);
-
-        return newDate;
+        if (tournamentDto.getEndTime() !=null && !DateHandler.isValidDateFormat(tournamentDto.getEndTime()))
+            tournamentDto.setEndTime(DateHandler.toISOString(DateHandler.toLocalDateTime(tournamentDto.getEndTime())));
     }
 }
