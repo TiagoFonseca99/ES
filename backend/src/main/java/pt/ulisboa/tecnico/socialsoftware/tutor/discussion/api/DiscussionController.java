@@ -42,7 +42,7 @@ public class DiscussionController {
     }
 
     @PostMapping(value = "/discussions/replies")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT')")
     public ReplyDto createReply(Principal principal, @Valid @RequestParam String message, @Valid @RequestBody DiscussionDto discussion){
         User user = (User) ((Authentication) principal).getPrincipal();
 
