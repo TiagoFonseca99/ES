@@ -122,7 +122,7 @@ class GiveExplanationPerformanceTest extends Specification {
 
             def reply = new ReplyDto()
             reply.setMessage(REPLY_MESSAGE)
-            reply.setTeacherId(teacher.getId())
+            reply.setUserId(teacher.getId())
             reply.setDate(LocalTime.now())
 
             discussionService.giveReply(reply, discussion)

@@ -12,7 +12,10 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalTime;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.REPLY_MISSING_DATA;
 
 @Entity
 @Table(name = "replies")
@@ -27,33 +30,34 @@ public class Reply {
 
     @NotNull
     @ManyToOne
-    private User teacher;
+    private User user;
 
     @NotNull
-    @Column(name="message")
+    @Column(name = "message")
     private String message;
 
-    @Column(name="date")
+    @Column(name = "date")
     private LocalTime date;
 
     public Reply() {
     }
 
-    public Reply(User teacher, Discussion discussion, ReplyDto reply) {
-        this.teacher = teacher;
-        teacher.addReply(this);
+    public Reply(User user, Discussion discussion, ReplyDto reply) {
+        checkEmptyMessage(reply);
+        this.user = user;
+        user.addReply(this);
         this.date = reply.getDate();
         this.message = reply.getMessage();
         this.discussion = discussion;
-        discussion.setReply(this);
+        discussion.addReply(this);
     }
 
-    public User getTeacher() {
-        return teacher;
+    public User getUser() {
+        return user;
     }
 
-    public void setTeacher(User teacher) {
-        this.teacher = teacher;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getMessage() {
@@ -84,5 +88,9 @@ public class Reply {
         this.discussion = discussion;
     }
 
-
+    private void checkEmptyMessage(ReplyDto reply) {
+        if(reply.getMessage().trim().length() == 0){
+            throw new TutorException(REPLY_MISSING_DATA);
+        }
+    }
 }

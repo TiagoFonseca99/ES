@@ -19,7 +19,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.ReplyRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
@@ -38,9 +37,6 @@ public class DiscussionService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private ReplyRepository replyRepository;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -79,16 +75,17 @@ public class DiscussionService {
 
         Discussion discussion = new Discussion(user, question, discussionDto);
         this.entityManager.persist(discussion);
-        if (discussionDto.getReplyDto() != null) {
+        List<ReplyDto> replies = discussionDto.getReplies();
+        if (replies != null && !replies.isEmpty()) {
+            for (ReplyDto reply : replies) {
+                User teacher = userRepository.findById(reply.getUserId())
+                        .orElseThrow(() -> new TutorException(USER_NOT_FOUND, reply.getUserId()));
 
-            User teacher = userRepository.findById(discussionDto.getReplyDto().getTeacherId())
-                        .orElseThrow(() -> new TutorException(USER_NOT_FOUND, discussionDto.getReplyDto().getTeacherId()));
-
-            Reply reply = new Reply(teacher, discussion, discussionDto.getReplyDto());
-            this.entityManager.persist(discussion);
-            this.entityManager.persist(reply);
-
+                this.entityManager.persist(new Reply(teacher, discussion, reply));
+                this.entityManager.persist(discussion);
+            }
         }
+
         return new DiscussionDto(discussion);
     }
 
@@ -98,14 +95,17 @@ public class DiscussionService {
         checkReplyDto(replyDto);
         checkDiscussionDto(discussionDto);
 
-        User teacher = userRepository.findById(replyDto.getTeacherId())
-        .orElseThrow(() -> new TutorException(USER_NOT_FOUND, replyDto.getTeacherId()));
-        checkTeacherAndDiscussion(teacher, discussionDto);
+        User user = userRepository.findById(replyDto.getUserId())
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, replyDto.getUserId()));
 
-        Discussion discussion = discussionRepository.findByUserIdQuestionId(discussionDto.getUserId(), discussionDto.getQuestionId())
-                .orElseThrow(() -> new TutorException(DISCUSSION_NOT_FOUND, discussionDto.getUserId(), discussionDto.getQuestionId()));
+        checkUserAndDiscussion(user, discussionDto);
 
-        Reply reply = new Reply(teacher, discussion, replyDto);
+        Discussion discussion = discussionRepository
+                .findByUserIdQuestionId(discussionDto.getUserId(), discussionDto.getQuestionId())
+                .orElseThrow(() -> new TutorException(DISCUSSION_NOT_FOUND, discussionDto.getUserId(),
+                        discussionDto.getQuestionId()));
+
+        Reply reply = new Reply(user, discussion, replyDto);
         this.entityManager.persist(reply);
         this.entityManager.merge(discussion);
 
@@ -113,47 +113,37 @@ public class DiscussionService {
     }
 
     private void checkReplyDto(ReplyDto replyDto) {
-        if (replyDto.getTeacherId() == null || replyDto.getMessage() == null || replyDto.getMessage() == "") {
+        if (replyDto.getUserId() == null || replyDto.getMessage() == null || replyDto.getMessage().equals("")) {
             throw new TutorException(REPLY_MISSING_DATA);
         }
     }
 
-    private void checkTeacherAndDiscussion(User teacher, DiscussionDto discussion) {
-        if(teacher.getRole() != User.Role.TEACHER) {
-            throw new TutorException(REPLY_NOT_TEACHER_CREATOR);
-        }
-        if(!replyRepository.findByTeacherIdDiscussionId(teacher.getId(), discussion.getUserId(), discussion.getQuestionId()).isEmpty()){
-            throw new TutorException(DUPLICATE_REPLY, teacher.getId());
+    private void checkUserAndDiscussion(User user, DiscussionDto discussion) {
+        if (user.getRole() != User.Role.TEACHER && !user.getId().equals(discussion.getUserId())) {
+            throw new TutorException(REPLY_UNAUTHORIZED_USER);
         }
     }
 
     private void checkDiscussionDto(DiscussionDto discussion) {
-        if (discussion.getQuestion() == null || discussion.getUserId() == null || discussion.getContent() == null || discussion.getContent().trim().length() == 0) {
+        if (discussion.getQuestion() == null || discussion.getUserId() == null || discussion.getContent() == null
+                || discussion.getContent().trim().length() == 0) {
             throw new TutorException(DISCUSSION_MISSING_DATA);
         }
     }
 
-    private void checkDiscussionDto(DiscussionDto discussion, Integer userId) {
-        checkDiscussionDto(discussion);
-
-        if(!userId.equals(discussion.getUserId())){
-            throw new TutorException(DISCUSSION_NOT_SUBMITTED_BY_REQUESTER, userId);
-        }
-    }
-
     private void checkUserAndQuestion(User user, Question question) {
-        if(user.getRole() == User.Role.TEACHER) {
+        if (user.getRole() == User.Role.TEACHER) {
             throw new TutorException(DISCUSSION_NOT_STUDENT_CREATOR);
         }
 
-        if(!discussionRepository.findByUserIdQuestionId(user.getId(), question.getId()).isEmpty()){
+        if (!discussionRepository.findByUserIdQuestionId(user.getId(), question.getId()).isEmpty()) {
             throw new TutorException(DUPLICATE_DISCUSSION, user.getId(), question.getId());
         }
 
         checkUserAnswered(user, question);
     }
 
-    private void checkUserAnswered(User user, Question question){
+    private void checkUserAnswered(User user, Question question) {
         if (!user.checkQuestionAnswered(question)) {
             throw new TutorException(QUESTION_NOT_ANSWERED, question.getId());
         }

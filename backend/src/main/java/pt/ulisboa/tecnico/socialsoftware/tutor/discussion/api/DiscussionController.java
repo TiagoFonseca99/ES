@@ -54,11 +54,11 @@ public class DiscussionController {
             throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
         }
 
-        reply.setTeacherId(user.getId());
+        reply.setUserId(user.getId());
         reply.setDate(LocalTime.now());
 
         return discussionService.giveReply(reply, discussion);
-        
+
     }
 
     @GetMapping(value = "/discussions")

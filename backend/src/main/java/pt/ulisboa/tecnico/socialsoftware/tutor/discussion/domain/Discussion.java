@@ -9,6 +9,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
+
 @Entity
 @Table(name = "discussions")
 public class Discussion {
@@ -18,9 +22,8 @@ public class Discussion {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @OneToOne
-    @JoinColumn(name = "reply_id")
-    private Reply reply;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "discussion", fetch = FetchType.LAZY, orphanRemoval =  true)
+    private List<Reply> replies = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
@@ -70,12 +73,12 @@ public class Discussion {
         this.discussionId.setUserId(user.getId());
     }
 
-    public Reply getReply() {
-        return reply;
+    public List<Reply> getReplies() {
+        return this.replies;
     }
 
-    public void setReply(Reply reply) {
-        this.reply = reply;
+    public void addReply(Reply reply) {
+        this.replies.add(reply);
     }
 
     public DiscussionId getId() {
@@ -98,5 +101,9 @@ public class Discussion {
         }
 
         return false;
+    }
+
+    public int hashCode() {
+        return Objects.hash(discussionId, getContent(), getReplies(), getUser(), getQuestion());
     }
 }
