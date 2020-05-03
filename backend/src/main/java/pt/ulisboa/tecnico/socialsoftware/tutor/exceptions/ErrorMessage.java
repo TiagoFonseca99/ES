@@ -78,6 +78,7 @@ public enum ErrorMessage {
     TOURNAMENT_CANCELED("Tournament canceled: %s"),
     STUDENT_NO_COURSE_EXECUTION("Student has no matching course execution : %s"),
     TOURNAMENT_NO_QUIZ("Tournament has no quiz: %s"),
+    USER_NOT_JOINED("User has not joined tournament: %s"),
 
     USERS_IMPORT_ERROR("Error importing users: %s"),
     QUESTIONS_IMPORT_ERROR("Error importing questions: %s"),

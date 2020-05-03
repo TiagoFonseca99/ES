@@ -260,6 +260,10 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                 .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
 
+        if (!tournament.getParticipants().contains(user)) {
+            throw  new TutorException(USER_NOT_JOINED, userId);
+        }
+
         if (!tournament.hasQuiz()) {
             throw new TutorException(TOURNAMENT_NO_QUIZ, tournamentDto.getId());
         }

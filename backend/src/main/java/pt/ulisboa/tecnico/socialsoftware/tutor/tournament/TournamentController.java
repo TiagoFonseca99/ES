@@ -182,6 +182,7 @@ public class TournamentController {
         if(user == null){
             throw new TutorException(AUTHENTICATION_ERROR);
         }
+
         return tournamentService.solveQuiz(user.getId(), tournamentDto);
     }
 
