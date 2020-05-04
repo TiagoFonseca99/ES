@@ -6,6 +6,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
@@ -71,16 +72,22 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public SubmissionDto resubmitQuestion(Integer submissionId, Integer studentId, QuestionDto questionDto){
-        Submission submission = getSubmission(submissionId);
-        checkIfConsistentReSubmission(submission.getQuestion(), studentId);
+    public SubmissionDto resubmitQuestion(Integer oldQuestionId, Integer newQuestionId, SubmissionDto submissionDto) {
+        checkIfConsistentSubmission(newQuestionId, submissionDto.getStudentId());
+        if(oldQuestionId == null)
+            throw new TutorException(SUBMISSION_MISSING_QUESTION);
 
-        Question question = getQuestion(submission.getQuestion().getId());
-        question.update(questionDto);
+        Question oldQuestion = getQuestion(oldQuestionId);
+        oldQuestion.setStatus("DEPRECATED");
 
-        User user = getStudent(studentId);
+        Question newQuestion = getQuestion(newQuestionId);
+        setNewOptionsId(submissionDto, newQuestion);
+        newQuestion.update(submissionDto.getQuestionDto());
 
-        submission = new Submission(question, user);
+
+        User user = getStudent(submissionDto.getStudentId());
+
+        Submission submission = new Submission(newQuestion, user);
 
         entityManager.persist(submission);
         return new SubmissionDto(submission);
@@ -167,15 +174,17 @@ public class SubmissionService {
         question.setStatus("AVAILABLE");
     }
 
-    private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
-        if(questionId == null)
-            throw new TutorException(SUBMISSION_MISSING_QUESTION);
-        if(studentId == null)
-            throw new TutorException(SUBMISSION_MISSING_STUDENT);
+    private void setNewOptionsId(SubmissionDto submissionDto, Question newQuestion) {
+        List<OptionDto> newOptions = newQuestion.getOptions().stream().map(OptionDto::new).collect(Collectors.toList());
+
+        int i = 0;
+        for (OptionDto option: submissionDto.getQuestionDto().getOptions()) {
+            option.setId(newOptions.get(i++).getId());
+        }
     }
 
-    private void checkIfConsistentReSubmission(Question question, Integer studentId) {
-        if(question == null)
+    private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
+        if(questionId == null)
             throw new TutorException(SUBMISSION_MISSING_QUESTION);
         if(studentId == null)
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
@@ -197,7 +206,7 @@ public class SubmissionService {
         return user;
     }
 
-    private void checkIfConsistentReview(ReviewDto reviewDto){
+    private void checkIfConsistentReview(ReviewDto reviewDto) {
 
         checkIfReviewHasJustification(reviewDto);
 
@@ -220,7 +229,7 @@ public class SubmissionService {
     }
 
 
-    private Submission getSubmission(Integer submissionId){
+    private Submission getSubmission(Integer submissionId) {
         return submissionRepository.findById(submissionId).orElseThrow(() -> new TutorException(SUBMISSION_NOT_FOUND, submissionId));
     }
 

@@ -18,6 +18,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.OptionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
@@ -67,12 +68,15 @@ class ResubmitQuestionTest extends Specification {
     def student
     @Shared
     def question
+    @Shared
+    def newQuestion
     def optionOK
     def optionKO
+    def option1
+    def option2
     def course
     def courseExecution
     def acronym
-    @Shared
     def submission
 
     def setup() {
@@ -84,7 +88,6 @@ class ResubmitQuestionTest extends Specification {
         student.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
         userRepository.save(student)
         question = new Question()
-        question.setKey(1)
         question.setTitle(QUESTION_TITLE)
         question.setContent(QUESTION_CONTENT)
         question.setCourse(course)
@@ -109,57 +112,92 @@ class ResubmitQuestionTest extends Specification {
         submission.setQuestion(question)
         submission.setUser(student)
         submissionRepository.save(submission)
+        newQuestion = new Question()
+        newQuestion.setTitle(QUESTION_TITLE)
+        newQuestion.setContent(QUESTION_CONTENT)
+        newQuestion.setCourse(course)
+        newQuestion.setStatus(Question.Status.SUBMITTED)
+        newQuestion.setNumberOfAnswers(2)
+        newQuestion.setNumberOfCorrect(1)
+        option1 = new Option()
+        option1.setContent(OPTION_CONTENT)
+        option1.setCorrect(true)
+        option1.setSequence(0)
+        option1.setQuestion(newQuestion)
+        optionRepository.save(option1)
+        option2 = new Option()
+        option2.setContent(OPTION_CONTENT)
+        option2.setCorrect(false)
+        option2.setSequence(1)
+        option2.setQuestion(newQuestion)
+        optionRepository.save(option2)
+        questionRepository.save(newQuestion)
     }
 
     def "edit question and resubmit"(){
         given: "a changed question"
-        def questionDto = new QuestionDto(question)
+        def questionDto = new QuestionDto()
         questionDto.setTitle(NEW_QUESTION_TITLE)
         questionDto.setContent(NEW_QUESTION_CONTENT)
         and: '2 changed options'
-        def options = new ArrayList<OptionDto>()
-        def optionDto = new OptionDto(optionOK)
+        def optionsList= new ArrayList<OptionDto>()
+        def optionDto = new OptionDto()
         optionDto.setContent(NEW_OPTION_CONTENT)
         optionDto.setCorrect(false)
-        options.add(optionDto)
-        optionDto = new OptionDto(optionKO)
+        optionDto.setSequence(0)
+        optionsList.add(optionDto)
+        optionDto = new OptionDto()
+        optionDto.setContent(OPTION_CONTENT)
         optionDto.setCorrect(true)
-        options.add(optionDto)
-        questionDto.setOptions(options)
+        optionDto.setSequence(1)
+        optionsList.add(optionDto)
+        questionDto.setOptions(optionsList)
+        and: "the new submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setQuestionDto(questionDto)
+        submissionDto.setCourseId(course.getId())
+        submissionDto.setStudentId(student.getId())
 
-        when: submissionService.resubmitQuestion(submission.getId(), student.getId(), questionDto)
+        when: submissionService.resubmitQuestion(question.getId(), newQuestion.getId(), submissionDto)
 
         then: "a new submission is created with the question changed"
         submissionRepository.count() == 2L
         def oldSub = submissionRepository.findAll().get(0).getQuestion()
         def newSub = submissionRepository.findAll().get(1).getQuestion()
-        oldSub == question
-        newSub == question
+        oldSub.getId() == question.getId()
+        newSub.getId() == newQuestion.getId()
+        question.getId() != newQuestion.getId()
         newSub.getTitle() == NEW_QUESTION_TITLE
         newSub.getContent() == NEW_QUESTION_CONTENT
+        oldSub.getStatus() == Question.Status.DEPRECATED
         and: 'are not changed'
-        newSub.getStatus() == oldSub.getStatus()
+        newSub.getStatus() == Question.Status.SUBMITTED
         newSub.getNumberOfAnswers() == oldSub.getNumberOfAnswers()
         newSub.getNumberOfCorrect() == oldSub.getNumberOfCorrect()
         and: 'an option is changed'
         newSub.getOptions().size() == 2
-        def resOptionOne = newSub.getOptions().stream().filter({option -> option.getId() == optionOK.getId()}).findAny().orElse(null)
+        def options = newSub.getOptions().stream().findAll()
+        def resOptionOne = options.get(0)
+        def resOptionTwo = options.get(1)
         resOptionOne.getContent() == NEW_OPTION_CONTENT
         !resOptionOne.getCorrect()
-        def resOptionTwo = newSub.getOptions().stream().filter({option -> option.getId() == optionKO.getId()}).findAny().orElse(null)
         resOptionTwo.getContent() == OPTION_CONTENT
         resOptionTwo.getCorrect()
-
-
     }
 
-    def "edit question with missing data"(){
-        given: 'a question'
-        def questionDto = new QuestionDto(question)
-        questionDto.setTitle('     ')
 
-        when:
-        submissionService.resubmitQuestion(submission.getId(), student.getId(), questionDto)
+    def "edit question with missing data"(){
+        given: "a changed question"
+        def questionDto = new QuestionDto()
+        questionDto.setTitle(' ')
+        questionDto.setContent(NEW_QUESTION_CONTENT)
+        and: "the new submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setQuestionDto(questionDto)
+        submissionDto.setCourseId(course.getId())
+        submissionDto.setStudentId(student.getId())
+
+        when: submissionService.resubmitQuestion(question.getId(), newQuestion.getId(), submissionDto)
 
         then: "the question an exception is thrown"
         def exception = thrown(TutorException)
@@ -167,26 +205,73 @@ class ResubmitQuestionTest extends Specification {
     }
 
     def "edit question with 2 option true"(){
-        given: 'a question'
-        def questionDto = new QuestionDto(question)
-
-        def optionDto = new OptionDto(optionOK)
+        given: "a changed question"
+        def questionDto = new QuestionDto()
+        questionDto.setTitle(NEW_QUESTION_TITLE)
+        questionDto.setContent(NEW_QUESTION_CONTENT)
+        and: '2 changed options'
+        def optionsList= new ArrayList<OptionDto>()
+        def optionDto = new OptionDto()
         optionDto.setContent(NEW_OPTION_CONTENT)
         optionDto.setCorrect(true)
-        def options = new ArrayList<OptionDto>()
-        options.add(optionDto)
-        optionDto = new OptionDto(optionKO)
+        optionDto.setSequence(0)
+        optionsList.add(optionDto)
+        optionDto = new OptionDto()
         optionDto.setContent(OPTION_CONTENT)
         optionDto.setCorrect(true)
-        options.add(optionDto)
-        questionDto.setOptions(options)
+        optionDto.setSequence(1)
+        optionsList.add(optionDto)
+        questionDto.setOptions(optionsList)
+        and: "the new submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setQuestionDto(questionDto)
+        submissionDto.setCourseId(course.getId())
+        submissionDto.setStudentId(student.getId())
 
         when:
-        submissionService.resubmitQuestion(submission.getId(), student.getId(), questionDto)
+        submissionService.resubmitQuestion(question.getId(), newQuestion.getId(), submissionDto)
 
         then: "the question an exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.ONE_CORRECT_OPTION_NEEDED
+    }
+
+    @Unroll
+    def "invalid arguments: studentId=#studentId | oldQuestionId=#oldQuestionId | newQuestionId=#newQuestionId  || errorMessage"(){
+        given: "a changed question"
+        def questionDto = new QuestionDto()
+        questionDto.setTitle(NEW_QUESTION_TITLE)
+        questionDto.setContent(NEW_QUESTION_CONTENT)
+        and: '2 changed options'
+        def optionsList= new ArrayList<OptionDto>()
+        def optionDto = new OptionDto()
+        optionDto.setContent(NEW_OPTION_CONTENT)
+        optionDto.setCorrect(false)
+        optionDto.setSequence(0)
+        optionsList.add(optionDto)
+        optionDto = new OptionDto()
+        optionDto.setContent(OPTION_CONTENT)
+        optionDto.setCorrect(true)
+        optionDto.setSequence(1)
+        optionsList.add(optionDto)
+        questionDto.setOptions(optionsList)
+        and: "the new submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setQuestionDto(questionDto)
+        submissionDto.setCourseId(course.getId())
+        submissionDto.setStudentId(studentId)
+
+        when: submissionService.resubmitQuestion(oldQuestionId, newQuestionId, submissionDto)
+
+        then: "exception is thrown"
+        def exception = thrown(TutorException)
+        exception.errorMessage == errorMessage
+
+        where:
+        studentId       | oldQuestionId     | newQuestionId       | errorMessage
+        null            | question.getId()  | newQuestion.getId() | SUBMISSION_MISSING_STUDENT
+        student.getId() | null              | newQuestion.getId() | SUBMISSION_MISSING_QUESTION
+        student.getId() | question.getId()  | null                | SUBMISSION_MISSING_QUESTION
     }
 
     @TestConfiguration

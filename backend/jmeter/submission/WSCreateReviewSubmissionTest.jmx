@@ -65,7 +65,7 @@
           <stringProp name="checkQuery"></stringProp>
           <stringProp name="dbUrl">jdbc:postgresql://localhost:5432/tutordb?autoReconnect=true</stringProp>
           <stringProp name="driver">org.postgresql.Driver</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
           <stringProp name="password"></stringProp>
           <stringProp name="connectionProperties"></stringProp>
         </JDBCDataSource>
@@ -195,7 +195,7 @@ INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 6
             <stringProp name="timeout">10000</stringProp>
             <stringProp name="transactionIsolation">DEFAULT</stringProp>
             <stringProp name="trimInterval">60000</stringProp>
-            <stringProp name="username">daniel</stringProp>
+            <stringProp name="username">dserafim1999</stringProp>
           </JDBCDataSource>
           <hashTree/>
           <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
@@ -404,7 +404,7 @@ INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 6
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">

@@ -201,59 +201,30 @@ INSERT INTO options(content, correct, question_id, sequence) VALUES (&apos;teste
             <stringProp name="timeout">10000</stringProp>
             <stringProp name="transactionIsolation">DEFAULT</stringProp>
             <stringProp name="trimInterval">60000</stringProp>
-            <stringProp name="username">daniel</stringProp>
+            <stringProp name="username">dserafim1999</stringProp>
           </JDBCDataSource>
           <hashTree/>
-          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request (Submission Id)" enabled="true">
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request (question Id)" enabled="true">
             <stringProp name="dataSource">sampleReq</stringProp>
             <stringProp name="queryType">Select Statement</stringProp>
-            <stringProp name="query">SELECT id from submissions where user_id = 676;</stringProp>
+            <stringProp name="query">SELECT * FROM questions q JOIN (SELECT question_id FROM submissions WHERE (id) IN (SELECT MAX(id) FROM submissions)) s ON q.id = s.question_id;</stringProp>
             <stringProp name="queryArguments"></stringProp>
             <stringProp name="queryArgumentsTypes"></stringProp>
             <stringProp name="variableNames"></stringProp>
-            <stringProp name="resultVariable">sub_id</stringProp>
+            <stringProp name="resultVariable">question</stringProp>
             <stringProp name="queryTimeout"></stringProp>
             <stringProp name="resultSetMaxRows"></stringProp>
-            <stringProp name="resultSetHandler">Store as String</stringProp>
+            <stringProp name="resultSetHandler">Store as Object</stringProp>
           </JDBCSampler>
           <hashTree>
             <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
               <stringProp name="BeanShellAssertion.query">if(ResponseCode.equals(&quot;200&quot;)) {
 	Failure=false;
 	
-	int ID = vars.getObject(&quot;sub_id&quot;).get(0).get(&quot;id&quot;);
-	vars.putObject(&quot;submission_id&quot;, ID);
-	
-} else {
-	Failure=true;
-	prev.setStopThread(true); 
-}</stringProp>
-              <stringProp name="BeanShellAssertion.filename"></stringProp>
-              <stringProp name="BeanShellAssertion.parameters"></stringProp>
-              <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
-            </BeanShellAssertion>
-            <hashTree/>
-          </hashTree>
-          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request (Option Id)" enabled="true">
-            <stringProp name="dataSource">sampleReq</stringProp>
-            <stringProp name="queryType">Select Statement</stringProp>
-            <stringProp name="query">WITH quest AS (SELECT id FROM questions WHERE key = 1200)
-SELECT o.id FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
-            <stringProp name="queryArguments"></stringProp>
-            <stringProp name="queryArgumentsTypes"></stringProp>
-            <stringProp name="variableNames"></stringProp>
-            <stringProp name="resultVariable">opt_id</stringProp>
-            <stringProp name="queryTimeout"></stringProp>
-            <stringProp name="resultSetMaxRows"></stringProp>
-            <stringProp name="resultSetHandler">Store as String</stringProp>
-          </JDBCSampler>
-          <hashTree>
-            <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
-              <stringProp name="BeanShellAssertion.query">if(ResponseCode.equals(&quot;200&quot;)) {
-	Failure=false;
-	
-	int ID = vars.getObject(&quot;opt_id&quot;).get(0).get(&quot;id&quot;);
-	vars.putObject(&quot;option_id&quot;, ID);
+	int ID = vars.getObject(&quot;question&quot;).get(0).get(&quot;id&quot;);
+	//System.out.println(ID);
+	vars.putObject(&quot;id&quot;, ID);
+	//vars.put(ID, vars.getObject(&quot;sub_id&quot;).get(0).get(&quot;id&quot;));
 	
 } else {
 	Failure=true;
@@ -272,16 +243,19 @@ SELECT o.id FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-	&quot;title&quot;: &quot;new&quot;,&#xd;
-	&quot;content&quot;: &quot;new content&quot;,&#xd;
-	&quot;options&quot;: [&#xd;
-	    {&#xd;
-	    	 &quot;id&quot;: ${option_id},&#xd;
-	      &quot;sequence&quot;: 0,&#xd;
-	      &quot;correct&quot;: true,&#xd;
-	      &quot;content&quot;: &quot;certo&quot;&#xd;
-	    }&#xd;
-	]&#xd;
+	&quot;courseId&quot;: 2,&#xd;
+	&quot;userId&quot;: 676,&#xd;
+	&quot;questionDto&quot;: {&#xd;
+		&quot;title&quot;: &quot;new&quot;,&#xd;
+		&quot;content&quot;: &quot;new content&quot;,&#xd;
+		&quot;options&quot;: [&#xd;
+		    {&#xd;
+		      &quot;sequence&quot;: 0,&#xd;
+		      &quot;correct&quot;: true,&#xd;
+	     	 &quot;content&quot;: &quot;certo&quot;&#xd;
+	    	}&#xd;
+		]&#xd;
+	}&#xd;
 }&#xd;
 </stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
@@ -292,7 +266,7 @@ SELECT o.id FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
             <stringProp name="HTTPSampler.port">${port}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/student/reviews/${submission_id}</stringProp>
+            <stringProp name="HTTPSampler.path">/student/reviews/${id}</stringProp>
             <stringProp name="HTTPSampler.method">PUT</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -316,7 +290,7 @@ SELECT o.id FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
           <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
             <stringProp name="dataSource">sampleReq</stringProp>
             <stringProp name="queryType">Select Statement</stringProp>
-            <stringProp name="query">SELECT * FROM questions WHERE key = 1200;</stringProp>
+            <stringProp name="query">SELECT * FROM questions q JOIN (SELECT question_id FROM submissions WHERE (id) IN (SELECT MAX(id) FROM submissions)) s ON q.id = s.question_id;</stringProp>
             <stringProp name="queryArguments"></stringProp>
             <stringProp name="queryArgumentsTypes"></stringProp>
             <stringProp name="variableNames"></stringProp>
@@ -331,7 +305,6 @@ SELECT o.id FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
 	Failure=false;
 	
 	String title = vars.getObject(&quot;question&quot;).get(0).get(&quot;title&quot;);
-	
 	if(!title.equals(&quot;new&quot;)){
 		Failure=true;
 	}
@@ -340,7 +313,8 @@ SELECT o.id FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
 } else {
 	Failure=true;
 	prev.setStopThread(true); 
-}</stringProp>
+}
+</stringProp>
               <stringProp name="BeanShellAssertion.filename"></stringProp>
               <stringProp name="BeanShellAssertion.parameters"></stringProp>
               <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
@@ -360,6 +334,27 @@ SELECT o.id FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
 } else {
 	Failure=true;
 	prev.setStopThread(true); 
+}
+</stringProp>
+              <stringProp name="BeanShellAssertion.filename"></stringProp>
+              <stringProp name="BeanShellAssertion.parameters"></stringProp>
+              <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+            </BeanShellAssertion>
+            <hashTree/>
+            <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+              <stringProp name="BeanShellAssertion.query">if(ResponseCode.equals(&quot;200&quot;)) {
+	Failure=false;
+	
+	String content = vars.getObject(&quot;question&quot;).get(0).get(&quot;status&quot;);
+	
+	if(!content.equals(&quot;SUBMITTED&quot;)){
+		Failure=true;
+	}
+	
+	
+} else {
+	Failure=true;
+	prev.setStopThread(true); 
 }</stringProp>
               <stringProp name="BeanShellAssertion.filename"></stringProp>
               <stringProp name="BeanShellAssertion.parameters"></stringProp>
@@ -370,8 +365,9 @@ SELECT o.id FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
           <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
             <stringProp name="dataSource">sampleReq</stringProp>
             <stringProp name="queryType">Select Statement</stringProp>
-            <stringProp name="query">WITH quest AS (SELECT id FROM questions WHERE key = 1200)
-SELECT * FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
+            <stringProp name="query">WITH quest AS (SELECT question_id FROM submissions WHERE (id) IN (SELECT MAX(id) FROM submissions))
+SELECT * FROM options o JOIN quest q ON o.question_id = q.question_id;
+</stringProp>
             <stringProp name="queryArguments"></stringProp>
             <stringProp name="queryArgumentsTypes"></stringProp>
             <stringProp name="variableNames"></stringProp>
@@ -513,9 +509,11 @@ SELECT * FROM options o JOIN quest q ON o.question_id = q.id;</stringProp>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
-          <stringProp name="query">DELETE FROM options WHERE question_id=(SELECT id FROM questions WHERE key=1200);
-WITH sub AS(DELETE FROM submissions WHERE user_id = 676 RETURNING question_id)
-DELETE FROM questions WHERE id IN (SELECT * FROM sub);</stringProp>
+          <stringProp name="query">WITH sub AS (SELECT question_id FROM submissions WHERE id IN (SELECT max(id) FROM submissions)) DELETE FROM options WHERE question_id IN (SELECT * FROM sub);
+WITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);
+
+WITH sub AS (SELECT question_id FROM submissions WHERE id IN (SELECT max(id) FROM submissions)) DELETE FROM options WHERE question_id IN (SELECT * FROM sub);
+WITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
