@@ -52,4 +52,15 @@ describe('Student walkthrough', () => {
     cy.wait(100);
     cy.editTournament('-1');
   });
+
+  it('login cancel tournament', () => {
+    cy.contains('Tournaments')
+      .should('be.visible')
+      .click();
+    cy.contains('My Tournaments')
+      .should('be.visible')
+      .click();
+    cy.wait(100);
+    cy.cancelTournament('-1');
+  });
 });

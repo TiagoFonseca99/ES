@@ -174,6 +174,17 @@ Cypress.Commands.add('editTournament', tournament => {
   cy.get('[data-cy="saveButton"]').click();
 });
 
+Cypress.Commands.add('cancelTournament', tournament => {
+  cy.get('tbody')
+    .children()
+    .eq(tournament)
+    .children()
+    .should('have.length', 9)
+    .eq(8)
+    .find('[data-cy="CancelTournament"]')
+    .click({ force: true });
+});
+
 Cypress.Commands.add('answerQuiz', n => {
   cy.get('[data-cy="quizzes"]').click();
   cy.get('[data-cy="availableQuizzes"]').click();
