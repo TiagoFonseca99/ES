@@ -75,7 +75,6 @@
 import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
-import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
 import StatementQuiz from '@/models/statement/StatementQuiz';
 import StatementManager from '@/models/statement/StatementManager';
 import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
@@ -192,7 +191,7 @@ export default class OpenTournamentView extends Vue {
     const topics = tournament.topics;
     tournament.enrolled = undefined;
     tournament.topics = [];
-    let quiz: StatementQuiz = (await RemoteServices.solveTournament(tournament));
+    let quiz: StatementQuiz = await RemoteServices.solveTournament(tournament);
     tournament.enrolled = enrolled;
     tournament.topics = topics;
     let statementManager: StatementManager = StatementManager.getInstance;

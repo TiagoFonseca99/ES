@@ -758,40 +758,29 @@ export default class RemoteServices {
     topicsToRemove: Number[],
     tournament: Tournament
   ): Promise<Tournament> {
-    let result: Tournament = tournament;
-    if (
-      result.endTime &&
-      endTime != result.endTime
-    ) {
-      result = await this.editEndTime(result);
+    let result = tournament;
+    if (result.endTime && endTime != result.endTime) {
+      tournament = await this.editEndTime(result);
     }
-    if (
-      result.startTime &&
-      startTime != result.startTime
-    ) {
-      result = await this.editStartTime(result);
+    if (result.startTime && startTime != result.startTime) {
+      tournament = await this.editStartTime(result);
     }
     if (
       result.numberOfQuestions &&
-      numberOfQuestions != tournament.numberOfQuestions
+      numberOfQuestions != result.numberOfQuestions
     ) {
-      result = await this.editNumberOfQuestions(
-        result.numberOfQuestions,
-        result
-      );
+      tournament = await this.editNumberOfQuestions(result);
     }
     if (topicsToAdd.length > 0) {
-      result = await this.addTopics(topicsToAdd, result);
+      tournament = await this.addTopics(topicsToAdd, result);
     }
     if (topicsToRemove.length > 0) {
-      result = await this.removeTopics(topicsToRemove, result);
+      tournament = await this.removeTopics(topicsToRemove, result);
     }
-    return new Tournament(result);
+    return new Tournament(tournament);
   }
 
-  static async editStartTime(
-    tournament: Tournament
-  ): Promise<Tournament> {
+  static async editStartTime(tournament: Tournament): Promise<Tournament> {
     return httpClient
       .post('/tournaments/editStartTime', tournament)
       .then(response => {
@@ -802,9 +791,7 @@ export default class RemoteServices {
       });
   }
 
-  static async editEndTime(
-    tournament: Tournament
-  ): Promise<Tournament> {
+  static async editEndTime(tournament: Tournament): Promise<Tournament> {
     return httpClient
       .post('/tournaments/editEndTime', tournament)
       .then(response => {
@@ -816,12 +803,15 @@ export default class RemoteServices {
   }
 
   static async editNumberOfQuestions(
-    numberOfQuestions: Number,
     tournament: Tournament
   ): Promise<Tournament> {
+    let numberOfQuestions: string = '';
+    if (tournament.numberOfQuestions) {
+      numberOfQuestions = tournament.numberOfQuestions.toString();
+    }
     let path: string =
       '/tournaments/editNumberOfQuestions?numberOfQuestions=' +
-      numberOfQuestions.toString();
+      numberOfQuestions;
     return httpClient
       .post(path, tournament)
       .then(response => {
@@ -935,5 +925,4 @@ export default class RemoteServices {
         throw Error(await this.errorMessage(error));
       });
   }
-
 }

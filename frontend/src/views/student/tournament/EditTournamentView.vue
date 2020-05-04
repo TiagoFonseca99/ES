@@ -193,6 +193,7 @@ import Tournament from '@/models/user/Tournament';
 import Topic from '@/models/management/Topic';
 import VueCtkDateTimePicker from 'vue-ctk-date-time-picker';
 import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css';
+import { ISOtoString } from '@/services/ConvertDateService';
 
 Vue.component('VueCtkDateTimePicker', VueCtkDateTimePicker);
 
@@ -269,17 +270,15 @@ export default class EditTournamentDialog extends Vue {
     await this.$store.dispatch('clearLoading');
   }
 
-  async cancelTournament() {
+  async resetChanges() {
     this.editTournament.startTime = this.oldStartTime;
     this.editTournament.endTime = this.oldEndTime;
     this.editTournament.numberOfQuestions = this.oldNumberOfQuestions;
     this.editTournament.topics = this.oldTopics;
+  }
 
-    console.log('topics antigos: ' + this.editTournament.topics);
-    this.topicsToAdd.map(topic => console.log('Topic to add: ' + topic.name));
-    this.topicsToRemove.map(topic =>
-      console.log('Topic to remove: ' + topic.name)
-    );
+  async cancelTournament() {
+    await this.resetChanges();
     this.$emit('close-dialog');
   }
 
@@ -298,6 +297,7 @@ export default class EditTournamentDialog extends Vue {
         'error',
         'Tournament must have Start Time, End Time, Number Of Questions and Topics'
       );
+      await this.resetChanges();
       return;
     }
 
@@ -306,7 +306,6 @@ export default class EditTournamentDialog extends Vue {
       const topics = this.editTournament.topics;
       this.editTournament.enrolled = undefined;
       this.editTournament.topics = [];
-      this.editTournament.state = 'NOT_CANCELED';
 
       let topicsToAddID = this.topicsToAdd.map(topic => {
         return topic.id;
@@ -325,7 +324,6 @@ export default class EditTournamentDialog extends Vue {
           topicsToRemoveID,
           this.editTournament
         );
-        console.log('Resultado: ' + result.topics);
         this.$emit('edit-tournament', result);
       } catch (error) {
         await this.$store.dispatch('error', error);
