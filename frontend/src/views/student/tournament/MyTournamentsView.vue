@@ -159,6 +159,11 @@ export default class MyTournamentsView extends Vue {
     this.currentTournament = null;
   }
 
+  onCloseDialog() {
+    this.editTournamentDialog = false;
+    this.currentTournament = null;
+  }
+
   async cancelTournament(tournamentToCancel: Tournament) {
     const enrolled = tournamentToCancel.enrolled;
     const topics = tournamentToCancel.topics;
@@ -175,11 +180,6 @@ export default class MyTournamentsView extends Vue {
     tournamentToCancel.enrolled = true;
     tournamentToCancel.topics = topics;
     tournamentToCancel.state = 'CANCELED';
-  }
-  
-  onCloseDialog() {
-    this.editTournamentDialog = false;
-    this.currentTournament = null;
   }
 }
 </script>
