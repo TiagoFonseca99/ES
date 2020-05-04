@@ -4,12 +4,14 @@ import javax.persistence.*;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -22,7 +24,7 @@ public class Discussion {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "discussion", fetch = FetchType.LAZY, orphanRemoval =  true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "discussion", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Reply> replies = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -30,8 +32,10 @@ public class Discussion {
     private User user;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="question_id", insertable = false, updatable = false)
+    @JoinColumn(name = "question_id", insertable = false, updatable = false)
     private Question question;
+
+    private LocalDateTime date;
 
     public Discussion() {
     }
@@ -41,10 +45,19 @@ public class Discussion {
         this.content = discussionDto.getContent();
         this.question = question;
         this.user = user;
-        discussionId.setQuestionId(question.getId());
-        discussionId.setUserId(user.getId());
-        question.addDiscussion(this);
-        user.addDiscussion(this);
+        this.discussionId.setQuestionId(question.getId());
+        this.discussionId.setUserId(user.getId());
+        this.question.addDiscussion(this);
+        this.user.addDiscussion(this);
+        this.setDate(DateHandler.toLocalDateTime(discussionDto.getDate()));
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
     }
 
     public String getContent() {
@@ -89,8 +102,8 @@ public class Discussion {
         discussionId = id;
     }
 
-    private void checkConsistentDiscussion(DiscussionDto discussionDto){
-        if(discussionDto.getContent().trim().length() == 0){
+    private void checkConsistentDiscussion(DiscussionDto discussionDto) {
+        if (discussionDto.getContent().trim().length() == 0 && discussionDto.getDate() != null) {
             throw new TutorException(DISCUSSION_MISSING_DATA);
         }
     }

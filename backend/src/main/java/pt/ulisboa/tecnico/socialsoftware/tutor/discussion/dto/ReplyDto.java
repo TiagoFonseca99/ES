@@ -2,31 +2,42 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto;
 
 import java.io.Serializable;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 
 public class ReplyDto implements Serializable {
     private Integer id;
     private Integer userId;
+    private String userName;
     private String message;
-    private LocalTime date;
+    private String date;
 
     public ReplyDto() {
     }
 
-    public ReplyDto(Reply reply) {
+	public ReplyDto(Reply reply) {
         this.setId(reply.getId());
         this.setUserId(reply.getUser().getId());
+        this.setUserName(reply.getUser().getName());
         this.setMessage(reply.getMessage());
-        this.setDate(reply.getDate());
+        this.setDate(DateHandler.toISOString(reply.getDate()));
     }
 
-    public LocalTime getDate() {
+    public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalTime date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

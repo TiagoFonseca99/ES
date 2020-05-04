@@ -36,9 +36,9 @@
           }}
         </td>
       </template>
-      <template v-slot:item.replyDto="{ item }">
+      <template v-slot:item.replies="{ item }">
         <td>
-          <v-icon v-if="item.replyDto !== undefined" style="color: #1ea62b"
+          <v-icon v-if="item.replies !== null" style="color: #1ea62b"
             >fas fa-check</v-icon
           >
           <v-icon v-else style="color: #fc0b03">fas fa-times</v-icon>
@@ -47,11 +47,39 @@
       <template v-slot:expanded-item="{ headers, item }">
         <td :colspan="headers.length" class="text-left">
           <div class="container" style="margin: 10px; width: 90%">
-            <p v-html="convertToMarkdown(item.content)" />
-            <p v-if="item.replyDto !== undefined">
-              <b>Reply by user with id {{ item.replyDto.teacherId }}: </b
-              >{{ convertToMarkdown(item.replyDto.message) }}
-            </p>
+            <b>On {{ item.date }}:</b>
+            <span v-html="convertToMarkdown(item.content)" />
+            <div v-if="item.replies !== []">
+              <div class="reply" v-for="reply in item.replies" :key="reply.id">
+                <b v-if="$store.getters.getUser.id !== reply.userId"
+                  >{{ reply.userName }} on {{ reply.date }}:
+                </b>
+                <b v-else>You on {{ reply.date }}:</b>
+                <span v-html="convertToMarkdown(reply.message)" />
+              </div>
+            </div>
+            <v-textarea
+              clearable
+              outlined
+              auto-grow
+              v-on:focus="setDiscussion(item)"
+              @input="setReplyMessage"
+              rows="2"
+              label="Message"
+              class="text"
+            ></v-textarea>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn
+                color="blue darken-1"
+                data-cy="submitReply"
+                @click="
+                  setDiscussion(item);
+                  submitReply();
+                "
+                >Submit</v-btn
+              >
+            </v-card-actions>
           </div>
         </td>
       </template>
@@ -77,8 +105,11 @@ export default class DiscussionView extends Vue {
   filterLabel: FilterState = FilterState.ALL;
   items: Discussion[] = [];
   expanded = [];
+  currentDiscussion!: Discussion;
+  replyMessages: Map<number, string> = new Map();
 
   headers: object = [
+    { text: '', value: 'data-table-expand' },
     {
       text: 'Question Title',
       value: 'question.title',
@@ -89,8 +120,7 @@ export default class DiscussionView extends Vue {
       value: 'content',
       align: 'center'
     },
-    { text: 'Reply?', value: 'replyDto', align: 'center' },
-    { text: '', value: 'data-table-expand' }
+    { text: 'Replies?', align: 'center' }
   ];
 
   async created() {
@@ -111,7 +141,7 @@ export default class DiscussionView extends Vue {
   customFilter() {
     if (this.filterLabel == FilterState.REPLY) {
       this.items = this.discussions.filter(discussion => {
-        return discussion.replyDto!;
+        return discussion.replies !== [];
       });
     } else {
       this.items = this.discussions;
@@ -126,10 +156,53 @@ export default class DiscussionView extends Vue {
     }
   }
 
+  setReplyMessage(message: string) {
+    this.replyMessages.set(this.currentDiscussion.userId!, message);
+  }
+
+  setDiscussion(discussion: Discussion) {
+    this.currentDiscussion = discussion;
+  }
+
+  async submitReply() {
+    try {
+      if (
+        this.replyMessages.get(this.currentDiscussion.userId!) === undefined
+      ) {
+        this.replyMessages.set(this.currentDiscussion.userId!, '');
+      }
+      const reply = await RemoteServices.createReply(
+        this.replyMessages.get(this.currentDiscussion.userId!)!,
+        this.currentDiscussion!
+      );
+      if (this.currentDiscussion.replies === null) {
+        this.currentDiscussion.replies = [];
+      }
+      this.currentDiscussion.replies.push(reply);
+      this.replyMessages.set(this.currentDiscussion.userId!, '');
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+
+      return false;
+    }
+
+    for (let i = 0; i < this.discussions.length; i++) {
+      if (this.discussions[i].replies === []) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   convertToMarkdown(text: string) {
     return convertMarkDown(text, null);
   }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.reply {
+  padding-left: 30px;
+}
+</style>

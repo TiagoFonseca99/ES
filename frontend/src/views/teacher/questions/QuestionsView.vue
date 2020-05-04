@@ -153,6 +153,7 @@
       v-if="currentQuestion"
       v-model="questionDialog"
       :question="currentQuestion"
+      :discussion="discussion"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
       v-on:submittedDiscussion="updateQuestion"
     />
@@ -192,6 +193,7 @@ export default class QuestionsView extends Vue {
   search: string = '';
   statusList = ['DISABLED', 'AVAILABLE', 'REMOVED'];
   filterLabel: FilterState = FilterState.ALL;
+  discussion: boolean = true;
 
   headers: object = [
     {
@@ -320,6 +322,7 @@ export default class QuestionsView extends Vue {
   showQuestionDialog(question: Question) {
     this.currentQuestion = question;
     this.questionDialog = true;
+    this.discussion = true;
   }
 
   onCloseShowQuestionDialog() {
@@ -346,6 +349,7 @@ export default class QuestionsView extends Vue {
     });
     this.currentQuestion.image = null;
     this.editQuestionDialog = true;
+    this.discussion = false;
   }
 
   async onSaveQuestion(question: Question) {

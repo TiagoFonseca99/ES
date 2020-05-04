@@ -9,8 +9,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -37,7 +38,7 @@ public class Reply {
     private String message;
 
     @Column(name = "date")
-    private LocalTime date;
+    private LocalDateTime date;
 
     public Reply() {
     }
@@ -46,7 +47,7 @@ public class Reply {
         checkEmptyMessage(reply);
         this.user = user;
         user.addReply(this);
-        this.date = reply.getDate();
+        this.date = DateHandler.toLocalDateTime(reply.getDate());
         this.message = reply.getMessage();
         this.discussion = discussion;
         discussion.addReply(this);
@@ -68,8 +69,12 @@ public class Reply {
         this.message = message;
     }
 
-    public LocalTime getDate() {
+    public LocalDateTime getDate() {
         return date;
+    }
+
+    public void getDate(LocalDateTime date) {
+        this.date = date;
     }
 
     public int getId() {
