@@ -40,6 +40,7 @@
         <p
           @click="showQuestionDialog(item)"
           @contextmenu="editQuestion(item, $event)"
+          data-cy="viewQuestion"
           style="cursor: pointer"
         >
           {{ item.title }}
@@ -131,6 +132,7 @@
               v-on="on"
               @click="deleteQuestion(item)"
               color="red"
+              data-cy="deleteQuestion"
               >delete</v-icon
             >
           </template>
@@ -250,7 +252,7 @@ export default class QuestionsView extends Vue {
         RemoteServices.getTopics(),
         RemoteServices.getQuestions()
       ]);
-      this.questions = this.questions.filter(q => q.status !== 'SUBMITTED');
+      this.questions = this.questions.filter(q => this.statusList.includes(q.status));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

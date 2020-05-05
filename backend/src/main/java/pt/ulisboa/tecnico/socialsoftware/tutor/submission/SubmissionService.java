@@ -6,6 +6,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
@@ -70,20 +72,44 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public SubmissionDto resubmitQuestion(Integer oldQuestionId, Integer newQuestionId, SubmissionDto submissionDto) {
+        checkIfConsistentSubmission(newQuestionId, submissionDto.getStudentId());
+        if(oldQuestionId == null)
+            throw new TutorException(SUBMISSION_MISSING_QUESTION);
+
+        Question oldQuestion = getQuestion(oldQuestionId);
+        oldQuestion.setStatus("DEPRECATED");
+
+        Question newQuestion = getQuestion(newQuestionId);
+        setNewOptionsId(submissionDto, newQuestion);
+        newQuestion.setStatus("SUBMITTED");
+        newQuestion.update(submissionDto.getQuestionDto());
+
+
+        User user = getStudent(submissionDto.getStudentId());
+
+        Submission submission = new Submission(newQuestion, user);
+
+        entityManager.persist(submission);
+        return new SubmissionDto(submission);
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ReviewDto reviewSubmission(Integer teacherId, ReviewDto reviewDto) {
 
         checkIfConsistentReview(reviewDto);
 
         User user = getTeacher(teacherId);
-        Submission submission = getSubmission(reviewDto);
+        Submission submission = getSubmission(reviewDto.getSubmissionId());
 
         if (reviewDto.getCreationDate() == null) {
             reviewDto.setCreationDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         }
 
-        if (reviewDto.getStatus().equals("APPROVED")){
-            updateQuestionStatus(submission);
-        }
+        updateQuestionStatus(submission, reviewDto.getStatus());
 
         Review review = new Review(user, submission, reviewDto);
 
@@ -142,9 +168,22 @@ public class SubmissionService {
         return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
 
-    private void updateQuestionStatus(Submission submission) {
+    private void updateQuestionStatus(Submission submission, String status) {
         Question question = getQuestion(submission.getQuestion().getId());
-        question.setStatus("AVAILABLE");
+        if(status.equals("APPROVED")){
+            question.setStatus("AVAILABLE");
+        } else {
+            question.setStatus("DEPRECATED");
+        }
+    }
+
+    private void setNewOptionsId(SubmissionDto submissionDto, Question newQuestion) {
+        List<OptionDto> newOptions = newQuestion.getOptions().stream().map(OptionDto::new).collect(Collectors.toList());
+
+        int i = 0;
+        for (OptionDto option: submissionDto.getQuestionDto().getOptions()) {
+            option.setId(newOptions.get(i++).getId());
+        }
     }
 
     private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
@@ -170,7 +209,7 @@ public class SubmissionService {
         return user;
     }
 
-    private void checkIfConsistentReview(ReviewDto reviewDto){
+    private void checkIfConsistentReview(ReviewDto reviewDto) {
 
         checkIfReviewHasJustification(reviewDto);
 
@@ -193,9 +232,7 @@ public class SubmissionService {
     }
 
 
-    private Submission getSubmission(ReviewDto reviewDto){
-
-        int submissionId = reviewDto.getSubmissionId();
+    private Submission getSubmission(Integer submissionId) {
         return submissionRepository.findById(submissionId).orElseThrow(() -> new TutorException(SUBMISSION_NOT_FOUND, submissionId));
     }
 
