@@ -4,15 +4,21 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
+import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
@@ -22,9 +28,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.TOURNAMENT_MISSING_NUMBER_OF_QUESTIONS
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.TOURNAMENT_MISSING_START_TIME
@@ -69,13 +72,10 @@ class CreateTournamentTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def startTime = LocalDateTime.now().plusHours(1)
-    def endTime = LocalDateTime.now().plusHours(2)
-    def formatter
+    def startTime = DateHandler.now().plusHours(1)
+    def endTime = DateHandler.now().plusHours(2)
 
     def setup() {
-        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -105,8 +105,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with existing user (student)"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -117,8 +117,8 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
         result.getId() != null
-        result.getStartTime().format(formatter) == startTime.format(formatter)
-        result.getEndTime().format(formatter) == endTime.format(formatter)
+        DateHandler.toISOString(result.getStartTime()) == DateHandler.toISOString(startTime)
+        DateHandler.toISOString(result.getEndTime()) == DateHandler.toISOString(endTime)
         result.getTopics() == [topic1, topic2]
         result.getNumberOfQuestions() == NUMBER_OF_QUESTIONS
         result.getState() == Tournament.Status.NOT_CANCELED
@@ -129,8 +129,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with existing user (teacher)" () {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -153,8 +153,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with existing user (admin)" () {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -177,8 +177,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with not existing user"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -197,8 +197,8 @@ class CreateTournamentTest extends Specification {
     def "create tournament with existing user and topics from different courses"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -225,8 +225,8 @@ class CreateTournamentTest extends Specification {
     def "start time is lower then current time"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(LocalDateTime.now().minusHours(2).format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(DateHandler.now().minusHours(2)))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -242,8 +242,8 @@ class CreateTournamentTest extends Specification {
     def "start time is higher then end time"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(LocalDateTime.now().plusHours(2).format(formatter))
-        tournamentDto.setEndTime(LocalDateTime.now().format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(DateHandler.now().plusHours(2)))
+        tournamentDto.setEndTime(DateHandler.toISOString(DateHandler.now()))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -259,8 +259,8 @@ class CreateTournamentTest extends Specification {
     def "0 topics"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
         topics = new ArrayList<Integer>()
@@ -274,150 +274,11 @@ class CreateTournamentTest extends Specification {
         tournamentRepository.count() == 0L
     }
 
-    def "add topic of same course"() {
-        given: "a tournament"
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
-
-        and: "new topic"
-        def topicDto3 = new TopicDto()
-        topicDto3.setName("TOPIC3")
-        def topic3 = new Topic(course, topicDto3)
-        topicRepository.save(topic3)
-
-        when:
-        tournamentService.addTopic(topic3.getId(), tournamentDto)
-
-        then:
-        tournamentRepository.count() == 1L
-        def result = tournamentRepository.findAll().get(0)
-        result.getTopics() == [topic1, topic2, topic3]
-    }
-
-    def "add topic of different course"() {
-        given: "a tournament"
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
-
-        and: "new course"
-        def differentCourse = new Course("TESTE", Course.Type.TECNICO)
-        courseRepository.save(differentCourse)
-
-        and: "new topic"
-        def topicDto3 = new TopicDto()
-        topicDto3.setName("TOPIC3")
-        def topic3 = new Topic(differentCourse, topicDto3)
-        topicRepository.save(topic3)
-
-        when:
-        tournamentService.addTopic(topic3.getId(), tournamentDto)
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_TOPIC_COURSE
-        tournamentRepository.count() == 1L
-        def result = tournamentRepository.findAll().get(0)
-        result.getTopics() == [topic1, topic2]
-    }
-
-    def "add duplicate topic"() {
-        given: "a tournament"
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
-
-        when:
-        tournamentService.addTopic(topic1.getId(), tournamentDto)
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.DUPLICATE_TOURNAMENT_TOPIC
-        tournamentRepository.count() == 1L
-        def result = tournamentRepository.findAll().get(0)
-        result.getTopics() == [topic1, topic2]
-    }
-
-    def "remove existing topic from tournament that contains that topic"() {
-        given: "a tournament"
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
-
-        when:
-        tournamentService.removeTopic(topic2.getId(), tournamentDto)
-
-        then:
-        tournamentRepository.count() == 1L
-        def result = tournamentRepository.findAll().get(0)
-        result.getTopics() == [topic1]
-    }
-
-    def "remove existing topic from tournament that does not contains that topic"() {
-        given: "a tournament"
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
-
-        and: "new topic"
-        def topicDto3 = new TopicDto()
-        topicDto3.setName("TOPIC3")
-        def topic3 = new Topic(course, topicDto3)
-        topicRepository.save(topic3)
-
-        when:
-        tournamentService.removeTopic(topic3.getId(), tournamentDto)
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_TOPIC_MISMATCH
-        tournamentRepository.count() == 1L
-        def result = tournamentRepository.findAll().get(0)
-        result.getTopics() == [topic1, topic2]
-    }
-
-    def "remove existing topic from tournament when only one left"() {
-        given: "a tournament"
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        topics = [topic1.getId()]
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
-
-        when:
-        tournamentService.removeTopic(topic1.getId(), tournamentDto)
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_HAS_ONLY_ONE_TOPIC
-        tournamentRepository.count() == 1L
-        def result = tournamentRepository.findAll().get(0)
-        result.getTopics() == [topic1]
-    }
-
     def "number of questions is negative"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(-1)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -433,8 +294,8 @@ class CreateTournamentTest extends Specification {
     def "number of questions is zero"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(0)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -476,6 +337,30 @@ class CreateTournamentTest extends Specification {
         @Bean
         TournamentService tournamentService() {
             return new TournamentService()
+        }
+
+        @Bean
+        StatementService statementService() {
+            return new StatementService()
+        }
+
+        @Bean
+        QuizService quizService() {
+            return new QuizService()
+        }
+
+        @Bean
+        AnswerService answerService() {
+            return new AnswerService()
+        }
+        @Bean
+        AnswersXmlImport answersXmlImport() {
+            return new AnswersXmlImport()
+        }
+
+        @Bean
+        QuestionService questionService() {
+            return new QuestionService()
         }
     }
 }

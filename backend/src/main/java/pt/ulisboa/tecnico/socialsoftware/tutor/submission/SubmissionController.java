@@ -7,6 +7,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -17,6 +20,7 @@ import javax.validation.Valid;
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -54,6 +58,24 @@ public class SubmissionController {
         }
 
         submissionService.changeSubmission(submissionDto);
+    }
+
+    @PutMapping("/student/reviews/{questionId}")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public SubmissionDto resubmitQuestion(Principal principal, @PathVariable Integer questionId, @Valid @RequestBody SubmissionDto submissionDto) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        QuestionDto oldQuestion = questionService.findQuestionById(questionId);
+        oldQuestion.getOptions().stream().forEach(o->o.setId(null));
+        QuestionDto newQuestion = questionService.createQuestion(submissionDto.getCourseId(), oldQuestion);
+
+        submissionDto.setStudentId(user.getId());
+
+        return submissionService.resubmitQuestion(questionId, newQuestion.getId(), submissionDto);
     }
 
 

@@ -31,7 +31,7 @@
           </elementProp>
           <elementProp name="status" elementType="Argument">
             <stringProp name="Argument.name">status</stringProp>
-            <stringProp name="Argument.value">REJECTED</stringProp>
+            <stringProp name="Argument.value">APPROVED</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -65,8 +65,8 @@
           <stringProp name="checkQuery"></stringProp>
           <stringProp name="dbUrl">jdbc:postgresql://localhost:5432/tutordb?autoReconnect=true</stringProp>
           <stringProp name="driver">org.postgresql.Driver</stringProp>
-          <stringProp name="username">tomas</stringProp>
-          <stringProp name="password">fartodisto</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
+          <stringProp name="password"></stringProp>
           <stringProp name="connectionProperties"></stringProp>
         </JDBCDataSource>
         <hashTree/>
@@ -76,7 +76,7 @@
           <stringProp name="query">WITH quest AS
 	(INSERT INTO questions (course_id, key) VALUES (2, 1200) RETURNING id)
 
-INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 643);</stringProp>
+INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
@@ -189,19 +189,19 @@ INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 6
             <stringProp name="driver">org.postgresql.Driver</stringProp>
             <stringProp name="initQuery"></stringProp>
             <boolProp name="keepAlive">true</boolProp>
-            <stringProp name="password">fartodisto</stringProp>
+            <stringProp name="password"></stringProp>
             <stringProp name="poolMax">0</stringProp>
             <boolProp name="preinit">false</boolProp>
             <stringProp name="timeout">10000</stringProp>
             <stringProp name="transactionIsolation">DEFAULT</stringProp>
             <stringProp name="trimInterval">60000</stringProp>
-            <stringProp name="username">tomas</stringProp>
+            <stringProp name="username">dserafim1999</stringProp>
           </JDBCDataSource>
           <hashTree/>
           <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
             <stringProp name="dataSource">sampleReq</stringProp>
             <stringProp name="queryType">Select Statement</stringProp>
-            <stringProp name="query">SELECT id from submissions where user_id = 643;</stringProp>
+            <stringProp name="query">SELECT id from submissions where id in (select max(id) from submissions);</stringProp>
             <stringProp name="queryArguments"></stringProp>
             <stringProp name="queryArgumentsTypes"></stringProp>
             <stringProp name="variableNames"></stringProp>
@@ -210,9 +210,9 @@ INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 6
             <stringProp name="resultSetMaxRows"></stringProp>
             <stringProp name="resultSetHandler">Store as String</stringProp>
           </JDBCSampler>
-          <hashTree/>
-          <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
-            <stringProp name="BeanShellAssertion.query">if(ResponseCode.equals(&quot;200&quot;)) {
+          <hashTree>
+            <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+              <stringProp name="BeanShellAssertion.query">if(ResponseCode.equals(&quot;200&quot;)) {
 	Failure=false;
 	
 	int ID = vars.getObject(&quot;sub_id&quot;).get(0).get(&quot;id&quot;);
@@ -224,11 +224,12 @@ INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 6
 	Failure=true;
 	prev.setStopThread(true); 
 }</stringProp>
-            <stringProp name="BeanShellAssertion.filename"></stringProp>
-            <stringProp name="BeanShellAssertion.parameters"></stringProp>
-            <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
-          </BeanShellAssertion>
-          <hashTree/>
+              <stringProp name="BeanShellAssertion.filename"></stringProp>
+              <stringProp name="BeanShellAssertion.parameters"></stringProp>
+              <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+            </BeanShellAssertion>
+            <hashTree/>
+          </hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request to create review" enabled="true">
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
@@ -236,7 +237,7 @@ INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 6
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-	&quot;studentId&quot;: 643,&#xd;
+	&quot;studentId&quot;: 676,&#xd;
 	&quot;submissionId&quot;: &quot;${id}&quot;,&#xd;
 	&quot;justification&quot;: &quot;Porque me apeteceu&quot;,&#xd;
 	&quot;status&quot;: &quot;${status}&quot;&#xd;
@@ -281,7 +282,7 @@ INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 6
             <hashTree/>
             <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert StudentId" enabled="true">
               <stringProp name="JSON_PATH">$.studentId</stringProp>
-              <stringProp name="EXPECTED_VALUE">643</stringProp>
+              <stringProp name="EXPECTED_VALUE">676</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>
@@ -290,12 +291,45 @@ INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 6
             <hashTree/>
             <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assertion previous status" enabled="true">
               <stringProp name="JSON_PATH">$.status</stringProp>
-              <stringProp name="EXPECTED_VALUE">REJECTED</stringProp>
+              <stringProp name="EXPECTED_VALUE">APPROVED</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>
               <boolProp name="ISREGEX">false</boolProp>
             </JSONPathAssertion>
+            <hashTree/>
+          </hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
+            <stringProp name="dataSource">sampleReq</stringProp>
+            <stringProp name="queryType">Select Statement</stringProp>
+            <stringProp name="query">WITH sub AS (SELECT question_id from submissions where id in (select max(id) from submissions)) 
+SELECT status FROM questions WHERE id IN (SELECT * FROM sub); </stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable">q_id</stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree>
+            <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion" enabled="true">
+              <stringProp name="BeanShellAssertion.query">if(ResponseCode.equals(&quot;200&quot;)) {
+	Failure=false;
+	
+	String status = vars.getObject(&quot;q_id&quot;).get(0).get(&quot;status&quot;);
+	if(!status.equals(&quot;AVAILABLE&quot;)) {
+		Failure=true;
+	}
+	
+} else {
+	Failure=true;
+	prev.setStopThread(true); 
+}</stringProp>
+              <stringProp name="BeanShellAssertion.filename"></stringProp>
+              <stringProp name="BeanShellAssertion.parameters"></stringProp>
+              <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+            </BeanShellAssertion>
             <hashTree/>
           </hashTree>
         </hashTree>
@@ -398,20 +432,19 @@ INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 6
           <stringProp name="driver">org.postgresql.Driver</stringProp>
           <stringProp name="initQuery"></stringProp>
           <boolProp name="keepAlive">true</boolProp>
-          <stringProp name="password">fartodisto</stringProp>
+          <stringProp name="password"></stringProp>
           <stringProp name="poolMax">0</stringProp>
           <boolProp name="preinit">false</boolProp>
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">tomas</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
-          <stringProp name="query">DELETE FROM reviews WHERE user_id = 677;
-DELETE FROM submissions WHERE user_id = 643;
-DELETE FROM questions WHERE key = 1200;
+          <stringProp name="query">DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews);
+WITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);
 </stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>

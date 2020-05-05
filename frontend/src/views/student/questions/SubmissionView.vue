@@ -20,6 +20,9 @@
           />
 
           <v-spacer />
+          <v-btn to="/student/reviews" color="primary" dark data-cy="submissionsStatus">
+            Submissions Status
+          </v-btn>
           <v-btn
             color="primary"
             dark
@@ -30,12 +33,11 @@
         </v-card-title>
       </template>
 
-      <template v-slot:item.questionDto.content="{ item }">
+      <template v-slot:item.questionDto.title="{ item }">
         <p
           v-html="
-            convertMarkDown(item.questionDto.content, item.questionDto.image)
-          "
-          @click="showQuestionDialog(item.questionDto)"
+            convertMarkDown(item.questionDto.title, item.questionDto.image)
+          " @click="showQuestionDialog(item.questionDto)"
       /></template>
 
       <template v-slot:item.questionDto.status="{ item }">
@@ -62,7 +64,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="showQuestionDialog(item.questionDto)"
@@ -75,7 +77,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="deleteSubmission(item)"
@@ -88,10 +90,15 @@
         </v-tooltip>
       </template>
     </v-data-table>
+    <footer>
+      <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to view
+      it.
+    </footer>
     <edit-submission-dialog
-      v-if="currentQuestion"
+      v-if="currentQuestion && currentSubmission"
       v-model="editSubmissionDialog"
       :question="currentQuestion"
+      :submission="currentSubmission"
       v-on:submit-question="onSaveQuestion"
     />
     <show-question-dialog
@@ -110,7 +117,7 @@ import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
 import Image from '@/models/management/Image';
-import ShowQuestionDialog from '@/views/teacher/questions/ShowQuestionDialog.vue';
+import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
 import EditSubmissionDialog from '@/views/student/questions/EditSubmissionDialog.vue';
 @Component({
   components: {
@@ -121,13 +128,20 @@ import EditSubmissionDialog from '@/views/student/questions/EditSubmissionDialog
 export default class SubmissionView extends Vue {
   submissions: Submission[] = [];
   currentQuestion: Question | null = null;
+  currentSubmission: Submission | null = null;
   editSubmissionDialog: boolean = false;
   questionDialog: boolean = false;
   search: string = '';
 
   headers: object = [
+    {
+      text: 'Actions',
+      value: 'action',
+      align: 'left',
+      width: '15%',
+      sortable: false
+    },
     { text: 'Title', value: 'questionDto.title', align: 'center' },
-    { text: 'Question', value: 'questionDto.content', align: 'left' },
     { text: 'Status', value: 'questionDto.status', align: 'center' },
     {
       text: 'Creation Date',
@@ -137,12 +151,6 @@ export default class SubmissionView extends Vue {
     {
       text: 'Image',
       value: 'questionDto.image',
-      align: 'center',
-      sortable: false
-    },
-    {
-      text: 'Actions',
-      value: 'action',
       align: 'center',
       sortable: false
     }
@@ -210,11 +218,14 @@ export default class SubmissionView extends Vue {
 
   submitQuestion() {
     this.currentQuestion = new Question();
+    this.currentQuestion.status = 'SUBMITTED';
+    this.currentSubmission = new Submission();
     this.editSubmissionDialog = true;
   }
 
   getStatusColor(status: string) {
     if (status === 'AVAILABLE') return 'green';
+    else if (status === 'DEPRECATED') return 'red';
     else return 'pink';
   }
 
@@ -223,6 +234,7 @@ export default class SubmissionView extends Vue {
     this.submissions.unshift(submission);
     this.editSubmissionDialog = false;
     this.currentQuestion = null;
+    this.currentSubmission = null;
   }
 
   async deleteSubmission(toDeletesubmission: Submission) {
@@ -234,7 +246,7 @@ export default class SubmissionView extends Vue {
         let questionId = toDeletesubmission.questionDto.id;
         if (questionId != null) await RemoteServices.deleteQuestion(questionId);
         this.submissions = this.submissions.filter(
-          submission => submission.id != toDeletesubmission.id
+          submission => submission.questionDto.id != questionId
         );
       } catch (error) {
         await this.$store.dispatch('error', error);

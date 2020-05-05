@@ -1,15 +1,16 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementQuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 
 import javax.persistence.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.time.LocalDateTime;
 
@@ -54,16 +55,15 @@ public class Tournament {
     @JoinColumn(name = "course_execution_id")
     private CourseExecution courseExecution;
 
-    @ManyToOne
-    @JoinColumn(name = "quiz_id")
-    private Quiz quiz;
+    @Column(name = "statementQuiz")
+    private StatementQuizDto statementQuizDto;
 
     public Tournament() {
     }
 
     public Tournament(User user, List<Topic> topics, TournamentDto tournamentDto) {
-        setStartTime(tournamentDto.getStartTimeDate());
-        setEndTime(tournamentDto.getEndTimeDate());
+        setStartTime(DateHandler.toLocalDateTime(tournamentDto.getStartTime()));
+        setEndTime(DateHandler.toLocalDateTime(tournamentDto.getEndTime()));
         setNumberOfQuestions(tournamentDto.getNumberOfQuestions());
         this.state = tournamentDto.getState();
         this.creator = user;
@@ -81,7 +81,15 @@ public class Tournament {
     }
 
     public void setStartTime(LocalDateTime startTime) {
-        checkStartTime(startTime);
+        if (startTime == null) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
+        }
+        // Added 1 minute as a buffer to take latency into consideration
+        if (this.endTime != null && this.endTime.isBefore(startTime) ||
+                startTime.plusMinutes(1).isBefore(DateHandler.now())) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
+        }
+
         this.startTime = startTime;
     }
 
@@ -90,7 +98,13 @@ public class Tournament {
     }
 
     public void setEndTime(LocalDateTime endTime) {
-        checkEndTime(endTime);
+        if (endTime == null) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
+        }
+        if (this.startTime != null && endTime.isBefore(this.startTime)) {
+            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
+        }
+
         this.endTime = endTime;
     }
 
@@ -113,6 +127,8 @@ public class Tournament {
         return state;
     }
 
+    public void setState(Status status) { this.state = status; }
+
     public List<User> getParticipants() {
         return participants;
     }
@@ -125,12 +141,12 @@ public class Tournament {
         return courseExecution;
     }
 
-    public Quiz getQuiz() {
-        return quiz;
+    public StatementQuizDto getStatementQuizDto() {
+        return statementQuizDto;
     }
 
-    public void setQuiz(Quiz quiz) {
-        this.quiz = quiz;
+    public void setStatementQuizDto(StatementQuizDto statementQuizDto) {
+        this.statementQuizDto = statementQuizDto;
     }
 
     private void setTopics(List<Topic> topics) {
@@ -182,49 +198,11 @@ public class Tournament {
         user.addTournament(this);
     }
 
-    private void checkStartTime(LocalDateTime startTime) {
-        if (startTime == null) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
+    public boolean hasQuiz() {
+        if (this.getStatementQuizDto() != null){
+            return true;
         }
-        // Added 1 minute as a buffer to take latency into consideration
-        if (endTime != null && endTime.isBefore(startTime) ||
-                startTime.plusMinutes(1).isBefore(LocalDateTime.now())) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "startTime");
-        }
-    }
-
-    private void checkEndTime(LocalDateTime endTime) {
-        if (endTime == null) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
-        }
-        if (startTime != null && endTime.isBefore(startTime)) {
-            throw new TutorException(TOURNAMENT_NOT_CONSISTENT, "endTime");
-        }
-    }
-    public QuizDto generateQuiz() {
-        if (this.quiz != null){
-            return null;
-        }
-        QuizDto quizDto = new QuizDto();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        if (LocalDateTime.now().isBefore(this.startTime)){
-            quizDto.setAvailableDate(this.startTime.format(formatter));
-        }
-        else {
-            quizDto.setAvailableDate(LocalDateTime.now().format(formatter));
-        }
-        quizDto.setConclusionDate(this.endTime.format(formatter));
-        quizDto.setScramble(true);
-        quizDto.setOneWay(true);
-        quizDto.setQrCodeOnly(false);
-        quizDto.setSeries(1);
-        quizDto.setVersion("A");
-
-        String title = "tournament Quizz nº" + this.id.toString();
-        quizDto.setTitle(title);
-        quizDto.setType(Quiz.QuizType.GENERATED);
-
-        return quizDto;
+        return false;
     }
 
 

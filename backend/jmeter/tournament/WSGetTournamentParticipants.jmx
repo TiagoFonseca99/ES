@@ -31,12 +31,12 @@
           </elementProp>
           <elementProp name="startTime" elementType="Argument">
             <stringProp name="Argument.name">startTime</stringProp>
-            <stringProp name="Argument.value">${__time(yyyy-MM-dd HH:mm)}</stringProp>
+            <stringProp name="Argument.value">${__time(yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="endTime" elementType="Argument">
             <stringProp name="Argument.name">endTime</stringProp>
-            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd HH:mm,,P2D,,)}</stringProp>
+            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;,,P2D,,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -190,7 +190,7 @@
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/tournaments/joinTournament</stringProp>
-            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
             <boolProp name="HTTPSampler.use_keepalive">true</boolProp>

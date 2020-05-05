@@ -83,7 +83,7 @@ class GiveExplanationTest extends Specification {
 
         def quiz = new Quiz()
         quiz.setKey(1)
-        quiz.setType(Quiz.QuizType.TEST)
+        quiz.setType("TEST")
 
         def quizanswer = new QuizAnswer()
 
@@ -116,16 +116,16 @@ class GiveExplanationTest extends Specification {
         discussion.setUser(student)
         discussion.setQuestion(question)
         discussionRepository.save(discussion)
-
+        userRepository.save(student)
     }
 
-    def "give reply to discussion"(){
+    def "teacher give reply to discussion"(){
         given: "a reply"
         def replyDto = new ReplyDto()
         replyDto.setMessage(DISCUSSION_REPLY)
-        replyDto.setTeacherId(teacher.getId())
+        replyDto.setUserId(teacher.getId())
         replyDto.setDate(LocalTime.now())
-        
+
 
         when: "a reply is given"
         discussionService.giveReply(replyDto, new DiscussionDto(discussion))
@@ -134,42 +134,67 @@ class GiveExplanationTest extends Specification {
         replyRepository.count() == 1L
         def result = replyRepository.findAll().get(0)
         result.getMessage() == DISCUSSION_REPLY
-        result.getTeacher() == teacher
+        result.getUser() == teacher
     }
 
-    def "ensure user is teacher"(){
+    def "student give reply to his discussion"(){
         given: "a response created by a student"
         def replyDto = new ReplyDto()
         replyDto.setMessage(DISCUSSION_REPLY)
-        replyDto.setTeacherId(student.getId())
+        replyDto.setUserId(student.getId())
         replyDto.setDate(LocalTime.now())
-       
-        when: "a user creates a reply"
+
+        when: "the student creates a reply"
         discussionService.giveReply(replyDto, new DiscussionDto(discussion))
 
-        then: "exception given"
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.REPLY_NOT_TEACHER_CREATOR
+        then: "the correct reply was given"
+        replyRepository.count() == 1L
+        def result = replyRepository.findAll().get(0)
+        result.getMessage() == DISCUSSION_REPLY
+        result.getUser() == student
     }
 
-    def "teacher can't submit 2 replies to the same discussion"(){
-        given: "2 replies from the same teacher"
+    def "student not creator give reply to discussion"(){
+        given: "a different student"
+        def otherStudent = new User(USER_NAME + "2", USER_USERNAME + "2", 3, User.Role.STUDENT)
+        userRepository.save(otherStudent)
+        and: "a reply created by the student"
         def replyDto = new ReplyDto()
         replyDto.setMessage(DISCUSSION_REPLY)
-        replyDto.setTeacherId(teacher.getId())
+        replyDto.setUserId(otherStudent.getId())
+        replyDto.setDate(LocalTime.now())
+
+        when: "the student creates a reply"
+        discussionService.giveReply(replyDto, new DiscussionDto(discussion))
+
+        then: "an exception is thrown"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.REPLY_UNAUTHORIZED_USER
+    }
+
+    def "user can submit 2 replies to the same discussion"(){
+        given: "2 replies from the same user"
+        def replyDto = new ReplyDto()
+        replyDto.setMessage(DISCUSSION_REPLY)
+        replyDto.setUserId(teacher.getId())
         replyDto.setDate(LocalTime.now())
         def replyDto2 = new ReplyDto()
-        replyDto2.setMessage(DISCUSSION_REPLY)
-        replyDto2.setTeacherId(teacher.getId())
+        replyDto2.setMessage(DISCUSSION_REPLY + "2")
+        replyDto2.setUserId(teacher.getId())
         replyDto2.setDate(LocalTime.now())
         discussionService.giveReply(replyDto, new DiscussionDto(discussion))
 
         when: "another reply is given"
         discussionService.giveReply(replyDto2, new DiscussionDto(discussion))
 
-        then: 
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.DUPLICATE_REPLY
+        then: "the two replies are present in the repository"
+        replyRepository.count() == 2L
+        def result = replyRepository.findAll().get(0)
+        result.getMessage() == DISCUSSION_REPLY
+        result.getUser() == teacher
+        def result2 = replyRepository.findAll().get(1)
+        result2.getMessage() == (DISCUSSION_REPLY + "2")
+        result2.getUser() == teacher
     }
 
     @TestConfiguration

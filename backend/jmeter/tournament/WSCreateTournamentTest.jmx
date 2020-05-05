@@ -31,12 +31,12 @@
           </elementProp>
           <elementProp name="startTime" elementType="Argument">
             <stringProp name="Argument.name">startTime</stringProp>
-            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd HH:mm,,P1D,,)}</stringProp>
+            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;,,P1D,,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="endTime" elementType="Argument">
             <stringProp name="Argument.name">endTime</stringProp>
-            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd HH:mm,,P2D,,)}</stringProp>
+            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;,,P2D,,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -242,7 +242,7 @@
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group" enabled="false">
+      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>

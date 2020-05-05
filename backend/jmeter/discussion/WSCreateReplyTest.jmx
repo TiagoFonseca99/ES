@@ -56,13 +56,13 @@
           <stringProp name="driver">org.postgresql.Driver</stringProp>
           <stringProp name="initQuery"></stringProp>
           <boolProp name="keepAlive">true</boolProp>
-          <stringProp name="password">tutordb</stringProp>
+          <stringProp name="password"></stringProp>
           <stringProp name="poolMax">0</stringProp>
           <boolProp name="preinit">false</boolProp>
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">jpaquete</stringProp>
+          <stringProp name="username">daniel</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
@@ -73,9 +73,6 @@ INSERT INTO question_answers (time_taken, option_id,  quiz_answer_id, quiz_quest
 CREATE TABLE IF NOT EXISTS discussions (question_id INTEGER, user_id INTEGER, content TEXT, reply_id INTEGER, PRIMARY KEY (question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (question_id) REFERENCES questions(id));
 
 CREATE TABLE IF NOT EXISTS replies (id SERIAL, date TIMESTAMP WITHOUT TIME ZONE, message VARCHAR(255), discussion_question_id INTEGER, discussion_user_id INTEGER, teacher_id INTEGER, PRIMARY KEY (id), FOREIGN KEY (discussion_question_id, discussion_user_id) REFERENCES discussions(question_id, user_id), FOREIGN KEY (teacher_id) REFERENCES users(id));
-
-ALTER TABLE discussions DROP CONSTRAINT IF EXISTS replyid;
-ALTER TABLE discussions ADD CONSTRAINT replyid FOREIGN KEY (reply_id) REFERENCES replies(id);
 
 INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;DISCUSSION CONTENT&apos;);</stringProp>
           <stringProp name="queryArguments"></stringProp>
@@ -224,8 +221,103 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;
             </JSONPathAssertion>
             <hashTree/>
             <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert teacher id" enabled="true">
-              <stringProp name="JSON_PATH">$.teacherId</stringProp>
+              <stringProp name="JSON_PATH">$.userId</stringProp>
               <stringProp name="EXPECTED_VALUE">677</stringProp>
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              <boolProp name="INVERT">false</boolProp>
+              <boolProp name="ISREGEX">false</boolProp>
+            </JSONPathAssertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login as Demo Student" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${server}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/auth/demo/student</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor" enabled="true">
+            <stringProp name="JSONPostProcessor.referenceNames">token</stringProp>
+            <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
+            <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+          </JSONPostProcessor>
+          <hashTree/>
+        </hashTree>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Authenticated Requests" enabled="true"/>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Authorization</stringProp>
+                <stringProp name="Header.value">${token}</stringProp>
+              </elementProp>
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request to create reply" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">&#xd;
+{&#xd;
+	&quot;content&quot;: &quot;DISCUSSION CONTENT&quot;,&#xd;
+	&quot;question&quot;: {&#xd;
+		&quot;id&quot;: 1504		&#xd;
+	},&#xd;
+	&quot;userId&quot;: 676&#xd;
+}&#xd;
+</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">${server}</stringProp>
+            <stringProp name="HTTPSampler.port">${port}</stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/discussions/replies?message=REPLY MESSAGE</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Reply Message" enabled="true">
+              <stringProp name="JSON_PATH">$.message</stringProp>
+              <stringProp name="EXPECTED_VALUE">REPLY MESSAGE</stringProp>
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              <boolProp name="INVERT">false</boolProp>
+              <boolProp name="ISREGEX">false</boolProp>
+            </JSONPathAssertion>
+            <hashTree/>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert student id" enabled="true">
+              <stringProp name="JSON_PATH">$.userId</stringProp>
+              <stringProp name="EXPECTED_VALUE">676</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>

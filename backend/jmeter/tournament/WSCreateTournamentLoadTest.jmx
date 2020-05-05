@@ -31,12 +31,12 @@
           </elementProp>
           <elementProp name="startTime" elementType="Argument">
             <stringProp name="Argument.name">startTime</stringProp>
-            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd HH:mm,,P1D,,)}</stringProp>
+            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;,,P1D,,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="endTime" elementType="Argument">
             <stringProp name="Argument.name">endTime</stringProp>
-            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd HH:mm,,P2D,,)}</stringProp>
+            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;,,P2D,,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -278,7 +278,7 @@
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">ars</stringProp>
+          <stringProp name="username">daniel</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">

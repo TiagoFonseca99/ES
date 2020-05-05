@@ -9,7 +9,7 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          <b>New Tournament</b>
+          <b>Edit Tournament</b>
         </span>
       </v-card-title>
 
@@ -21,31 +21,29 @@
             </v-flex>
             <v-row>
               <v-col cols="12" sm="6">
-                <v-datetime-picker
+                <VueCtkDateTimePicker
                   label="Start Time"
-                  format="yyyy-MM-dd HH:mm"
-                  v-model="editTournament.startTime"
-                  date-format="yyyy-MM-dd"
-                  time-format="HH:mm"
+                  id="startTimeInput"
+                  v-model="newStartTime"
+                  format="YYYY-MM-DDTHH:mm:ssZ"
                 >
-                </v-datetime-picker>
+                </VueCtkDateTimePicker>
               </v-col>
               <v-spacer></v-spacer>
               <v-col cols="12" sm="6">
-                <v-datetime-picker
+                <VueCtkDateTimePicker
                   label="End Time"
-                  format="yyyy-MM-dd HH:mm"
-                  v-model="editTournament.endTime"
-                  date-format="yyyy-MM-dd"
-                  time-format="HH:mm"
+                  id="endTimeInput"
+                  v-model="newEndTime"
+                  format="YYYY-MM-DDTHH:mm:ssZ"
                 >
-                </v-datetime-picker>
+                </VueCtkDateTimePicker>
               </v-col>
             </v-row>
             <v-flex xs24 sm12 md8>
               <p>
                 <b>Number Of Questions:</b>
-                {{ editTournament.numberOfQuestions }}
+                {{ oldNumberOfQuestions }}
               </p>
               <v-text-field
                 min="1"
@@ -173,7 +171,7 @@
         <v-spacer />
         <v-btn
           color="blue darken-1"
-          @click="$emit('close-dialog')"
+          @click="cancelTournament"
           data-cy="cancelButton"
           >Cancel</v-btn
         >
@@ -193,6 +191,11 @@ import { Component, Model, Prop, Vue } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
 import Tournament from '@/models/user/Tournament';
 import Topic from '@/models/management/Topic';
+import VueCtkDateTimePicker from 'vue-ctk-date-time-picker';
+import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css';
+import { ISOtoString } from '@/services/ConvertDateService';
+
+Vue.component('VueCtkDateTimePicker', VueCtkDateTimePicker);
 
 @Component
 export default class EditTournamentDialog extends Vue {
@@ -210,7 +213,15 @@ export default class EditTournamentDialog extends Vue {
   currentTopics: Topic[] = [];
   availableTopics: Topic[] = [];
 
-  topicsID: Number[] = [];
+  oldStartTime: string = '';
+  oldEndTime: string = '';
+  oldNumberOfQuestions: number = -1;
+  oldTopics: String[] = [];
+
+  newStartTime: string = '';
+  newEndTime: string = '';
+  topicsToAdd: Topic[] = [];
+  topicsToRemove: Topic[] = [];
 
   topicHeaders: object = [
     {
@@ -229,57 +240,100 @@ export default class EditTournamentDialog extends Vue {
   ];
 
   async created() {
-    this.editTournament = new Tournament(this.tournament);
-
+    this.editTournament = this.tournament;
+    if (this.editTournament.startTime) {
+      this.oldStartTime = this.newStartTime = this.editTournament.startTime;
+    }
+    if (this.editTournament.endTime) {
+      this.oldEndTime = this.newEndTime = this.editTournament.endTime;
+    }
+    if (this.editTournament.numberOfQuestions) {
+      this.oldNumberOfQuestions = this.editTournament.numberOfQuestions;
+    }
+    this.oldTopics = this.editTournament.topics;
     await this.$store.dispatch('loading');
     try {
       [this.allTopics] = await Promise.all([RemoteServices.getTopics()]);
       this.availableTopics = this.allTopics;
+      this.editTournament.topics.forEach(topicName => {
+        this.availableTopics.forEach(topic => {
+          if (topic.name.valueOf() == topicName.valueOf()) {
+            this.addTopic(topic);
+          }
+        });
+      });
+      this.topicsToAdd = [];
+      this.topicsToRemove = [];
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
   }
 
+  async resetChanges() {
+    this.editTournament.startTime = this.oldStartTime;
+    this.editTournament.endTime = this.oldEndTime;
+    this.editTournament.numberOfQuestions = this.oldNumberOfQuestions;
+    this.editTournament.topics = this.oldTopics;
+  }
+
+  async cancelTournament() {
+    await this.resetChanges();
+    this.$emit('close-dialog');
+  }
+
   async saveTournament() {
+    this.editTournament.startTime = this.newStartTime;
+    this.editTournament.endTime = this.newEndTime;
+
     if (
       this.editTournament &&
       (!this.editTournament.startTime ||
         !this.editTournament.endTime ||
         !this.editTournament.numberOfQuestions ||
-        !this.editTournament.topics)
+        this.currentTopics.length == 0)
     ) {
       await this.$store.dispatch(
         'error',
         'Tournament must have Start Time, End Time, Number Of Questions and Topics'
       );
+      await this.resetChanges();
       return;
     }
 
-    if (this.editTournament && this.editTournament.id == null) {
+    if (this.editTournament && this.editTournament.id != null) {
       const enrolled = this.editTournament.enrolled;
       const topics = this.editTournament.topics;
       this.editTournament.enrolled = undefined;
       this.editTournament.topics = [];
-      this.editTournament.state = 'NOT_CANCELED';
 
-      this.topicsID = this.currentTopics.map(topic => {
+      let topicsToAddID = this.topicsToAdd.map(topic => {
+        return topic.id;
+      });
+
+      let topicsToRemoveID = this.topicsToRemove.map(topic => {
         return topic.id;
       });
 
       try {
-        const result = await RemoteServices.createTournament(
-          this.topicsID,
+        const result = await RemoteServices.editTournament(
+          this.oldStartTime,
+          this.oldEndTime,
+          this.oldNumberOfQuestions,
+          topicsToAddID,
+          topicsToRemoveID,
           this.editTournament
         );
-        this.$emit('new-tournament', result);
+        this.$emit('edit-tournament', result);
       } catch (error) {
         await this.$store.dispatch('error', error);
         this.editTournament.enrolled = enrolled;
         this.editTournament.topics = topics;
       }
       this.editTournament.enrolled = enrolled;
-      this.editTournament.topics = topics;
+      this.editTournament.topics = this.currentTopics.map(topic => {
+        return topic.name;
+      });
     }
   }
 
@@ -302,6 +356,14 @@ export default class EditTournamentDialog extends Vue {
   }
 
   removeTopic(topic: Topic) {
+    if (this.oldTopics.includes(topic.name)) {
+      this.topicsToRemove.push(topic);
+    }
+
+    if (this.topicsToAdd.includes(topic)) {
+      this.topicsToAdd = this.topicsToAdd.filter(t => t.id != topic.id);
+    }
+
     this.availableTopics.push(topic);
     this.availableTopics.sort((a, b) => {
       let result = a.name.localeCompare(b.name);
@@ -311,6 +373,14 @@ export default class EditTournamentDialog extends Vue {
   }
 
   addTopic(topic: Topic) {
+    if (!this.oldTopics.includes(topic.name)) {
+      this.topicsToAdd.push(topic);
+    }
+
+    if (this.topicsToRemove.includes(topic)) {
+      this.topicsToRemove = this.topicsToRemove.filter(t => t.id != topic.id);
+    }
+
     this.currentTopics.push(topic);
     this.currentTopics.sort((a, b) => {
       let result = a.name.localeCompare(b.name);

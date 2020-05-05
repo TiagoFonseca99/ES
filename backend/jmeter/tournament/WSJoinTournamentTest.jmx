@@ -31,12 +31,12 @@
           </elementProp>
           <elementProp name="startTime" elementType="Argument">
             <stringProp name="Argument.name">startTime</stringProp>
-            <stringProp name="Argument.value">${__time(yyyy-MM-dd HH:mm)}</stringProp>
+            <stringProp name="Argument.value">${__time(yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="endTime" elementType="Argument">
             <stringProp name="Argument.name">endTime</stringProp>
-            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd HH:mm,,P2D,,)}</stringProp>
+            <stringProp name="Argument.value">${__timeShift(yyyy-MM-dd&apos;T&apos;HH:mm:ss&apos;Z&apos;,,P2D,,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -106,7 +106,7 @@
                   <stringProp name="Argument.value">{&#xd;
 	&quot;startTime&quot;: &quot;${startTime}&quot;,&#xd;
 	&quot;endTime&quot;: &quot;${endTime}&quot;,&#xd;
-	&quot;numberOfQuestions&quot;: 2,&#xd;
+	&quot;numberOfQuestions&quot;: 1,&#xd;
 	&quot;state&quot;: &quot;NOT_CANCELED&quot;&#xd;
 }&#xd;
 </stringProp>
@@ -149,7 +149,7 @@
             <hashTree/>
             <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert numberOfQuestions" enabled="true">
               <stringProp name="JSON_PATH">$.numberOfQuestions</stringProp>
-              <stringProp name="EXPECTED_VALUE">2</stringProp>
+              <stringProp name="EXPECTED_VALUE">1</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>
@@ -172,12 +172,11 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">&#xd;
-{&#xd;
+                  <stringProp name="Argument.value">{&#xd;
 	&quot;id&quot;: 1,&#xd;
 	&quot;startTime&quot;: &quot;${startTime}&quot;,&#xd;
 	&quot;endTime&quot;: &quot;${endTime}&quot;,&#xd;
-	&quot;numberOfQuestions&quot;: 2,&#xd;
+	&quot;numberOfQuestions&quot;: 1,&#xd;
 	&quot;state&quot;: &quot;NOT_CANCELED&quot;&#xd;
 }&#xd;
 </stringProp>
@@ -190,7 +189,7 @@
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/tournaments/joinTournament</stringProp>
-            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <stringProp name="HTTPSampler.method">PUT</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
             <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
@@ -276,7 +275,7 @@
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group" enabled="true">
+      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown Thread Group" enabled="false">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
