@@ -168,6 +168,7 @@
       v-if="currentQuestion"
       v-model="questionDialog"
       :question="currentQuestion"
+      :discussion=false
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
     />
   </div>

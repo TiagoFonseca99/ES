@@ -10,7 +10,7 @@
       <v-card-title>
         <span class="headline">
           {{
-            currentQuestionId === null
+            oldQuestionId === null
               ? 'New Submission'
               : 'Edit Submission'
           }}
@@ -74,7 +74,7 @@
           @click="submitQuestion"
           data-cy="submitButton"
           >
-          {{editQuestion && editQuestion.id === null
+          {{oldQuestionId === null
               ? 'Submit'
               : 'Resubmit'
           }}
@@ -98,7 +98,7 @@ export default class EditSubmissionDialog extends Vue {
   @Prop({ type: Submission, required: true }) readonly submission!: Submission;
 
   editQuestion!: Question;
-  oldQuestionId!: number;
+  oldQuestionId: number | null = null;
   currentSubmission!: Submission;
 
   created() {

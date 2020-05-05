@@ -40,6 +40,7 @@
         <p
           @click="showQuestionDialog(item)"
           @contextmenu="editQuestion(item, $event)"
+          data-cy="viewQuestion"
           style="cursor: pointer"
         >
           {{ item.title }}
@@ -131,6 +132,7 @@
               v-on="on"
               @click="deleteQuestion(item)"
               color="red"
+              data-cy="deleteQuestion"
               >delete</v-icon
             >
           </template>
