@@ -1,9 +1,10 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.api;
 
 import java.security.Principal;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.activation.DataHandler;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto;
@@ -37,12 +39,13 @@ public class DiscussionController {
         }
 
         discussion.setUserId(user.getId());
+        discussion.setDate(DateHandler.toISOString(DateHandler.now()));
 
         return discussionService.createDiscussion(discussion);
     }
 
     @PostMapping(value = "/discussions/replies")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT')")
     public ReplyDto createReply(Principal principal, @Valid @RequestParam String message, @Valid @RequestBody DiscussionDto discussion){
         User user = (User) ((Authentication) principal).getPrincipal();
 
@@ -54,11 +57,11 @@ public class DiscussionController {
             throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
         }
 
-        reply.setTeacherId(user.getId());
-        reply.setDate(LocalTime.now());
+        reply.setUserId(user.getId());
+        reply.setDate(DateHandler.toISOString(DateHandler.now()));
 
         return discussionService.giveReply(reply, discussion);
-        
+
     }
 
     @GetMapping(value = "/discussions")
