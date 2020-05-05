@@ -13,4 +13,7 @@ import java.util.List;
 public interface TournamentRepository extends JpaRepository<Tournament, Integer> {
     @Query(value = "SELECT * FROM tournaments t WHERE t.start_time < CURRENT_TIMESTAMP AND t.end_time > CURRENT_TIMESTAMP AND t.state = 'NOT_CANCELED'", nativeQuery = true)
     List<Tournament> getOpenedTournaments();
+
+    @Query(value = "SELECT * FROM tournaments t WHERE t.user_id = :user_id", nativeQuery = true)
+    List<Tournament> getUserTournaments(Integer user_id);
 }

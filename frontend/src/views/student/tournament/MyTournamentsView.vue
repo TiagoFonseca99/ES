@@ -8,6 +8,7 @@
       :hide-default-footer="true"
       :mobile-breakpoint="0"
       multi-sort
+      data-cy="allTournaments"
     >
       <template v-slot:top>
         <v-card-title>
@@ -18,16 +19,6 @@
             class="mx-2"
           />
           <v-spacer />
-          <v-btn to="/student/all" color="primary" dark data-cy="createButton"
-            >See All Tournaments
-          </v-btn>
-          <v-btn
-            color="primary"
-            dark
-            @click="newTournament"
-            data-cy="createButton"
-            >New Tournament
-          </v-btn>
         </v-card-title>
       </template>
 
@@ -38,12 +29,12 @@
               small
               class="mr-2"
               v-on="on"
-              @click="joinTournament(item)"
-              data-cy="JoinTournament"
-              >fas fa-sign-in-alt</v-icon
+              @click="editTournament(item)"
+              data-cy="EditTournament"
+              >create</v-icon
             >
           </template>
-          <span>Join Tournament</span>
+          <span>Edit Tournament</span>
         </v-tooltip>
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
@@ -51,21 +42,21 @@
               small
               class="mr-2"
               v-on="on"
-              @click="solveQuiz(item)"
-              data-cy="SolveQuiz"
-              >fas fa-pencil-alt</v-icon
+              @click="cancelTournament(item)"
+              data-cy="CancelTournament"
+              >cancel</v-icon
             >
           </template>
-          <span>Solve Quiz</span>
+          <span>Cancel Tournament</span>
         </v-tooltip>
       </template>
     </v-data-table>
 
     <edit-tournament-dialog
       v-if="currentTournament"
-      v-model="createTournamentDialog"
+      v-model="editTournamentDialog"
       :tournament="currentTournament"
-      v-on:new-tournament="onCreateTournament"
+      v-on:edit-tournament="onEditTournament"
       v-on:close-dialog="onCloseDialog"
     />
   </v-card>
@@ -75,19 +66,18 @@
 import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
-import StatementQuiz from '@/models/statement/StatementQuiz';
-import StatementManager from '@/models/statement/StatementManager';
-import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
+import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
+import { ISOtoString } from '@/services/ConvertDateService';
 
 @Component({
   components: {
-    'edit-tournament-dialog': CreateTournamentDialog
+    'edit-tournament-dialog': EditTournamentDialog
   }
 })
-export default class OpenTournamentView extends Vue {
+export default class MyTournamentsView extends Vue {
   tournaments: Tournament[] = [];
   currentTournament: Tournament | null = null;
-  createTournamentDialog: boolean = false;
+  editTournamentDialog: boolean = false;
   search: string = '';
   headers: object = [
     {
@@ -146,57 +136,50 @@ export default class OpenTournamentView extends Vue {
   async created() {
     await this.$store.dispatch('loading');
     try {
-      this.tournaments = await RemoteServices.getOpenTournaments();
+      this.tournaments = await RemoteServices.getUserTournaments();
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
   }
 
-  newTournament() {
-    this.currentTournament = new Tournament();
-    this.createTournamentDialog = true;
+  editTournament(tournamentToEdit: Tournament) {
+    this.currentTournament = tournamentToEdit;
+    this.editTournamentDialog = true;
   }
 
-  async onCreateTournament(tournament: Tournament) {
-    this.tournaments.unshift(tournament);
-    this.createTournamentDialog = false;
+  async onEditTournament(tournament: Tournament) {
+    this.currentTournament = tournament;
+    try {
+      this.tournaments = await RemoteServices.getUserTournaments();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+    this.editTournamentDialog = false;
     this.currentTournament = null;
   }
 
   onCloseDialog() {
-    this.createTournamentDialog = false;
+    this.editTournamentDialog = false;
     this.currentTournament = null;
   }
 
-  async joinTournament(tournamentToJoin: Tournament) {
-    const enrolled = tournamentToJoin.enrolled;
-    const topics = tournamentToJoin.topics;
-    tournamentToJoin.enrolled = undefined;
-    tournamentToJoin.topics = [];
+  async cancelTournament(tournamentToCancel: Tournament) {
+    const enrolled = tournamentToCancel.enrolled;
+    const topics = tournamentToCancel.topics;
+    tournamentToCancel.enrolled = false;
+    tournamentToCancel.topics = [];
     try {
-      await RemoteServices.joinTournament(tournamentToJoin);
+      await RemoteServices.cancelTournament(tournamentToCancel);
     } catch (error) {
       await this.$store.dispatch('error', error);
-      tournamentToJoin.enrolled = enrolled;
-      tournamentToJoin.topics = topics;
+      tournamentToCancel.enrolled = enrolled;
+      tournamentToCancel.topics = topics;
       return;
     }
-    tournamentToJoin.enrolled = true;
-    tournamentToJoin.topics = topics;
-  }
-
-  async solveQuiz(tournament: Tournament) {
-    const enrolled = tournament.enrolled;
-    const topics = tournament.topics;
-    tournament.enrolled = undefined;
-    tournament.topics = [];
-    let quiz: StatementQuiz = await RemoteServices.solveTournament(tournament);
-    tournament.enrolled = enrolled;
-    tournament.topics = topics;
-    let statementManager: StatementManager = StatementManager.getInstance;
-    statementManager.statementQuiz = quiz;
-    await this.$router.push({ name: 'solve-quiz' });
+    tournamentToCancel.enrolled = true;
+    tournamentToCancel.topics = topics;
+    tournamentToCancel.state = 'CANCELED';
   }
 }
 </script>
