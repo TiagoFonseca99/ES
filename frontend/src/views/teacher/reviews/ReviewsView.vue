@@ -51,24 +51,18 @@
           />
         </template>
         <template v-slot:item.action="{ item }">
-          <v-btn color="primary" small @click="createReview(item)" data-cy="createReview">
-            Create
-          </v-btn>
+          <v-btn color="primary" small @click="createReview(item)" data-cy="createReview"
+            >Create</v-btn
+          >
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <v-icon
-                    small
-                    class="mr-2"
-                    v-on="on"
-                    @click="deleteSubmission(item)"
-                    color="red"
-                    data-cy="deleteSubmission"
-            >delete</v-icon
-            >
-          </template>
+              <v-icon small class="mr-2" v-on="on" @click="deleteSubmission(item)" color="red" data-cy="deleteSubmission"
+                >delete</v-icon
+              >
+            </template>
           <span>Delete Question</span>
         </v-tooltip>
-        </template>
+       </template>
       </v-data-table>
       <edit-reviews
         v-if="currentSubmission"

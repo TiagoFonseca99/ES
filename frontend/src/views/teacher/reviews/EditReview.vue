@@ -37,26 +37,34 @@
         <v-btn color="blue darken-1" data-cy="Reject" @click="createReview('REJECTED')"
           >Reject</v-btn
         >
-        <v-btn color="blue darken-1" data-cy="Approve" @click="createReview('APPROVED')"
+        <v-btn color="blue darken-1" data-cy="Approve" @click="menuChangeSubmission('APPROVED')"
           >Approve</v-btn
         >
       </v-card-actions>
+      <menu-change-submission  v-if="currentReview" v-model="menuChangeSubmissions" :review="currentReview" :submission="editSubmission" v-on:no-changes="onSaveReview"/>
     </v-card>
   </v-dialog>
 </template>
 <script lang="ts">
+
 import { Component, Model, Prop, Vue } from 'vue-property-decorator';
 import Review from '@/models/management/Review';
 import RemoteServices from '@/services/RemoteServices';
 import Submission from '@/models/management/Submission';
+import MenuChangeSubmission from '@/views/teacher/reviews/MenuChangeSubmission.vue';
 
-@Component
+@Component({
+  components: {
+    'menu-change-submission': MenuChangeSubmission
+  }
+})
 export default class EditReview extends Vue {
   @Prop({ type: Submission, required: true }) submission!: Submission;
   @Model('dialog', Boolean) dialog!: boolean;
 
   editSubmission!: Submission;
   currentReview!: Review;
+  menuChangeSubmissions: boolean = false;
 
   created() {
     this.editSubmission = this.submission;
@@ -72,11 +80,30 @@ export default class EditReview extends Vue {
       this.currentReview.submissionId = this.editSubmission.id;
       this.currentReview.studentId = this.editSubmission.studentId;
       this.currentReview.status = status;
+      console.log(this.currentReview);
       const result = await RemoteServices.createReview(this.currentReview);
       this.$emit('create-review', result);
+
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
+  }
+
+  async menuChangeSubmission(status: string) {
+    if (this.currentReview && !this.currentReview.justification) {
+      await this.$store.dispatch('error', 'Review must have justification');
+      return;
+    }
+    this.currentReview.submissionId = this.editSubmission.id;
+    this.currentReview.studentId = this.editSubmission.studentId;
+    this.currentReview.status = status;
+    this.menuChangeSubmissions = true;
+  }
+
+  async onSaveReview() {
+    this.menuChangeSubmissions = false;
+    this.$emit('create-review');
+    await this.$store.dispatch('clearLoading');
   }
 }
 </script>

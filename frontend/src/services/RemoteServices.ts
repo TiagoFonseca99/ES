@@ -561,6 +561,15 @@ export default class RemoteServices {
       });
   }
 
+  static async changeSubmission(submission: Submission) {
+    return httpClient
+        .post('/management/reviews/changeSubmission', submission)
+        .then(response => {})
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        });
+  }
+
   static async getSubmissions(): Promise<Submission[]> {
     return httpClient
       .get('/student/submissions')
