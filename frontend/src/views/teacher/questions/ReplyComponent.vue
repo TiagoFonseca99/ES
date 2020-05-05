@@ -7,8 +7,60 @@
       <div class="discussion">
         <ul>
           <li v-for="discussion in discussions" :key="discussion.content">
-            <span v-html="convertMarkDown(discussion.content)" />
-            <div v-if="discussion.replyDto === undefined" class="reply-message">
+            <div class="text-left">
+              <b>{{ discussion.userName }} on {{ discussion.date }}:</b>
+              <span v-html="convertMarkDown(discussion.content)" />
+            </div>
+            <v-expansion-panels
+              v-if="discussion.replies !== null"
+              :popout="true"
+            >
+              <v-expansion-panel>
+                <v-expansion-panel-header
+                  >View replies</v-expansion-panel-header
+                >
+                <v-expansion-panel-content>
+                  <div
+                    v-for="reply in discussion.replies"
+                    :key="reply.id"
+                    class="text-left reply"
+                  >
+                    <b v-if="$store.getters.getUser.id !== reply.userId"
+                      >{{ reply.userName }} on {{ reply.date }}:
+                    </b>
+                    <b v-else>You on {{ reply.date }}:</b>
+                    <span v-html="convertMarkDown(reply.message)" />
+                  </div>
+                  <div class="reply-message">
+                    <v-textarea
+                      clearable
+                      outlined
+                      auto-grow
+                      v-on:focus="setDiscussion(discussion)"
+                      @input="setReplyMessage"
+                      rows="2"
+                      label="Message"
+                      class="text"
+                      data-cy="ReplyMessage"
+                      style="padding-top: 20px;"
+                    ></v-textarea>
+                    <v-card-actions>
+                      <v-spacer />
+                      <v-btn
+                        color="blue darken-1"
+                        data-cy="submitReply"
+                        @click="
+                          setDiscussion(discussion);
+                          submitReply();
+                        "
+                        >Submit</v-btn
+                      >
+                    </v-card-actions>
+                  </div>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+            <div class="reply-message" v-else>
               <v-textarea
                 clearable
                 outlined
@@ -32,9 +84,6 @@
                   >Submit</v-btn
                 >
               </v-card-actions>
-            </div>
-            <div v-else class="text-left reply">
-              <span v-html="convertMarkDown(discussion.replyDto.message)" />
             </div>
           </li>
         </ul>
@@ -61,10 +110,18 @@ export default class ReplyComponent extends Vue {
       if (this.replyMessages.get(this.discussion.userId!) === undefined) {
         this.replyMessages.set(this.discussion.userId!, '');
       }
-      this.discussion.replyDto = await RemoteServices.createReply(
+      const reply = await RemoteServices.createReply(
         this.replyMessages.get(this.discussion.userId!)!,
         this.discussion!
       );
+
+      if (this.discussion.replies === null) {
+        this.discussion.replies = [];
+      }
+
+      this.discussion.replies.push(reply);
+
+      this.replyMessages.set(this.discussion.userId!, '');
     } catch (error) {
       await this.$store.dispatch('error', error);
 
@@ -72,7 +129,7 @@ export default class ReplyComponent extends Vue {
     }
 
     for (let i = 0; i < this.discussions.length; i++) {
-      if (!this.discussions[i].replyDto!) {
+      if (this.discussions[i].replies === []) {
         return false;
       }
     }
@@ -103,7 +160,7 @@ export default class ReplyComponent extends Vue {
   user-select: none;
   caret-color: rgb(51, 51, 51);
   overflow: hidden;
-  margin: -50px auto 100px;
+  margin: -50px auto 0;
   border-radius: 0;
 
   ul {
@@ -136,8 +193,8 @@ export default class ReplyComponent extends Vue {
     width: 100%;
     left: 0;
     margin: 5px;
-    padding: 15px;
-    border-top: #1e88e5 solid 2px;
+    padding: 15px 15px 0 30px;
+    border-bottom: #1e88e5 solid 2px;
   }
 }
 </style>
