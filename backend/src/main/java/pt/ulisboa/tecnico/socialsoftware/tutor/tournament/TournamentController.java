@@ -83,6 +83,18 @@ public class TournamentController {
         tournamentService.joinTournament(user.getId(), tournamentDto);
     }
 
+
+    @PostMapping(value = "/tournaments/leaveTournament")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
+    public void leaveTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        tournamentService.leaveTournament(user.getId(), tournamentDto);
+    }
+
     @PutMapping(value = "/tournaments/cancelTournament")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void cancelTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
