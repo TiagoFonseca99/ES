@@ -7,6 +7,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 public class DashboardDto implements Serializable {
+    private String name;
+    private String username;
     private Integer numDiscussions;
     private Integer numPublicDiscussions;
     private Integer numSubmissions;
@@ -16,9 +18,27 @@ public class DashboardDto implements Serializable {
     public DashboardDto() {
     }
 
-    public DashboardDto(User user) {
+	public DashboardDto(User user) {
+        this.name = user.getName();
+        this.username = user.getUsername();
         this.numDiscussions = user.getDiscussions().size();
     }
+
+    public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
     public List<TournamentDto> getJoinedTournaments() {
         return joinedTournaments;

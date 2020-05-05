@@ -201,9 +201,19 @@
 
         <!-- ------------- -->
 
+        <v-btn
+          to="/student/dashboard"
+          v-if="isStudent && currentCourse"
+          text
+          dark
+        >
+          Dashboard
+          <v-icon>fa fa-user</v-icon>
+        </v-btn>
+
         <v-btn to="/student/stats" v-if="isStudent && currentCourse" text dark>
           Stats
-          <v-icon>fas fa-user</v-icon>
+          <v-icon>fas fa-chart-area</v-icon>
         </v-btn>
 
         <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
@@ -445,6 +455,13 @@
           </v-list-item>
 
           <!-- ----------- -->
+
+          <v-list-item to="/student/dashboard">
+            <v-list-item-action>
+              <v-icon>fas fa-user</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Dashboard</v-list-item-content>
+          </v-list-item>
 
           <v-list-item to="/student/stats">
             <v-list-item-action>
