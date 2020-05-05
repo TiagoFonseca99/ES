@@ -3,13 +3,8 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.tournament;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementQuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
@@ -77,7 +72,7 @@ public class TournamentController {
         return tournamentService.getUserTournaments(user);
     }
 
-    @PostMapping(value = "/tournaments/joinTournament")
+    @PutMapping(value = "/tournaments/joinTournament")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
     public void joinTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
@@ -88,7 +83,7 @@ public class TournamentController {
         tournamentService.joinTournament(user.getId(), tournamentDto);
     }
 
-    @PostMapping(value = "/tournaments/cancelTournament")
+    @PutMapping(value = "/tournaments/cancelTournament")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void cancelTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
@@ -99,7 +94,7 @@ public class TournamentController {
         tournamentService.cancelTournament(user.getId(), tournamentDto);
     }
 
-    @PostMapping(value = "/tournaments/editStartTime")
+    @PutMapping(value = "/tournaments/editStartTime")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void editStartTime(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
@@ -111,7 +106,7 @@ public class TournamentController {
         tournamentService.editStartTime(user.getId(), tournamentDto);
     }
 
-    @PostMapping(value = "/tournaments/editEndTime")
+    @PutMapping(value = "/tournaments/editEndTime")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void editEndTime(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
@@ -123,7 +118,7 @@ public class TournamentController {
         tournamentService.editEndTime(user.getId(), tournamentDto);
     }
 
-    @PostMapping(value = "/tournaments/editNumberOfQuestions")
+    @PutMapping(value = "/tournaments/editNumberOfQuestions")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void editNumberOfQuestions(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam Integer numberOfQuestions) {
         User user = (User) ((Authentication) principal).getPrincipal();
@@ -135,7 +130,7 @@ public class TournamentController {
         tournamentService.editNumberOfQuestions(user.getId(), tournamentDto, numberOfQuestions);
     }
 
-    @PostMapping(value = "/tournaments/addTopics")
+    @PutMapping(value = "/tournaments/addTopics")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void addTopics(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam List<Integer> topicsId) {
         User user = (User) ((Authentication) principal).getPrincipal();
@@ -149,7 +144,7 @@ public class TournamentController {
         }
     }
 
-    @PostMapping(value = "/tournaments/removeTopics")
+    @PutMapping(value = "/tournaments/removeTopics")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void removeTopics(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam List<Integer> topicsId) {
         User user = (User) ((Authentication) principal).getPrincipal();
@@ -174,7 +169,7 @@ public class TournamentController {
         return tournamentService.getTournamentParticipants(tournamentDto);
     }
 
-    @PostMapping(value = "/tournaments/solveQuiz")
+    @PutMapping(value = "/tournaments/solveQuiz")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
     public StatementQuizDto solveQuiz(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();

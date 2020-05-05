@@ -782,7 +782,7 @@ export default class RemoteServices {
 
   static async editStartTime(tournament: Tournament): Promise<Tournament> {
     return httpClient
-      .post('/tournaments/editStartTime', tournament)
+      .put('/tournaments/editStartTime', tournament)
       .then(response => {
         return new Tournament(response.data);
       })
@@ -793,7 +793,7 @@ export default class RemoteServices {
 
   static async editEndTime(tournament: Tournament): Promise<Tournament> {
     return httpClient
-      .post('/tournaments/editEndTime', tournament)
+      .put('/tournaments/editEndTime', tournament)
       .then(response => {
         return new Tournament(response.data);
       })
@@ -813,7 +813,7 @@ export default class RemoteServices {
       '/tournaments/editNumberOfQuestions?numberOfQuestions=' +
       numberOfQuestions;
     return httpClient
-      .post(path, tournament)
+      .put(path, tournament)
       .then(response => {
         return new Tournament(response.data);
       })
@@ -832,7 +832,7 @@ export default class RemoteServices {
     }
     path = path.substring(0, path.length - 1);
     return httpClient
-      .post(path, tournament)
+      .put(path, tournament)
       .then(response => {
         return new Tournament(response.data);
       })
@@ -851,7 +851,7 @@ export default class RemoteServices {
     }
     path = path.substring(0, path.length - 1);
     return httpClient
-      .post(path, tournament)
+      .put(path, tournament)
       .then(response => {
         return new Tournament(response.data);
       })
@@ -901,7 +901,7 @@ export default class RemoteServices {
 
   static solveTournament(tournament: Tournament) {
     return httpClient
-      .post('tournaments/solveQuiz', tournament)
+      .put('tournaments/solveQuiz', tournament)
       .then(response => {
         return new StatementQuiz(response.data);
       })
@@ -912,7 +912,7 @@ export default class RemoteServices {
 
   static joinTournament(tournament: Tournament) {
     return httpClient
-      .post('tournaments/joinTournament', tournament)
+      .put('tournaments/joinTournament', tournament)
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
@@ -920,7 +920,7 @@ export default class RemoteServices {
 
   static cancelTournament(tournament: Tournament) {
     return httpClient
-      .post('tournaments/cancelTournament', tournament)
+      .put('tournaments/cancelTournament', tournament)
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
