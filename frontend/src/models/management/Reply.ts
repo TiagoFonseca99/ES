@@ -1,15 +1,19 @@
+import { ISOtoString } from '@/services/ConvertDateService';
+
 export default class Reply {
   id!: number;
-  teacherId!: number;
+  userId!: number;
+  userName!: string;
   message!: string;
   date!: string | null;
 
   constructor(jsonObj?: Reply) {
     if (jsonObj) {
       this.id = jsonObj.id;
-      this.teacherId = jsonObj.teacherId;
+      this.userId = jsonObj.userId;
+      this.userName = jsonObj.userName;
       this.message = jsonObj.message;
-      this.date = jsonObj.date;
+      this.date = ISOtoString(jsonObj.date);
     }
   }
 }

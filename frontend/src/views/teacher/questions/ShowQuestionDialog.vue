@@ -25,7 +25,7 @@
         >
       </v-card-actions>
       <reply-component
-        v-if="this.$store.getters.isTeacher"
+        v-if="this.$store.getters.isTeacher && discussion"
         :discussions="discussions"
         v-on:submit="submittedDiscussion"
       />
@@ -57,6 +57,7 @@ import RemoteServices from '@/services/RemoteServices';
 export default class ShowQuestionDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
   @Prop({ type: Question, required: true }) readonly question!: Question;
+  @Prop({ type: Boolean, required: true }) readonly discussion!: Boolean;
   discussions: Discussion[] = [];
 
   async created() {
@@ -67,7 +68,7 @@ export default class ShowQuestionDialog extends Vue {
 
   @Watch('question')
   async getDiscussions() {
-    if (this.$store.getters.isTeacher) {
+    if (this.$store.getters.isTeacher && this.discussion) {
       try {
         [this.discussions] = await Promise.all([
           RemoteServices.getDiscussionsByQuestion(this.question.id!)

@@ -13,6 +13,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 @Repository
 @Transactional
 public interface ReplyRepository extends JpaRepository<Reply, Integer> {
-    @Query(value = "SELECT * FROM replies r WHERE r.teacher_id = :teacherId AND r.discussion_question_id = :questionId AND r.discussion_user_id = :userId", nativeQuery = true)
-    Optional<Reply> findByTeacherIdDiscussionId(Integer teacherId, Integer userId, Integer questionId);
+    @Query(value = "SELECT * FROM replies r WHERE r.user_id = :userId AND r.discussion_question_id = :questionId AND r.discussion_user_id = :creatorId", nativeQuery = true)
+    Optional<Reply> findByTeacherIdDiscussionId(Integer userId, Integer creatorId, Integer questionId);
 }
