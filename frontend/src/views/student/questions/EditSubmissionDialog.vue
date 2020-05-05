@@ -10,7 +10,7 @@
       <v-card-title>
         <span class="headline">
           {{
-            editQuestion && editQuestion.id === null
+            currentQuestionId === null
               ? 'New Submission'
               : 'Edit Submission'
           }}

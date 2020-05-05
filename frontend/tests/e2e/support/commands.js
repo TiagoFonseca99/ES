@@ -34,11 +34,18 @@ Cypress.Commands.add('createCourseExecution', (name, acronym, academicTerm) => {
     cy.get('[data-cy="saveButton"]').click();
 });
 
-Cypress.Commands.add('closeErrorMessage', (name, acronym, academicTerm) => {
-    cy.contains('Error')
-        .parent()
-        .find('button')
-        .click();
+Cypress.Commands.add('closeErrorMessage', (message) => {
+    if(message == null) {
+        cy.contains('Error')
+            .parent()
+            .find('button')
+            .click();
+    } else {
+        cy.contains(message)
+            .parent()
+            .find('button')
+            .click();
+    }
 });
 
 Cypress.Commands.add('deleteCourseExecution', acronym => {
@@ -250,8 +257,24 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add(
+  'resubmitQuestion',
+  (title, content, opt1, opt2, opt3, opt4) => {
+      cy.get('[data-cy="QuestionTitle"]').clear().type(title);
+      cy.get('[data-cy="QuestionContent"]').clear().type(content);
+      cy.get('[data-cy="Switch1"]').click({ force: true });
+      cy.get('[data-cy="Option1"]').clear().type(opt1);
+      cy.get('[data-cy="Option2"]').clear().type(opt2);
+      cy.get('[data-cy="Switch3"]').click({ force: true });
+      cy.get('[data-cy="Option3"]').clear().type(opt3);
+      cy.get('[data-cy="Option4"]').clear().type(opt4);
+      cy.get('[data-cy="submitButton"]').click();
+      cy.wait(500);
+  }
+);
+
+Cypress.Commands.add(
   'viewQuestion',
-  title => {
+    (title, content, op1, op2, op3, op4) => {
       cy.contains(title)
         .parent().parent().parent()
         .should('have.length', 1)
@@ -259,6 +282,12 @@ Cypress.Commands.add(
         .should('have.length', 5)
         .find('[data-cy="viewQuestion"]')
         .click();
+      cy.contains(title);
+      cy.contains(content);
+      cy.contains(op1);
+      cy.contains(op2);
+      cy.contains(op3);
+      cy.contains(op4);
       cy.get('[data-cy="close"]').click();
   }
 );
@@ -268,6 +297,12 @@ Cypress.Commands.add('submitInvalidQuestion', (title, content) => {
     cy.get('[data-cy="submitQuestion"]').click();
     cy.get('[data-cy="QuestionTitle"]').type(title);
     cy.get('[data-cy="QuestionContent"]').type(content);
+    cy.get('[data-cy="submitButton"]').click();
+});
+
+Cypress.Commands.add('resubmitInvalidQuestion', title => {
+    cy.get('[data-cy="QuestionTitle"]').clear().type(title);
+    cy.get('[data-cy="QuestionContent"]').clear();
     cy.get('[data-cy="submitButton"]').click();
 });
 
@@ -315,7 +350,7 @@ Cypress.Commands.add('RejectSubmissions', (title, justification) => {
     cy.get('[data-cy="Reject"]').click();
 });
 
-Cypress.Commands.add('getSubmissionStatus', (title, status, justification) => {
+Cypress.Commands.add('getSubmissionStatus', (title, status) => {
     cy.contains('Questions').click();
     cy.contains('Reviews').click();
     cy.contains(status);
@@ -327,4 +362,17 @@ Cypress.Commands.add('getSubmissionStatus', (title, status, justification) => {
       .find('[data-cy="view"]')
       .click();
     cy.get('[data-cy="close"]').click();
+});
+
+Cypress.Commands.add('seeRejectedQuestionAndResubmit', title => {
+    cy.contains('Questions').click();
+    cy.contains('Reviews').click();
+    cy.contains(title)
+        .parent()
+        .should('have.length', 1)
+        .children()
+        .should('have.length', 5)
+        .find('[data-cy="view"]')
+        .click();
+    cy.get('[data-cy="resubmit"]').click();
 });

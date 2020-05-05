@@ -82,6 +82,7 @@ public class SubmissionService {
 
         Question newQuestion = getQuestion(newQuestionId);
         setNewOptionsId(submissionDto, newQuestion);
+        newQuestion.setStatus("SUBMITTED");
         newQuestion.update(submissionDto.getQuestionDto());
 
 
@@ -108,9 +109,7 @@ public class SubmissionService {
             reviewDto.setCreationDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         }
 
-        if (reviewDto.getStatus().equals("APPROVED")){
-            updateQuestionStatus(submission);
-        }
+        updateQuestionStatus(submission, reviewDto.getStatus());
 
         Review review = new Review(user, submission, reviewDto);
 
@@ -169,9 +168,13 @@ public class SubmissionService {
         return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
 
-    private void updateQuestionStatus(Submission submission) {
+    private void updateQuestionStatus(Submission submission, String status) {
         Question question = getQuestion(submission.getQuestion().getId());
-        question.setStatus("AVAILABLE");
+        if(status.equals("APPROVED")){
+            question.setStatus("AVAILABLE");
+        } else {
+            question.setStatus("DEPRECATED");
+        }
     }
 
     private void setNewOptionsId(SubmissionDto submissionDto, Question newQuestion) {

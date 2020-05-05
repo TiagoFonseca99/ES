@@ -144,9 +144,11 @@ public class QuestionService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void removeQuestion(Integer questionId) {
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
-        List<Submission> submissions = new ArrayList<>(submissionRepository.findByQuestionId(question.getId()));
+        Submission submission = submissionRepository.findByQuestionId(question.getId());
 
-        deleteSubmissions(submissions);
+        if (submission != null) {
+            deleteSubmission(submission);
+        }
 
         question.remove();
         questionRepository.delete(question);
@@ -286,8 +288,11 @@ public class QuestionService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteQuestion(Question question) {
-        List<Submission> submissions = new ArrayList<>(submissionRepository.findByQuestionId(question.getId()));
-        deleteSubmissions(submissions);
+        Submission submission = submissionRepository.findByQuestionId(question.getId());
+
+        if (submission != null) {
+            deleteSubmission(submission);
+        }
 
         for (Option option : question.getOptions()) {
             option.remove();
@@ -305,14 +310,12 @@ public class QuestionService {
 
     }
 
-    public void deleteSubmissions(List<Submission> submissions) {
-        for(Submission submission : submissions){
-            List<Review> reviews = new ArrayList<>(reviewRepository.findBySubmissionId(submission.getId()));
-            for (Review review : reviews) {
-                reviewRepository.delete(review);
-            }
-            submissionRepository.delete(submission);
+    public void deleteSubmission(Submission submission) {
+        List<Review> reviews = new ArrayList<>(reviewRepository.findBySubmissionId(submission.getId()));
+        for (Review review : reviews) {
+            reviewRepository.delete(review);
         }
+        submissionRepository.delete(submission);
     }
 }
 

@@ -36,8 +36,8 @@
       <template v-slot:item.questionDto.title="{ item }">
         <p
           v-html="
-            convertMarkDown(item.questionDto.content, item.questionDto.image)
-          "@click="showQuestionDialog(item.questionDto)"
+            convertMarkDown(item.questionDto.title, item.questionDto.image)
+          " @click="showQuestionDialog(item.questionDto)"
       /></template>
 
       <template v-slot:item.questionDto.status="{ item }">
@@ -98,6 +98,7 @@
       v-if="currentQuestion"
       v-model="editSubmissionDialog"
       :question="currentQuestion"
+      :submission="currentSubmission"
       v-on:submit-question="onSaveQuestion"
     />
     <show-question-dialog
@@ -127,6 +128,7 @@ import EditSubmissionDialog from '@/views/student/questions/EditSubmissionDialog
 export default class SubmissionView extends Vue {
   submissions: Submission[] = [];
   currentQuestion: Question | null = null;
+  currentSubmission: Submission | null = null;
   editSubmissionDialog: boolean = false;
   questionDialog: boolean = false;
   search: string = '';
@@ -216,11 +218,14 @@ export default class SubmissionView extends Vue {
 
   submitQuestion() {
     this.currentQuestion = new Question();
+    this.currentQuestion.status = 'SUBMITTED';
+    this.currentSubmission = new Submission();
     this.editSubmissionDialog = true;
   }
 
   getStatusColor(status: string) {
     if (status === 'AVAILABLE') return 'green';
+    else if (status === 'DEPRECATED') return 'red';
     else return 'pink';
   }
 
@@ -240,7 +245,7 @@ export default class SubmissionView extends Vue {
         let questionId = toDeletesubmission.questionDto.id;
         if (questionId != null) await RemoteServices.deleteQuestion(questionId);
         this.submissions = this.submissions.filter(
-          submission => submission.id != toDeletesubmission.id
+          submission => submission.questionDto.id != questionId
         );
       } catch (error) {
         await this.$store.dispatch('error', error);
