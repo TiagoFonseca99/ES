@@ -254,14 +254,14 @@ Cypress.Commands.add('openSubmissions', () => {
   cy.contains('Submissions').click();
 });
 
-Cypress.Commands.add('reviewSubmission', (title) => {
+Cypress.Commands.add('reviewSubmission', (title, status) => {
     //add review for submission
     cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH sub AS (SELECT s.id FROM submissions s JOIN questions q ON s.question_id=q.id WHERE q.title=\'' + title +'\') INSERT INTO reviews(creation_date,justification,status,student_id,submission_id,user_id) VALUES (current_timestamp,\'As opções estão incorretas, e a pergunta pouco clara\', \'REJECTED\', 676, (SELECT * FROM sub), 677);" ')
 });
 
-Cypress.Commands.add('addSubmission', (title) => {
+Cypress.Commands.add('addSubmission', (title, qstatus) => {
     //add question and submission
-    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\''+ title +'\', \'Question?\', \'DEPRECATED\', 2, current_timestamp) RETURNING id) INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" ')
+    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\''+ title +'\', \'Question?\', \''+ qstatus +'\', 2, current_timestamp) RETURNING id) INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" ')
 
     //add options
     cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' + title +'\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste a\', \'t\', (SELECT id FROM quest), 0);" ')
@@ -273,8 +273,8 @@ Cypress.Commands.add('addSubmission', (title) => {
 
 
 Cypress.Commands.add('openTeacherQuestions', () => {
-  cy.get('[data-cy="Management"]').click();
-  cy.get('[data-cy="Questions"]').click();
+    cy.get('[data-cy="Management"]').click();
+    cy.get('[data-cy="Questions"]').click();
 });
 
 Cypress.Commands.add(
@@ -335,6 +335,32 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add(
+    'checkAvailableQuestion',
+    (title, content, op1, op2, op3, op4) => {
+        cy.contains(title)
+            .parent().parent()
+            .should('have.length', 1)
+            .children()
+            .should('have.length', 10)
+            .find('[data-cy="viewQuestion"]')
+            .click();
+        cy.contains(title);
+        cy.contains(content);
+        cy.contains(op1);
+        cy.contains(op2);
+        cy.contains(op3);
+        cy.contains(op4);
+        cy.get('[data-cy="close"]').click();
+        cy.contains(title)
+            .parent().parent()
+            .should('have.length', 1)
+            .children()
+            .should('have.length', 10)
+            .contains("AVAILABLE");
+    }
+);
+
 Cypress.Commands.add('submitInvalidQuestion', (title, content) => {
     cy.openSubmissions();
     cy.get('[data-cy="submitQuestion"]').click();
@@ -363,6 +389,19 @@ Cypress.Commands.add('deleteSubmission', title => {
       .find('[data-cy="deleteSubmission"]')
       .click();
 });
+
+Cypress.Commands.add(
+    'deleteQuestion',
+    title => {
+        cy.contains(title)
+            .parent().parent()
+            .should('have.length', 1)
+            .children()
+            .should('have.length', 10)
+            .find('[data-cy="deleteQuestion"]')
+            .click();
+    }
+);
 
 Cypress.Commands.add('teacherReviewsSubmission', () => {
   cy.exec(

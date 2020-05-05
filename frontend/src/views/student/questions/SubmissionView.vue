@@ -95,7 +95,7 @@
       it.
     </footer>
     <edit-submission-dialog
-      v-if="currentQuestion"
+      v-if="currentQuestion && currentSubmission"
       v-model="editSubmissionDialog"
       :question="currentQuestion"
       :submission="currentSubmission"
@@ -234,6 +234,7 @@ export default class SubmissionView extends Vue {
     this.submissions.unshift(submission);
     this.editSubmissionDialog = false;
     this.currentQuestion = null;
+    this.currentSubmission = null;
   }
 
   async deleteSubmission(toDeletesubmission: Submission) {

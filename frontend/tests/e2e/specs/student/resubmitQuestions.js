@@ -1,7 +1,7 @@
 describe('Student walkthrough', () => {
     beforeEach(() => {
         cy.demoStudentLogin()
-        cy.addSubmission('Test Question');
+        cy.addSubmission('Test Question', 'DEPRECATED');
         cy.reviewSubmission('Test Question');
     })
 
