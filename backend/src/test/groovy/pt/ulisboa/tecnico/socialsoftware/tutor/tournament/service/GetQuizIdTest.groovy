@@ -185,7 +185,7 @@ class GetQuizIdTest extends Specification {
 
         then:
         def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_NO_QUIZ
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_JOINED
     }
 
 
