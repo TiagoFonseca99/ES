@@ -120,7 +120,6 @@ class GenerateStudentQuizTest extends Specification {
         assessment.setCourseExecution(courseExecution)
         assessment.addTopicConjunction(topicConjunction)
         topicConjunction.setAssessment(assessment)
-        assessmentRepository.save(assessment)
 
     }
 

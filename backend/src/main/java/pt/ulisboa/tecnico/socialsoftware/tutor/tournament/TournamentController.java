@@ -3,19 +3,15 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.tournament;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
+import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementQuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.security.Principal;
 
@@ -29,7 +25,7 @@ public class TournamentController {
 
     @PostMapping(value = "/tournaments")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public TournamentDto createTournament(Principal principal, @RequestParam List<Integer> topicsId, @Valid @RequestBody TournamentDto tournamentDto) {
+    public TournamentDto createTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam List<Integer> topicsId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
@@ -64,7 +60,19 @@ public class TournamentController {
         return tournamentService.getOpenedTournaments();
     }
 
-    @PostMapping(value = "/tournaments/joinTournament")
+    @GetMapping(value = "/tournaments/getUserTournaments")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public List<TournamentDto> getUserTournaments(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return tournamentService.getUserTournaments(user);
+    }
+
+    @PutMapping(value = "/tournaments/joinTournament")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
     public void joinTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
@@ -73,6 +81,81 @@ public class TournamentController {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
         tournamentService.joinTournament(user.getId(), tournamentDto);
+    }
+
+    @PutMapping(value = "/tournaments/cancelTournament")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void cancelTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        tournamentService.cancelTournament(user.getId(), tournamentDto);
+    }
+
+    @PutMapping(value = "/tournaments/editStartTime")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void editStartTime(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        tournamentService.editStartTime(user.getId(), tournamentDto);
+    }
+
+    @PutMapping(value = "/tournaments/editEndTime")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void editEndTime(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        tournamentService.editEndTime(user.getId(), tournamentDto);
+    }
+
+    @PutMapping(value = "/tournaments/editNumberOfQuestions")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void editNumberOfQuestions(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam Integer numberOfQuestions) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        tournamentService.editNumberOfQuestions(user.getId(), tournamentDto, numberOfQuestions);
+    }
+
+    @PutMapping(value = "/tournaments/addTopics")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void addTopics(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam List<Integer> topicsId) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        for (Integer topicId : topicsId) {
+            tournamentService.addTopic(user.getId(), tournamentDto, topicId);
+        }
+    }
+
+    @PutMapping(value = "/tournaments/removeTopics")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void removeTopics(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam List<Integer> topicsId) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        for (Integer topicId : topicsId) {
+            tournamentService.removeTopic(user.getId(), tournamentDto, topicId);
+        }
     }
 
     @GetMapping(value = "/tournaments/getTournamentParticipants")
@@ -86,14 +169,23 @@ public class TournamentController {
         return tournamentService.getTournamentParticipants(tournamentDto);
     }
 
-    private void formatDates(TournamentDto tournamentDto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    @PutMapping(value = "/tournaments/solveQuiz")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
+    public StatementQuizDto solveQuiz(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
+        User user = (User) ((Authentication) principal).getPrincipal();
 
-        if (tournamentDto.getStartTime() != null && !tournamentDto.getStartTime().matches("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2})")){
-            tournamentDto.setStartTime(LocalDateTime.parse(tournamentDto.getStartTime().replaceAll(".$", ""), DateTimeFormatter.ISO_DATE_TIME).format(formatter));
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
         }
-        if (tournamentDto.getEndTime() !=null && !tournamentDto.getEndTime().matches("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2})"))
-            tournamentDto.setEndTime(LocalDateTime.parse(tournamentDto.getEndTime().replaceAll(".$", ""), DateTimeFormatter.ISO_DATE_TIME).format(formatter));
+
+        return tournamentService.solveQuiz(user.getId(), tournamentDto);
     }
 
+    private void formatDates(TournamentDto tournamentDto) {
+        if (tournamentDto.getStartTime() != null && !DateHandler.isValidDateFormat(tournamentDto.getStartTime()))
+            tournamentDto.setStartTime(DateHandler.toISOString(DateHandler.toLocalDateTime(tournamentDto.getStartTime())));
+
+        if (tournamentDto.getEndTime() !=null && !DateHandler.isValidDateFormat(tournamentDto.getEndTime()))
+            tournamentDto.setEndTime(DateHandler.toISOString(DateHandler.toLocalDateTime(tournamentDto.getEndTime())));
+    }
 }

@@ -107,6 +107,8 @@ public enum ErrorMessage {
     TOURNAMENT_NOT_FOUND("Tournament %s not found"),
     TOURNAMENT_TOPIC_COURSE("Tournament topics must be of the same course execution"),
     TOURNAMENT_TOPIC_MISMATCH("Tournament %s does not have topic %d"),
+    TOURNAMENT_CREATOR("User %s can not cancel this tournament"),
+    USER_NOT_JOINED("User has not joined tournament: %s"),
 
     // Ddp
     DISCUSSION_MISSING_DATA("Missing information for discussion"),

@@ -4,8 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
+import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
@@ -19,9 +25,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import spock.lang.Specification
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
 @DataJpaTest
 class GetOpenedTournamentsPerformanceTest extends Specification {
 
@@ -34,7 +37,6 @@ class GetOpenedTournamentsPerformanceTest extends Specification {
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
     public static final int NUMBER_OF_QUESTIONS1 = 5
-    public static final int NUMBER_OF_QUESTIONS2 = 7
 
     @Autowired
     TournamentService tournamentService
@@ -63,13 +65,10 @@ class GetOpenedTournamentsPerformanceTest extends Specification {
     def topicDto2
     def topics1 = new ArrayList<Integer>()
     def topics2 = new ArrayList<Integer>()
-    def startTime_Now
-    def endTime_Now = LocalDateTime.now().plusHours(2)
-    def formatter
+    def startTime_Now = DateHandler.now()
+    def endTime_Now = DateHandler.now().plusHours(2)
 
     def setup() {
-        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -98,10 +97,9 @@ class GetOpenedTournamentsPerformanceTest extends Specification {
 
     def "performance testing to get 1000 Open Tournaments"() {
         given:
-        startTime_Now = LocalDateTime.now()
         def tournamentDto1 = new TournamentDto()
-        tournamentDto1.setStartTime(startTime_Now.format(formatter))
-        tournamentDto1.setEndTime(endTime_Now.format(formatter))
+        tournamentDto1.setStartTime(DateHandler.toISOString(startTime_Now))
+        tournamentDto1.setEndTime(DateHandler.toISOString(endTime_Now))
         tournamentDto1.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDto1.setState(Tournament.Status.NOT_CANCELED)
         1.upto(1, {tournamentService.createTournament(user.getId(), topics1, tournamentDto1)})
@@ -115,8 +113,8 @@ class GetOpenedTournamentsPerformanceTest extends Specification {
         //result.size() == 1000
         def resTournament1 = result.get(0)
 
-        resTournament1.getStartTime() == startTime_Now.format(formatter)
-        resTournament1.getEndTime() == endTime_Now.format(formatter)
+        resTournament1.getStartTime() == DateHandler.toISOString(startTime_Now)
+        resTournament1.getEndTime() == DateHandler.toISOString(endTime_Now)
         resTournament1.getNumberOfQuestions() == tournamentDto1.getNumberOfQuestions()
         resTournament1.getState() == tournamentDto1.getState()
         def topicsResults1 = resTournament1.getTopics()
@@ -129,6 +127,30 @@ class GetOpenedTournamentsPerformanceTest extends Specification {
         @Bean
         TournamentService tournamentService() {
             return new TournamentService()
+        }
+
+        @Bean
+        StatementService statementService() {
+            return new StatementService()
+        }
+
+        @Bean
+        QuizService quizService() {
+            return new QuizService()
+        }
+
+        @Bean
+        AnswerService answerService() {
+            return new AnswerService()
+        }
+        @Bean
+        AnswersXmlImport answersXmlImport() {
+            return new AnswersXmlImport()
+        }
+
+        @Bean
+        QuestionService questionService() {
+            return new QuestionService()
         }
     }
 
