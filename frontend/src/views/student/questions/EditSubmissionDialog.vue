@@ -9,7 +9,11 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          {{ 'Submit Question' }}
+          {{
+            currentQuestionId === null
+              ? 'New Submission'
+              : 'Edit Submission'
+          }}
         </span>
       </v-card-title>
 
@@ -69,7 +73,12 @@
           color="blue darken-1"
           @click="submitQuestion"
           data-cy="submitButton"
-          >Submit</v-btn
+          >
+          {{editQuestion && editQuestion.id === null
+              ? 'Submit'
+              : 'Resubmit'
+          }}
+        </v-btn
         >
       </v-card-actions>
     </v-card>
@@ -77,7 +86,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Model, Prop, Vue } from 'vue-property-decorator';
+  import {Component, Model, Prop, Vue, Watch} from 'vue-property-decorator';
 import Question from '@/models/management/Question';
 import RemoteServices from '@/services/RemoteServices';
 import Submission from '@/models/management/Submission';
@@ -86,14 +95,24 @@ import Submission from '@/models/management/Submission';
 export default class EditSubmissionDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
   @Prop({ type: Question, required: true }) readonly question!: Question;
+  @Prop({ type: Submission, required: true }) readonly submission!: Submission;
 
   editQuestion!: Question;
+  oldQuestionId!: number;
   currentSubmission!: Submission;
 
   created() {
+    this.updateSubmission();
+  }
+
+  @Watch('question', { immediate: true, deep: true})
+  updateSubmission() {
     this.editQuestion = new Question(this.question);
-    this.editQuestion.status = 'SUBMITTED';
-    this.currentSubmission = new Submission();
+    if (this.editQuestion.id != null) {
+      this.oldQuestionId = this.editQuestion.id;
+      this.editQuestion.id = null;
+    }
+    this.currentSubmission = new Submission(this.submission);
   }
 
   async submitQuestion() {
@@ -111,9 +130,11 @@ export default class EditSubmissionDialog extends Vue {
     try {
       this.currentSubmission.questionDto = this.editQuestion;
       this.currentSubmission.courseId = this.$store.getters.getCurrentCourse.courseId;
-      const result = await RemoteServices.submitQuestion(
-        this.currentSubmission
-      );
+      const result =
+              this.oldQuestionId != null
+                      ? await RemoteServices.resubmitQuestion(this.currentSubmission, this.oldQuestionId)
+                      : await RemoteServices.submitQuestion(this.currentSubmission);
+
       this.$emit('submit-question', result);
     } catch (error) {
       await this.$store.dispatch('error', error);

@@ -144,9 +144,11 @@ public class QuestionService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void removeQuestion(Integer questionId) {
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
-        Submission submission = submissionRepository.findByQuestionId(questionId).orElse(null);
+        Submission submission = submissionRepository.findByQuestionId(question.getId());
 
-        deleteSubmission(submission);
+        if (submission != null) {
+            deleteSubmission(submission);
+        }
 
         question.remove();
         questionRepository.delete(question);
@@ -286,11 +288,13 @@ public class QuestionService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteQuestion(Question question) {
-        for (Option option : question.getOptions()) {
-            Submission submission = submissionRepository.findByQuestionId(question.getId()).orElse(null);
+        Submission submission = submissionRepository.findByQuestionId(question.getId());
 
+        if (submission != null) {
             deleteSubmission(submission);
+        }
 
+        for (Option option : question.getOptions()) {
             option.remove();
             optionRepository.delete(option);
         }
@@ -307,13 +311,11 @@ public class QuestionService {
     }
 
     public void deleteSubmission(Submission submission) {
-        if (submission != null) {
-            List<Review> reviews = new ArrayList<>(reviewRepository.findBySubmissionId(submission.getId()));
-            for (Review review : reviews) {
-                reviewRepository.delete(review);
-            }
-            submissionRepository.delete(submission);
+        List<Review> reviews = new ArrayList<>(reviewRepository.findBySubmissionId(submission.getId()));
+        for (Review review : reviews) {
+            reviewRepository.delete(review);
         }
+        submissionRepository.delete(submission);
     }
 }
 

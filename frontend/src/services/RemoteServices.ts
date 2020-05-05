@@ -561,6 +561,17 @@ export default class RemoteServices {
       });
   }
 
+  static async resubmitQuestion(submission: Submission, questionId: number): Promise<Submission> {
+    return httpClient
+        .put(`/student/reviews/${questionId}`, submission)
+        .then(response => {
+          return new Submission(response.data);
+        })
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        });
+  }
+
   static async getSubmissions(): Promise<Submission[]> {
     return httpClient
       .get('/student/submissions')
