@@ -27,7 +27,7 @@
         <template v-slot:item.questionDto.title="{ item }">
           <p
             v-html="
-              convertMarkDown(item.questionDto.content, item.questionDto.image)
+              convertMarkDown(item.questionDto.title, item.questionDto.image)
             "
             @click="showQuestionDialog(item.questionDto)"
         /></template>
@@ -300,6 +300,7 @@ export default class ReviewsView extends Vue {
       return a.questionDto.creationDate < b.questionDto.creationDate ? 1 : -1;
     else return 0;
   }
+
   showQuestionDialog(question: Question) {
     this.currentQuestion = question;
     this.questionDialog = true;
