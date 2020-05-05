@@ -1,10 +1,8 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.api;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.activation.DataHandler;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
