@@ -46,6 +46,19 @@
           </template>
           <span>Join Tournament</span>
         </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              small
+              class="mr-2"
+              v-on="on"
+              @click="leaveTournament(item)"
+              data-cy="LeaveTournament"
+              >fas fa-sign-out-alt</v-icon
+            >
+          </template>
+          <span>Leave Tournament</span>
+        </v-tooltip>
       </template>
     </v-data-table>
 
@@ -169,6 +182,23 @@ export default class AllTournamentView extends Vue {
       return;
     }
     tournamentToJoin.enrolled = true;
+    tournamentToJoin.topics = topics;
+  }
+
+  async leaveTournament(tournamentToJoin: Tournament) {
+    const enrolled = tournamentToJoin.enrolled;
+    const topics = tournamentToJoin.topics;
+    tournamentToJoin.enrolled = undefined;
+    tournamentToJoin.topics = [];
+    try {
+      await RemoteServices.leaveTournament(tournamentToJoin);
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+      tournamentToJoin.enrolled = enrolled;
+      tournamentToJoin.topics = topics;
+      return;
+    }
+    tournamentToJoin.enrolled = false;
     tournamentToJoin.topics = topics;
   }
 }

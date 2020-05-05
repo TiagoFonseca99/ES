@@ -51,6 +51,19 @@
               small
               class="mr-2"
               v-on="on"
+              @click="leaveTournament(item)"
+              data-cy="LeaveTournament"
+              >fas fa-sign-out-alt</v-icon
+            >
+          </template>
+          <span>Leave Tournament</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              small
+              class="mr-2"
+              v-on="on"
               @click="solveQuiz(item)"
               data-cy="SolveQuiz"
               >fas fa-pencil-alt</v-icon
@@ -186,17 +199,43 @@ export default class OpenTournamentView extends Vue {
     tournamentToJoin.topics = topics;
   }
 
+  async leaveTournament(tournamentToJoin: Tournament) {
+    const enrolled = tournamentToJoin.enrolled;
+    const topics = tournamentToJoin.topics;
+    tournamentToJoin.enrolled = undefined;
+    tournamentToJoin.topics = [];
+    try {
+      await RemoteServices.leaveTournament(tournamentToJoin);
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+      tournamentToJoin.enrolled = enrolled;
+      tournamentToJoin.topics = topics;
+      return;
+    }
+    tournamentToJoin.enrolled = false;
+    tournamentToJoin.topics = topics;
+  }
+
   async solveQuiz(tournament: Tournament) {
     const enrolled = tournament.enrolled;
     const topics = tournament.topics;
     tournament.enrolled = undefined;
     tournament.topics = [];
-    let quiz: StatementQuiz = await RemoteServices.solveTournament(tournament);
+    try {
+      let quiz: StatementQuiz = await RemoteServices.solveTournament(
+        tournament
+      );
+      let statementManager: StatementManager = StatementManager.getInstance;
+      statementManager.statementQuiz = quiz;
+      await this.$router.push({ name: 'solve-quiz' });
+      return;
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+      tournament.enrolled = enrolled;
+      tournament.topics = topics;
+    }
     tournament.enrolled = enrolled;
     tournament.topics = topics;
-    let statementManager: StatementManager = StatementManager.getInstance;
-    statementManager.statementQuiz = quiz;
-    await this.$router.push({ name: 'solve-quiz' });
   }
 }
 </script>

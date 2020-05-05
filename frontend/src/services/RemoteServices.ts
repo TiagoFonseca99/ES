@@ -918,6 +918,14 @@ export default class RemoteServices {
       });
   }
 
+  static leaveTournament(tournament: Tournament) {
+    return httpClient
+      .post('tournaments/leaveTournament', tournament)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static cancelTournament(tournament: Tournament) {
     return httpClient
       .put('tournaments/cancelTournament', tournament)
