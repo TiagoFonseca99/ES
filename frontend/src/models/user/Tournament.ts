@@ -1,4 +1,6 @@
 import User from '@/models/user/User';
+import Topic from '@/models/management/Topic';
+import { ISOtoString } from '@/services/ConvertDateService';
 
 export default class Tournament {
   id!: number | undefined;
@@ -14,30 +16,41 @@ export default class Tournament {
   constructor(jsonObj?: Tournament, user?: User) {
     if (jsonObj) {
       this.id = jsonObj.id;
-      this.startTime = jsonObj.startTime;
-      this.endTime = jsonObj.endTime;
+      if (jsonObj.startTime) {
+        this.startTime = ISOtoString(jsonObj.startTime);
+      }
+      if (jsonObj.endTime) {
+        this.endTime = ISOtoString(jsonObj.endTime);
+      }
       this.numberOfQuestions = jsonObj.numberOfQuestions;
       this.state = jsonObj.state;
       this.courseAcronym = jsonObj.courseAcronym;
       this.topics = [];
 
-      const t: String[] = jsonObj.topics!;
-      if (t) {
-        for (let i = 0; i < t.length; i++) {
-          this.topics.push(' ' + t[i]);
-        }
+      if (jsonObj.topics) {
+        // @ts-ignore
+        jsonObj.topics.forEach((topic: Topic) => {
+          if (!this.topics.includes(topic.name)) {
+            this.topics.push(topic.name);
+          }
+        });
       }
+
       const p: User[] = jsonObj.participants;
+      this.enrolled = false;
       if (user) {
+        p.forEach(pUser => {
+          if (user.id == pUser.id) {
+            this.enrolled = true;
+            return;
+          }
+        });
         for (let i = 0; i < p!.length; i++) {
           if (user.id == p![i].id) {
             this.enrolled = true;
             return;
           }
         }
-        this.enrolled = false;
-      } else {
-        this.enrolled = false;
       }
     }
   }

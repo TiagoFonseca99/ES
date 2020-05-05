@@ -51,7 +51,7 @@
 
     <edit-tournament-dialog
       v-if="currentTournament"
-      v-model="editTournamentDialog"
+      v-model="createTournamentDialog"
       :tournament="currentTournament"
       v-on:new-tournament="onCreateTournament"
       v-on:close-dialog="onCloseDialog"
@@ -63,17 +63,17 @@
 import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
-import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
+import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
 
 @Component({
   components: {
-    'edit-tournament-dialog': EditTournamentDialog
+    'edit-tournament-dialog': CreateTournamentDialog
   }
 })
 export default class AllTournamentView extends Vue {
   tournaments: Tournament[] = [];
   currentTournament: Tournament | null = null;
-  editTournamentDialog: boolean = false;
+  createTournamentDialog: boolean = false;
   search: string = '';
   headers: object = [
     {
@@ -82,7 +82,7 @@ export default class AllTournamentView extends Vue {
       align: 'center',
       width: '10%'
     },
-    { text: 'Id', value: 'id', align: 'center', width: '10%' },
+    { text: 'Id', value: 'id', align: 'center', width: '10%', sort: 'true' },
     {
       text: 'Topics',
       value: 'topics',
@@ -141,17 +141,17 @@ export default class AllTournamentView extends Vue {
 
   newTournament() {
     this.currentTournament = new Tournament();
-    this.editTournamentDialog = true;
+    this.createTournamentDialog = true;
   }
 
   async onCreateTournament(tournament: Tournament) {
     this.tournaments.unshift(tournament);
-    this.editTournamentDialog = false;
+    this.createTournamentDialog = false;
     this.currentTournament = null;
   }
 
   onCloseDialog() {
-    this.editTournamentDialog = false;
+    this.createTournamentDialog = false;
     this.currentTournament = null;
   }
 

@@ -6,46 +6,41 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
 
 @DataJpaTest
-class JoinTournamentPerformanceTest extends Specification {
-
-    public static final String USER_NAME1 = "Dinis"
-    public static final String USERNAME1 = "JDinis99"
-    public static final String USER_NAME2 = "Tiago"
-    public static final String USERNAME2 = "TiagoFonseca99"
+class CancelTournamentTest extends Specification {
+    public static final String USER_NAME1 = "Tiago"
+    public static final String USERNAME1 = "TiagoFonseca99"
     public static final Integer KEY1 = 1
+    public static final String USER_NAME2 = "João"
+    public static final String USERNAME2 = "JoãoDinis99"
     public static final Integer KEY2 = 2
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
-    public static final int NUMBER_OF_QUESTIONS1 = 1
-
-    @Autowired
-    UserService userService
+    public static final int NUMBER_OF_QUESTIONS = 5
 
     @Autowired
     TournamentService tournamentService
@@ -65,9 +60,6 @@ class JoinTournamentPerformanceTest extends Specification {
     @Autowired
     TopicRepository topicRepository
 
-    @Autowired
-    QuestionRepository questionRepository
-
     def user
     def course
     def courseExecution
@@ -76,22 +68,17 @@ class JoinTournamentPerformanceTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def endTime_Now = DateHandler.now().plusHours(2)
-    def tournamentDtoInit = new TournamentDto()
-    def tournamentDto = new TournamentDto()
-    def questionOne
+    def startTime = DateHandler.now().plusHours(1)
+    def endTime = DateHandler.now().plusHours(2)
+    def tournamentDto
 
     def setup() {
         user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
-        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
-
-        course.addCourseExecution(courseExecution)
-        courseExecution.setCourse(course)
-
         courseRepository.save(course)
 
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
         courseExecution.addUser(user)
         courseExecutionRepository.save(courseExecution)
 
@@ -111,63 +98,54 @@ class JoinTournamentPerformanceTest extends Specification {
         topics.add(topic1.getId())
         topics.add(topic2.getId())
 
-        tournamentDtoInit.setStartTime(DateHandler.toISOString(DateHandler.now()))
-        tournamentDtoInit.setEndTime(DateHandler.toISOString(endTime_Now))
-        tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
-        tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
+        tournamentDto = new TournamentDto()
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
-        questionOne = new Question()
-        questionOne.setKey(1)
-        questionOne.setContent("Question Content")
-        questionOne.setTitle("Question Title")
-        questionOne.setStatus(Question.Status.AVAILABLE)
-        questionOne.setCourse(course)
-        questionOne.addTopic(topic1)
-        questionRepository.save(questionOne)
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
     }
 
-    def "performance test to join user 10000 times" () {
-        given: "10000 users"
-        def user2
-        1.upto(1, {
-            user2 = new User(USER_NAME2 +it, USERNAME2 +it, KEY2 +it, User.Role.STUDENT)
-            user2.addCourse(courseExecution)
-            courseExecution.addUser(user2)
-            userRepository.save(user2)
-
-            //userRepository.save(new User(USER_NAME2 +it, USERNAME2 +it, KEY2 +it, User.Role.STUDENT))
-        })
+    def "user that created tournament cancels it"() {
+        given:
 
         when:
-        0.upto(1, {tournamentService.joinTournament(user.getId() + it, tournamentDto)})
-        1.upto(1, {tournamentService.getTournamentParticipants(tournamentDto)})
+        tournamentService.cancelTournament(user.getId(), tournamentDto)
 
-        then: "the student has joined the tournament"
-        def result = tournamentService.getTournamentParticipants(tournamentDto)
-        result.size() == 2
-        def resTournamentParticipant1 = result.get(0)
-
-        resTournamentParticipant1.getId() == user.getId()
-        resTournamentParticipant1.getUsername() == USERNAME1
-        resTournamentParticipant1.getName() == USER_NAME1
-        resTournamentParticipant1.getRole() == User.Role.STUDENT
-
+        then:
+        tournamentRepository.count() == 1L
+        def result = tournamentRepository.findAll().get(0)
+        result.getState() == Tournament.Status.CANCELED
     }
 
+    def "user that did not created tournament cancels it"() {
+        given: "a new user"
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        courseExecution.addUser(user2)
+        courseExecutionRepository.save(courseExecution)
 
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
 
+        when:
+        tournamentService.cancelTournament(user2.getId(), tournamentDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_CREATOR
+
+        and:
+        tournamentRepository.count() == 1L
+        def result = tournamentRepository.findAll().get(0)
+        result.getState() == Tournament.Status.NOT_CANCELED
+    }
 
     @TestConfiguration
     static class TournamentServiceImplTestContextConfiguration {
         @Bean
         TournamentService tournamentService() {
             return new TournamentService()
-        }
-
-        @Bean
-        UserService userService() {
-            return new UserService()
         }
 
         @Bean
@@ -193,8 +171,5 @@ class JoinTournamentPerformanceTest extends Specification {
         QuestionService questionService() {
             return new QuestionService()
         }
-
     }
-
-
 }
