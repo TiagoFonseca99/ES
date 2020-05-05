@@ -24,19 +24,21 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "users")
 public class User implements UserDetails, DomainEntity {
-    public enum Role {STUDENT, TEACHER, ADMIN, DEMO_ADMIN}
+    public enum Role {
+        STUDENT, TEACHER, ADMIN, DEMO_ADMIN
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique=true, nullable = false)
+    @Column(unique = true, nullable = false)
     private Integer key;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(unique=true)
+    @Column(unique = true)
     private String username;
 
     private String name;
@@ -58,7 +60,7 @@ public class User implements UserDetails, DomainEntity {
     @Column(name = "last_access")
     private LocalDateTime lastAccess;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval=true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<QuizAnswer> quizAnswers = new HashSet<>();
 
     @ManyToMany
@@ -67,19 +69,20 @@ public class User implements UserDetails, DomainEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Discussion> discussions = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "teacher", fetch=FetchType.LAZY, orphanRemoval=true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Reply> replies = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch=FetchType.LAZY, orphanRemoval=true)
-    private Set<Submission>  submissions = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Submission> submissions = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch=FetchType.LAZY, orphanRemoval=true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Review> reviews = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "participants")
     private List<Tournament> tournaments = new ArrayList<>();
 
-    public User() {}
+    public User() {
+    }
 
     public User(String name, String username, Integer key, User.Role role) {
         this.name = name;
@@ -172,11 +175,13 @@ public class User implements UserDetails, DomainEntity {
         return courseExecutions;
     }
 
-    public Set<Submission> getSubmissions() { return submissions; }
+    public Set<Submission> getSubmissions() {
+        return submissions;
+    }
 
     public Set<Question> getSubmittedQuestions() {
-        Set <Question> questions = new HashSet<>();
-        for(Submission submission : this.submissions)
+        Set<Question> questions = new HashSet<>();
+        for (Submission submission : this.submissions)
             questions.add(submission.getQuestion());
 
         return questions;
@@ -192,10 +197,8 @@ public class User implements UserDetails, DomainEntity {
 
     public Integer getNumberOfTeacherQuizzes() {
         if (this.numberOfTeacherQuizzes == null)
-            this.numberOfTeacherQuizzes = (int) getQuizAnswers().stream()
-                    .filter(QuizAnswer::isCompleted)
-                    .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.PROPOSED))
-                    .count();
+            this.numberOfTeacherQuizzes = (int) getQuizAnswers().stream().filter(QuizAnswer::isCompleted)
+                    .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.PROPOSED)).count();
 
         return numberOfTeacherQuizzes;
     }
@@ -220,10 +223,8 @@ public class User implements UserDetails, DomainEntity {
 
     public Integer getNumberOfInClassQuizzes() {
         if (this.numberOfInClassQuizzes == null)
-            this.numberOfInClassQuizzes = (int) getQuizAnswers().stream()
-                    .filter(QuizAnswer::isCompleted)
-                    .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.IN_CLASS))
-                    .count();
+            this.numberOfInClassQuizzes = (int) getQuizAnswers().stream().filter(QuizAnswer::isCompleted)
+                    .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.IN_CLASS)).count();
 
         return numberOfInClassQuizzes;
     }
@@ -234,11 +235,9 @@ public class User implements UserDetails, DomainEntity {
 
     public Integer getNumberOfTeacherAnswers() {
         if (this.numberOfTeacherAnswers == null)
-            this.numberOfTeacherAnswers = getQuizAnswers().stream()
-                    .filter(QuizAnswer::isCompleted)
+            this.numberOfTeacherAnswers = getQuizAnswers().stream().filter(QuizAnswer::isCompleted)
                     .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.PROPOSED))
-                    .mapToInt(quizAnswer -> quizAnswer.getQuiz().getQuizQuestions().size())
-                    .sum();
+                    .mapToInt(quizAnswer -> quizAnswer.getQuiz().getQuizQuestions().size()).sum();
 
         return numberOfTeacherAnswers;
     }
@@ -249,12 +248,10 @@ public class User implements UserDetails, DomainEntity {
 
     public Integer getNumberOfInClassAnswers() {
         if (this.numberOfInClassAnswers == null)
-            this.numberOfInClassAnswers = getQuizAnswers().stream()
-                    .filter(QuizAnswer::isCompleted)
+            this.numberOfInClassAnswers = getQuizAnswers().stream().filter(QuizAnswer::isCompleted)
                     .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.IN_CLASS))
-                    .mapToInt(quizAnswer -> quizAnswer.getQuiz().getQuizQuestions().size())
-                    .sum();
-            return numberOfInClassAnswers;
+                    .mapToInt(quizAnswer -> quizAnswer.getQuiz().getQuizQuestions().size()).sum();
+        return numberOfInClassAnswers;
     }
 
     public void setNumberOfInClassAnswers(Integer numberOfInClassAnswers) {
@@ -263,11 +260,9 @@ public class User implements UserDetails, DomainEntity {
 
     public Integer getNumberOfStudentAnswers() {
         if (this.numberOfStudentAnswers == null) {
-            this.numberOfStudentAnswers = getQuizAnswers().stream()
-                    .filter(QuizAnswer::isCompleted)
+            this.numberOfStudentAnswers = getQuizAnswers().stream().filter(QuizAnswer::isCompleted)
                     .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.GENERATED))
-                    .mapToInt(quizAnswer -> quizAnswer.getQuiz().getQuizQuestions().size())
-                    .sum();
+                    .mapToInt(quizAnswer -> quizAnswer.getQuiz().getQuizQuestions().size()).sum();
         }
 
         return numberOfStudentAnswers;
@@ -279,15 +274,14 @@ public class User implements UserDetails, DomainEntity {
 
     public Integer getNumberOfCorrectTeacherAnswers() {
         if (this.numberOfCorrectTeacherAnswers == null)
-            this.numberOfCorrectTeacherAnswers = (int) this.getQuizAnswers().stream()
-                    .filter(QuizAnswer::isCompleted)
+            this.numberOfCorrectTeacherAnswers = (int) this.getQuizAnswers().stream().filter(QuizAnswer::isCompleted)
                     .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.PROPOSED))
                     .flatMap(quizAnswer -> quizAnswer.getQuestionAnswers().stream())
-                    .filter(questionAnswer -> questionAnswer.getOption() != null &&
-                            questionAnswer.getOption().getCorrect())
+                    .filter(questionAnswer -> questionAnswer.getOption() != null
+                            && questionAnswer.getOption().getCorrect())
                     .count();
 
-            return numberOfCorrectTeacherAnswers;
+        return numberOfCorrectTeacherAnswers;
     }
 
     public void setNumberOfCorrectTeacherAnswers(Integer numberOfCorrectTeacherAnswers) {
@@ -296,12 +290,11 @@ public class User implements UserDetails, DomainEntity {
 
     public Integer getNumberOfCorrectInClassAnswers() {
         if (this.numberOfCorrectInClassAnswers == null)
-            this.numberOfCorrectInClassAnswers = (int) this.getQuizAnswers().stream()
-                    .filter(QuizAnswer::isCompleted)
+            this.numberOfCorrectInClassAnswers = (int) this.getQuizAnswers().stream().filter(QuizAnswer::isCompleted)
                     .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.IN_CLASS))
                     .flatMap(quizAnswer -> quizAnswer.getQuestionAnswers().stream())
-                    .filter(questionAnswer -> questionAnswer.getOption() != null &&
-                        questionAnswer.getOption().getCorrect())
+                    .filter(questionAnswer -> questionAnswer.getOption() != null
+                            && questionAnswer.getOption().getCorrect())
                     .count();
 
         return numberOfCorrectInClassAnswers;
@@ -313,12 +306,11 @@ public class User implements UserDetails, DomainEntity {
 
     public Integer getNumberOfCorrectStudentAnswers() {
         if (this.numberOfCorrectStudentAnswers == null)
-            this.numberOfCorrectStudentAnswers = (int) this.getQuizAnswers().stream()
-                    .filter(QuizAnswer::isCompleted)
+            this.numberOfCorrectStudentAnswers = (int) this.getQuizAnswers().stream().filter(QuizAnswer::isCompleted)
                     .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.GENERATED))
                     .flatMap(quizAnswer -> quizAnswer.getQuestionAnswers().stream())
-                    .filter(questionAnswer -> questionAnswer.getOption() != null &&
-                        questionAnswer.getOption().getCorrect())
+                    .filter(questionAnswer -> questionAnswer.getOption() != null
+                            && questionAnswer.getOption().getCorrect())
                     .count();
 
         return numberOfCorrectStudentAnswers;
@@ -407,13 +399,21 @@ public class User implements UserDetails, DomainEntity {
         this.courseExecutions.add(course);
     }
 
-    public void addSubmission(Submission submission) { this.submissions.add(submission); }
+    public void addSubmission(Submission submission) {
+        this.submissions.add(submission);
+    }
 
-    public void addTournament(Tournament tournament) { this.tournaments.add(tournament); }
+    public void addTournament(Tournament tournament) {
+        this.tournaments.add(tournament);
+    }
 
-    public Boolean isStudent(){ return this.role == User.Role.STUDENT; }
+    public Boolean isStudent() {
+        return this.role == User.Role.STUDENT;
+    }
 
-    public Boolean isTeacher(){ return this.role == User.Role.TEACHER; }
+    public Boolean isTeacher() {
+        return this.role == User.Role.TEACHER;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -454,12 +454,10 @@ public class User implements UserDetails, DomainEntity {
                 .flatMap(quizAnswer -> quizAnswer.getQuestionAnswers().stream())
                 .filter(questionAnswer -> availableQuestions.contains(questionAnswer.getQuizQuestion().getQuestion()))
                 .filter(questionAnswer -> questionAnswer.getTimeTaken() != null && questionAnswer.getTimeTaken() != 0)
-                .map(questionAnswer -> questionAnswer.getQuizQuestion().getQuestion())
-                .collect(Collectors.toList());
+                .map(questionAnswer -> questionAnswer.getQuizQuestion().getQuestion()).collect(Collectors.toList());
 
         List<Question> notAnsweredQuestions = availableQuestions.stream()
-                .filter(question -> !studentAnsweredQuestions.contains(question))
-                .collect(Collectors.toList());
+                .filter(question -> !studentAnsweredQuestions.contains(question)).collect(Collectors.toList());
 
         List<Question> result = new ArrayList<>();
 
@@ -491,15 +489,13 @@ public class User implements UserDetails, DomainEntity {
     }
 
     public boolean checkQuestionAnswered(Question question) {
-        return getQuizAnswers().stream()
-                .flatMap(quizAnswer -> quizAnswer.getQuestionAnswers().stream())
+        return getQuizAnswers().stream().flatMap(quizAnswer -> quizAnswer.getQuestionAnswers().stream())
                 .filter(questionAnswer -> questionAnswer.getTimeTaken() != null && questionAnswer.getTimeTaken() != 0)
-                .map(questionAnswer -> questionAnswer.getQuizQuestion().getQuestion())
-                .collect(Collectors.toList())
+                .map(questionAnswer -> questionAnswer.getQuizQuestion().getQuestion()).collect(Collectors.toList())
                 .contains(question);
     }
 
-    public void addDiscussion(Discussion discussion){
+    public void addDiscussion(Discussion discussion) {
         this.discussions.add(discussion);
     }
 

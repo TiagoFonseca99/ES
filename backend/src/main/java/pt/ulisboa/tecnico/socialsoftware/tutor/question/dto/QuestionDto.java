@@ -63,7 +63,7 @@ public class QuestionDto implements Serializable {
         if (this.hasDiscussions) {
             this.hasAllReplies = true;
             for (Discussion d : question.getDiscussions()) {
-                if (d.getReply() == null) {
+                if (d.getReplies() == null || d.getReplies().isEmpty()) {
                     this.hasAllReplies = false;
                     break;
                 }

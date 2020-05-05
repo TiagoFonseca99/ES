@@ -68,12 +68,10 @@
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">CREATE TABLE IF NOT EXISTS discussions (question_id INTEGER, user_id INTEGER, content TEXT, reply_id INTEGER, PRIMARY KEY (question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (question_id) REFERENCES questions(id));
+          <stringProp name="query">CREATE TABLE IF NOT EXISTS discussions (question_id INTEGER, user_id INTEGER, content TEXT, PRIMARY KEY (question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (question_id) REFERENCES questions(id));
 
-CREATE TABLE IF NOT EXISTS replies (id SERIAL, date TIMESTAMP WITHOUT TIME ZONE, message VARCHAR(255), discussion_question_id INTEGER, discussion_user_id INTEGER, teacher_id INTEGER, PRIMARY KEY (id), FOREIGN KEY (discussion_question_id, discussion_user_id) REFERENCES discussions(question_id, user_id), FOREIGN KEY (teacher_id) REFERENCES users(id));
-
-ALTER TABLE discussions DROP CONSTRAINT IF EXISTS replyid;
-ALTER TABLE discussions ADD CONSTRAINT replyid FOREIGN KEY (reply_id) REFERENCES replies(id);</stringProp>
+CREATE TABLE IF NOT EXISTS replies (id SERIAL, date TIMESTAMP WITHOUT TIME ZONE, message VARCHAR(255), discussion_question_id INTEGER, discussion_user_id INTEGER, user_id INTEGER, PRIMARY KEY (id), FOREIGN KEY (discussion_question_id, discussion_user_id) REFERENCES discussions(question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id));
+</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
@@ -257,7 +255,7 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (${question}, 676
           </HTTPSamplerProxy>
           <hashTree>
             <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert teacher id" enabled="true">
-              <stringProp name="JSON_PATH">$.teacherId</stringProp>
+              <stringProp name="JSON_PATH">$.userId</stringProp>
               <stringProp name="EXPECTED_VALUE">677</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
