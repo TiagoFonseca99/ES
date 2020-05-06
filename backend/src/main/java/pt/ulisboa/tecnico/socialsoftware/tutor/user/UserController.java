@@ -5,11 +5,13 @@ import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
+
+import javax.validation.Valid;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.AUTHENTICATION_ERROR;;
 
@@ -28,5 +30,27 @@ public class UserController {
         }
 
         return userService.getDashboardInfo(user.getId());
+    }
+
+    @PutMapping(value = "/switchTournamentNamePermission")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void switchTournamentNamePermission(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        userService.switchTournamentNamePermission(user.getId());
+    }
+
+    @PutMapping(value = "/switchTournamentScorePermission")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void switchTournamentScorePermission(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        userService.switchTournamentScorePermission(user.getId());
     }
 }

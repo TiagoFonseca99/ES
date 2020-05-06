@@ -34,7 +34,9 @@ public class TournamentDto implements Serializable {
         this.topics = tournament.getTopics().stream().map(TopicDto::new).collect(Collectors.toList());
         this.participants = tournament.getParticipants().stream().map(UserDto::new).collect(Collectors.toList());
         this.courseAcronym = tournament.getCourseExecution().getAcronym();
-        this.quizId = tournament.getStatementQuizDto().getId();
+        if (tournament.hasQuiz()) {
+            this.quizId = tournament.getStatementQuizDto().getId();
+        }
     }
 
     public Integer getId() {
