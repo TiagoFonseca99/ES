@@ -411,9 +411,12 @@ public class User implements UserDetails, DomainEntity {
         this.tournaments.add(tournament);
     }
 
+
     public Boolean isStudent() {
         return this.role == User.Role.STUDENT;
     }
+
+    public void removeTournament(Tournament tournament) { this.tournaments.remove(tournament); }
 
     public Boolean isTeacher() {
         return this.role == User.Role.TEACHER;

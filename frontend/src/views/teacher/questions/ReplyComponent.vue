@@ -7,6 +7,12 @@
       <div class="discussion">
         <ul>
           <li v-for="discussion in discussions" :key="discussion.content">
+            <v-switch
+              v-model="discussion.available"
+              class="ma-4"
+              label="Public"
+              v-on:click="setDiscussion(discussion); setAvailability()"
+            />
             <div class="text-left">
               <b>{{ discussion.userName }} on {{ discussion.date }}:</b>
               <span v-html="convertMarkDown(discussion.content)" />
@@ -93,7 +99,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
+import { Component, Vue, Prop, Emit, Watch } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
 import RemoteServices from '../../../services/RemoteServices';
@@ -135,6 +141,21 @@ export default class ReplyComponent extends Vue {
     }
 
     return true;
+  }
+  
+  private delay(ms: number)
+  {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async setAvailability() {
+    try {
+      this.discussion = await RemoteServices.setAvailability(this.discussion, !this.discussion.available);
+      await this.delay(1000);
+    }
+    catch (error) {
+      await this.$store.dispatch('error', error);
+    }
   }
 
   setReplyMessage(message: string) {

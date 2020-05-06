@@ -68,9 +68,7 @@
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">WITH qa AS (INSERT INTO quiz_answers (completed, quiz_id, user_id, used_in_statistics) VALUES (&apos;t&apos;, 5375, 676, &apos;f&apos;) RETURNING id)
-INSERT INTO question_answers (time_taken, option_id,  quiz_answer_id, quiz_question_id) VALUES (634, 6512, (SELECT id FROM qa), 40975);
-CREATE TABLE IF NOT EXISTS discussions (question_id INTEGER, user_id INTEGER, content TEXT, reply_id INTEGER, PRIMARY KEY (question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (question_id) REFERENCES questions(id));
+          <stringProp name="query">
 
 INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;DISCUSSION CONTENT&apos;);</stringProp>
           <stringProp name="queryArguments"></stringProp>
@@ -331,10 +329,8 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
-          <stringProp name="query">WITH qa AS(DELETE FROM quiz_answers WHERE user_id = 676 RETURNING id)
-DELETE FROM question_answers WHERE quiz_answer_id = (SELECT id FROM qa);
-DROP TABLE discussions CASCADE;
-DROP TABLE replies CASCADE;</stringProp>
+          <stringProp name="query">DELETE FROM discussions WHERE user_id=676 AND question_id = 1504;
+</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
