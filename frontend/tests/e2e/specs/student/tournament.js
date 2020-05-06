@@ -34,14 +34,6 @@ describe('Student walkthrough', () => {
     cy.joinTournament('0');
   });
 
-  it('login joins tournament already in', () => {
-    cy.log('try to join again');
-    cy.joinTournament('-1');
-
-    cy.closeErrorMessage();
-    cy.log('close dialog');
-  });
-
   it('login edits tournament', () => {
     cy.contains('Tournaments')
       .should('be.visible')

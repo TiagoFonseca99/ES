@@ -30,9 +30,18 @@
           </v-btn>
         </v-card-title>
       </template>
-
+      <template v-slot:item.state="{ item }">
+        <v-chip :color="getStateColor(item.state)">
+          {{ getStateName(item.state) }}
+        </v-chip>
+      </template>
+      <template v-slot:item.enrolled="{ item }">
+        <v-chip :color="getEnrolledColor(item.enrolled)">
+          {{ getEnrolledName(item.enrolled) }}
+        </v-chip>
+      </template>
       <template v-slot:item.action="{ item }">
-        <v-tooltip bottom>
+        <v-tooltip bottom v-if="isNotEnrolled(item)">
           <template v-slot:activator="{ on }">
             <v-icon
               small
@@ -109,7 +118,7 @@ export default class OpenTournamentView extends Vue {
       align: 'center',
       width: '10%'
     },
-    { text: 'Id', value: 'id', align: 'center', width: '10%', sort: true },
+    { text: 'Tournament Number', value: 'id', align: 'center', width: '10%' },
     {
       text: 'Topics',
       value: 'topics',
@@ -180,6 +189,30 @@ export default class OpenTournamentView extends Vue {
   onCloseDialog() {
     this.createTournamentDialog = false;
     this.currentTournament = null;
+  }
+
+  getStateColor(state: string) {
+    if (state === 'NOT_CANCELED') return 'green';
+    else return 'red';
+  }
+
+  getStateName(state: string) {
+    if (state === 'NOT_CANCELED') return 'NOT CANCELED';
+    else return 'CANCELED';
+  }
+
+  getEnrolledColor(enrolled: string) {
+    if (enrolled) return 'green';
+    else return 'red';
+  }
+
+  getEnrolledName(enrolled: string) {
+    if (enrolled) return 'YOU ARE IN';
+    else return 'YOU NEED TO JOIN';
+  }
+
+  isNotEnrolled(tournamentToJoin: Tournament) {
+    return !tournamentToJoin.enrolled;
   }
 
   async joinTournament(tournamentToJoin: Tournament) {
