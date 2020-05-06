@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.user.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -22,6 +23,7 @@ public class DashboardDto implements Serializable {
         this.name = user.getName();
         this.username = user.getUsername();
         this.numDiscussions = user.getDiscussions().size();
+        this.joinedTournaments = user.getTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
     }
 
     public String getUsername() {
