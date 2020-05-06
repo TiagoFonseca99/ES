@@ -108,6 +108,16 @@
             <v-card-title class="justify-center" style="display: block;"
               >Discussions</v-card-title
             >
+            <v-card-actions>
+              <v-switch
+                class="justify-content-end"
+                v-if="info !== null"
+                v-model="info.discussionStatsPublic"
+                label="Public"
+                style="float: right"
+                @change="toggleDiscussions()"
+              />
+            </v-card-actions>
             <div class="dashInfo" v-if="info !== null">
               <div class="square">
                 <animated-number class="num" :number="info.numDiscussions" />
@@ -162,6 +172,16 @@ export default class DashboardView extends Vue {
     }
 
     await this.$store.dispatch('clearLoading');
+  }
+
+  async toggleDiscussions() {
+    try {
+      console.log(this.info);
+      this.info = await RemoteServices.toggleDiscussionStats();
+      console.log(this.info);
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
   }
 }
 </script>

@@ -8,6 +8,7 @@ export default class Dashboard {
   numSubmissions!: number | null;
   numApprovedSubmissions!: number | null;
   joinedTournaments!: Tournament[] | null;
+  discussionStatsPublic!: boolean;
 
   constructor(jsonObj?: Dashboard) {
     if (jsonObj) {
@@ -17,6 +18,7 @@ export default class Dashboard {
       this.numPublicDiscussions = jsonObj.numPublicDiscussions;
       this.numSubmissions = jsonObj.numSubmissions;
       this.numApprovedSubmissions = jsonObj.numApprovedSubmissions;
+      this.discussionStatsPublic = jsonObj.discussionStatsPublic;
 
       if (jsonObj.joinedTournaments !== null) {
         this.joinedTournaments = [];

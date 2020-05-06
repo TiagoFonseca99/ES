@@ -691,7 +691,10 @@ export default class RemoteServices {
       });
   }
 
-  static async setAvailability(discussion: Discussion, available: boolean): Promise<Discussion> {
+  static async setAvailability(
+    discussion: Discussion,
+    available: boolean
+  ): Promise<Discussion> {
     return httpClient
       .put('/discussions?available=' + available, discussion)
       .then(response => {
@@ -710,6 +713,17 @@ export default class RemoteServices {
       .post('/discussions/replies?message=' + message, discussion)
       .then(response => {
         return new Reply(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async toggleDiscussionStats(): Promise<Dashboard> {
+    return httpClient
+      .put('/dashboard/discussions')
+      .then(response => {
+        return new Dashboard(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
