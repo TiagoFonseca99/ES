@@ -54,7 +54,7 @@
           </template>
           <span>Join Tournament</span>
         </v-tooltip>
-        <v-tooltip bottom>
+        <v-tooltip bottom v-if="!isNotEnrolled(item)">
           <template v-slot:activator="{ on }">
             <v-icon
               small
@@ -67,7 +67,7 @@
           </template>
           <span>Leave Tournament</span>
         </v-tooltip>
-        <v-tooltip bottom>
+        <v-tooltip bottom v-if="!isNotEnrolled(item)">
           <template v-slot:activator="{ on }">
             <v-icon
               small
