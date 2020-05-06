@@ -48,4 +48,13 @@ public class Submission {
 
     public int getStudentId() { return this.user.getId(); }
 
+    @Override
+    public String toString() {
+        return "Submission{" +
+                "id=" + id +
+                ", question=" + question +
+                ", user='" + user +
+                '}';
+    }
+
 }

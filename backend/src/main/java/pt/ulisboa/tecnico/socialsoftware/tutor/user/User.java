@@ -54,6 +54,8 @@ public class User implements UserDetails, DomainEntity {
     private Integer numberOfCorrectTeacherAnswers;
     private Integer numberOfCorrectInClassAnswers;
     private Integer numberOfCorrectStudentAnswers;
+    private Integer numberOfApprovedSubmissions;
+    private Integer numberOfRejectedSubmissions;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
@@ -100,6 +102,8 @@ public class User implements UserDetails, DomainEntity {
         this.numberOfCorrectTeacherAnswers = 0;
         this.numberOfCorrectInClassAnswers = 0;
         this.numberOfCorrectStudentAnswers = 0;
+        this.numberOfApprovedSubmissions = 0;
+        this.numberOfRejectedSubmissions = 0;
     }
 
     @Override
@@ -320,6 +324,14 @@ public class User implements UserDetails, DomainEntity {
     public void setNumberOfCorrectStudentAnswers(Integer numberOfCorrectStudentAnswers) {
         this.numberOfCorrectStudentAnswers = numberOfCorrectStudentAnswers;
     }
+
+    public Integer getNumberOfApprovedSubmissions() { return numberOfApprovedSubmissions; }
+
+    public void setNumberOfApprovedSubmissions(Integer numberOfApprovedSubmissions) { this.numberOfApprovedSubmissions = numberOfApprovedSubmissions; }
+
+    public Integer getNumberOfRejectedSubmissions() { return numberOfRejectedSubmissions; }
+
+    public void setNumberOfRejectedSubmissions(Integer numberOfRejectedSubmissions) { this.numberOfRejectedSubmissions = numberOfRejectedSubmissions; }
 
     @Override
     public String toString() {

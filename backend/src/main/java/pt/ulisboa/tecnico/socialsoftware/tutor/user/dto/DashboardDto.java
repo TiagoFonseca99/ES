@@ -13,6 +13,7 @@ public class DashboardDto implements Serializable {
     private Integer numPublicDiscussions;
     private Integer numSubmissions;
     private Integer numApprovedSubmissions;
+    private Integer numRejectedSubmissions;
     private List<TournamentDto> joinedTournaments;
 
     public DashboardDto() {
@@ -22,6 +23,9 @@ public class DashboardDto implements Serializable {
         this.name = user.getName();
         this.username = user.getUsername();
         this.numDiscussions = user.getDiscussions().size();
+        this.numSubmissions = user.getSubmissions().size();
+        this.numApprovedSubmissions = user.getNumberOfApprovedSubmissions();
+        this.numRejectedSubmissions = user.getNumberOfRejectedSubmissions();
     }
 
     public String getUsername() {
@@ -44,17 +48,17 @@ public class DashboardDto implements Serializable {
         return joinedTournaments;
     }
 
-    public void setJoinedTournaments(List<TournamentDto> joinedTournaments) {
-        this.joinedTournaments = joinedTournaments;
-    }
+    public void setJoinedTournaments(List<TournamentDto> joinedTournaments) { this.joinedTournaments = joinedTournaments; }
 
     public Integer getNumApprovedSubmissions() {
         return numApprovedSubmissions;
     }
 
-    public void setNumApprovedSubmissions(Integer numApprovedSubmissions) {
-        this.numApprovedSubmissions = numApprovedSubmissions;
-    }
+    public void setNumApprovedSubmissions(Integer numApprovedSubmissions) { this.numApprovedSubmissions = numApprovedSubmissions; }
+
+    public Integer getNumRejectedSubmissions() { return numRejectedSubmissions; }
+
+    public void setNumRejectedSubmissions(Integer numRejectedSubmissions) { this.numRejectedSubmissions = numRejectedSubmissions; }
 
     public Integer getNumSubmissions() {
         return numSubmissions;
@@ -68,9 +72,7 @@ public class DashboardDto implements Serializable {
         return numPublicDiscussions;
     }
 
-    public void setNumPublicDiscussions(Integer numPublicDiscussions) {
-        this.numPublicDiscussions = numPublicDiscussions;
-    }
+    public void setNumPublicDiscussions(Integer numPublicDiscussions) { this.numPublicDiscussions = numPublicDiscussions; }
 
     public Integer getNumDiscussions() {
         return numDiscussions;

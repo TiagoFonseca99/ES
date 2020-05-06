@@ -14,6 +14,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.UsersXmlExport;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.UsersXmlImport;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 
 import java.sql.SQLException;
@@ -29,6 +31,9 @@ public class UserService {
 
     @Autowired
     private CourseExecutionRepository courseExecutionRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     public User findByUsername(String username) {
         return this.userRepository.findByUsername(username);
@@ -69,6 +74,15 @@ public class UserService {
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void setNumberOfReviewedSubmissions(User user) {
+        List<Review> studentApprovedSubmissions = reviewRepository.getApprovedSubmissions(user.getId());
+        List<Review> studentRejectedSubmissions = reviewRepository.getRejectedSubmissions(user.getId());
+
+        user.setNumberOfApprovedSubmissions(studentApprovedSubmissions.size());
+        user.setNumberOfRejectedSubmissions(studentRejectedSubmissions.size());
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void addCourseExecution(int userId, int executionId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
@@ -91,6 +105,7 @@ public class UserService {
         User user = userRepository.findById(requesterId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, requesterId));
 
         checkStudent(user);
+        setNumberOfReviewedSubmissions(user);
 
         return user.getDashboardInfo();
     }
