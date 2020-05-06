@@ -88,11 +88,21 @@ public class UserService {
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public DashboardDto getDashboardInfo(Integer requesterId) {
-        User user = userRepository.findById(requesterId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, requesterId));
+        User user = userRepository.findById(requesterId)
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, requesterId));
 
         checkStudent(user);
 
         return user.getDashboardInfo();
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public DashboardDto toggleDiscussionStatsVisibility(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
+
+        checkStudent(user);
+        return user.toggleDiscussionStatsVisibility();
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))

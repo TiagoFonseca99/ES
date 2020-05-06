@@ -82,6 +82,9 @@ public class User implements UserDetails, DomainEntity {
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "participants")
     private List<Tournament> tournaments = new ArrayList<>();
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean discussionStatsPublic = true;
+
     public User() {
     }
 
@@ -509,6 +512,15 @@ public class User implements UserDetails, DomainEntity {
     }
 
     public DashboardDto getDashboardInfo() {
+        return new DashboardDto(this);
+    }
+
+    public boolean isDiscussionStatsPublic() {
+        return this.discussionStatsPublic;
+    }
+
+    public DashboardDto toggleDiscussionStatsVisibility() {
+        this.discussionStatsPublic = !this.discussionStatsPublic;
         return new DashboardDto(this);
     }
 }
