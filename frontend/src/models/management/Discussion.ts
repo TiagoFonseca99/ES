@@ -10,6 +10,7 @@ export default class Discussion {
   question!: Question;
   replies!: Reply[] | null;
   date!: string | null;
+  available!: boolean;
 
   constructor(jsonObj?: Discussion) {
     if (jsonObj) {
@@ -19,6 +20,7 @@ export default class Discussion {
       this.content = jsonObj.content;
       this.question = new Question(jsonObj.question);
       this.date = ISOtoString(jsonObj.date);
+      this.available = jsonObj.available;
       if (jsonObj.replies !== null) {
         this.replies = jsonObj.replies.map((reply: any) => {
           return new Reply(reply);

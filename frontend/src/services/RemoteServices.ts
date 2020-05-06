@@ -691,6 +691,17 @@ export default class RemoteServices {
       });
   }
 
+  static async setAvailability(discussion: Discussion, available: boolean): Promise<Discussion> {
+    return httpClient
+      .put('/discussions?available=' + available, discussion)
+      .then(response => {
+        return new Discussion(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async createReply(
     message: string,
     discussion: Discussion
