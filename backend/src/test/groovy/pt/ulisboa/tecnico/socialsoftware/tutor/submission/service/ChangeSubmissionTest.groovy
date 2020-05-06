@@ -72,11 +72,8 @@ class ChangeSubmissionTest extends Specification {
     @Shared
     def question
     @Shared
-    def newQuestion
     def optionOK
     def optionKO
-    def option1
-    def option2
     def course
     def courseExecution
     def acronym
@@ -115,26 +112,6 @@ class ChangeSubmissionTest extends Specification {
         submission.setQuestion(question)
         submission.setUser(student)
         submissionRepository.save(submission)
-        newQuestion = new Question()
-        newQuestion.setTitle(QUESTION_TITLE)
-        newQuestion.setContent(QUESTION_CONTENT)
-        newQuestion.setCourse(course)
-        newQuestion.setStatus(Question.Status.SUBMITTED)
-        newQuestion.setNumberOfAnswers(2)
-        newQuestion.setNumberOfCorrect(1)
-        option1 = new Option()
-        option1.setContent(OPTION_CONTENT)
-        option1.setCorrect(true)
-        option1.setSequence(0)
-        option1.setQuestion(newQuestion)
-        optionRepository.save(option1)
-        option2 = new Option()
-        option2.setContent(OPTION_CONTENT)
-        option2.setCorrect(false)
-        option2.setSequence(1)
-        option2.setQuestion(newQuestion)
-        optionRepository.save(option2)
-        questionRepository.save(newQuestion)
     }
 
     def "change submission before approving"() {
@@ -144,16 +121,16 @@ class ChangeSubmissionTest extends Specification {
         questionDto.setContent(NEW_QUESTION_CONTENT)
         and: "2 options changed"
         def optionsList= new ArrayList<OptionDto>()
-        def optionDto = new OptionDto()
-        optionDto.setContent(NEW_OPTION_CONTENT)
-        optionDto.setCorrect(false)
-        optionDto.setSequence(0)
-        optionsList.add(optionDto)
-        optionDto = new OptionDto()
-        optionDto.setContent(OPTION_CONTENT)
-        optionDto.setCorrect(true)
-        optionDto.setSequence(1)
-        optionsList.add(optionDto)
+        def optionDto1 = new OptionDto(optionOK)
+        optionDto1.setContent(NEW_OPTION_CONTENT)
+        optionDto1.setCorrect(false)
+        optionDto1.setSequence(0)
+        optionsList.add(optionDto1)
+        def optionDto2 = new OptionDto(optionKO)
+        optionDto2.setContent(OPTION_CONTENT)
+        optionDto2.setCorrect(true)
+        optionDto2.setSequence(1)
+        optionsList.add(optionDto2)
         questionDto.setOptions(optionsList)
         and: "the new submissionDto"
         def submissionDto = new SubmissionDto()

@@ -174,6 +174,7 @@ public class SubmissionService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void changeSubmission(SubmissionDto submission) {
+
         if (submission.getStudentId() == null) {
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
         }
@@ -182,10 +183,11 @@ public class SubmissionService {
             throw new TutorException(SUBMISSION_MISSING_QUESTION);
         }
 
+
         Question question = questionRepository.getOne(submission.getQuestionDto().getId());
 
-        question.getOptions().clear();
         question.update(submission.getQuestionDto());
+
 
         entityManager.persist(question);
 
