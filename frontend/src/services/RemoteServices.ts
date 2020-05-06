@@ -943,7 +943,7 @@ export default class RemoteServices {
 
   static leaveTournament(tournament: Tournament) {
     return httpClient
-      .post('tournaments/leaveTournament', tournament)
+      .put('tournaments/leaveTournament', tournament)
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });

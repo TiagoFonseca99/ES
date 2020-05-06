@@ -84,7 +84,7 @@ public class TournamentController {
     }
 
 
-    @PostMapping(value = "/tournaments/leaveTournament")
+    @PutMapping(value = "/tournaments/leaveTournament")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
     public void leaveTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
