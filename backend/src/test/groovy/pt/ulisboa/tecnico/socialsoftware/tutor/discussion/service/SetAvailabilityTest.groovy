@@ -25,6 +25,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
 import java.time.LocalTime;
 
@@ -69,6 +70,7 @@ class SetAvailabilityTest extends Specification {
     def student
     def question
     def discussion
+    def discussionDto
 
     def setup() {
         question = new Question()
@@ -110,17 +112,18 @@ class SetAvailabilityTest extends Specification {
         student.addQuizAnswer(quizanswer)
         userRepository.save(student)
 
-        discussion = new Discussion()
-        discussion.setContent(DISCUSSION_CONTENT)
-        discussion.setUser(student)
-        discussion.setQuestion(question)
-        discussionRepository.save(discussion)
+        discussionDto = new DiscussionDto()
+        discussionDto.setContent(DISCUSSION_CONTENT)
+        discussionDto.setUserId(student.getId())
+        discussionDto.setQuestion(new QuestionDto(question))
+        discussion = discussionService.createDiscussion(discussionDto)
         userRepository.save(student)
     }
 
     def "set discussion public"() {
         when: "Setting the discussion public"
-        discussionService.setAvailability(student.getId(), question.getId(), true)
+        discussionDto.setAvailability(true)
+        discussionService.setAvailability(discussionDto)
 
         then: "check the discussion is public"
         def result = discussionRepository.findByUserId(student.getId()).get(0)
@@ -129,7 +132,8 @@ class SetAvailabilityTest extends Specification {
 
     def "set discussion private"() {
         when: "Setting the discussion private"
-        discussionService.setAvailability(student.getId(), question.getId(), false)
+        discussionDto.setAvailability(false)
+        discussionService.setAvailability(discussionDto)
 
         then: "check the discussion is private"
         def result2 = discussionRepository.findByUserId(student.getId()).get(0)
