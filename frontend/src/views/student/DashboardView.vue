@@ -76,6 +76,7 @@
             <v-data-table
               :headers="headers"
               :items="tournaments"
+              :sort-by="['id']"
               :hide-default-footer="true"
               :mobile-breakpoint="0"
               class="fill-height"
@@ -173,7 +174,7 @@ export default class DashboardView extends Vue {
       this.stats = await RemoteServices.getUserStats();
       this.quizzes = await RemoteServices.getSolvedQuizzes();
       if (this.info.joinedTournaments)
-        this.tournaments = this.info.joinedTournaments;
+        this.tournaments = this.info.joinedTournaments.sort();
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -197,13 +198,8 @@ export default class DashboardView extends Vue {
 
   score(tournament: Tournament) {
     let score = '';
-    console.log(this.quizzes.length);
-    console.log(tournament.quizId);
-    console.log(tournament.id)
     this.quizzes.map(quiz => {
-      console.log('quiz: ' + quiz.statementQuiz.id);
       if (quiz.statementQuiz.id == tournament.quizId) {
-        console.log('ola');
         score = this.calculateScore(quiz);
       }
     });
