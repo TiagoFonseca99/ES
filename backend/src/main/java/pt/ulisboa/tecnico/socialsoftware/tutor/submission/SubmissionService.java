@@ -16,6 +16,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
@@ -167,6 +168,32 @@ public class SubmissionService {
 
         return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void changeSubmission(SubmissionDto submission) {
+        Question question = questionRepository.getOne(submission.getQuestionDto().getId());
+
+        question.setContent(submission.getQuestionDto().getContent());
+        question.setTitle(submission.getQuestionDto().getTitle());
+        question.setNumberOfAnswers(submission.getQuestionDto().getNumberOfAnswers());
+        question.setNumberOfCorrect(submission.getQuestionDto().getNumberOfCorrect());
+
+
+        System.out.println("Options - " + submission.getQuestionDto().getOptions());
+        for (int i = 0; i < question.getOptions().size(); i++) {
+            Option option = question.getOptions().get(i);
+            option.setContent(submission.getQuestionDto().getOptions().get(i).getContent());
+            option.setCorrect(submission.getQuestionDto().getOptions().get(i).getCorrect());
+            entityManager.persist(option);
+
+        }
+        System.out.println("After - " + question.getOptions());
+        entityManager.persist(question);
+    }
+
 
     private void updateQuestionStatus(Submission submission, String status) {
         Question question = getQuestion(submission.getQuestion().getId());
