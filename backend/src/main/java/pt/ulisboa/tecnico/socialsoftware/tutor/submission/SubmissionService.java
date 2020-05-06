@@ -174,24 +174,21 @@ public class SubmissionService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void changeSubmission(SubmissionDto submission) {
+        if (submission.getStudentId() == null) {
+            throw new TutorException(SUBMISSION_MISSING_STUDENT);
+        }
+
+        if (submission.getQuestionDto().getId() == null) {
+            throw new TutorException(SUBMISSION_MISSING_QUESTION);
+        }
+
         Question question = questionRepository.getOne(submission.getQuestionDto().getId());
 
-        question.setContent(submission.getQuestionDto().getContent());
-        question.setTitle(submission.getQuestionDto().getTitle());
-        question.setNumberOfAnswers(submission.getQuestionDto().getNumberOfAnswers());
-        question.setNumberOfCorrect(submission.getQuestionDto().getNumberOfCorrect());
+        question.getOptions().clear();
+        question.update(submission.getQuestionDto());
 
-
-        System.out.println("Options - " + submission.getQuestionDto().getOptions());
-        for (int i = 0; i < question.getOptions().size(); i++) {
-            Option option = question.getOptions().get(i);
-            option.setContent(submission.getQuestionDto().getOptions().get(i).getContent());
-            option.setCorrect(submission.getQuestionDto().getOptions().get(i).getCorrect());
-            entityManager.persist(option);
-
-        }
-        System.out.println("After - " + question.getOptions());
         entityManager.persist(question);
+
     }
 
 
