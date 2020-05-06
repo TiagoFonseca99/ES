@@ -20,6 +20,7 @@ public class TournamentDto implements Serializable {
     private List<TopicDto> topics = new ArrayList<>();
     private List<UserDto> participants = new ArrayList<>();
     private String courseAcronym = null;
+    private Integer quizId = null;
 
     public TournamentDto() {
     }
@@ -33,6 +34,7 @@ public class TournamentDto implements Serializable {
         this.topics = tournament.getTopics().stream().map(TopicDto::new).collect(Collectors.toList());
         this.participants = tournament.getParticipants().stream().map(UserDto::new).collect(Collectors.toList());
         this.courseAcronym = tournament.getCourseExecution().getAcronym();
+        this.quizId = tournament.getStatementQuizDto().getId();
     }
 
     public Integer getId() {
@@ -86,4 +88,8 @@ public class TournamentDto implements Serializable {
     public void setCourseAcronym(String couseAcronym) {
         this.courseAcronym = couseAcronym;
     }
+
+    public Integer getQuizId() { return quizId; }
+
+    public void setQuizId(Integer quizId) { this.quizId = quizId; }
 }

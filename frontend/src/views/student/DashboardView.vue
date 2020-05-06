@@ -75,9 +75,17 @@
             <v-card-title class="justify-center">Tournaments</v-card-title>
             <v-data-table
               :headers="headers"
+              :items="tournaments"
               :hide-default-footer="true"
+              :mobile-breakpoint="0"
               class="fill-height"
-            ></v-data-table>
+            >
+              <template v-slot:item.score="{ item }">
+                <v-chip>
+                  {{ score(item) }}
+                </v-chip>
+              </template>
+            </v-data-table>
           </v-card>
         </v-col>
         <v-col :cols="2">
@@ -138,7 +146,9 @@ import { Component, Vue } from 'vue-property-decorator';
 import Dashboard from '@/models/management/Dashboard';
 import RemoteServices from '@/services/RemoteServices';
 import StudentStats from '@/models/statement/StudentStats';
+import Tournament from '@/models/user/Tournament';
 import AnimatedNumber from '@/components/AnimatedNumber.vue';
+import SolvedQuiz from '@/models/statement/SolvedQuiz';
 
 @Component({
   components: { AnimatedNumber }
@@ -146,10 +156,14 @@ import AnimatedNumber from '@/components/AnimatedNumber.vue';
 export default class DashboardView extends Vue {
   info: Dashboard | null = null;
   stats: StudentStats | null = null;
+  tournaments: Tournament[] = [];
+  quizzes: SolvedQuiz[] = [];
+
   headers: object = [
-    { text: 'Tournament Number', align: 'center' },
-    { text: 'Date', align: 'center' },
-    { text: 'Score', align: 'center' }
+    { text: 'Tournament Number', value: 'id', align: 'center' },
+    { text: 'Start Time', value: 'startTime', align: 'center' },
+    { text: 'End Time', value: 'endTime', align: 'center' },
+    { text: 'Score', value: 'score', align: 'center' }
   ];
 
   async created() {
@@ -157,11 +171,45 @@ export default class DashboardView extends Vue {
     try {
       this.info = await RemoteServices.getDashboardInfo();
       this.stats = await RemoteServices.getUserStats();
+      this.quizzes = await RemoteServices.getSolvedQuizzes();
+      if (this.info.joinedTournaments)
+        this.tournaments = this.info.joinedTournaments;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
 
     await this.$store.dispatch('clearLoading');
+  }
+
+  calculateScore(quiz: SolvedQuiz) {
+    let correct = 0;
+    for (let i = 0; i < quiz.statementQuiz.questions.length; i++) {
+      if (
+        quiz.statementQuiz.answers[i] &&
+        quiz.correctAnswers[i].correctOptionId ===
+          quiz.statementQuiz.answers[i].optionId
+      ) {
+        correct += 1;
+      }
+    }
+    return `${correct}/${quiz.statementQuiz.questions.length}`;
+  }
+
+  score(tournament: Tournament) {
+    let score = '';
+    console.log(this.quizzes.length);
+    console.log(tournament.quizId);
+    console.log(tournament.id)
+    this.quizzes.map(quiz => {
+      console.log('quiz: ' + quiz.statementQuiz.id);
+      if (quiz.statementQuiz.id == tournament.quizId) {
+        console.log('ola');
+        score = this.calculateScore(quiz);
+      }
+    });
+
+    if (score == '') return 'not solved';
+    return score;
   }
 }
 </script>

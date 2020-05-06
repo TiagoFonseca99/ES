@@ -12,6 +12,7 @@ export default class Tournament {
   enrolled!: boolean | undefined;
   topics!: String[];
   participants!: User[];
+  quizId!: number | undefined;
 
   constructor(jsonObj?: Tournament, user?: User) {
     if (jsonObj) {
@@ -52,6 +53,7 @@ export default class Tournament {
           }
         }
       }
+      this.quizId = jsonObj.quizId;
     }
   }
 }
