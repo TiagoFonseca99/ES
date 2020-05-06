@@ -123,11 +123,12 @@ class CreateReviewTest extends Specification {
         then: "the service is in the repository"
         reviewRepository.count() == 1L
         def result = reviewRepository.findAll().get(0)
+        def question = questionRepository.findAll().get(0);
         result.getId() != null
         result.getJustification() == REVIEW_JUSTIFICATION
         result.getStatus() == Review.Status.APPROVED
         result.getSubmission() == submission
-
+        question.getStatus() == Question.Status.AVAILABLE;
     }
 
 
@@ -163,6 +164,7 @@ class CreateReviewTest extends Specification {
         then: "the service is in the repository"
         reviewRepository.count() == 1L
         def result = reviewRepository.findAll().get(0)
+        def question = questionRepository.findAll().get(0);
         result.getId() != null
         result.getJustification() == REVIEW_JUSTIFICATION
         result.getImage().getId() != null
@@ -170,7 +172,7 @@ class CreateReviewTest extends Specification {
         result.getImage().getWidth() == IMAGE_WIDTH
         result.getStatus() == Review.Status.REJECTED
         result.getSubmission() == submission
-
+        question.getStatus() == Question.Status.DEPRECATED
     }
 
 

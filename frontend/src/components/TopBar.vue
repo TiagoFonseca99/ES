@@ -224,6 +224,14 @@
             </v-btn>
           </template>
           <v-list dense>
+            <v-list-item to="/student/myTournaments">
+              <v-list-item-action>
+                <v-icon>fas fa-user-check</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>My Tournaments</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item to="/student/open">
               <v-list-item-action>
                 <v-icon>fas fa-medal</v-icon>
@@ -439,6 +447,13 @@
           <!-- ----------- -->
 
           <!-- ----TDP---- -->
+
+          <v-list-item to="/student/myTournaments">
+            <v-list-item-action>
+              <v-icon>fas fa-medal</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>My Tournaments</v-list-item-content>
+          </v-list-item>
 
           <v-list-item to="/student/open">
             <v-list-item-action>
