@@ -422,7 +422,28 @@ Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
       .click();
     cy.get('[data-cy="Justification"]').type(justification);
     cy.get('[data-cy="Approve"]').click();
+    cy.get('[data-cy="NoButton"]').click();
 });
+
+Cypress.Commands.add('ChangeSubmission', (title, justification, question_title, question_content) => {
+    cy.get('[data-cy="Management"]').click();
+    cy.get('[data-cy="Reviews"]').click();
+    cy.get('[data-cy="Search"]').click();
+    cy.wait(1000);
+    cy.contains(title)
+        .parent().parent().parent()
+        .should('have.length', 1)
+        .children()
+        .should('have.length', 6)
+        .find('[data-cy="createReview"]')
+        .click();
+    cy.get('[data-cy="Justification"]').type(justification);
+    cy.get('[data-cy="Approve"]').click();
+    cy.get('[data-cy="YesButton"]').click();
+    cy.get('[data-cy="QuestionTitle"]').type(question_title);
+    cy.get('[data-cy="QuestionContent"]').type(question_content);
+});
+
 
 Cypress.Commands.add('RejectSubmissions', (title, justification) => {
     cy.get('[data-cy="Management"]').click();

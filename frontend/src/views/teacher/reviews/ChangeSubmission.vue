@@ -61,8 +61,8 @@
         <v-spacer />
         <v-btn
           color="blue darken-1"
-          @click="$emit('dialog', false)"
-          data-cy="cancelButton"
+          @click="cancelButton"
+          data-cy="cancelButton1"
           >Cancel</v-btn
         >
         <v-btn
@@ -118,6 +118,10 @@ export default class MenuChangeSubmission extends Vue {
       }
     }
 
+    cancelButton() {
+      this.$emit('dialog', false);
+      this.$emit('change-sub');
+    }
 }
 
 </script>
