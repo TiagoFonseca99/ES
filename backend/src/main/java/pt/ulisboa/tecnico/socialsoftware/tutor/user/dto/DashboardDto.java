@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.user.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
@@ -26,6 +27,16 @@ public class DashboardDto implements Serializable {
         this.numSubmissions = user.getSubmissions().size();
         this.numApprovedSubmissions = user.getNumberOfApprovedSubmissions();
         this.numRejectedSubmissions = user.getNumberOfRejectedSubmissions();
+        this.joinedTournaments = new ArrayList<>();
+    }
+
+    public DashboardDto(Integer numDiscussions, Integer numSubmissions, Integer numPublicDiscussions, Integer numApprovedSubmissions, Integer numRejectedSubmissions, List<TournamentDto> joinedTournaments) {
+        this.numDiscussions = numDiscussions;
+        this.numPublicDiscussions = numPublicDiscussions;
+        this.numSubmissions = numSubmissions;
+        this.numApprovedSubmissions = numApprovedSubmissions;
+        this.numRejectedSubmissions = numRejectedSubmissions;
+        this.joinedTournaments = joinedTournaments;
     }
 
     public String getUsername() {

@@ -435,6 +435,17 @@ export default class RemoteServices {
       });
   }
 
+  static async getCourseDashboardInfo(executionId: number): Promise<Dashboard> {
+    return httpClient
+        .get(`/dashboard/${executionId}`)
+        .then(response => {
+          return new Dashboard(response.data);
+        })
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        });
+  }
+
   static async getAssessments(): Promise<Assessment[]> {
     return httpClient
       .get(
