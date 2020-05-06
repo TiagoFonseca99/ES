@@ -24,6 +24,8 @@ public class Discussion {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    private boolean available = false;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "discussion", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Reply> replies = new ArrayList<>();
 
@@ -66,6 +68,14 @@ public class Discussion {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailability(boolean bool) {
+        this.available = bool;
     }
 
     public Question getQuestion() {

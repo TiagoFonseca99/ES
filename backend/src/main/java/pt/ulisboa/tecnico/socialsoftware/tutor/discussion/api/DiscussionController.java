@@ -42,6 +42,18 @@ public class DiscussionController {
         return discussionService.createDiscussion(discussion);
     }
 
+    @PostMapping(value = "/discussions/question")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public void setAvailability(Principal principal, @Valid @RequestParam boolean bool, @Valid @RequestBody DiscussionDto discussion) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        discussionService.setAvailability(discussion.getUserId(), discussion.getQuestionId(), bool);
+    }
+
     @PostMapping(value = "/discussions/replies")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT')")
     public ReplyDto createReply(Principal principal, @Valid @RequestParam String message, @Valid @RequestBody DiscussionDto discussion){
