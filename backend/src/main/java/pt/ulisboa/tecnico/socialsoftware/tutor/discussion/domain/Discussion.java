@@ -24,8 +24,6 @@ public class Discussion {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private boolean available = false;
-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "discussion", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Reply> replies = new ArrayList<>();
 
@@ -38,6 +36,9 @@ public class Discussion {
     private Question question;
 
     private LocalDateTime date;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean available;
 
     public Discussion() {
     }
@@ -52,6 +53,7 @@ public class Discussion {
         this.question.addDiscussion(this);
         this.user.addDiscussion(this);
         this.setDate(DateHandler.toLocalDateTime(discussionDto.getDate()));
+        this.available = discussionDto.isAvailable();
     }
 
     public LocalDateTime getDate() {
