@@ -15,6 +15,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -505,5 +506,9 @@ public class User implements UserDetails, DomainEntity {
 
     public void addReply(Reply reply) {
         replies.add(reply);
+    }
+
+    public DashboardDto getDashboardInfo() {
+        return new DashboardDto(this);
     }
 }

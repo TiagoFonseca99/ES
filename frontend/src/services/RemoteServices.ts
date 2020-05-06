@@ -18,6 +18,7 @@ import Submission from '@/models/management/Submission';
 import Review from '@/models/management/Review';
 import Discussion from '@/models/management/Discussion';
 import Reply from '@/models/management/Reply';
+import Dashboard from '@/models/management/Dashboard';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 10000;
@@ -729,6 +730,17 @@ export default class RemoteServices {
         );
         document.body.appendChild(link);
         link.click();
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getDashboardInfo(): Promise<Dashboard> {
+    return httpClient
+      .get('/dashboard')
+      .then(response => {
+        return new Dashboard(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
