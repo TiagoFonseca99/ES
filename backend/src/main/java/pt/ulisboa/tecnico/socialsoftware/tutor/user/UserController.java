@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
@@ -28,5 +29,17 @@ public class UserController {
         }
 
         return userService.getDashboardInfo(user.getId());
+    }
+
+    @PutMapping(value = "/dashboard/discussions")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public DashboardDto toggleDiscussionStats(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return userService.toggleDiscussionStatsVisibility(user.getId());
     }
 }

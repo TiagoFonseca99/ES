@@ -519,8 +519,7 @@ public class User implements UserDetails, DomainEntity {
         return this.discussionStatsPublic;
     }
 
-    public DashboardDto toggleDiscussionStatsVisibility() {
+    public void toggleDiscussionStatsVisibility() {
         this.discussionStatsPublic = !this.discussionStatsPublic;
-        return new DashboardDto(this);
     }
 }

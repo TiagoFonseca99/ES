@@ -102,7 +102,9 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
         checkStudent(user);
-        return user.toggleDiscussionStatsVisibility();
+        user.toggleDiscussionStatsVisibility();
+
+        return user.getDashboardInfo();
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
