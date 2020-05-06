@@ -23,6 +23,7 @@ import ResultsView from '@/views/student/quiz/ResultsView.vue';
 import StatsView from '@/views/student/StatsView.vue';
 import ScanView from '@/views/student/ScanView.vue';
 import DiscussionView from '@/views/student/discussion/DiscussionView.vue';
+import DashboardView from '@/views/student/DashboardView.vue';
 
 import AdminManagementView from '@/views/admin/AdminManagementView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
@@ -253,6 +254,15 @@ let router = new Router({
           component: DiscussionView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Discussions',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: DashboardView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Dashboard',
             requiredAuth: 'Student'
           }
         }
