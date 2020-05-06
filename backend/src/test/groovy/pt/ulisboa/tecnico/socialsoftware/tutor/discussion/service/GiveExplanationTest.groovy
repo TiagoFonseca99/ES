@@ -26,7 +26,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
-import java.time.LocalTime;
+import java.time.LocalDateTime
 
 
 @DataJpaTest
@@ -124,7 +124,7 @@ class GiveExplanationTest extends Specification {
         def replyDto = new ReplyDto()
         replyDto.setMessage(DISCUSSION_REPLY)
         replyDto.setUserId(teacher.getId())
-        replyDto.setDate(LocalTime.now())
+        replyDto.setDate(LocalDateTime.now())
 
 
         when: "a reply is given"
@@ -142,7 +142,7 @@ class GiveExplanationTest extends Specification {
         def replyDto = new ReplyDto()
         replyDto.setMessage(DISCUSSION_REPLY)
         replyDto.setUserId(student.getId())
-        replyDto.setDate(LocalTime.now())
+        replyDto.setDate(LocalDateTime.now())
 
         when: "the student creates a reply"
         discussionService.giveReply(replyDto, new DiscussionDto(discussion))
@@ -162,7 +162,7 @@ class GiveExplanationTest extends Specification {
         def replyDto = new ReplyDto()
         replyDto.setMessage(DISCUSSION_REPLY)
         replyDto.setUserId(otherStudent.getId())
-        replyDto.setDate(LocalTime.now())
+        replyDto.setDate(LocalDateTime.now())
 
         when: "the student creates a reply"
         discussionService.giveReply(replyDto, new DiscussionDto(discussion))
@@ -177,11 +177,11 @@ class GiveExplanationTest extends Specification {
         def replyDto = new ReplyDto()
         replyDto.setMessage(DISCUSSION_REPLY)
         replyDto.setUserId(teacher.getId())
-        replyDto.setDate(LocalTime.now())
+        replyDto.setDate(LocalDateTime.now())
         def replyDto2 = new ReplyDto()
         replyDto2.setMessage(DISCUSSION_REPLY + "2")
         replyDto2.setUserId(teacher.getId())
-        replyDto2.setDate(LocalTime.now())
+        replyDto2.setDate(LocalDateTime.now())
         discussionService.giveReply(replyDto, new DiscussionDto(discussion))
 
         when: "another reply is given"

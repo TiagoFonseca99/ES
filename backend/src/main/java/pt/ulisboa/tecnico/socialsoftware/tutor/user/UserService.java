@@ -14,6 +14,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.UsersXmlExport;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.UsersXmlImport;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -28,6 +31,9 @@ public class UserService {
 
     @Autowired
     private CourseExecutionRepository courseExecutionRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     public User findByUsername(String username) {
         return this.userRepository.findByUsername(username);
@@ -68,10 +74,20 @@ public class UserService {
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void setNumberOfReviewedSubmissions(User user) {
+        List<Review> studentApprovedSubmissions = reviewRepository.getApprovedSubmissions(user.getId());
+        List<Review> studentRejectedSubmissions = reviewRepository.getRejectedSubmissions(user.getId());
+
+        user.setNumberOfApprovedSubmissions(studentApprovedSubmissions.size());
+        user.setNumberOfRejectedSubmissions(studentRejectedSubmissions.size());
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void addCourseExecution(int userId, int executionId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
-        CourseExecution courseExecution = courseExecutionRepository.findById(executionId).orElseThrow(() -> new TutorException(COURSE_EXECUTION_NOT_FOUND, executionId));
+        CourseExecution courseExecution = courseExecutionRepository.findById(executionId)
+                .orElseThrow(() -> new TutorException(COURSE_EXECUTION_NOT_FOUND, executionId));
 
         user.addCourse(courseExecution);
         courseExecution.addUser(user);
@@ -80,13 +96,21 @@ public class UserService {
     public String exportUsers() {
         UsersXmlExport xmlExporter = new UsersXmlExport();
 
-       return xmlExporter.export(userRepository.findAll());
+        return xmlExporter.export(userRepository.findAll());
     }
 
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public DashboardDto getDashboardInfo(Integer requesterId) {
+        User user = userRepository.findById(requesterId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, requesterId));
 
-    @Retryable(
-      value = { SQLException.class },
-      backoff = @Backoff(delay = 5000))
+        checkStudent(user);
+        setNumberOfReviewedSubmissions(user);
+
+        return user.getDashboardInfo();
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void importUsers(String usersXML) {
         UsersXmlImport xmlImporter = new UsersXmlImport();
@@ -112,7 +136,7 @@ public class UserService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public User getDemoAdmin() {
-        User user =  this.userRepository.findByUsername(Demo.ADMIN_USERNAME);
+        User user = this.userRepository.findByUsername(Demo.ADMIN_USERNAME);
         if (user == null)
             return createUser("Demo Admin", Demo.ADMIN_USERNAME, User.Role.DEMO_ADMIN);
         return user;
@@ -133,5 +157,11 @@ public class UserService {
         }
 
         return newDemoUser;
+    }
+
+    private void checkStudent(User user) {
+        if (user.getRole() != User.Role.STUDENT) {
+            throw new TutorException(USER_NOT_STUDENT, user.getId());
+        }
     }
 }

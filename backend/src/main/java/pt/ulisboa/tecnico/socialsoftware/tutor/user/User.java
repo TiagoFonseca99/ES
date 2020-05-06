@@ -15,6 +15,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -53,6 +54,8 @@ public class User implements UserDetails, DomainEntity {
     private Integer numberOfCorrectTeacherAnswers;
     private Integer numberOfCorrectInClassAnswers;
     private Integer numberOfCorrectStudentAnswers;
+    private Integer numberOfApprovedSubmissions;
+    private Integer numberOfRejectedSubmissions;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
@@ -99,6 +102,8 @@ public class User implements UserDetails, DomainEntity {
         this.numberOfCorrectTeacherAnswers = 0;
         this.numberOfCorrectInClassAnswers = 0;
         this.numberOfCorrectStudentAnswers = 0;
+        this.numberOfApprovedSubmissions = 0;
+        this.numberOfRejectedSubmissions = 0;
     }
 
     @Override
@@ -320,6 +325,14 @@ public class User implements UserDetails, DomainEntity {
         this.numberOfCorrectStudentAnswers = numberOfCorrectStudentAnswers;
     }
 
+    public Integer getNumberOfApprovedSubmissions() { return numberOfApprovedSubmissions; }
+
+    public void setNumberOfApprovedSubmissions(Integer numberOfApprovedSubmissions) { this.numberOfApprovedSubmissions = numberOfApprovedSubmissions; }
+
+    public Integer getNumberOfRejectedSubmissions() { return numberOfRejectedSubmissions; }
+
+    public void setNumberOfRejectedSubmissions(Integer numberOfRejectedSubmissions) { this.numberOfRejectedSubmissions = numberOfRejectedSubmissions; }
+
     @Override
     public String toString() {
         return "User{" +
@@ -505,5 +518,9 @@ public class User implements UserDetails, DomainEntity {
 
     public void addReply(Reply reply) {
         replies.add(reply);
+    }
+
+    public DashboardDto getDashboardInfo() {
+        return new DashboardDto(this);
     }
 }

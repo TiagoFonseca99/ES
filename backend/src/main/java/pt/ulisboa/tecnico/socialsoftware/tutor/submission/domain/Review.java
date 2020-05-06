@@ -117,4 +117,16 @@ public class Review {
     public LocalDateTime getCreationDate() { return creationDate; }
 
     public void setCreationDate(LocalDateTime creationDate) { this.creationDate = creationDate; }
+
+    @Override
+    public String toString() {
+        return "Review{" +
+                "id=" + id +
+                ", justification='" + justification + '\'' +
+                ", status=" + status +
+                ", studentId=" + studentId +
+                ", submission=" + submission.getQuestion() +
+                ", image=" + image +
+                '}';
+    }
 }
