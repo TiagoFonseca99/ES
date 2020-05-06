@@ -73,6 +73,20 @@
         <v-col :cols="5">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Tournaments</v-card-title>
+            <v-switch
+              :value="this.tournamentNamePermission"
+              class="ma-4"
+              label="Allow other users to see tournament names"
+              data-cy="switchNamePermission"
+              @change="swichTournamentNamePermission()"
+            />
+            <v-switch
+              :value="this.tournamentScorePermission"
+              class="ma-4"
+              label="Allow other users to see tournament scores"
+              data-cy="switchScorePermission"
+              @change="swichTournamentScorePermission()"
+            />
             <v-data-table
               :headers="headers"
               :items="tournaments"
@@ -155,6 +169,8 @@ import SolvedQuiz from '@/models/statement/SolvedQuiz';
   components: { AnimatedNumber }
 })
 export default class DashboardView extends Vue {
+  tournamentNamePermission: boolean = false;
+  tournamentScorePermission: boolean = false;
   info: Dashboard | null = null;
   stats: StudentStats | null = null;
   tournaments: Tournament[] = [];
@@ -175,6 +191,8 @@ export default class DashboardView extends Vue {
       this.quizzes = await RemoteServices.getSolvedQuizzes();
       if (this.info.joinedTournaments)
         this.tournaments = this.info.joinedTournaments.sort();
+      this.tournamentNamePermission = this.info.tournamentNamePermission;
+      this.tournamentScorePermission = this.info.tournamentScorePermission;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -206,6 +224,34 @@ export default class DashboardView extends Vue {
 
     if (score == '') return 'not solved';
     return score;
+  }
+
+  async swichTournamentNamePermission() {
+    try {
+      await RemoteServices.swichTournamentNamePermission();
+      this.tournamentNamePermission = !this.tournamentNamePermission;
+      if (!this.tournamentNamePermission) {
+        this.tournamentScorePermission = false;
+      }
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+      return;
+    }
+  }
+
+  async swichTournamentScorePermission() {
+    try {
+      await RemoteServices.swichTournamentScorePermission();
+      this.tournamentScorePermission = !this.tournamentScorePermission;
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+      this.resetButton();
+      return;
+    }
+  }
+
+  async resetButton() {
+    this.tournamentScorePermission = false;
   }
 }
 </script>

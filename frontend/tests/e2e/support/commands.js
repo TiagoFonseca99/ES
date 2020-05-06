@@ -159,6 +159,28 @@ Cypress.Commands.add('joinTournament', tournament => {
     .click({ force: true });
 });
 
+Cypress.Commands.add('solveTournament', tournament => {
+  cy.get('tbody')
+    .children()
+    .eq(tournament)
+    .children()
+    .should('have.length', 9)
+    .eq(8)
+    .find('[data-cy="SolveQuiz"]')
+    .click({ force: true });
+});
+
+Cypress.Commands.add('leaveTournament', tournament => {
+  cy.get('tbody')
+    .children()
+    .eq(tournament)
+    .children()
+    .should('have.length', 9)
+    .eq(8)
+    .find('[data-cy="LeaveTournament"]')
+    .click({ force: true });
+});
+
 Cypress.Commands.add('editTournament', tournament => {
   cy.get('tbody')
     .children()
