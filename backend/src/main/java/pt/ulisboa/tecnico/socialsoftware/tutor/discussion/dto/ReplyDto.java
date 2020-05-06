@@ -41,6 +41,10 @@ public class ReplyDto implements Serializable {
         this.date = date;
     }
 
+    public void setDate(LocalDateTime date) {
+        this.date = DateHandler.toISOString(date);
+    }
+
     public String getMessage() {
         return message;
     }

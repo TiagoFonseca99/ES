@@ -27,7 +27,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
-import java.time.LocalTime;
+import java.time.LocalDateTime
 
 
 @DataJpaTest
@@ -121,7 +121,7 @@ class GiveExplanationPerformanceTest extends Specification {
             def reply = new ReplyDto()
             reply.setMessage(REPLY_MESSAGE)
             reply.setUserId(teacher.getId())
-            reply.setDate(LocalTime.now())
+            reply.setDate(LocalDateTime.now())
 
             discussionService.giveReply(reply, discussion)
         }
