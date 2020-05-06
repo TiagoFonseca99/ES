@@ -45,12 +45,25 @@
           </template>
           <span>Join Tournament</span>
         </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              small
+              class="mr-2"
+              v-on="on"
+              @click="solveQuiz(item)"
+              data-cy="SolveQuiz"
+              >fas fa-pencil-alt</v-icon
+            >
+          </template>
+          <span>Solve Quiz</span>
+        </v-tooltip>
       </template>
     </v-data-table>
 
     <edit-tournament-dialog
       v-if="currentTournament"
-      v-model="editTournamentDialog"
+      v-model="createTournamentDialog"
       :tournament="currentTournament"
       v-on:new-tournament="onCreateTournament"
       v-on:close-dialog="onCloseDialog"
@@ -62,17 +75,19 @@
 import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
-import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
+import StatementQuiz from '@/models/statement/StatementQuiz';
+import StatementManager from '@/models/statement/StatementManager';
+import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
 
 @Component({
   components: {
-    'edit-tournament-dialog': EditTournamentDialog
+    'edit-tournament-dialog': CreateTournamentDialog
   }
 })
 export default class OpenTournamentView extends Vue {
   tournaments: Tournament[] = [];
   currentTournament: Tournament | null = null;
-  editTournamentDialog: boolean = false;
+  createTournamentDialog: boolean = false;
   search: string = '';
   headers: object = [
     {
@@ -81,7 +96,7 @@ export default class OpenTournamentView extends Vue {
       align: 'center',
       width: '10%'
     },
-    { text: 'Id', value: 'id', align: 'center', width: '10%' },
+    { text: 'Id', value: 'id', align: 'center', width: '10%', sort: true },
     {
       text: 'Topics',
       value: 'topics',
@@ -140,17 +155,17 @@ export default class OpenTournamentView extends Vue {
 
   newTournament() {
     this.currentTournament = new Tournament();
-    this.editTournamentDialog = true;
+    this.createTournamentDialog = true;
   }
 
   async onCreateTournament(tournament: Tournament) {
     this.tournaments.unshift(tournament);
-    this.editTournamentDialog = false;
+    this.createTournamentDialog = false;
     this.currentTournament = null;
   }
 
   onCloseDialog() {
-    this.editTournamentDialog = false;
+    this.createTournamentDialog = false;
     this.currentTournament = null;
   }
 
@@ -169,6 +184,19 @@ export default class OpenTournamentView extends Vue {
     }
     tournamentToJoin.enrolled = true;
     tournamentToJoin.topics = topics;
+  }
+
+  async solveQuiz(tournament: Tournament) {
+    const enrolled = tournament.enrolled;
+    const topics = tournament.topics;
+    tournament.enrolled = undefined;
+    tournament.topics = [];
+    let quiz: StatementQuiz = await RemoteServices.solveTournament(tournament);
+    tournament.enrolled = enrolled;
+    tournament.topics = topics;
+    let statementManager: StatementManager = StatementManager.getInstance;
+    statementManager.statementQuiz = quiz;
+    await this.$router.push({ name: 'solve-quiz' });
   }
 }
 </script>

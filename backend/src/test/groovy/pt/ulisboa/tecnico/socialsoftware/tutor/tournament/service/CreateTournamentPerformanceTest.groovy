@@ -4,13 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
+import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto
@@ -18,9 +24,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentR
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @DataJpaTest
 class CreateTournamentPerformanceTest extends Specification {
@@ -60,13 +63,10 @@ class CreateTournamentPerformanceTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def startTime = LocalDateTime.now().plusHours(1)
-    def endTime = LocalDateTime.now().plusHours(2)
-    def formatter
+    def startTime = DateHandler.now().plusHours(1)
+    def endTime = DateHandler.now().plusHours(2)
 
     def setup() {
-        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-
         user = new User(USER_NAME, USERNAME, KEY, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -96,8 +96,8 @@ class CreateTournamentPerformanceTest extends Specification {
     def "performance testing to create 500 000 Tournaments"() {
         given:
         def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(startTime.format(formatter))
-        tournamentDto.setEndTime(endTime.format(formatter))
+        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
 
@@ -113,6 +113,30 @@ class CreateTournamentPerformanceTest extends Specification {
         @Bean
         TournamentService tournamentService() {
             return new TournamentService()
+        }
+
+        @Bean
+        StatementService statementService() {
+            return new StatementService()
+        }
+
+        @Bean
+        QuizService quizService() {
+            return new QuizService()
+        }
+
+        @Bean
+        AnswerService answerService() {
+            return new AnswerService()
+        }
+        @Bean
+        AnswersXmlImport answersXmlImport() {
+            return new AnswersXmlImport()
+        }
+
+        @Bean
+        QuestionService questionService() {
+            return new QuestionService()
         }
     }
 }

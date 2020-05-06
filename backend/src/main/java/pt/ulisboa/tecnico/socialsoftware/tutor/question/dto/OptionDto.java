@@ -24,6 +24,10 @@ public class OptionDto implements Serializable {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public Integer getSequence() {
         return sequence;
     }

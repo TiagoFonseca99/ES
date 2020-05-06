@@ -10,18 +10,20 @@
         <div class="col">Justification</div>
       </li>
       <li class="list-row" v-for="review in this.reviews" :key="review.id">
-        <div class="col" @click="showQuestionDialog(getSubmission(review))">
-          {{ getSubmission(review).title }}
+        <div class="col" @click="showQuestionDialog(getQuestion(review))">
+          {{ getQuestion(review).title }}
         </div>
-        <div class="col" @click="showQuestionDialog(getSubmission(review))">
-          {{ getSubmission(review).creationDate }}
+        <div class="col">
+          <v-chip small>
+            <span> {{ getQuestion(review).creationDate }} </span>
+          </v-chip>
         </div>
-        <div class="col" @click="showQuestionDialog(getSubmission(review))">
+        <div class="col">
           <v-chip small>
             <span>{{ review.creationDate }}</span>
           </v-chip>
         </div>
-        <div class="col" @click="showQuestionDialog(getSubmission(review))">
+        <div class="col">
           <v-chip :color="getStatusColor(review.status)" small>
             <span>{{ getReviewStatus(review) }}</span>
           </v-chip>
@@ -37,16 +39,23 @@
           >
         </div>
       </li>
+      <li class="list-header" >
+        <div class="col" style="color: white">
+          <v-icon class="mr-2" color="white">mouse</v-icon>Left-click on question's title to view it.
+        </div>
+      </li>
     </ul>
     <show-review-dialog
       v-if="currentReview"
-      :dialog="reviewDialog"
+      v-model="reviewDialog"
+      :submission="getSubmission(currentReview)"
+      :question="getQuestion(currentReview)"
       :review="currentReview"
       v-on:close-show-review-dialog="onCloseShowReviewDialog"
     />
     <show-question-dialog
       v-if="currentQuestion"
-      :dialog="questionDialog"
+      v-model="questionDialog"
       :question="currentQuestion"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
     />
@@ -61,7 +70,7 @@ import Review from '@/models/management/Review';
 import Submission from '@/models/management/Submission';
 import Image from '@/models/management/Image';
 import ShowReviewDialog from '@/views/student/questions/ShowReviewDialog.vue';
-import ShowQuestionDialog from '@/views/teacher/questions/ShowQuestionDialog.vue';
+import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
 import Question from '@/models/management/Question';
 
 @Component({
@@ -92,7 +101,7 @@ export default class ReviewView extends Vue {
     await this.$store.dispatch('clearLoading');
   }
 
-  getSubmission(review: Review) {
+  getQuestion(review: Review) {
     let submission = this.submissions.find(
       (submission: Submission) => submission.id == review.submissionId
     );
@@ -100,6 +109,10 @@ export default class ReviewView extends Vue {
     if (submission) {
       return submission.questionDto;
     }
+  }
+
+  getSubmission(review: Review) {
+    return this.submissions.find((submission: Submission) => submission.id == review.submissionId);
   }
 
   getReviewStatus(review: Review) {

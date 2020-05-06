@@ -4,10 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
+import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
@@ -21,9 +29,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import spock.lang.Specification
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @DataJpaTest
 class StudentJoinTournamentTest extends Specification {
@@ -45,7 +50,7 @@ class StudentJoinTournamentTest extends Specification {
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
-    public static final int NUMBER_OF_QUESTIONS1 = 5
+    public static final int NUMBER_OF_QUESTIONS1 = 1
 
     @Autowired
     UserService userService
@@ -68,6 +73,9 @@ class StudentJoinTournamentTest extends Specification {
     @Autowired
     TopicRepository topicRepository
 
+    @Autowired
+    QuestionRepository questionRepository
+
     def user
     def course
     def courseExecution
@@ -76,21 +84,22 @@ class StudentJoinTournamentTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def startTime_Now
-    def endTime_Now = LocalDateTime.now().plusHours(2)
+    def endTime_Now = DateHandler.now().plusHours(2)
     def tournamentDtoInit = new TournamentDto()
     def tournamentDto = new TournamentDto()
-    def formatter
+    def questionOne
 
     def setup() {
-        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-
         user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+
+        course.addCourseExecution(courseExecution)
+        courseExecution.setCourse(course)
+
         courseRepository.save(course)
 
-        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
         courseExecution.addUser(user)
         courseExecutionRepository.save(courseExecution)
 
@@ -110,11 +119,21 @@ class StudentJoinTournamentTest extends Specification {
         topics.add(topic1.getId())
         topics.add(topic2.getId())
 
-        tournamentDtoInit.setStartTime(LocalDateTime.now().format(formatter))
-        tournamentDtoInit.setEndTime(endTime_Now.format(formatter))
+        tournamentDtoInit.setStartTime(DateHandler.toISOString(DateHandler.now()))
+        tournamentDtoInit.setEndTime(DateHandler.toISOString(endTime_Now))
         tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
         tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
+
+        questionOne = new Question()
+        questionOne.setKey(1)
+        questionOne.setContent("Question Content")
+        questionOne.setTitle("Question Title")
+        questionOne.setStatus(Question.Status.AVAILABLE)
+        questionOne.setCourse(course)
+        questionOne.addTopic(topic1)
+        questionRepository.save(questionOne)
+
     }
 
     def "2 student join an open tournament and get participants" () {
@@ -282,11 +301,10 @@ class StudentJoinTournamentTest extends Specification {
         userRepository.save(user2)
 
         and:
-        startTime_Now = LocalDateTime.now()
         def canceledTournamentDtoInit = new TournamentDto()
         def canceledTournamentDto = new TournamentDto()
-        canceledTournamentDtoInit.setStartTime(startTime_Now.format(formatter))
-        canceledTournamentDtoInit.setEndTime(endTime_Now.format(formatter))
+        canceledTournamentDtoInit.setStartTime(DateHandler.toISOString(DateHandler.now()))
+        canceledTournamentDtoInit.setEndTime(DateHandler.toISOString(endTime_Now))
         canceledTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         canceledTournamentDtoInit.setState(Tournament.Status.CANCELED)
         canceledTournamentDto = tournamentService.createTournament(user.getId(), topics, canceledTournamentDtoInit)
@@ -310,11 +328,10 @@ class StudentJoinTournamentTest extends Specification {
         userRepository.save(user2)
 
         and:
-        startTime_Now = LocalDateTime.now()
         def notOpenTournamentDtoInit = new TournamentDto()
         def notOpenTournamentDto = new TournamentDto()
-        notOpenTournamentDtoInit.setStartTime(startTime_Now.format(formatter))
-        notOpenTournamentDtoInit.setEndTime(LocalDateTime.now().format(formatter))
+        notOpenTournamentDtoInit.setStartTime(DateHandler.toISOString(DateHandler.now()))
+        notOpenTournamentDtoInit.setEndTime(DateHandler.toISOString(DateHandler.now()))
         notOpenTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
         notOpenTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
         notOpenTournamentDto = tournamentService.createTournament(user.getId(), topics, notOpenTournamentDtoInit)
@@ -406,18 +423,39 @@ class StudentJoinTournamentTest extends Specification {
 
 
     @TestConfiguration
-    static class TournamentServiceImplTestContextConfiguration {
+    static class UserServiceImplTestContextConfiguration {
         @Bean
         TournamentService tournamentService() {
             return new TournamentService()
         }
-    }
 
-    @TestConfiguration
-    static class UserServiceImplTestContextConfiguration {
         @Bean
         UserService userService() {
             return new UserService()
+        }
+
+        @Bean
+        StatementService statementService() {
+            return new StatementService()
+        }
+
+        @Bean
+        QuizService quizService() {
+            return new QuizService()
+        }
+
+        @Bean
+        AnswerService answerService() {
+            return new AnswerService()
+        }
+        @Bean
+        AnswersXmlImport answersXmlImport() {
+            return new AnswersXmlImport()
+        }
+
+        @Bean
+        QuestionService questionService() {
+            return new QuestionService()
         }
     }
 
