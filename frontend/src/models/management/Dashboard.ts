@@ -10,6 +10,7 @@ export default class Dashboard {
   numRejectedSubmissions!: number | null;
   joinedTournaments!: Tournament[] | null;
   discussionStatsPublic!: boolean;
+  submissionStatsPublic!: boolean;
   tournamentStatsPublic!: boolean;
   tournamentNamePermission!: boolean;
   tournamentScorePermission!: boolean;
@@ -23,6 +24,7 @@ export default class Dashboard {
       this.numSubmissions = jsonObj.numSubmissions;
       this.numApprovedSubmissions = jsonObj.numApprovedSubmissions;
       this.discussionStatsPublic = jsonObj.discussionStatsPublic;
+      this.submissionStatsPublic = jsonObj.submissionStatsPublic;
       this.tournamentStatsPublic = jsonObj.tournamentStatsPublic;
       this.numRejectedSubmissions = jsonObj.numRejectedSubmissions;
       this.tournamentNamePermission = jsonObj.tournamentNamePermission;
