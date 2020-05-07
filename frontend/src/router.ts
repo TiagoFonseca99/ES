@@ -11,6 +11,7 @@ import QuestionsView from '@/views/teacher/questions/QuestionsView.vue';
 import TopicsView from '@/views/teacher/TopicsView.vue';
 import QuizzesView from '@/views/teacher/quizzes/QuizzesView.vue';
 import StudentsView from '@/views/teacher/students/StudentsView.vue';
+import CourseDashboardView from '@/views/teacher/DashboardView.vue';
 import StudentView from '@/views/student/StudentView.vue';
 
 import MyTournamentsView from '@/views/student/tournament/MyTournamentsView.vue';
@@ -130,6 +131,15 @@ let router = new Router({
           component: ImpExpView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - ImpExp',
+            requiredAuth: 'Teacher'
+          }
+        },
+        {
+          path: 'dashboard',
+          name: 'course -dashboard',
+          component: CourseDashboardView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Course Dashboard',
             requiredAuth: 'Teacher'
           }
         }

@@ -8,17 +8,20 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.Demo;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.StudentDto;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.COURSE_EXECUTION_NOT_FOUND;
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.INVALID_TYPE_FOR_COURSE;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Service
 public class CourseService {
@@ -27,6 +30,9 @@ public class CourseService {
 
     @Autowired
     private CourseExecutionRepository courseExecutionRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Retryable(
             value = { SQLException.class },
@@ -137,6 +143,39 @@ public class CourseService {
                     courseRepository.save(course);
                     return course;
                 });
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public DashboardDto getDashboardInfo(int courseExecutionId) {
+        CourseExecution courseExecution = courseExecutionRepository.findById(courseExecutionId).orElse(null);
+        if (courseExecution == null) {
+            return new DashboardDto();
+        }
+        List<User> allStudents = courseExecution.getUsers().stream().filter(user -> user.getRole().equals(User.Role.STUDENT)).collect(Collectors.toList());
+        //filter private dtos
+        List<DashboardDto> publicStudentsInfo = allStudents.stream().map(u -> userService.getDashboardInfo(u.getId())).collect(Collectors.toList());
+
+        return getAllPublicStudentsInfo(publicStudentsInfo);
+    }
+
+    private DashboardDto getAllPublicStudentsInfo(List<DashboardDto> publicStudentsInfo) {
+        Integer numDiscussions = 0;
+        Integer numPublicDiscussions = 0;
+        Integer numSubmissions = 0;
+        Integer numApprovedSubmissions = 0;
+        Integer numRejectedSubmissions = 0;
+        List<TournamentDto> joinedTournaments = new ArrayList<>();
+
+        for (DashboardDto studentInfo : publicStudentsInfo) {
+            numDiscussions += studentInfo.getNumDiscussions();
+            //numPublicDiscussions += studentInfo.getNumPublicDiscussions();
+            numSubmissions += studentInfo.getNumSubmissions();
+            numApprovedSubmissions += studentInfo.getNumApprovedSubmissions();
+            numRejectedSubmissions += studentInfo.getNumRejectedSubmissions();
+            joinedTournaments.addAll(studentInfo.getJoinedTournaments());
+        }
+        return new DashboardDto(numDiscussions, numPublicDiscussions, numSubmissions, numApprovedSubmissions, numRejectedSubmissions, joinedTournaments);
     }
 
     private CourseExecution createCourseExecution(Course existingCourse, CourseDto courseDto) {

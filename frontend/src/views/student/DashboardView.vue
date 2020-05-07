@@ -10,10 +10,10 @@
           <v-card class="dashCard">
             <v-card-title class="justify-center">User Info</v-card-title>
             <div class="text-left" style="padding-left: 25px;">
-              <b>Name: </b>
+              <b style="color: #1976d2">Name: </b>
               <span>{{ info !== null ? info.name : 'Unknown user' }}</span
               ><br />
-              <b>Username: </b>
+              <b style="color: #1976d2">Username: </b>
               <span>{{ info !== null ? info.username : 'Unknown user' }}</span>
             </div>
             <v-container>
@@ -117,6 +117,13 @@
                   :number="info.numApprovedSubmissions"
                 />
                 <p class="statName">Approved Submissions</p>
+              </div>
+              <div class="square">
+                <animated-number
+                        class="num"
+                        :number="info.numRejectedSubmissions"
+                />
+                <p class="statName">Rejected Submissions</p>
               </div>
             </div>
             <div v-else>
@@ -296,14 +303,14 @@ export default class DashboardView extends Vue {
   }
 
   .square {
-    border: 2px solid #333333;
+    border: 3px solid #ffffff;
     border-radius: 5px;
     display: flex;
     color: #1976d2;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    @include background-opacity(#7f7f7f, 0.75);
+    @include background-opacity(#ffffff, 0.85);
 
     .num {
       display: block;

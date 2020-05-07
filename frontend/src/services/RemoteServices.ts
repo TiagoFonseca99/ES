@@ -435,6 +435,17 @@ export default class RemoteServices {
       });
   }
 
+  static async getCourseDashboardInfo(executionId: number): Promise<Dashboard> {
+    return httpClient
+        .get(`/dashboard/${executionId}`)
+        .then(response => {
+          return new Dashboard(response.data);
+        })
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        });
+  }
+
   static async getAssessments(): Promise<Assessment[]> {
     return httpClient
       .get(
@@ -560,6 +571,15 @@ export default class RemoteServices {
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
+  }
+
+  static async changeSubmission(submission: Submission) {
+    return httpClient
+        .put('/management/reviews/changeSubmission', submission)
+        .then(response => {})
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        });
   }
 
   static async resubmitQuestion(submission: Submission, questionId: number): Promise<Submission> {
