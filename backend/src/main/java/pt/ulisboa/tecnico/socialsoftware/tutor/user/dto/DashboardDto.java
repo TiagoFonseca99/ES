@@ -12,6 +12,8 @@ public class DashboardDto implements Serializable {
     private String name;
     private String username;
     private boolean discussionStatsPublic;
+    private boolean submissionStatsPublic;
+    private boolean tournamentStatsPublic;
     private Integer numDiscussions;
     private Integer numPublicDiscussions;
     private Integer numSubmissions;
@@ -28,6 +30,8 @@ public class DashboardDto implements Serializable {
         this.name = user.getName();
         this.username = user.getUsername();
         this.discussionStatsPublic = user.isDiscussionStatsPublic();
+        this.submissionStatsPublic = user.isSubmissionStatsPublic();
+        this.tournamentStatsPublic = user.isTournamentStatsPublic();
         this.numDiscussions = user.getDiscussions().size();
         this.numPublicDiscussions = user.getPublicDiscussions().size();
         this.numSubmissions = user.getSubmissions().size();
@@ -44,15 +48,32 @@ public class DashboardDto implements Serializable {
         this.numSubmissions = numSubmissions;
         this.numApprovedSubmissions = numApprovedSubmissions;
         this.numRejectedSubmissions = numRejectedSubmissions;
-        this.joinedTournaments = joinedTournaments;
+        this.joinedTournaments = new ArrayList<>(joinedTournaments);
     }
 
     public boolean isDiscussionStatsPublic() {
         return discussionStatsPublic;
     }
 
+    public boolean isSubmissionStatsPublic() {
+        return submissionStatsPublic;
+    }
+
+    public boolean isTournamentStatsPublic() {
+        return tournamentStatsPublic;
+    }
+    
     public void setDiscussionStatsPublic(boolean discussionStatsPublic) {
         this.discussionStatsPublic = discussionStatsPublic;
+    }
+
+    public void setSubmissionStatsPublic(boolean submissionStatsPublic) {
+        this.submissionStatsPublic = submissionStatsPublic;
+    }
+
+
+    public void setTournamentStatsPublic(boolean tournamentStatsPublic) {
+        this.tournamentStatsPublic = tournamentStatsPublic;
     }
 
     public String getUsername() {

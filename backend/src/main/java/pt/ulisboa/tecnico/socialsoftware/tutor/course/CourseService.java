@@ -153,7 +153,6 @@ public class CourseService {
             return new DashboardDto();
         }
         List<User> allStudents = courseExecution.getUsers().stream().filter(user -> user.getRole().equals(User.Role.STUDENT)).collect(Collectors.toList());
-        //filter private dtos
         List<DashboardDto> publicStudentsInfo = allStudents.stream().map(u -> userService.getDashboardInfo(u.getId())).collect(Collectors.toList());
 
         return getAllPublicStudentsInfo(publicStudentsInfo);
@@ -168,12 +167,18 @@ public class CourseService {
         List<TournamentDto> joinedTournaments = new ArrayList<>();
 
         for (DashboardDto studentInfo : publicStudentsInfo) {
-            numDiscussions += studentInfo.getNumDiscussions();
-            //numPublicDiscussions += studentInfo.getNumPublicDiscussions();
-            numSubmissions += studentInfo.getNumSubmissions();
-            numApprovedSubmissions += studentInfo.getNumApprovedSubmissions();
-            numRejectedSubmissions += studentInfo.getNumRejectedSubmissions();
-            joinedTournaments.addAll(studentInfo.getJoinedTournaments());
+            if (studentInfo.isDiscussionStatsPublic()) {
+                numDiscussions += studentInfo.getNumDiscussions();
+                // numPublicDiscussions += studentInfo.getNumPublicDiscussions();
+            }
+            if (studentInfo.isSubmissionStatsPublic()) {
+                numSubmissions += studentInfo.getNumSubmissions();
+                numApprovedSubmissions += studentInfo.getNumApprovedSubmissions();
+                numRejectedSubmissions += studentInfo.getNumRejectedSubmissions();
+            }
+            if (studentInfo.isTournamentStatsPublic()) {
+                joinedTournaments.addAll(studentInfo.getJoinedTournaments());
+            }
         }
         return new DashboardDto(numDiscussions, numPublicDiscussions, numSubmissions, numApprovedSubmissions, numRejectedSubmissions, joinedTournaments);
     }

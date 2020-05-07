@@ -11,10 +11,10 @@
             <v-card-title class="justify-center">User Info</v-card-title>
             <div class="text-left" style="padding-left: 25px;">
               <b style="color: #1976d2">Name: </b>
-              <span>{{ info !== null ? info.name : 'Unknown user' }}</span
+              <span data-cy="name">{{ info !== null ? info.name : 'Unknown user' }}</span
               ><br />
               <b style="color: #1976d2">Username: </b>
-              <span>{{ info !== null ? info.username : 'Unknown user' }}</span>
+              <span data-cy="username">{{ info !== null ? info.username : 'Unknown user' }}</span>
             </div>
             <v-container>
               <v-col>
@@ -74,18 +74,11 @@
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Tournaments</v-card-title>
             <v-switch
-              :value="this.tournamentNamePermission"
-              class="ma-4"
-              label="Allow other users to see tournament names"
-              data-cy="switchNamePermission"
-              @change="switchTournamentNamePermission()"
-            />
-            <v-switch
-              :value="this.tournamentScorePermission"
-              class="ma-4"
-              label="Allow other users to see tournament scores"
-              data-cy="switchScorePermission"
-              @change="switchTournamentScorePermission()"
+              style="flex: 1"
+              v-if="info !== null"
+              v-model="info.tournamentStatsPublic"
+              :label="info.tournamentStatsPublic ? 'Public' : 'Private'"
+              @change="toggleTournaments()"
             />
             <v-data-table
               :headers="headers"
@@ -96,7 +89,7 @@
               class="fill-height"
             >
               <template v-slot:item.score="{ item }">
-                <v-chip>
+                <v-chip :color="getPercentageColor(score(item))">
                   {{ score(item) }}
                 </v-chip>
               </template>
@@ -106,19 +99,31 @@
         <v-col :cols="2">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Submissions</v-card-title>
+            <div
+                    class="switchContainer"
+                    style="display: flex; flex-direction: row; position: relative;"
+            >
+              <v-switch
+                      style="flex: 1"
+                      v-if="info !== null"
+                      v-model="info.submissionStatsPublic"
+                      :label="info.submissionStatsPublic ? 'Public' : 'Private'"
+                      @change="toggleSubmissions()"
+              />
+            </div>
             <div class="dashInfo" v-if="info !== null">
-              <div class="square">
+              <div class="square" data-cy="numSubmissions">
                 <animated-number class="num" :number="info.numSubmissions" />
                 <p class="statName">Submissions</p>
               </div>
-              <div class="square">
+              <div class="square" data-cy="numApprovedSubmissions">
                 <animated-number
                   class="num"
                   :number="info.numApprovedSubmissions"
                 />
                 <p class="statName">Approved Submissions</p>
               </div>
-              <div class="square">
+              <div class="square" data-cy="numRejectedSubmissions">
                 <animated-number
                   class="num"
                   :number="info.numRejectedSubmissions"
@@ -227,6 +232,22 @@ export default class DashboardView extends Vue {
     }
   }
 
+  async toggleSubmissions() {
+    try {
+      this.info = await RemoteServices.toggleSubmissionStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  async toggleTournaments() {
+    try {
+      this.info = await RemoteServices.toggleTournamentStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
   calculateScore(quiz: SolvedQuiz) {
     let correct = 0;
     for (let i = 0; i < quiz.statementQuiz.questions.length; i++) {
@@ -272,13 +293,18 @@ export default class DashboardView extends Vue {
       this.tournamentScorePermission = !this.tournamentScorePermission;
     } catch (error) {
       await this.$store.dispatch('error', error);
-      this.resetButton();
       return;
     }
   }
 
-  async resetButton() {
-    this.tournamentScorePermission = false;
+  getPercentageColor(score: string) {
+    let res = score.split("/");
+    let percentage = parseInt(res[0])/parseInt(res[1])*100;
+    if (percentage < 25) return 'red';
+    else if (percentage < 50) return 'orange';
+    else if (percentage < 75) return 'lime';
+    else if (percentage <= 100) return 'green';
+    else return 'grey';
   }
 }
 </script>
