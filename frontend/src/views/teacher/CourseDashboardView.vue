@@ -155,7 +155,6 @@ export default class DashboardView extends Vue {
         this.$store.getters.getCurrentCourse.courseExecutionId
       );
       if (this.info.joinedTournaments){
-        console.log(this.info.joinedTournaments);
         this.tournaments = this.info.joinedTournaments.sort();
       }
       this.course = this.$store.getters.getCurrentCourse;

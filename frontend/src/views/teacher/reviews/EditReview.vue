@@ -94,7 +94,6 @@ export default class EditReview extends Vue {
       this.currentReview.submissionId = this.editSubmission.id;
       this.currentReview.studentId = this.editSubmission.studentId;
       this.currentReview.status = status;
-      console.log(this.currentReview);
       const result = await RemoteServices.createReview(this.currentReview);
       this.$emit('create-review', result);
     } catch (error) {

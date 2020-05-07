@@ -270,7 +270,7 @@ export default class DashboardView extends Vue {
       }
     });
 
-    if (score == '') return 'not solved';
+    if (score == '') return 'NOT SOLVED';
     return score;
   }
 
@@ -304,7 +304,7 @@ export default class DashboardView extends Vue {
     else if (percentage < 50) return 'orange';
     else if (percentage < 75) return 'lime';
     else if (percentage <= 100) return 'green';
-    else return 'grey';
+    else return 'primary';
   }
 }
 </script>

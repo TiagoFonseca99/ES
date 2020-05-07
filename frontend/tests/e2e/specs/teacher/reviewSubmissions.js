@@ -12,7 +12,7 @@ describe('Teacher walkthrough', () => {
 
     it('login approves a submission', () => {
 
-        cy.ApproveSubmissions('OIOI','Excelente Pergunta');
+        cy.approveSubmissions('OIOI','Excelente Pergunta');
         cy.log('delete student submited question');
         cy.wait(1000);
         cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "With rev as (delete from reviews where user_id = 677 returning submission_id) delete from submissions where id = (select submission_id from rev); delete from questions where title = \'OIOI\'"');
@@ -21,7 +21,7 @@ describe('Teacher walkthrough', () => {
 
     it('login rejects a submission', () => {
 
-        cy.RejectSubmissions('OIOI','Porque me apeteceu');
+        cy.rejectSubmissions('OIOI','Porque me apeteceu');
         cy.log('delete student submited question');
         cy.wait(1000);
         cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "With rev as (delete from reviews where user_id = 677 returning submission_id) delete from submissions where id = (select submission_id from rev); delete from questions where title = \'OIOI\'"');
@@ -30,7 +30,7 @@ describe('Teacher walkthrough', () => {
 
     it('login reviews submisssion without justification', () => {
         cy.log('missing information');
-        cy.RejectSubmissions('OIOI',' ');
+        cy.rejectSubmissions('OIOI',' ');
 
         cy.closeErrorMessage();
 

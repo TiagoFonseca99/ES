@@ -2,7 +2,7 @@
     <div>
         <span v-html="convertMarkDown(question.content, question.image)" />
         <ul>
-            <li v-for="option in question.options" :key="option.number">
+            <li v-for="option in question.options" :key="option.sequence">
         <span
                 v-if="option.correct"
                 v-html="convertMarkDown('**[★]** ' + option.content)"

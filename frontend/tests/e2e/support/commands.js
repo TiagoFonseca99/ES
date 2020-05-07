@@ -432,7 +432,7 @@ Cypress.Commands.add('teacherReviewsSubmission', () => {
   );
 });
 
-Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
+Cypress.Commands.add('approveSubmissions', (title, justification) => {
     cy.get('[data-cy="Management"]').click();
     cy.get('[data-cy="Reviews"]').click();
     cy.get('[data-cy="Search"]').click();
@@ -448,7 +448,7 @@ Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
     cy.get('[data-cy="NoButton"]').click();
 });
 
-Cypress.Commands.add('ChangeSubmission', (title, justification, question_title, question_content) => {
+Cypress.Commands.add('changeSubmission', (title, justification, question_title, question_content) => {
     cy.get('[data-cy="Management"]').click();
     cy.get('[data-cy="Reviews"]').click();
     cy.get('[data-cy="Search"]').click();
@@ -468,7 +468,7 @@ Cypress.Commands.add('ChangeSubmission', (title, justification, question_title, 
 });
 
 
-Cypress.Commands.add('RejectSubmissions', (title, justification) => {
+Cypress.Commands.add('rejectSubmissions', (title, justification) => {
     cy.get('[data-cy="Management"]').click();
     cy.get('[data-cy="Reviews"]').click();
     cy.get('[data-cy="Search"]').click();
