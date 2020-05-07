@@ -89,7 +89,7 @@
               class="fill-height"
             >
               <template v-slot:item.score="{ item }">
-                <v-chip>
+                <v-chip :color="getPercentageColor(score(item))">
                   {{ score(item) }}
                 </v-chip>
               </template>
@@ -295,6 +295,16 @@ export default class DashboardView extends Vue {
       await this.$store.dispatch('error', error);
       return;
     }
+  }
+
+  getPercentageColor(score: string) {
+    let res = score.split("/");
+    let percentage = parseInt(res[0])/parseInt(res[1])*100;
+    if (percentage < 25) return 'red';
+    else if (percentage < 50) return 'orange';
+    else if (percentage < 75) return 'lime';
+    else if (percentage <= 100) return 'green';
+    else return 'grey';
   }
 }
 </script>

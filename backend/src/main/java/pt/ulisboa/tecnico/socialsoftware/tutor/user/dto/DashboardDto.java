@@ -47,7 +47,7 @@ public class DashboardDto implements Serializable {
         this.numSubmissions = numSubmissions;
         this.numApprovedSubmissions = numApprovedSubmissions;
         this.numRejectedSubmissions = numRejectedSubmissions;
-        this.joinedTournaments = joinedTournaments;
+        this.joinedTournaments = new ArrayList<>(joinedTournaments);
     }
 
     public boolean isDiscussionStatsPublic() {
