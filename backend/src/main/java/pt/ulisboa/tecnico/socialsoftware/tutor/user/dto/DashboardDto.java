@@ -35,7 +35,7 @@ public class DashboardDto implements Serializable {
         this.tournamentScorePermission = user.getTournamentScorePermissionB();
     }
 
-    public DashboardDto(Integer numDiscussions, Integer numSubmissions, Integer numPublicDiscussions, Integer numApprovedSubmissions, Integer numRejectedSubmissions, List<TournamentDto> joinedTournaments) {
+    public DashboardDto(Integer numDiscussions, Integer numPublicDiscussions, Integer numSubmissions, Integer numApprovedSubmissions, Integer numRejectedSubmissions, List<TournamentDto> joinedTournaments) {
         this.numDiscussions = numDiscussions;
         this.numPublicDiscussions = numPublicDiscussions;
         this.numSubmissions = numSubmissions;
