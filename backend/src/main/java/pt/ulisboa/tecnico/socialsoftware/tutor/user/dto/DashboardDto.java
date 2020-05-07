@@ -12,6 +12,7 @@ public class DashboardDto implements Serializable {
     private String name;
     private String username;
     private boolean discussionStatsPublic;
+    private boolean tournamentStatsPublic;
     private Integer numDiscussions;
     private Integer numPublicDiscussions;
     private Integer numSubmissions;
@@ -28,6 +29,7 @@ public class DashboardDto implements Serializable {
         this.name = user.getName();
         this.username = user.getUsername();
         this.discussionStatsPublic = user.isDiscussionStatsPublic();
+        this.tournamentStatsPublic = user.isTournamentStatsPublic();
         this.numDiscussions = user.getDiscussions().size();
         this.numSubmissions = user.getSubmissions().size();
         this.numApprovedSubmissions = user.getNumberOfApprovedSubmissions();
@@ -52,6 +54,14 @@ public class DashboardDto implements Serializable {
 
     public void setDiscussionStatsPublic(boolean discussionStatsPublic) {
         this.discussionStatsPublic = discussionStatsPublic;
+    }
+
+    public boolean isTournamentStatsPublic() {
+        return tournamentStatsPublic;
+    }
+
+    public void setTournamentStatsPublic(boolean tournamentStatsPublic) {
+        this.tournamentStatsPublic = tournamentStatsPublic;
     }
 
     public String getUsername() {
