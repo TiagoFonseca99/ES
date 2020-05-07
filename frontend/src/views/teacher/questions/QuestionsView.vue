@@ -3,7 +3,7 @@
     <v-data-table
       :headers="headers"
       :custom-filter="customFilter"
-      :items="items"
+      :items="questions"
       :search="search"
       :sort-by="['creationDate']"
       sort-desc
@@ -186,7 +186,6 @@ enum FilterState {
   }
 })
 export default class QuestionsView extends Vue {
-  items: Question[] = [];
   questions: Question[] = [];
   topics: Topic[] = [];
   currentQuestion: Question | null = null;
