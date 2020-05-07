@@ -92,6 +92,7 @@ class GetDashboardInfoTest extends Specification {
     def student2
     def teacher
     def tournamentDto1 = new TournamentDto()
+    def tournamentDto2 = new TournamentDto()
     def submission1
     def submission2
 
@@ -191,8 +192,14 @@ class GetDashboardInfoTest extends Specification {
         tournamentDto1.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto1.setState(Tournament.Status.NOT_CANCELED)
 
+        tournamentDto2 = new TournamentDto()
+        tournamentDto2.setStartTime(DateHandler.toISOString(startTime))
+        tournamentDto2.setEndTime(DateHandler.toISOString(endTime))
+        tournamentDto2.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto2.setState(Tournament.Status.NOT_CANCELED)
 
         tournamentDto1 = tournamentService.createTournament(student1.getId(), topics, tournamentDto1)
+        tournamentDto2 = tournamentService.createTournament(student1.getId(), topics, tournamentDto2)
 
         submission1 = new Submission()
         submission1.setQuestion(submittedQuestion1)
@@ -319,6 +326,20 @@ class GetDashboardInfoTest extends Specification {
 
         then:
         result.getJoinedTournaments().size() == 1
+    }
+
+    def "get number of tournaments from student enrolled in 2 tournaments"() {
+        given: "student enrolled in tournament 1"
+        tournamentService.joinTournament(student1.getId(), tournamentDto1)
+
+        and: "student enrolled in tournament 2"
+        tournamentService.joinTournament(student1.getId(), tournamentDto2)
+
+        when: "requesting information"
+        def result = userService.getDashboardInfo(student1.getId())
+
+        then:
+        result.getJoinedTournaments().size() == 2
     }
 
     def "get number of tournaments from student enrolled in 0 tournament"() {
