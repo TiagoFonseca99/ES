@@ -55,8 +55,8 @@ public class Tournament {
     @JoinColumn(name = "course_execution_id")
     private CourseExecution courseExecution;
 
-    @Column(name = "statementQuiz")
-    private StatementQuizDto statementQuizDto;
+    @Column(name = "quizID")
+    private Integer quizId;
 
     public Tournament() {
     }
@@ -141,12 +141,12 @@ public class Tournament {
         return courseExecution;
     }
 
-    public StatementQuizDto getStatementQuizDto() {
-        return statementQuizDto;
+    public Integer getQuizId() {
+        return quizId;
     }
 
-    public void setStatementQuizDto(StatementQuizDto statementQuizDto) {
-        this.statementQuizDto = statementQuizDto;
+    public void setQuizId(Integer quizId) {
+        this.quizId = quizId;
     }
 
     private void setTopics(List<Topic> topics) {
@@ -204,7 +204,7 @@ public class Tournament {
     }
 
     public boolean hasQuiz() {
-        if (this.getStatementQuizDto() != null){
+        if (this.getQuizId() != null){
             return true;
         }
         return false;
