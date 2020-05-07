@@ -73,11 +73,34 @@
         <v-col :cols="5">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Tournaments</v-card-title>
+            <v-switch
+              :value="this.tournamentNamePermission"
+              class="ma-4"
+              label="Allow other users to see tournament names"
+              data-cy="switchNamePermission"
+              @change="swichTournamentNamePermission()"
+            />
+            <v-switch
+              :value="this.tournamentScorePermission"
+              class="ma-4"
+              label="Allow other users to see tournament scores"
+              data-cy="switchScorePermission"
+              @change="swichTournamentScorePermission()"
+            />
             <v-data-table
               :headers="headers"
+              :items="tournaments"
+              :sort-by="['id']"
               :hide-default-footer="true"
+              :mobile-breakpoint="0"
               class="fill-height"
-            ></v-data-table>
+            >
+              <template v-slot:item.score="{ item }">
+                <v-chip>
+                  {{ score(item) }}
+                </v-chip>
+              </template>
+            </v-data-table>
           </v-card>
         </v-col>
         <v-col :cols="2">
@@ -138,18 +161,26 @@ import { Component, Vue } from 'vue-property-decorator';
 import Dashboard from '@/models/management/Dashboard';
 import RemoteServices from '@/services/RemoteServices';
 import StudentStats from '@/models/statement/StudentStats';
+import Tournament from '@/models/user/Tournament';
 import AnimatedNumber from '@/components/AnimatedNumber.vue';
+import SolvedQuiz from '@/models/statement/SolvedQuiz';
 
 @Component({
   components: { AnimatedNumber }
 })
 export default class DashboardView extends Vue {
+  tournamentNamePermission: boolean = false;
+  tournamentScorePermission: boolean = false;
   info: Dashboard | null = null;
   stats: StudentStats | null = null;
+  tournaments: Tournament[] = [];
+  quizzes: SolvedQuiz[] = [];
+
   headers: object = [
-    { text: 'Tournament Number', align: 'center' },
-    { text: 'Date', align: 'center' },
-    { text: 'Score', align: 'center' }
+    { text: 'Tournament Number', value: 'id', align: 'center' },
+    { text: 'Start Time', value: 'startTime', align: 'center' },
+    { text: 'End Time', value: 'endTime', align: 'center' },
+    { text: 'Score', value: 'score', align: 'center' }
   ];
 
   async created() {
@@ -157,11 +188,70 @@ export default class DashboardView extends Vue {
     try {
       this.info = await RemoteServices.getDashboardInfo();
       this.stats = await RemoteServices.getUserStats();
+      this.quizzes = await RemoteServices.getSolvedQuizzes();
+      if (this.info.joinedTournaments)
+        this.tournaments = this.info.joinedTournaments.sort();
+      this.tournamentNamePermission = this.info.tournamentNamePermission;
+      this.tournamentScorePermission = this.info.tournamentScorePermission;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
 
     await this.$store.dispatch('clearLoading');
+  }
+
+  calculateScore(quiz: SolvedQuiz) {
+    let correct = 0;
+    for (let i = 0; i < quiz.statementQuiz.questions.length; i++) {
+      if (
+        quiz.statementQuiz.answers[i] &&
+        quiz.correctAnswers[i].correctOptionId ===
+          quiz.statementQuiz.answers[i].optionId
+      ) {
+        correct += 1;
+      }
+    }
+    return `${correct}/${quiz.statementQuiz.questions.length}`;
+  }
+
+  score(tournament: Tournament) {
+    let score = '';
+    this.quizzes.map(quiz => {
+      if (quiz.statementQuiz.id == tournament.quizId) {
+        score = this.calculateScore(quiz);
+      }
+    });
+
+    if (score == '') return 'not solved';
+    return score;
+  }
+
+  async swichTournamentNamePermission() {
+    try {
+      await RemoteServices.swichTournamentNamePermission();
+      this.tournamentNamePermission = !this.tournamentNamePermission;
+      if (!this.tournamentNamePermission) {
+        this.tournamentScorePermission = false;
+      }
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+      return;
+    }
+  }
+
+  async swichTournamentScorePermission() {
+    try {
+      await RemoteServices.swichTournamentScorePermission();
+      this.tournamentScorePermission = !this.tournamentScorePermission;
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+      this.resetButton();
+      return;
+    }
+  }
+
+  async resetButton() {
+    this.tournamentScorePermission = false;
   }
 }
 </script>

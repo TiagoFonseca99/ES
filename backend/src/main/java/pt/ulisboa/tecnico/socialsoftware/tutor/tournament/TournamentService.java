@@ -236,16 +236,13 @@ public class TournamentService {
             Quiz quiz = quizRepository.findById(statementQuizDto.getId())
                     .orElseThrow(() -> new TutorException(QUIZ_NOT_FOUND, statementQuizDto.getId()));
 
-
             if (DateHandler.now().isBefore(tournament.getStartTime())){
                 quiz.setAvailableDate(tournament.getStartTime());
             }
             quiz.setConclusionDate(tournament.getEndTime());
 
             tournament.setStatementQuizDto(statementQuizDto);
-
         }
-
     }
 
     @Retryable(

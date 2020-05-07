@@ -4,6 +4,7 @@
       :headers="headers"
       :items="tournaments"
       :search="search"
+      :sort-by="['id']"
       disable-pagination
       :hide-default-footer="true"
       :mobile-breakpoint="0"
