@@ -124,6 +124,17 @@ public class UserService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public DashboardDto toggleSubmissionStatsVisibility(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
+
+        checkStudent(user);
+        user.toggleSubmissionStatsVisibility();
+
+        return user.getDashboardInfo();
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void importUsers(String usersXML) {
         UsersXmlImport xmlImporter = new UsersXmlImport();
 
@@ -171,22 +182,6 @@ public class UserService {
         }
     }
 
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void switchSubmissionPermission(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-
-        if (user.getSubmissionPermission()) {
-            user.setSubmissionPermission(false);
-            user.setSubmissionPermission(false);
-        }
-        else {
-            user.setSubmissionPermission(true);
-        }
-    }
 
     @Retryable(
             value = { SQLException.class },

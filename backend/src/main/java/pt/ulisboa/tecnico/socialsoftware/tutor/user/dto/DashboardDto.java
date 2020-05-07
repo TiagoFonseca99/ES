@@ -12,6 +12,7 @@ public class DashboardDto implements Serializable {
     private String name;
     private String username;
     private boolean discussionStatsPublic;
+    private boolean submissionStatsPublic;
     private Integer numDiscussions;
     private Integer numPublicDiscussions;
     private Integer numSubmissions;
@@ -20,7 +21,6 @@ public class DashboardDto implements Serializable {
     private List<TournamentDto> joinedTournaments;
     private Boolean tournamentNamePermission;
     private Boolean tournamentScorePermission;
-    private Boolean submissionPermission;
 
     public DashboardDto() {
     }
@@ -29,12 +29,12 @@ public class DashboardDto implements Serializable {
         this.name = user.getName();
         this.username = user.getUsername();
         this.discussionStatsPublic = user.isDiscussionStatsPublic();
+        this.submissionStatsPublic = user.isSubmissionStatsPublic();
         this.numDiscussions = user.getDiscussions().size();
         this.numSubmissions = user.getSubmissions().size();
         this.numApprovedSubmissions = user.getNumberOfApprovedSubmissions();
         this.numRejectedSubmissions = user.getNumberOfRejectedSubmissions();
         this.joinedTournaments = user.getTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
-        this.submissionPermission = user.getSubmissionPermission();
         this.tournamentNamePermission = user.getTournamentNamePermissionB();
         this.tournamentScorePermission = user.getTournamentScorePermissionB();
     }
@@ -52,8 +52,16 @@ public class DashboardDto implements Serializable {
         return discussionStatsPublic;
     }
 
+    public boolean isSubmissionStatsPublic() {
+        return submissionStatsPublic;
+    }
+
     public void setDiscussionStatsPublic(boolean discussionStatsPublic) {
         this.discussionStatsPublic = discussionStatsPublic;
+    }
+
+    public void setSubmissionStatsPublic(boolean submissionStatsPublic) {
+        this.submissionStatsPublic = submissionStatsPublic;
     }
 
     public String getUsername() {
@@ -108,14 +116,6 @@ public class DashboardDto implements Serializable {
 
     public void setTournamentNamePermission(Boolean tournamentNamePermission) {
         this.tournamentNamePermission = tournamentNamePermission;
-    }
-
-    public Boolean submissionPermission() {
-        return submissionPermission;
-    }
-
-    public void setSubmissionPermission(Boolean submissionPermission) {
-        this.submissionPermission = submissionPermission;
     }
 
     public Boolean getTournamentScorePermission() {
