@@ -45,6 +45,15 @@
           </v-list>
         </v-menu>
 
+        <v-btn
+          to="/management/dashboard"
+          v-if="isTeacher && currentCourse"
+          text
+          dark
+        >
+          Course Dashboard
+          <v-icon>school</v-icon>
+        </v-btn>
         <v-menu offset-y v-if="isTeacher && currentCourse" open-on-hover>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" text dark data-cy="Management">

@@ -435,6 +435,17 @@ export default class RemoteServices {
       });
   }
 
+  static async getCourseDashboardInfo(executionId: number): Promise<Dashboard> {
+    return httpClient
+      .get(`/dashboard/${executionId}`)
+      .then(response => {
+        return new Dashboard(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async getAssessments(): Promise<Assessment[]> {
     return httpClient
       .get(
@@ -557,6 +568,15 @@ export default class RemoteServices {
       .then(response => {
         return new Submission(response.data);
       })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async changeSubmission(submission: Submission) {
+    return httpClient
+      .put('/management/reviews/changeSubmission', submission)
+      .then(() => {})
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
@@ -964,6 +984,22 @@ export default class RemoteServices {
   static joinTournament(tournament: Tournament) {
     return httpClient
       .put('tournaments/joinTournament', tournament)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static switchTournamentNamePermission() {
+    return httpClient
+      .put('/switchTournamentNamePermission')
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static switchTournamentScorePermission() {
+    return httpClient
+      .put('/switchTournamentScorePermission')
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });

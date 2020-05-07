@@ -14,6 +14,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Assessment
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.AssessmentRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import spock.lang.Specification
 
 @DataJpaTest
@@ -26,6 +27,9 @@ class RemoveCourseExecutionsTest extends Specification {
 
     @Autowired
     CourseService courseService
+
+    @Autowired
+    UserService userService
 
     @Autowired
     CourseRepository courseRepository
@@ -102,6 +106,15 @@ class RemoveCourseExecutionsTest extends Specification {
         @Bean
         CourseService courseService() {
             return new CourseService()
+        }
+    }
+
+    @TestConfiguration
+    static class UserServiceImplTestContextConfiguration {
+
+        @Bean
+        UserService userService() {
+            return new UserService()
         }
     }
 }

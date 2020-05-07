@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.AUTHENTICATION_ERROR;;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.AUTHENTICATION_ERROR;
 
 @RestController
 public class UserController {
@@ -41,5 +41,27 @@ public class UserController {
         }
 
         return userService.toggleDiscussionStatsVisibility(user.getId());
+    }
+
+    @PutMapping(value = "/switchTournamentNamePermission")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void switchTournamentNamePermission(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        userService.switchTournamentNamePermission(user.getId());
+    }
+
+    @PutMapping(value = "/switchTournamentScorePermission")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void switchTournamentScorePermission(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        userService.switchTournamentScorePermission(user.getId());
     }
 }

@@ -48,6 +48,18 @@ public class SubmissionController {
         return submissionService.createSubmission(question.getId(), submissionDto);
     }
 
+    @PutMapping(value = "/management/reviews/changeSubmission")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public void changeSubmission(Principal principal, @Valid @RequestBody SubmissionDto submissionDto) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        submissionService.changeSubmission(submissionDto);
+    }
+
     @PutMapping("/student/reviews/{questionId}")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public SubmissionDto resubmitQuestion(Principal principal, @PathVariable Integer questionId, @Valid @RequestBody SubmissionDto submissionDto) {
@@ -65,6 +77,7 @@ public class SubmissionController {
 
         return submissionService.resubmitQuestion(questionId, newQuestion.getId(), submissionDto);
     }
+
 
     @PostMapping(value = "/management/reviews")
     @PreAuthorize("hasRole('ROLE_TEACHER')")

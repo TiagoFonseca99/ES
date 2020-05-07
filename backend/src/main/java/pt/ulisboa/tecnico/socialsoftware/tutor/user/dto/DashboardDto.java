@@ -1,7 +1,9 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.user.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -14,7 +16,10 @@ public class DashboardDto implements Serializable {
     private Integer numPublicDiscussions;
     private Integer numSubmissions;
     private Integer numApprovedSubmissions;
+    private Integer numRejectedSubmissions;
     private List<TournamentDto> joinedTournaments;
+    private Boolean tournamentNamePermission;
+    private Boolean tournamentScorePermission;
 
     public DashboardDto() {
     }
@@ -24,6 +29,21 @@ public class DashboardDto implements Serializable {
         this.username = user.getUsername();
         this.discussionStatsPublic = user.isDiscussionStatsPublic();
         this.numDiscussions = user.getDiscussions().size();
+        this.numSubmissions = user.getSubmissions().size();
+        this.numApprovedSubmissions = user.getNumberOfApprovedSubmissions();
+        this.numRejectedSubmissions = user.getNumberOfRejectedSubmissions();
+        this.joinedTournaments = user.getTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
+        this.tournamentNamePermission = user.getTournamentNamePermissionB();
+        this.tournamentScorePermission = user.getTournamentScorePermissionB();
+    }
+
+    public DashboardDto(Integer numDiscussions, Integer numPublicDiscussions, Integer numSubmissions, Integer numApprovedSubmissions, Integer numRejectedSubmissions, List<TournamentDto> joinedTournaments) {
+        this.numDiscussions = numDiscussions;
+        this.numPublicDiscussions = numPublicDiscussions;
+        this.numSubmissions = numSubmissions;
+        this.numApprovedSubmissions = numApprovedSubmissions;
+        this.numRejectedSubmissions = numRejectedSubmissions;
+        this.joinedTournaments = joinedTournaments;
     }
 
     public boolean isDiscussionStatsPublic() {
@@ -54,17 +74,17 @@ public class DashboardDto implements Serializable {
         return joinedTournaments;
     }
 
-    public void setJoinedTournaments(List<TournamentDto> joinedTournaments) {
-        this.joinedTournaments = joinedTournaments;
-    }
+    public void setJoinedTournaments(List<TournamentDto> joinedTournaments) { this.joinedTournaments = joinedTournaments; }
 
     public Integer getNumApprovedSubmissions() {
         return numApprovedSubmissions;
     }
 
-    public void setNumApprovedSubmissions(Integer numApprovedSubmissions) {
-        this.numApprovedSubmissions = numApprovedSubmissions;
-    }
+    public void setNumApprovedSubmissions(Integer numApprovedSubmissions) { this.numApprovedSubmissions = numApprovedSubmissions; }
+
+    public Integer getNumRejectedSubmissions() { return numRejectedSubmissions; }
+
+    public void setNumRejectedSubmissions(Integer numRejectedSubmissions) { this.numRejectedSubmissions = numRejectedSubmissions; }
 
     public Integer getNumSubmissions() {
         return numSubmissions;
@@ -78,9 +98,24 @@ public class DashboardDto implements Serializable {
         return numPublicDiscussions;
     }
 
-    public void setNumPublicDiscussions(Integer numPublicDiscussions) {
-        this.numPublicDiscussions = numPublicDiscussions;
+    public void setNumPublicDiscussions(Integer numPublicDiscussions) { this.numPublicDiscussions = numPublicDiscussions; }
+
+    public Boolean getTournamentNamePermission() {
+        return tournamentNamePermission;
     }
+
+    public void setTournamentNamePermission(Boolean tournamentNamePermission) {
+        this.tournamentNamePermission = tournamentNamePermission;
+    }
+
+    public Boolean getTournamentScorePermission() {
+        return tournamentScorePermission;
+    }
+
+    public void setTournamentScorePermission(Boolean tournamentScorePermission) {
+        this.tournamentScorePermission = tournamentScorePermission;
+    }
+
 
     public Integer getNumDiscussions() {
         return numDiscussions;

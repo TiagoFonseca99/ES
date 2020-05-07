@@ -54,6 +54,10 @@ public class User implements UserDetails, DomainEntity {
     private Integer numberOfCorrectTeacherAnswers;
     private Integer numberOfCorrectInClassAnswers;
     private Integer numberOfCorrectStudentAnswers;
+    private Integer numberOfApprovedSubmissions;
+    private Integer numberOfRejectedSubmissions;
+    private Boolean tournamentNamePermission;
+    private Boolean tournamentScorePermission;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
@@ -103,6 +107,10 @@ public class User implements UserDetails, DomainEntity {
         this.numberOfCorrectTeacherAnswers = 0;
         this.numberOfCorrectInClassAnswers = 0;
         this.numberOfCorrectStudentAnswers = 0;
+        this.numberOfApprovedSubmissions = 0;
+        this.numberOfRejectedSubmissions = 0;
+        this.tournamentNamePermission = false;
+        this.tournamentScorePermission = false;
     }
 
     @Override
@@ -322,6 +330,46 @@ public class User implements UserDetails, DomainEntity {
 
     public void setNumberOfCorrectStudentAnswers(Integer numberOfCorrectStudentAnswers) {
         this.numberOfCorrectStudentAnswers = numberOfCorrectStudentAnswers;
+    }
+
+    public Integer getNumberOfApprovedSubmissions() { return numberOfApprovedSubmissions; }
+
+    public void setNumberOfApprovedSubmissions(Integer numberOfApprovedSubmissions) { this.numberOfApprovedSubmissions = numberOfApprovedSubmissions; }
+
+    public Integer getNumberOfRejectedSubmissions() { return numberOfRejectedSubmissions; }
+
+    public void setNumberOfRejectedSubmissions(Integer numberOfRejectedSubmissions) { this.numberOfRejectedSubmissions = numberOfRejectedSubmissions; }
+    
+    public boolean getTournamentNamePermission() {
+        if (tournamentNamePermission == null)
+            this.tournamentNamePermission = false;
+        return tournamentNamePermission;
+    }
+
+    public Boolean getTournamentNamePermissionB() {
+        if (tournamentNamePermission == null)
+            this.tournamentNamePermission = Boolean.FALSE;
+        return tournamentNamePermission;
+    }
+
+    public void setTournamentNamePermission(boolean tournamentNamePermission) {
+        this.tournamentNamePermission = tournamentNamePermission;
+    }
+
+    public boolean getTournamentScorePermission() {
+        if (tournamentScorePermission == null)
+            this.tournamentScorePermission = false;
+        return tournamentScorePermission;
+    }
+
+    public Boolean getTournamentScorePermissionB() {
+        if (tournamentScorePermission == null)
+            this.tournamentScorePermission = Boolean.FALSE;
+        return tournamentScorePermission;
+    }
+
+    public void setTournamentScorePermission(boolean tournamentScorePermission) {
+        this.tournamentScorePermission = tournamentScorePermission;
     }
 
     @Override

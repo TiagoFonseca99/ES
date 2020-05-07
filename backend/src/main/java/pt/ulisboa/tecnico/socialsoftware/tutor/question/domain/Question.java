@@ -135,8 +135,8 @@ public class Question implements DomainEntity {
         if (options.stream().filter(OptionDto::getCorrect).count() != 1) {
             throw new TutorException(ONE_CORRECT_OPTION_NEEDED);
         }
-
         int index = 0;
+
         for (OptionDto optionDto : options) {
             if (optionDto.getId() == null) {
                 optionDto.setSequence(index++);
@@ -291,13 +291,17 @@ public class Question implements DomainEntity {
     }
 
     public void update(QuestionDto questionDto) {
+
         if (getQuizQuestions().stream().flatMap(quizQuestion -> quizQuestion.getQuestionAnswers().stream()).findAny().isPresent()) {
             throw new TutorException(CANNOT_CHANGE_ANSWERED_QUESTION);
         }
 
         setTitle(questionDto.getTitle());
+
         setContent(questionDto.getContent());
+
         setOptions(questionDto.getOptions());
+
     }
 
     public void updateTopics(Set<Topic> newTopics) {
