@@ -77,8 +77,7 @@
 </template>
 
 <script lang="ts">
-
-import {Component, Model, Prop, Vue} from 'vue-property-decorator';
+import { Component, Model, Prop, Vue } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
 import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
@@ -98,32 +97,31 @@ export default class MenuChangeSubmission extends Vue {
   }
 
   async changeQuestion() {
-      if (
-        this.editQuestion &&
-        (!this.editQuestion.title || !this.editQuestion.content)
-      ) {
-        await this.$store.dispatch(
-          'error',
-          'Question must have title and content'
-        );
-        return;
-      }
-      try {
-        this.editSubmission.questionDto = this.editQuestion;
-        this.editSubmission.courseId = this.$store.getters.getCurrentCourse.courseId;
-        await RemoteServices.changeSubmission(this.editSubmission);
-        this.$emit('change-sub');
-      } catch (error) {
-        await this.$store.dispatch('error', error);
-      }
+    if (
+      this.editQuestion &&
+      (!this.editQuestion.title || !this.editQuestion.content)
+    ) {
+      await this.$store.dispatch(
+        'error',
+        'Question must have title and content'
+      );
+      return;
     }
-
-    cancelButton() {
-      this.$emit('dialog', false);
+    try {
+      this.editSubmission.questionDto = this.editQuestion;
+      this.editSubmission.courseId = this.$store.getters.getCurrentCourse.courseId;
+      await RemoteServices.changeSubmission(this.editSubmission);
       this.$emit('change-sub');
+    } catch (error) {
+      await this.$store.dispatch('error', error);
     }
-}
+  }
 
+  cancelButton() {
+    this.$emit('dialog', false);
+    this.$emit('change-sub');
+  }
+}
 </script>
 
 <style lang="scss" scoped></style>

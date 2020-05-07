@@ -10,7 +10,7 @@
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Information</v-card-title>
             <div class="dashInfo" v-if="course">
-              <div class="square taller" >
+              <div class="square taller">
                 <b class="infoName">Course Name</b>
                 <span style="color: black">{{ course.name }}</span>
               </div>
@@ -24,7 +24,9 @@
               </div>
               <div class="square taller">
                 <b class="infoName">Course Type</b>
-                <span style="color: black">{{ course.courseExecutionType }}</span>
+                <span style="color: black">{{
+                  course.courseExecutionType
+                }}</span>
               </div>
               <div class="square taller">
                 <b class="infoName">Status</b>
@@ -65,8 +67,8 @@
               </div>
               <div class="square">
                 <animated-number
-                        class="num"
-                        :number="info.numRejectedSubmissions"
+                  class="num"
+                  :number="info.numRejectedSubmissions"
                 />
                 <p class="statName">Total Rejected Submissions</p>
               </div>
@@ -131,7 +133,9 @@ export default class DashboardView extends Vue {
     await this.$store.dispatch('loading');
     try {
       this.course = this.$store.getters.getCurrentCourse;
-      this.info = await RemoteServices.getCourseDashboardInfo(this.$store.getters.getCurrentCourse.courseExecutionId);
+      this.info = await RemoteServices.getCourseDashboardInfo(
+        this.$store.getters.getCurrentCourse.courseExecutionId
+      );
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

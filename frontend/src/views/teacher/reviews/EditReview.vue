@@ -43,16 +43,24 @@
           @click="createReview('REJECTED')"
           >Reject</v-btn
         >
-        <v-btn color="blue darken-1" data-cy="Approve" @click="menuChangeSubmission('APPROVED')"
+        <v-btn
+          color="blue darken-1"
+          data-cy="Approve"
+          @click="menuChangeSubmission('APPROVED')"
           >Approve</v-btn
         >
       </v-card-actions>
-      <menu-change-submission  v-if="currentReview" v-model="menuChangeSubmissions" :review="currentReview" :submission="editSubmission" v-on:no-changes="onSaveReview"/>
+      <menu-change-submission
+        v-if="currentReview"
+        v-model="menuChangeSubmissions"
+        :review="currentReview"
+        :submission="editSubmission"
+        v-on:no-changes="onSaveReview"
+      />
     </v-card>
   </v-dialog>
 </template>
 <script lang="ts">
-
 import { Component, Model, Prop, Vue } from 'vue-property-decorator';
 import Review from '@/models/management/Review';
 import RemoteServices from '@/services/RemoteServices';
@@ -89,7 +97,6 @@ export default class EditReview extends Vue {
       console.log(this.currentReview);
       const result = await RemoteServices.createReview(this.currentReview);
       this.$emit('create-review', result);
-
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

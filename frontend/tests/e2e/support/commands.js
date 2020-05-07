@@ -240,13 +240,18 @@ Cypress.Commands.add('viewMyDiscussions', () => {
   cy.get('[data-cy="discussions"]').click();
 });
 
-Cypress.Commands.add('replyDiscussion', content => {
+Cypress.Commands.add('replyTeacherDiscussion', content => {
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH rep AS (INSERT INTO replies (discussion_user_id, teacher_id, message, date) VALUES (676, 677, \'' +
+    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO replies (discussion_user_id, user_id, message, date) VALUES (676, 677, \'' +
       content +
-      '\', \'2020-01-01 00:00:01\') RETURNING id) UPDATE discussions SET reply_id = (SELECT id FROM rep) WHERE user_id = 676;"'
+      '\', \'2020-01-01 00:00:01\')"'
   );
 });
+
+Cypress.Commands.add('replyDiscussion', content => {
+  cy.get('[data-cy="reply"]').type(content);
+  cy.get('[data-cy="submitReply"]').click();
+})
 
 Cypress.Commands.add('openDiscussion', n => {
   cy.get('tbody > :nth-child(' + n + 1 + ') > .text-start').click();

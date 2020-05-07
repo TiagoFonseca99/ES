@@ -91,6 +91,16 @@ public class DiscussionService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public DiscussionDto setAvailability(DiscussionDto discussionDto) {
+        Discussion discussion = discussionRepository.findByUserIdQuestionId(discussionDto.getUserId(), discussionDto.getQuestionId())
+                                .orElseThrow(() -> new TutorException(DISCUSSION_NOT_FOUND, discussionDto.getUserId(),
+                                discussionDto.getQuestionId()));
+        discussion.setAvailability(discussionDto.isAvailable());
+        return discussionDto;
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ReplyDto giveReply(ReplyDto replyDto, DiscussionDto discussionDto) {
         checkReplyDto(replyDto);
         checkDiscussionDto(discussionDto);
