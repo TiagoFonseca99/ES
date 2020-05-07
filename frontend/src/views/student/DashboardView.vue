@@ -108,16 +108,18 @@
             <v-card-title class="justify-center" style="display: block;"
               >Discussions</v-card-title
             >
-            <v-card-actions>
+            <div
+              class="switchContainer"
+              style="display: flex; flex-direction: row; position: relative;"
+            >
               <v-switch
-                class="justify-content-end"
+                style="flex: 1"
                 v-if="info !== null"
                 v-model="info.discussionStatsPublic"
-                label="Public"
-                style="float: right"
+                :label="info.discussionStatsPublic ? 'Public' : 'Private'"
                 @change="toggleDiscussions()"
               />
-            </v-card-actions>
+            </div>
             <div class="dashInfo" v-if="info !== null">
               <div class="square">
                 <animated-number class="num" :number="info.numDiscussions" />
@@ -156,6 +158,7 @@ import AnimatedNumber from '@/components/AnimatedNumber.vue';
 export default class DashboardView extends Vue {
   info: Dashboard | null = null;
   stats: StudentStats | null = null;
+  labelDiscussions!: string;
   headers: object = [
     { text: 'Tournament Number', align: 'center' },
     { text: 'Date', align: 'center' },
@@ -176,9 +179,7 @@ export default class DashboardView extends Vue {
 
   async toggleDiscussions() {
     try {
-      console.log(this.info);
       this.info = await RemoteServices.toggleDiscussionStats();
-      console.log(this.info);
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

@@ -6,25 +6,40 @@
       </v-card-title>
       <div class="discussion">
         <ul>
-          <li v-for="discussion in discussions" :key="discussion.content">
-            <v-switch
-              v-model="discussion.available"
-              class="ma-4"
-              label="Public"
-              v-on:click="setDiscussion(discussion); setAvailability()"
-            />
-            <div class="text-left">
-              <b>{{ discussion.userName }} on {{ discussion.date }}:</b>
-              <span v-html="convertMarkDown(discussion.content)" />
+          <li
+            v-for="discussion in discussions"
+            :key="discussion.content"
+            @focus="setDiscussion(discussion)"
+          >
+            <div
+              style="display: flex; justify-content: space-between; position: relative"
+            >
+              <div
+                class="text-left"
+                style="flex: 1; position: relative; max-width: 100%"
+              >
+                <b>{{ discussion.userName }} on {{ discussion.date }}:</b>
+                <span v-html="convertMarkDown(discussion.content)" />
+              </div>
             </div>
             <v-expansion-panels
               v-if="discussion.replies !== null"
               :popout="true"
             >
+              <v-switch
+                v-model="discussion.available"
+                class="ma-4"
+                :label="discussion.available ? 'Public' : 'Private'"
+                @change="
+                  setDiscussion(discussion);
+                  setAvailability();
+                "
+                style="flex: 1; position: relative"
+              />
               <v-expansion-panel>
                 <v-expansion-panel-header
-                  >View replies</v-expansion-panel-header
-                >
+                  >View replies
+                </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <div
                     v-for="reply in discussion.replies"
@@ -79,6 +94,16 @@
                 data-cy="ReplyMessage"
               ></v-textarea>
               <v-card-actions>
+                <v-switch
+                  v-model="discussion.available"
+                  class="ma-4"
+                  :label="discussion.available ? 'Public' : 'Private'"
+                  @change="
+                    setDiscussion(discussion);
+                    setAvailability();
+                  "
+                  style="flex: 1; position: relative"
+                />
                 <v-spacer />
                 <v-btn
                   color="blue darken-1"
@@ -99,7 +124,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit, Watch } from 'vue-property-decorator';
+import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
 import RemoteServices from '../../../services/RemoteServices';
@@ -107,7 +132,7 @@ import RemoteServices from '../../../services/RemoteServices';
 @Component
 export default class ReplyComponent extends Vue {
   @Prop() readonly discussions!: Discussion[];
-  discussion!: Discussion;
+  discussion: Discussion = this.discussions[0];
   replyMessages: Map<number, string> = new Map();
 
   @Emit('submit')
@@ -142,18 +167,15 @@ export default class ReplyComponent extends Vue {
 
     return true;
   }
-  
-  private delay(ms: number)
-  {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
 
   async setAvailability() {
     try {
-      this.discussion = await RemoteServices.setAvailability(this.discussion, !this.discussion.available);
-      await this.delay(1000);
-    }
-    catch (error) {
+      this.discussion = await RemoteServices.setAvailability(
+        this.discussion,
+        this.discussion.available
+      );
+      console.log(this.discussion.available);
+    } catch (error) {
       await this.$store.dispatch('error', error);
     }
   }
@@ -194,7 +216,7 @@ export default class ReplyComponent extends Vue {
 
   .reply-message {
     width: 95%;
-    margin: 5px auto auto;
+    margin: 5px auto 20px;
 
     .text {
       user-select: text;
