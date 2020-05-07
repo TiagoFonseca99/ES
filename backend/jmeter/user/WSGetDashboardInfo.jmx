@@ -62,12 +62,21 @@
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
-          <stringProp name="query">WITH question AS (SELECT id FROM questions ORDER BY id ASC LIMIT 1) INSERT INTO discussions (user_id, question_id, content) VALUES (676, (SELECT id FROM question), &apos;DISCUSSION CONTENT&apos;);</stringProp>
+          <stringProp name="query">WITH question AS (SELECT id FROM questions ORDER BY id ASC LIMIT 1) INSERT INTO discussions (user_id, question_id, content) VALUES (676, (SELECT id FROM question), &apos;DISCUSSION CONTENT&apos;);
+
+WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (&apos;Title1&apos;, &apos;Question1?&apos;, 2,&apos;AVAILABLE&apos;, current_timestamp) RETURNING id), 
+	subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) 
+INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (&apos;Porque sim&apos;, &apos;APPROVED&apos;, 676, (SELECT id from subs), 677, current_timestamp);
+
+WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (&apos;Title2&apos;, &apos;Question2?&apos;, 2,&apos;DEPRECATED&apos;, current_timestamp) RETURNING id), 
+	subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) 
+INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (&apos;Porque nao&apos;, &apos;REJECTED&apos;, 676, (SELECT id from subs), 677, current_timestamp);
+</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="queryTimeout"></stringProp>
@@ -199,6 +208,33 @@
               <boolProp name="ISREGEX">false</boolProp>
             </JSONPathAssertion>
             <hashTree/>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert number of submissions" enabled="true">
+              <stringProp name="JSON_PATH">$.numSubmissions</stringProp>
+              <stringProp name="EXPECTED_VALUE">2</stringProp>
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              <boolProp name="INVERT">false</boolProp>
+              <boolProp name="ISREGEX">false</boolProp>
+            </JSONPathAssertion>
+            <hashTree/>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert number of approved submissions" enabled="true">
+              <stringProp name="JSON_PATH">$.numApprovedSubmissions</stringProp>
+              <stringProp name="EXPECTED_VALUE">1</stringProp>
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              <boolProp name="INVERT">false</boolProp>
+              <boolProp name="ISREGEX">false</boolProp>
+            </JSONPathAssertion>
+            <hashTree/>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert number of rejected submissions" enabled="true">
+              <stringProp name="JSON_PATH">$.numRejectedSubmissions</stringProp>
+              <stringProp name="EXPECTED_VALUE">1</stringProp>
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              <boolProp name="INVERT">false</boolProp>
+              <boolProp name="ISREGEX">false</boolProp>
+            </JSONPathAssertion>
+            <hashTree/>
           </hashTree>
         </hashTree>
         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
@@ -306,12 +342,20 @@
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
-          <stringProp name="query">WITH question AS (SELECT id FROM questions ORDER BY id ASC LIMIT 1) DELETE FROM discussions WHERE question_id = (SELECT id FROM question) AND user_id = 676;</stringProp>
+          <stringProp name="query">WITH question AS (SELECT id FROM questions ORDER BY id ASC LIMIT 1) DELETE FROM discussions WHERE question_id = (SELECT id FROM question) AND user_id = 676;
+
+WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id),
+     sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) 
+DELETE FROM questions WHERE id IN (SELECT * FROM sub);
+
+WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id),
+     sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) 
+DELETE FROM questions WHERE id IN (SELECT * FROM sub);</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="queryTimeout"></stringProp>
