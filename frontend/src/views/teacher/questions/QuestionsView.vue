@@ -252,7 +252,7 @@ export default class QuestionsView extends Vue {
         RemoteServices.getTopics(),
         RemoteServices.getQuestions()
       ]);
-      this.questions = this.questions.filter(q => this.statusList.includes(q.status));
+      //this.questions = this.questions.filter(q => this.statusList.includes(q.status));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -335,6 +335,7 @@ export default class QuestionsView extends Vue {
   newQuestion() {
     this.currentQuestion = new Question();
     this.editQuestionDialog = true;
+    this.discussion = false;
   }
 
   editQuestion(question: Question, e?: Event) {
