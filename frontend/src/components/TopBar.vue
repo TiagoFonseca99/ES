@@ -46,10 +46,10 @@
         </v-menu>
 
         <v-btn
-                to="/management/dashboard"
-                v-if="isTeacher && currentCourse"
-                text
-                dark
+          to="/management/dashboard"
+          v-if="isTeacher && currentCourse"
+          text
+          dark
         >
           Course Dashboard
           <v-icon>school</v-icon>

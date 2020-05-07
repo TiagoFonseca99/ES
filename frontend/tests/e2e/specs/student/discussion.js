@@ -11,9 +11,10 @@ describe('Student discussion walkthrough', () => {
     cy.answerQuiz(0)
     cy.writeDiscussion('I don\' know what this question means')
     cy.log('Teacher replies to discussion')
-    cy.replyDiscussion('I think the question is pretty straightforward')
+    cy.replyTeacherDiscussion('I think the question is pretty straightforward')
     cy.viewMyDiscussions()
     cy.openDiscussion(0)
+    cy.replyDiscussion('I still don\'t understand')
   })
 
   it('login answer quiz create empty discussion', () => {

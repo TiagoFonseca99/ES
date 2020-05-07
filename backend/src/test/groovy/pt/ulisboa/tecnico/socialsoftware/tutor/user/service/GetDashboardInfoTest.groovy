@@ -34,7 +34,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 
 @DataJpaTest
-class GetNumberOfDiscussionsTest extends Specification {
+class GetDashboardInfoTest extends Specification {
     public static final String DISCUSSION_CONTENT = "discussion content"
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"

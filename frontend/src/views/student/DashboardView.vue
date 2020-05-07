@@ -78,14 +78,14 @@
               class="ma-4"
               label="Allow other users to see tournament names"
               data-cy="switchNamePermission"
-              @change="swichTournamentNamePermission()"
+              @change="switchTournamentNamePermission()"
             />
             <v-switch
               :value="this.tournamentScorePermission"
               class="ma-4"
               label="Allow other users to see tournament scores"
               data-cy="switchScorePermission"
-              @change="swichTournamentScorePermission()"
+              @change="switchTournamentScorePermission()"
             />
             <v-data-table
               :headers="headers"
@@ -120,8 +120,8 @@
               </div>
               <div class="square">
                 <animated-number
-                        class="num"
-                        :number="info.numRejectedSubmissions"
+                  class="num"
+                  :number="info.numRejectedSubmissions"
                 />
                 <p class="statName">Rejected Submissions</p>
               </div>
@@ -138,6 +138,18 @@
             <v-card-title class="justify-center" style="display: block;"
               >Discussions</v-card-title
             >
+            <div
+              class="switchContainer"
+              style="display: flex; flex-direction: row; position: relative;"
+            >
+              <v-switch
+                style="flex: 1"
+                v-if="info !== null"
+                v-model="info.discussionStatsPublic"
+                :label="info.discussionStatsPublic ? 'Public' : 'Private'"
+                @change="toggleDiscussions()"
+              />
+            </div>
             <div class="dashInfo" v-if="info !== null">
               <div class="square">
                 <animated-number class="num" :number="info.numDiscussions" />
@@ -207,6 +219,14 @@ export default class DashboardView extends Vue {
     await this.$store.dispatch('clearLoading');
   }
 
+  async toggleDiscussions() {
+    try {
+      this.info = await RemoteServices.toggleDiscussionStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
   calculateScore(quiz: SolvedQuiz) {
     let correct = 0;
     for (let i = 0; i < quiz.statementQuiz.questions.length; i++) {
@@ -233,9 +253,9 @@ export default class DashboardView extends Vue {
     return score;
   }
 
-  async swichTournamentNamePermission() {
+  async switchTournamentNamePermission() {
     try {
-      await RemoteServices.swichTournamentNamePermission();
+      await RemoteServices.switchTournamentNamePermission();
       this.tournamentNamePermission = !this.tournamentNamePermission;
       if (!this.tournamentNamePermission) {
         this.tournamentScorePermission = false;
@@ -246,9 +266,9 @@ export default class DashboardView extends Vue {
     }
   }
 
-  async swichTournamentScorePermission() {
+  async switchTournamentScorePermission() {
     try {
-      await RemoteServices.swichTournamentScorePermission();
+      await RemoteServices.switchTournamentScorePermission();
       this.tournamentScorePermission = !this.tournamentScorePermission;
     } catch (error) {
       await this.$store.dispatch('error', error);
