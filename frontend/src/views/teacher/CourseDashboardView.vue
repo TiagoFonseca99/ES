@@ -44,12 +44,27 @@
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Tournaments</v-card-title>
             <v-data-table
-              :headers="headers"
-              :hide-default-footer="true"
-              class="fill-height"
-            ></v-data-table>
+                    :headers="headers"
+                    :items="tournaments"
+                    :sort-by="['id']"
+                    :hide-default-footer="true"
+                    :mobile-breakpoint="0"
+                    class="fill-height"
+            >
+              <template v-slot:item.startTime="{ item }">
+                <v-chip small color=primary>
+                  {{ item.startTime }}
+                </v-chip>
+              </template>
+              <template v-slot:item.endTime="{ item }">
+                <v-chip small color=primary>
+                  {{ item.endTime }}
+                </v-chip>
+              </template>
+            </v-data-table>
           </v-card>
         </v-col>
+
         <v-col :cols="2">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Submissions</v-card-title>
@@ -116,6 +131,8 @@ import Dashboard from '@/models/management/Dashboard';
 import RemoteServices from '@/services/RemoteServices';
 import AnimatedNumber from '@/components/AnimatedNumber.vue';
 import Course from '@/models/user/Course';
+import Tournament from "@/models/user/Tournament";
+import SolvedQuiz from "@/models/statement/SolvedQuiz";
 
 @Component({
   components: { AnimatedNumber }
@@ -123,19 +140,25 @@ import Course from '@/models/user/Course';
 export default class DashboardView extends Vue {
   info: Dashboard | null = null;
   course: Course | null = null;
+  tournaments: Tournament[] = [];
+
   headers: object = [
-    { text: 'Tournament Number', align: 'center' },
-    { text: 'Date', align: 'center' },
-    { text: 'Score', align: 'center' }
+    { text: 'Tournament Number', value: 'id', align: 'center' },
+    { text: 'Start Time', value: 'startTime', align: 'center' },
+    { text: 'End Time', value: 'endTime', align: 'center' }
   ];
 
   async created() {
     await this.$store.dispatch('loading');
     try {
-      this.course = this.$store.getters.getCurrentCourse;
       this.info = await RemoteServices.getCourseDashboardInfo(
         this.$store.getters.getCurrentCourse.courseExecutionId
       );
+      if (this.info.joinedTournaments){
+        console.log(this.info.joinedTournaments);
+        this.tournaments = this.info.joinedTournaments.sort();
+      }
+      this.course = this.$store.getters.getCurrentCourse;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
