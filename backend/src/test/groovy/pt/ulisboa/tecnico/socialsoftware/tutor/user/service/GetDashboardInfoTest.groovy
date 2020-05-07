@@ -175,6 +175,25 @@ class GetDashboardInfoTest extends Specification {
         result.getNumDiscussions() == 0
     }
 
+    def "get number of public discussions from student with 0 public discussions"(){
+        when: "requesting information"
+        def result = userService.getDashboardInfo(student1.getId())
+
+        then:
+        result.getNumPublicDiscussions() == 0
+    }
+
+    def "get number of public discussions from student with 1 public discussion"(){
+        given: "1 discussion made public"
+        userRepository.findByUsername("user username").getDiscussions().stream().findFirst().get().setAvailability(true);
+
+        when: "requesting information"
+        def result = userService.getDashboardInfo(student1.getId())
+
+        then:
+        result.getNumPublicDiscussions() == 1
+    }
+
     def "get number of discussions from teacher"(){
         given: "a teacher"
         def teacher = new User(USER_NAME + "3", USER_USERNAME + "3", 4, User.Role.TEACHER)

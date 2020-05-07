@@ -558,6 +558,16 @@ public class User implements UserDetails, DomainEntity {
         return this.discussions;
     }
 
+    public Set<Discussion> getPublicDiscussions() {
+        Set<Discussion> publicDiscussions = new HashSet<>();
+        for(Discussion discussion: this.discussions) {
+            if(discussion.isAvailable()) {
+                publicDiscussions.add(discussion);
+            }
+        } 
+        return publicDiscussions;
+    }
+
     public void addReply(Reply reply) {
         replies.add(reply);
     }
