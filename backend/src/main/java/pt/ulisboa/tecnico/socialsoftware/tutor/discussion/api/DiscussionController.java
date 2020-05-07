@@ -102,4 +102,17 @@ public class DiscussionController {
 
         return discussionService.findDiscussionsByQuestionId(questionId);
     }
+
+    @GetMapping(value = "/discussions/public/question")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public List<DiscussionDto> getPublicDiscussionsByQuestion(Principal principal,
+            @Valid @RequestParam Integer questionId) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        return discussionService.getPublicDiscussionsByQuestion(user.getId(), questionId);
+    }
 }
