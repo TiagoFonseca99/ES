@@ -113,7 +113,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import Dashboard from '@/models/management/Dashboard';
 import RemoteServices from '@/services/RemoteServices';
 import AnimatedNumber from '@/components/AnimatedNumber.vue';
-import Course from "@/models/user/Course";
+import Course from '@/models/user/Course';
 
 @Component({
   components: { AnimatedNumber }
