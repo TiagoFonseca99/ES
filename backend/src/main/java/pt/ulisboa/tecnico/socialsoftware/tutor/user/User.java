@@ -44,7 +44,6 @@ public class User implements UserDetails, DomainEntity {
 
     private String name;
     private String enrolledCoursesAcronyms;
-
     private Integer numberOfTeacherQuizzes;
     private Integer numberOfStudentQuizzes;
     private Integer numberOfInClassQuizzes;
@@ -93,6 +92,8 @@ public class User implements UserDetails, DomainEntity {
     @Column(columnDefinition = "boolean default true")
     private boolean submissionStatsPublic = true;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean tournamentStatsPublic = true;
 
     public User() {
     }
@@ -587,4 +588,11 @@ public class User implements UserDetails, DomainEntity {
         this.submissionStatsPublic = !this.submissionStatsPublic;
     }
 
+    public boolean isTournamentStatsPublic() {
+        return this.tournamentStatsPublic;
+    }
+
+    public void toggleTournamentStatsVisibility() {
+        this.tournamentStatsPublic = !this.tournamentStatsPublic;
+    }
 }

@@ -241,7 +241,7 @@ public class TournamentService {
             }
             quiz.setConclusionDate(tournament.getEndTime());
 
-            tournament.setStatementQuizDto(statementQuizDto);
+            tournament.setQuizId(statementQuizDto.getId());
         }
     }
 
@@ -286,7 +286,7 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_NO_QUIZ, tournamentDto.getId());
         }
 
-        return tournament.getStatementQuizDto();
+        return statementService.getQuizByQRCode(userId, tournament.getQuizId());
     }
 
     @Retryable(

@@ -74,18 +74,11 @@
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Tournaments</v-card-title>
             <v-switch
-              :value="this.tournamentNamePermission"
-              class="ma-4"
-              label="Allow other users to see tournament names"
-              data-cy="switchNamePermission"
-              @change="switchTournamentNamePermission()"
-            />
-            <v-switch
-              :value="this.tournamentScorePermission"
-              class="ma-4"
-              label="Allow other users to see tournament scores"
-              data-cy="switchScorePermission"
-              @change="switchTournamentScorePermission()"
+              style="flex: 1"
+              v-if="info !== null"
+              v-model="info.tournamentStatsPublic"
+              :label="info.tournamentStatsPublic ? 'Public' : 'Private'"
+              @change="toggleTournaments()"
             />
             <v-data-table
               :headers="headers"
@@ -247,6 +240,14 @@ export default class DashboardView extends Vue {
     }
   }
 
+  async toggleTournaments() {
+    try {
+      this.info = await RemoteServices.toggleTournamentStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
   calculateScore(quiz: SolvedQuiz) {
     let correct = 0;
     for (let i = 0; i < quiz.statementQuiz.questions.length; i++) {
@@ -292,13 +293,8 @@ export default class DashboardView extends Vue {
       this.tournamentScorePermission = !this.tournamentScorePermission;
     } catch (error) {
       await this.$store.dispatch('error', error);
-      this.resetButton();
       return;
     }
-  }
-
-  async resetButton() {
-    this.tournamentScorePermission = false;
   }
 }
 </script>
