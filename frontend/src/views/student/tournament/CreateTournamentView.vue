@@ -255,7 +255,7 @@ export default class CreateTournamentDialog extends Vue {
       (!this.editTournament.startTime ||
         !this.editTournament.endTime ||
         !this.editTournament.numberOfQuestions ||
-        !this.editTournament.topics)
+        this.currentTopics.length == 0)
     ) {
       await this.$store.dispatch(
         'error',
