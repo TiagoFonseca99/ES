@@ -16,6 +16,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
@@ -167,6 +168,31 @@ public class SubmissionService {
 
         return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void changeSubmission(SubmissionDto submission) {
+
+        if (submission.getStudentId() == null) {
+            throw new TutorException(SUBMISSION_MISSING_STUDENT);
+        }
+
+        if (submission.getQuestionDto().getId() == null) {
+            throw new TutorException(SUBMISSION_MISSING_QUESTION);
+        }
+
+
+        Question question = questionRepository.getOne(submission.getQuestionDto().getId());
+
+        question.update(submission.getQuestionDto());
+
+
+        entityManager.persist(question);
+
+    }
+
 
     private void updateQuestionStatus(Submission submission, String status) {
         Question question = getQuestion(submission.getQuestion().getId());

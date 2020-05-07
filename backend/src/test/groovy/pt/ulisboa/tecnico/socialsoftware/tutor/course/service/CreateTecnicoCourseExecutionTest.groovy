@@ -10,6 +10,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseService
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Specification
 
@@ -21,6 +22,9 @@ class CreateTecnicoCourseExecutionTest extends Specification {
 
     @Autowired
     CourseService courseService
+
+    @Autowired
+    UserService userService
 
     @Autowired
     CourseRepository courseRepository
@@ -159,6 +163,15 @@ class CreateTecnicoCourseExecutionTest extends Specification {
         @Bean
         CourseService courseService() {
             return new CourseService()
+        }
+    }
+
+    @TestConfiguration
+    static class UserServiceImplTestContextConfiguration {
+
+        @Bean
+        UserService userService() {
+            return new UserService()
         }
     }
 }

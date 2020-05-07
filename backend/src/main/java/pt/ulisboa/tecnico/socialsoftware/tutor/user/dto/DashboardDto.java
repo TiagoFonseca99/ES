@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.user.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,10 +11,12 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 public class DashboardDto implements Serializable {
     private String name;
     private String username;
+    private boolean discussionStatsPublic;
     private Integer numDiscussions;
     private Integer numPublicDiscussions;
     private Integer numSubmissions;
     private Integer numApprovedSubmissions;
+    private Integer numRejectedSubmissions;
     private List<TournamentDto> joinedTournaments;
     private Boolean tournamentNamePermission;
     private Boolean tournamentScorePermission;
@@ -21,47 +24,67 @@ public class DashboardDto implements Serializable {
     public DashboardDto() {
     }
 
-	public DashboardDto(User user) {
+    public DashboardDto(User user) {
         this.name = user.getName();
         this.username = user.getUsername();
+        this.discussionStatsPublic = user.isDiscussionStatsPublic();
         this.numDiscussions = user.getDiscussions().size();
+        this.numSubmissions = user.getSubmissions().size();
+        this.numApprovedSubmissions = user.getNumberOfApprovedSubmissions();
+        this.numRejectedSubmissions = user.getNumberOfRejectedSubmissions();
         this.joinedTournaments = user.getTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
         this.tournamentNamePermission = user.getTournamentNamePermissionB();
         this.tournamentScorePermission = user.getTournamentScorePermissionB();
+    }
 
+    public DashboardDto(Integer numDiscussions, Integer numPublicDiscussions, Integer numSubmissions, Integer numApprovedSubmissions, Integer numRejectedSubmissions, List<TournamentDto> joinedTournaments) {
+        this.numDiscussions = numDiscussions;
+        this.numPublicDiscussions = numPublicDiscussions;
+        this.numSubmissions = numSubmissions;
+        this.numApprovedSubmissions = numApprovedSubmissions;
+        this.numRejectedSubmissions = numRejectedSubmissions;
+        this.joinedTournaments = joinedTournaments;
+    }
+
+    public boolean isDiscussionStatsPublic() {
+        return discussionStatsPublic;
+    }
+
+    public void setDiscussionStatsPublic(boolean discussionStatsPublic) {
+        this.discussionStatsPublic = discussionStatsPublic;
     }
 
     public String getUsername() {
-		return username;
-	}
+        return username;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public List<TournamentDto> getJoinedTournaments() {
         return joinedTournaments;
     }
 
-    public void setJoinedTournaments(List<TournamentDto> joinedTournaments) {
-        this.joinedTournaments = joinedTournaments;
-    }
+    public void setJoinedTournaments(List<TournamentDto> joinedTournaments) { this.joinedTournaments = joinedTournaments; }
 
     public Integer getNumApprovedSubmissions() {
         return numApprovedSubmissions;
     }
 
-    public void setNumApprovedSubmissions(Integer numApprovedSubmissions) {
-        this.numApprovedSubmissions = numApprovedSubmissions;
-    }
+    public void setNumApprovedSubmissions(Integer numApprovedSubmissions) { this.numApprovedSubmissions = numApprovedSubmissions; }
+
+    public Integer getNumRejectedSubmissions() { return numRejectedSubmissions; }
+
+    public void setNumRejectedSubmissions(Integer numRejectedSubmissions) { this.numRejectedSubmissions = numRejectedSubmissions; }
 
     public Integer getNumSubmissions() {
         return numSubmissions;
@@ -75,9 +98,7 @@ public class DashboardDto implements Serializable {
         return numPublicDiscussions;
     }
 
-    public void setNumPublicDiscussions(Integer numPublicDiscussions) {
-        this.numPublicDiscussions = numPublicDiscussions;
-    }
+    public void setNumPublicDiscussions(Integer numPublicDiscussions) { this.numPublicDiscussions = numPublicDiscussions; }
 
     public Boolean getTournamentNamePermission() {
         return tournamentNamePermission;

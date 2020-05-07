@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.*
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import spock.lang.Specification
 
 @DataJpaTest
@@ -18,6 +19,9 @@ class GetCourseExecutionsTest extends Specification {
 
     @Autowired
     CourseService courseService
+
+    @Autowired
+    UserService userService
 
     @Autowired
     CourseRepository courseRepository
@@ -60,6 +64,15 @@ class GetCourseExecutionsTest extends Specification {
         @Bean
         CourseService courseService() {
             return new CourseService()
+        }
+    }
+
+    @TestConfiguration
+    static class UserServiceImplTestContextConfiguration {
+
+        @Bean
+        UserService userService() {
+            return new UserService()
         }
     }
 }

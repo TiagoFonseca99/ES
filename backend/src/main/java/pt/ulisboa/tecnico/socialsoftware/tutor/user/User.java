@@ -54,6 +54,8 @@ public class User implements UserDetails, DomainEntity {
     private Integer numberOfCorrectTeacherAnswers;
     private Integer numberOfCorrectInClassAnswers;
     private Integer numberOfCorrectStudentAnswers;
+    private Integer numberOfApprovedSubmissions;
+    private Integer numberOfRejectedSubmissions;
     private Boolean tournamentNamePermission;
     private Boolean tournamentScorePermission;
 
@@ -84,6 +86,9 @@ public class User implements UserDetails, DomainEntity {
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "participants")
     private List<Tournament> tournaments = new ArrayList<>();
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean discussionStatsPublic = true;
+
     public User() {
     }
 
@@ -102,6 +107,8 @@ public class User implements UserDetails, DomainEntity {
         this.numberOfCorrectTeacherAnswers = 0;
         this.numberOfCorrectInClassAnswers = 0;
         this.numberOfCorrectStudentAnswers = 0;
+        this.numberOfApprovedSubmissions = 0;
+        this.numberOfRejectedSubmissions = 0;
         this.tournamentNamePermission = false;
         this.tournamentScorePermission = false;
     }
@@ -325,6 +332,14 @@ public class User implements UserDetails, DomainEntity {
         this.numberOfCorrectStudentAnswers = numberOfCorrectStudentAnswers;
     }
 
+    public Integer getNumberOfApprovedSubmissions() { return numberOfApprovedSubmissions; }
+
+    public void setNumberOfApprovedSubmissions(Integer numberOfApprovedSubmissions) { this.numberOfApprovedSubmissions = numberOfApprovedSubmissions; }
+
+    public Integer getNumberOfRejectedSubmissions() { return numberOfRejectedSubmissions; }
+
+    public void setNumberOfRejectedSubmissions(Integer numberOfRejectedSubmissions) { this.numberOfRejectedSubmissions = numberOfRejectedSubmissions; }
+    
     public boolean getTournamentNamePermission() {
         if (tournamentNamePermission == null)
             this.tournamentNamePermission = false;
@@ -549,5 +564,13 @@ public class User implements UserDetails, DomainEntity {
 
     public DashboardDto getDashboardInfo() {
         return new DashboardDto(this);
+    }
+
+    public boolean isDiscussionStatsPublic() {
+        return this.discussionStatsPublic;
+    }
+
+    public void toggleDiscussionStatsVisibility() {
+        this.discussionStatsPublic = !this.discussionStatsPublic;
     }
 }

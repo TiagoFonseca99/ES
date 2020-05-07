@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.StudentDto;
 
 import java.security.Principal;
@@ -57,6 +58,12 @@ public class CourseController {
         return courseService.courseStudents(executionId);
     }
 
+    @GetMapping("/dashboard/{executionId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#executionId, 'EXECUTION.ACCESS')")
+    public DashboardDto getDashBoardInfo(@PathVariable int executionId) {
+        return courseService.getDashboardInfo(executionId);
+    }
+
     @DeleteMapping("/executions/{courseExecutionId}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_DEMO_ADMIN') and hasPermission(#courseExecutionId, 'DEMO.ACCESS'))")
     public ResponseEntity removeCourseExecution(@PathVariable Integer courseExecutionId) {
@@ -64,4 +71,7 @@ public class CourseController {
 
         return ResponseEntity.ok().build();
     }
+
+
+
 }

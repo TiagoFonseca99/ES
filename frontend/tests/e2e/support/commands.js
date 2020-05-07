@@ -240,13 +240,18 @@ Cypress.Commands.add('viewMyDiscussions', () => {
   cy.get('[data-cy="discussions"]').click();
 });
 
-Cypress.Commands.add('replyDiscussion', content => {
+Cypress.Commands.add('replyTeacherDiscussion', content => {
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH rep AS (INSERT INTO replies (discussion_user_id, teacher_id, message, date) VALUES (676, 677, \'' +
+    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO replies (discussion_user_id, user_id, message, date) VALUES (676, 677, \'' +
       content +
-      '\', \'2020-01-01 00:00:01\') RETURNING id) UPDATE discussions SET reply_id = (SELECT id FROM rep) WHERE user_id = 676;"'
+      '\', \'2020-01-01 00:00:01\')"'
   );
 });
+
+Cypress.Commands.add('replyDiscussion', content => {
+  cy.get('[data-cy="reply"]').type(content);
+  cy.get('[data-cy="submitReply"]').click();
+})
 
 Cypress.Commands.add('openDiscussion', n => {
   cy.get('tbody > :nth-child(' + n + 1 + ') > .text-start').click();
@@ -444,7 +449,28 @@ Cypress.Commands.add('ApproveSubmissions', (title, justification) => {
       .click();
     cy.get('[data-cy="Justification"]').type(justification);
     cy.get('[data-cy="Approve"]').click();
+    cy.get('[data-cy="NoButton"]').click();
 });
+
+Cypress.Commands.add('ChangeSubmission', (title, justification, question_title, question_content) => {
+    cy.get('[data-cy="Management"]').click();
+    cy.get('[data-cy="Reviews"]').click();
+    cy.get('[data-cy="Search"]').click();
+    cy.wait(1000);
+    cy.contains(title)
+        .parent().parent().parent()
+        .should('have.length', 1)
+        .children()
+        .should('have.length', 6)
+        .find('[data-cy="createReview"]')
+        .click();
+    cy.get('[data-cy="Justification"]').type(justification);
+    cy.get('[data-cy="Approve"]').click();
+    cy.get('[data-cy="YesButton"]').click();
+    cy.get('[data-cy="QuestionTitle"]').type(question_title);
+    cy.get('[data-cy="QuestionContent"]').type(question_content);
+});
+
 
 Cypress.Commands.add('RejectSubmissions', (title, justification) => {
     cy.get('[data-cy="Management"]').click();
