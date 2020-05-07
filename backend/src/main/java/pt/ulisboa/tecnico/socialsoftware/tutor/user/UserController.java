@@ -43,6 +43,18 @@ public class UserController {
         return userService.toggleDiscussionStatsVisibility(user.getId());
     }
 
+    @PutMapping(value = "/dashboard/tournaments")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public DashboardDto toggleTournamentStats(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return userService.toggleTournamentStatsVisibility(user.getId());
+    }
+
     @PutMapping(value = "/switchTournamentNamePermission")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void switchTournamentNamePermission(Principal principal) {

@@ -753,6 +753,17 @@ export default class RemoteServices {
       });
   }
 
+  static async toggleTournamentStats(): Promise<Dashboard> {
+    return httpClient
+      .put('/dashboard/tournaments')
+      .then(response => {
+        return new Dashboard(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async exportAll() {
     return httpClient
       .get('/admin/export', {
