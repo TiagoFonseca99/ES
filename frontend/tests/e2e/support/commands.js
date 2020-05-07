@@ -394,10 +394,6 @@ Cypress.Commands.add('submitInvalidQuestion', (title, content) => {
     cy.get('[data-cy="QuestionTitle"]').type(title);
     cy.get('[data-cy="QuestionContent"]').type(content);
     cy.get('[data-cy="Switch1"]').click({ force: true });
-    cy.get('[data-cy="Option1"]').type(opt1);
-    cy.get('[data-cy="Option2"]').type(opt2);
-    cy.get('[data-cy="Option3"]').type(opt3);
-    cy.get('[data-cy="Option4"]').type(opt4);
     cy.get('[data-cy="submitButton"]').click();
 });
 
@@ -512,4 +508,38 @@ Cypress.Commands.add('seeRejectedQuestionAndResubmit', title => {
         .find('[data-cy="view"]')
         .click();
     cy.get('[data-cy="resubmit"]').click();
+});
+
+Cypress.Commands.add('openDashboard', () => {
+    cy.contains('Dashboard').click();
+});
+
+Cypress.Commands.add('addSubmissionInfo', () => {
+    cy.log("Add 3 submissions: 1 approved and 2 rejected");
+    cy.exec(
+        'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title1\', \'Question1?\', 2,\'AVAILABLE\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque sim\', \'APPROVED\', 676, (SELECT id from subs), 677, current_timestamp);" '
+    );
+    cy.exec(
+        'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title2\', \'Question2?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', 676, (SELECT id from subs), 677, current_timestamp);" '
+    );
+    cy.exec(
+        'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title3\', \'Question3?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', 676, (SELECT id from subs), 677, current_timestamp);" '
+    );
+});
+
+Cypress.Commands.add('removeSubmissionInfo', () => {
+    cy.exec('PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" ');
+    cy.exec('PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" ');
+    cy.exec('PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" ');
+});
+
+Cypress.Commands.add('checkUserInfo', (name, username) => {
+    cy.get('[data-cy="name"]').contains(name);
+    cy.get('[data-cy="username"]').contains(username);
+});
+
+Cypress.Commands.add('checkSubmissionsInfo', (numSubmissions, numApprovedSubmissions, numRejectedSubmissions) => {
+    cy.get('[data-cy="numSubmissions"]').children().contains(numSubmissions);
+    cy.get('[data-cy="numApprovedSubmissions"]').children().contains(numApprovedSubmissions);
+    cy.get('[data-cy="numRejectedSubmissions"]').children().contains(numRejectedSubmissions);
 });
