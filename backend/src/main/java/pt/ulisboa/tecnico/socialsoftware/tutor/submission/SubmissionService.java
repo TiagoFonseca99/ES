@@ -122,17 +122,6 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ReviewDto> getSubmissionStatus(Integer submissionId) {
-        if(submissionId == null)
-            throw new TutorException(SUBMISSION_NOT_FOUND, 0);
-
-        return reviewRepository.getSubmissionStatus(submissionId).stream().map(ReviewDto::new).collect(Collectors.toList());
-    }
-
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<ReviewDto> getSubmissionReviews(Integer studentId) {
         if(studentId == null)
             throw new TutorException(REVIEW_MISSING_STUDENT);

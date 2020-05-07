@@ -117,18 +117,6 @@ public class SubmissionController {
         return submissionService.getReviewsToTeacher();
     }
 
-
-    @GetMapping(value = "/student/submissions/{submissionId}")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public List<ReviewDto> getSubmissionStatus(Principal principal, @PathVariable int submissionId) {
-        User user = (User) ((Authentication) principal).getPrincipal();
-
-        if (user == null) {
-            throw new TutorException(AUTHENTICATION_ERROR);
-        }
-        return submissionService.getSubmissionStatus(submissionId);
-    }
-
     @GetMapping(value = "/student/reviews")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public List<ReviewDto> getSubmissionReviews(Principal principal) {
