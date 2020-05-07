@@ -961,6 +961,30 @@ export default class RemoteServices {
       });
   }
 
+  static swichTournamentNamePermission() {
+    return httpClient
+      .put('/switchTournamentNamePermission')
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static swichTournamentScorePermission() {
+    return httpClient
+      .put('/switchTournamentScorePermission')
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static leaveTournament(tournament: Tournament) {
+    return httpClient
+      .put('tournaments/leaveTournament', tournament)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static cancelTournament(tournament: Tournament) {
     return httpClient
       .put('tournaments/cancelTournament', tournament)

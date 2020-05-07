@@ -236,18 +236,36 @@ public class TournamentService {
             Quiz quiz = quizRepository.findById(statementQuizDto.getId())
                     .orElseThrow(() -> new TutorException(QUIZ_NOT_FOUND, statementQuizDto.getId()));
 
-
             if (DateHandler.now().isBefore(tournament.getStartTime())){
                 quiz.setAvailableDate(tournament.getStartTime());
             }
             quiz.setConclusionDate(tournament.getEndTime());
 
             tournament.setStatementQuizDto(statementQuizDto);
-
         }
-
     }
 
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void leaveTournament(Integer userId, TournamentDto tournamentDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
+
+        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
+                .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+
+
+        if (!tournament.getParticipants().contains(user)) {
+            throw new TutorException(USER_NOT_JOINED, user.getUsername());
+        }
+
+
+        tournament.removeParticipant(user);
+
+
+    }
 
     @Retryable(
             value = { SQLException.class },

@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.user.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -16,6 +17,8 @@ public class DashboardDto implements Serializable {
     private Integer numApprovedSubmissions;
     private Integer numRejectedSubmissions;
     private List<TournamentDto> joinedTournaments;
+    private Boolean tournamentNamePermission;
+    private Boolean tournamentScorePermission;
 
     public DashboardDto() {
     }
@@ -27,7 +30,9 @@ public class DashboardDto implements Serializable {
         this.numSubmissions = user.getSubmissions().size();
         this.numApprovedSubmissions = user.getNumberOfApprovedSubmissions();
         this.numRejectedSubmissions = user.getNumberOfRejectedSubmissions();
-        this.joinedTournaments = new ArrayList<>();
+        this.joinedTournaments = user.getTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
+        this.tournamentNamePermission = user.getTournamentNamePermissionB();
+        this.tournamentScorePermission = user.getTournamentScorePermissionB();
     }
 
     public DashboardDto(Integer numDiscussions, Integer numSubmissions, Integer numPublicDiscussions, Integer numApprovedSubmissions, Integer numRejectedSubmissions, List<TournamentDto> joinedTournaments) {
@@ -84,6 +89,23 @@ public class DashboardDto implements Serializable {
     }
 
     public void setNumPublicDiscussions(Integer numPublicDiscussions) { this.numPublicDiscussions = numPublicDiscussions; }
+
+    public Boolean getTournamentNamePermission() {
+        return tournamentNamePermission;
+    }
+
+    public void setTournamentNamePermission(Boolean tournamentNamePermission) {
+        this.tournamentNamePermission = tournamentNamePermission;
+    }
+
+    public Boolean getTournamentScorePermission() {
+        return tournamentScorePermission;
+    }
+
+    public void setTournamentScorePermission(Boolean tournamentScorePermission) {
+        this.tournamentScorePermission = tournamentScorePermission;
+    }
+
 
     public Integer getNumDiscussions() {
         return numDiscussions;

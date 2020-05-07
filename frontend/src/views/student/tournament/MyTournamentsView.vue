@@ -4,6 +4,7 @@
       :headers="headers"
       :items="tournaments"
       :search="search"
+      :sort-by="['id']"
       disable-pagination
       :hide-default-footer="true"
       :mobile-breakpoint="0"
@@ -21,7 +22,16 @@
           <v-spacer />
         </v-card-title>
       </template>
-
+      <template v-slot:item.state="{ item }">
+        <v-chip :color="getStateColor(item.state)">
+          {{ getStateName(item.state) }}
+        </v-chip>
+      </template>
+      <template v-slot:item.enrolled="{ item }">
+        <v-chip :color="getEnrolledColor(item.enrolled)">
+          {{ getEnrolledName(item.enrolled) }}
+        </v-chip>
+      </template>
       <template v-slot:item.action="{ item }">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
@@ -36,7 +46,7 @@
           </template>
           <span>Edit Tournament</span>
         </v-tooltip>
-        <v-tooltip bottom>
+        <v-tooltip bottom v-if="isNotCanceled(item)">
           <template v-slot:activator="{ on }">
             <v-icon
               small
@@ -67,7 +77,6 @@ import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
 import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
-import { ISOtoString } from '@/services/ConvertDateService';
 
 @Component({
   components: {
@@ -86,7 +95,7 @@ export default class MyTournamentsView extends Vue {
       align: 'center',
       width: '10%'
     },
-    { text: 'Id', value: 'id', align: 'center', width: '10%', sort: true },
+    { text: 'Tournament Number', value: 'id', align: 'center', width: '10%' },
     {
       text: 'Topics',
       value: 'topics',
@@ -164,6 +173,30 @@ export default class MyTournamentsView extends Vue {
     this.currentTournament = null;
   }
 
+  getStateColor(state: string) {
+    if (state === 'NOT_CANCELED') return 'green';
+    else return 'red';
+  }
+
+  getStateName(state: string) {
+    if (state === 'NOT_CANCELED') return 'NOT CANCELED';
+    else return 'CANCELED';
+  }
+
+  getEnrolledColor(enrolled: string) {
+    if (enrolled) return 'green';
+    else return 'red';
+  }
+
+  getEnrolledName(enrolled: string) {
+    if (enrolled) return 'YOU ARE IN';
+    else return 'YOU NEED TO JOIN';
+  }
+
+  isNotCanceled(tournamentToCancel: Tournament) {
+    return tournamentToCancel.state === 'NOT_CANCELED';
+  }
+
   async cancelTournament(tournamentToCancel: Tournament) {
     const enrolled = tournamentToCancel.enrolled;
     const topics = tournamentToCancel.topics;
@@ -177,7 +210,7 @@ export default class MyTournamentsView extends Vue {
       tournamentToCancel.topics = topics;
       return;
     }
-    tournamentToCancel.enrolled = true;
+    tournamentToCancel.enrolled = enrolled;
     tournamentToCancel.topics = topics;
     tournamentToCancel.state = 'CANCELED';
   }

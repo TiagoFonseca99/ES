@@ -198,6 +198,11 @@ public class Tournament {
         user.addTournament(this);
     }
 
+    public void removeParticipant(User user) {
+        this.participants.remove(user);
+        user.removeTournament(this);
+    }
+
     public boolean hasQuiz() {
         if (this.getStatementQuizDto() != null){
             return true;

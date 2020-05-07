@@ -29,6 +29,7 @@ public enum ErrorMessage {
     USER_NOT_FOUND("User not found with id %d"),
     ASSESSMENT_NOT_FOUND("Assessment not found with id %d"),
     TOPIC_CONJUNCTION_NOT_FOUND("Topic Conjunction not found with id %d"),
+    USER_TOURNAMENT_PERMISSIONS_NOT_CONSISTENT("Tournament permissions not consistent for user %s"),
 
     QUIZ_ANSWER_NOT_FOUND("Quiz answer not found with id %d"),
     QUIZ_NOT_FOUND("Quiz not found with id %d"),
