@@ -163,6 +163,23 @@ public class UserService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void switchSubmissionPermission(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
+
+        if (user.getSubmissionPermission()) {
+            user.setSubmissionPermission(false);
+            user.setSubmissionPermission(false);
+        }
+        else {
+            user.setSubmissionPermission(true);
+        }
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void switchTournamentScorePermission(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));

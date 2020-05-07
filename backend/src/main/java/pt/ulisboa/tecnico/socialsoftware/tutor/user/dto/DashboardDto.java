@@ -19,6 +19,7 @@ public class DashboardDto implements Serializable {
     private List<TournamentDto> joinedTournaments;
     private Boolean tournamentNamePermission;
     private Boolean tournamentScorePermission;
+    private Boolean submissionPermission;
 
     public DashboardDto() {
     }
@@ -31,6 +32,7 @@ public class DashboardDto implements Serializable {
         this.numApprovedSubmissions = user.getNumberOfApprovedSubmissions();
         this.numRejectedSubmissions = user.getNumberOfRejectedSubmissions();
         this.joinedTournaments = user.getTournaments().stream().map(TournamentDto::new).collect(Collectors.toList());
+        this.submissionPermission = user.getSubmissionPermission();
         this.tournamentNamePermission = user.getTournamentNamePermissionB();
         this.tournamentScorePermission = user.getTournamentScorePermissionB();
     }
@@ -96,6 +98,14 @@ public class DashboardDto implements Serializable {
 
     public void setTournamentNamePermission(Boolean tournamentNamePermission) {
         this.tournamentNamePermission = tournamentNamePermission;
+    }
+
+    public Boolean submissionPermission() {
+        return submissionPermission;
+    }
+
+    public void setSubmissionPermission(Boolean submissionPermission) {
+        this.submissionPermission = submissionPermission;
     }
 
     public Boolean getTournamentScorePermission() {

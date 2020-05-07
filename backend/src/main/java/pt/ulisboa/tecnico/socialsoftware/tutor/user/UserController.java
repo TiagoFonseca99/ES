@@ -53,4 +53,15 @@ public class UserController {
         }
         userService.switchTournamentScorePermission(user.getId());
     }
+
+    @PutMapping(value = "/switchSubmissionPermission")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void switchSubmissionPermission(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        userService.switchSubmissionPermission(user.getId());
+    }
 }

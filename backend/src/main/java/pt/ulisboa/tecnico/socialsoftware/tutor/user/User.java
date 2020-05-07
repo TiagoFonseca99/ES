@@ -58,6 +58,7 @@ public class User implements UserDetails, DomainEntity {
     private Integer numberOfRejectedSubmissions;
     private Boolean tournamentNamePermission;
     private Boolean tournamentScorePermission;
+    private Boolean submissionPermission;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
@@ -108,6 +109,7 @@ public class User implements UserDetails, DomainEntity {
         this.numberOfRejectedSubmissions = 0;
         this.tournamentNamePermission = false;
         this.tournamentScorePermission = false;
+        this.submissionPermission = false;
     }
 
     @Override
@@ -367,6 +369,16 @@ public class User implements UserDetails, DomainEntity {
 
     public void setTournamentScorePermission(boolean tournamentScorePermission) {
         this.tournamentScorePermission = tournamentScorePermission;
+    }
+
+    public boolean getSubmissionPermission() {
+        if (submissionPermission == null)
+            this.submissionPermission = false;
+        return submissionPermission;
+    }
+
+    public void setSubmissionPermission(boolean submissionPermission) {
+        this.submissionPermission = submissionPermission;
     }
 
     @Override
