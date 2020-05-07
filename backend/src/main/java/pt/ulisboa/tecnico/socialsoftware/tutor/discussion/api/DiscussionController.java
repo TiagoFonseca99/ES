@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +41,20 @@ public class DiscussionController {
         discussion.setDate(DateHandler.toISOString(DateHandler.now()));
 
         return discussionService.createDiscussion(discussion);
+    }
+
+    @PutMapping(value = "/discussions")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public DiscussionDto setAvailability(Principal principal, @Valid @RequestParam boolean available, @Valid @RequestBody DiscussionDto discussion) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        discussion.setAvailability(available);
+
+        return discussionService.setAvailability(discussion);
     }
 
     @PostMapping(value = "/discussions/replies")

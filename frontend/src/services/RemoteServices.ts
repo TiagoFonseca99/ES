@@ -437,13 +437,13 @@ export default class RemoteServices {
 
   static async getCourseDashboardInfo(executionId: number): Promise<Dashboard> {
     return httpClient
-        .get(`/dashboard/${executionId}`)
-        .then(response => {
-          return new Dashboard(response.data);
-        })
-        .catch(async error => {
-          throw Error(await this.errorMessage(error));
-        });
+      .get(`/dashboard/${executionId}`)
+      .then(response => {
+        return new Dashboard(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async getAssessments(): Promise<Assessment[]> {
@@ -575,22 +575,25 @@ export default class RemoteServices {
 
   static async changeSubmission(submission: Submission) {
     return httpClient
-        .put('/management/reviews/changeSubmission', submission)
-        .then(response => {})
-        .catch(async error => {
-          throw Error(await this.errorMessage(error));
-        });
+      .put('/management/reviews/changeSubmission', submission)
+      .then(() => {})
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
-  static async resubmitQuestion(submission: Submission, questionId: number): Promise<Submission> {
+  static async resubmitQuestion(
+    submission: Submission,
+    questionId: number
+  ): Promise<Submission> {
     return httpClient
-        .put(`/student/reviews/${questionId}`, submission)
-        .then(response => {
-          return new Submission(response.data);
-        })
-        .catch(async error => {
-          throw Error(await this.errorMessage(error));
-        });
+      .put(`/student/reviews/${questionId}`, submission)
+      .then(response => {
+        return new Submission(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async getSubmissions(): Promise<Submission[]> {
@@ -711,6 +714,20 @@ export default class RemoteServices {
       });
   }
 
+  static async setAvailability(
+    discussion: Discussion,
+    available: boolean
+  ): Promise<Discussion> {
+    return httpClient
+      .put('/discussions?available=' + available, discussion)
+      .then(response => {
+        return new Discussion(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async createReply(
     message: string,
     discussion: Discussion
@@ -719,6 +736,17 @@ export default class RemoteServices {
       .post('/discussions/replies?message=' + message, discussion)
       .then(response => {
         return new Reply(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async toggleDiscussionStats(): Promise<Dashboard> {
+    return httpClient
+      .put('/dashboard/discussions')
+      .then(response => {
+        return new Dashboard(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
@@ -961,7 +989,7 @@ export default class RemoteServices {
       });
   }
 
-  static swichTournamentNamePermission() {
+  static switchTournamentNamePermission() {
     return httpClient
       .put('/switchTournamentNamePermission')
       .catch(async error => {
@@ -969,7 +997,7 @@ export default class RemoteServices {
       });
   }
 
-  static swichTournamentScorePermission() {
+  static switchTournamentScorePermission() {
     return httpClient
       .put('/switchTournamentScorePermission')
       .catch(async error => {

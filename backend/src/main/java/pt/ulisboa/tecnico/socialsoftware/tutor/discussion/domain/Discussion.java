@@ -37,6 +37,9 @@ public class Discussion {
 
     private LocalDateTime date;
 
+    @Column(columnDefinition = "boolean default false")
+    private boolean available;
+
     public Discussion() {
     }
 
@@ -50,6 +53,7 @@ public class Discussion {
         this.question.addDiscussion(this);
         this.user.addDiscussion(this);
         this.setDate(DateHandler.toLocalDateTime(discussionDto.getDate()));
+        this.available = discussionDto.isAvailable();
     }
 
     public LocalDateTime getDate() {
@@ -66,6 +70,14 @@ public class Discussion {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailability(boolean bool) {
+        this.available = bool;
     }
 
     public Question getQuestion() {

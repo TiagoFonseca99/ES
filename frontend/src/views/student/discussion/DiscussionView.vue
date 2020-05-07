@@ -67,6 +67,7 @@
               rows="2"
               label="Message"
               class="text"
+              data-cy="reply"
             ></v-textarea>
             <v-card-actions>
               <v-spacer />

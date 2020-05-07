@@ -46,10 +46,10 @@
         </v-menu>
 
         <v-btn
-                to="/management/dashboard"
-                v-if="isTeacher && currentCourse"
-                text
-                dark
+          to="/management/dashboard"
+          v-if="isTeacher && currentCourse"
+          text
+          dark
         >
           Course Dashboard
           <v-icon>school</v-icon>
@@ -327,6 +327,14 @@
           <template v-slot:activator>
             <v-list-item-title>Management</v-list-item-title>
           </template>
+          <v-list-item to="/management/dashboard">
+            <v-list-item-action>
+              <v-icon>school</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Course Dashboard</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
           <v-list-item to="/management/questions">
             <v-list-item-action>
               <v-icon>question_answer</v-icon>

@@ -17,6 +17,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto
@@ -34,8 +38,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 
 @DataJpaTest
-class GetNumberOfDiscussionsTest extends Specification {
+class GetDashboardInfoTest extends Specification {
     public static final String DISCUSSION_CONTENT = "discussion content"
+    public static final String APPROVED = 'APPROVED'
+    public static final String REJECTED = 'REJECTED'
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String USER_USERNAME = "user username"
@@ -45,6 +51,7 @@ class GetNumberOfDiscussionsTest extends Specification {
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
+    public static final String REVIEW_JUSTIFICATION = 'Porque me apeteceu'
     public static final int NUMBER_OF_QUESTIONS = 1
 
 
@@ -70,18 +77,29 @@ class GetNumberOfDiscussionsTest extends Specification {
     TournamentRepository tournamentRepository
 
     @Autowired
+    SubmissionRepository submissionRepository
+
+    @Autowired
     UserService userService
 
     @Autowired
     TournamentService tournamentService
 
+    @Autowired
+    SubmissionService submissionService
+
     def student1
     def student2
+    def teacher
     def tournamentDto1 = new TournamentDto()
+    def submission1
+    def submission2
 
     def setup(){
         student1 = new User(USER_NAME, USER_USERNAME, 1, User.Role.STUDENT)
         student2 = new User(USER_NAME + "1", USER_USERNAME + "1", 2, User.Role.STUDENT)
+        teacher = new User(USER_NAME + "3", USER_USERNAME + "3", 4, User.Role.TEACHER)
+        userRepository.save(teacher)
 
         def course = new Course(COURSE_NAME, Course.Type.TECNICO)
         def courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
@@ -92,6 +110,8 @@ class GetNumberOfDiscussionsTest extends Specification {
         courseExecutionRepository.save(courseExecution)
 
         student1.addCourse(courseExecution)
+        student2.addCourse(courseExecution)
+
         userRepository.save(student1)
         userRepository.save(student2)
 
@@ -128,6 +148,22 @@ class GetNumberOfDiscussionsTest extends Specification {
         question2.addTopic(topic2)
         questionRepository.save(question2)
 
+        def submittedQuestion1 = new Question()
+        submittedQuestion1.setKey(3)
+        submittedQuestion1.setContent(QUESTION_CONTENT + '2')
+        submittedQuestion1.setTitle(QUESTION_TITLE + '2')
+        submittedQuestion1.setStatus(Question.Status.SUBMITTED)
+        submittedQuestion1.setCourse(course)
+        questionRepository.save(submittedQuestion1)
+
+        def submittedQuestion2 = new Question()
+        submittedQuestion2.setKey(4)
+        submittedQuestion2.setContent(QUESTION_CONTENT + '3')
+        submittedQuestion2.setTitle(QUESTION_TITLE + '3')
+        submittedQuestion2.setStatus(Question.Status.SUBMITTED)
+        submittedQuestion2.setCourse(course)
+        questionRepository.save(submittedQuestion2)
+
         def discussion1 = new Discussion()
         discussion1.setContent(DISCUSSION_CONTENT)
         discussion1.setUser(student1)
@@ -157,6 +193,22 @@ class GetNumberOfDiscussionsTest extends Specification {
 
 
         tournamentDto1 = tournamentService.createTournament(student1.getId(), topics, tournamentDto1)
+
+        submission1 = new Submission()
+        submission1.setQuestion(submittedQuestion1)
+        submission1.setUser(student2)
+        submissionRepository.save(submission1)
+
+        submission2 = new Submission()
+        submission2.setQuestion(submittedQuestion2)
+        submission2.setUser(student2)
+        submissionRepository.save(submission2)
+
+        student2.addSubmission(submission1)
+        student2.addSubmission(submission2)
+
+        userRepository.save(student2)
+
     }
 
     def "get number of discussions from student with 2 discussions"(){
@@ -175,17 +227,59 @@ class GetNumberOfDiscussionsTest extends Specification {
         result.getNumDiscussions() == 0
     }
 
-    def "get number of discussions from teacher"(){
-        given: "a teacher"
-        def teacher = new User(USER_NAME + "3", USER_USERNAME + "3", 4, User.Role.TEACHER)
-        userRepository.save(teacher)
-
+    def "get dashboard info from teacher"(){
         when: "requesting information"
         userService.getDashboardInfo(teacher.getId())
 
         then: "an exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+    }
+
+    def "get number of submissions from student without submissions"(){
+        when: "requesting information"
+        def result = userService.getDashboardInfo(student1.getId())
+
+        then:
+        result.getNumSubmissions() == 0
+        result.getNumApprovedSubmissions() == 0
+        result.getNumRejectedSubmissions() == 0
+    }
+
+    def "get number of submissions from student with 2 submissions without reviews"(){
+        when: "requesting information"
+        def result = userService.getDashboardInfo(student2.getId())
+
+        then:
+        result.getNumSubmissions() == 2
+        result.getNumApprovedSubmissions() == 0
+        result.getNumRejectedSubmissions() == 0
+    }
+
+    def "get number of submissions from student with 1 approved submission and 1 rejected submission"(){
+        given: "2 reviews"
+        def reviewDto1 = new ReviewDto()
+        reviewDto1.setTeacherId(teacher.getId())
+        reviewDto1.setStudentId(student2.getId())
+        reviewDto1.setSubmissionId(submission1.getId())
+        reviewDto1.setStatus(APPROVED)
+        reviewDto1.setJustification(REVIEW_JUSTIFICATION)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto1)
+        def reviewDto2 = new ReviewDto()
+        reviewDto2.setTeacherId(teacher.getId())
+        reviewDto2.setStudentId(student2.getId())
+        reviewDto2.setSubmissionId(submission2.getId())
+        reviewDto2.setStatus(REJECTED)
+        reviewDto2.setJustification(REVIEW_JUSTIFICATION)
+        submissionService.reviewSubmission(teacher.getId(), reviewDto2)
+
+        when: "requesting information"
+        def result = userService.getDashboardInfo(student2.getId())
+
+        then:
+        result.getNumSubmissions() == 2
+        result.getNumApprovedSubmissions() == 1
+        result.getNumRejectedSubmissions() == 1
     }
 
     def "get number of tournaments from student enrolled in 1 tournament"() {
@@ -243,6 +337,14 @@ class GetNumberOfDiscussionsTest extends Specification {
         @Bean
         QuestionService questionService() {
             return new QuestionService()
+        }
+    }
+
+    @TestConfiguration
+    static class SubmissionServiceImplTestContextConfiguration {
+        @Bean
+        SubmissionService submissionService() {
+            return new SubmissionService()
         }
     }
 }
