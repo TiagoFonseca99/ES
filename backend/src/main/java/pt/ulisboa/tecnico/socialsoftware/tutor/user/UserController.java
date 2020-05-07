@@ -64,4 +64,16 @@ public class UserController {
         }
         userService.switchTournamentScorePermission(user.getId());
     }
+
+    @PutMapping(value = "/dashboard/submissions")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public DashboardDto toggleSubmissionStats(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return userService.toggleSubmissionStatsVisibility(user.getId());
+    }
 }

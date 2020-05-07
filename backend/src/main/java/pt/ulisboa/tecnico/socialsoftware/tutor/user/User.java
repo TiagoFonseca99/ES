@@ -58,6 +58,7 @@ public class User implements UserDetails, DomainEntity {
     private Integer numberOfRejectedSubmissions;
     private Boolean tournamentNamePermission;
     private Boolean tournamentScorePermission;
+    private Boolean submissionPermission;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
@@ -88,6 +89,10 @@ public class User implements UserDetails, DomainEntity {
 
     @Column(columnDefinition = "boolean default true")
     private boolean discussionStatsPublic = true;
+
+    @Column(columnDefinition = "boolean default true")
+    private boolean submissionStatsPublic = true;
+
 
     public User() {
     }
@@ -573,4 +578,13 @@ public class User implements UserDetails, DomainEntity {
     public void toggleDiscussionStatsVisibility() {
         this.discussionStatsPublic = !this.discussionStatsPublic;
     }
+
+    public boolean isSubmissionStatsPublic() {
+        return this.submissionStatsPublic;
+    }
+
+    public void toggleSubmissionStatsVisibility() {
+        this.submissionStatsPublic = !this.submissionStatsPublic;
+    }
+
 }
