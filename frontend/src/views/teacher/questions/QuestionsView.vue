@@ -3,7 +3,7 @@
     <v-data-table
       :headers="headers"
       :custom-filter="customFilter"
-      :items="items"
+      :items="questions"
       :search="search"
       :sort-by="['creationDate']"
       sort-desc
