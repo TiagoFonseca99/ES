@@ -132,10 +132,10 @@ export default class DashboardView extends Vue {
   async created() {
     await this.$store.dispatch('loading');
     try {
-      this.course = this.$store.getters.getCurrentCourse;
       this.info = await RemoteServices.getCourseDashboardInfo(
         this.$store.getters.getCurrentCourse.courseExecutionId
       );
+      this.course = this.$store.getters.getCurrentCourse;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

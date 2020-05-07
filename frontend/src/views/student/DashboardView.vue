@@ -11,10 +11,10 @@
             <v-card-title class="justify-center">User Info</v-card-title>
             <div class="text-left" style="padding-left: 25px;">
               <b style="color: #1976d2">Name: </b>
-              <span>{{ info !== null ? info.name : 'Unknown user' }}</span
+              <span data-cy="name">{{ info !== null ? info.name : 'Unknown user' }}</span
               ><br />
               <b style="color: #1976d2">Username: </b>
-              <span>{{ info !== null ? info.username : 'Unknown user' }}</span>
+              <span data-cy="username">{{ info !== null ? info.username : 'Unknown user' }}</span>
             </div>
             <v-container>
               <v-col>
@@ -107,18 +107,18 @@
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Submissions</v-card-title>
             <div class="dashInfo" v-if="info !== null">
-              <div class="square">
+              <div class="square" data-cy="numSubmissions">
                 <animated-number class="num" :number="info.numSubmissions" />
                 <p class="statName">Submissions</p>
               </div>
-              <div class="square">
+              <div class="square" data-cy="numApprovedSubmissions">
                 <animated-number
                   class="num"
                   :number="info.numApprovedSubmissions"
                 />
                 <p class="statName">Approved Submissions</p>
               </div>
-              <div class="square">
+              <div class="square" data-cy="numRejectedSubmissions">
                 <animated-number
                   class="num"
                   :number="info.numRejectedSubmissions"
