@@ -106,6 +106,18 @@
         <v-col :cols="2">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Submissions</v-card-title>
+            <div
+                    class="switchContainer"
+                    style="display: flex; flex-direction: row; position: relative;"
+            >
+              <v-switch
+                      style="flex: 1"
+                      v-if="info !== null"
+                      v-model="info.submissionStatsPublic"
+                      :label="info.submissionStatsPublic ? 'Public' : 'Private'"
+                      @change="toggleSubmissions()"
+              />
+            </div>
             <div class="dashInfo" v-if="info !== null">
               <div class="square">
                 <animated-number class="num" :number="info.numSubmissions" />
@@ -222,6 +234,14 @@ export default class DashboardView extends Vue {
   async toggleDiscussions() {
     try {
       this.info = await RemoteServices.toggleDiscussionStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  async toggleSubmissions() {
+    try {
+      this.info = await RemoteServices.toggleSubmissionStats();
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
