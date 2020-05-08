@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.2.1">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Load Test Web Service createDiscussion" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Load Test Web Service createReply" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
@@ -68,7 +68,7 @@
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">CREATE TABLE IF NOT EXISTS discussions (question_id INTEGER, user_id INTEGER, content TEXT, PRIMARY KEY (question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (question_id) REFERENCES questions(id));
+          <stringProp name="query">CREATE TABLE IF NOT EXISTS discussions (question_id INTEGER, user_id INTEGER, available BOOLEAN DEFAULT false, date TIMESTAMP WITHOUT TIME ZONE, content TEXT, PRIMARY KEY (question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (question_id) REFERENCES questions(id));
 
 CREATE TABLE IF NOT EXISTS replies (id SERIAL, date TIMESTAMP WITHOUT TIME ZONE, message VARCHAR(255), discussion_question_id INTEGER, discussion_user_id INTEGER, user_id INTEGER, PRIMARY KEY (id), FOREIGN KEY (discussion_question_id, discussion_user_id) REFERENCES discussions(question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id));
 </stringProp>
@@ -388,8 +388,8 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (${question}, 676
           <stringProp name="query">WITH qa AS(DELETE FROM quiz_answers WHERE user_id = 676 RETURNING id)
 DELETE FROM question_answers WHERE quiz_answer_id IN (SELECT * FROM qa);
 
-DROP TABLE discussions CASCADE;
-DROP TABLE replies CASCADE;
+DELETE FROM replies WHERE user_id = 677;
+DELETE FROM discussions WHERE user_id = 676;
 </stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>

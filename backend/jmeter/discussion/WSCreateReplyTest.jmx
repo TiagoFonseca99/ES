@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.2.1">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Web Service createDiscussion" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Web Service createReply" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
@@ -70,9 +70,10 @@
           <stringProp name="queryType">Callable Statement</stringProp>
           <stringProp name="query">WITH qa AS (INSERT INTO quiz_answers (completed, quiz_id, user_id, used_in_statistics) VALUES (&apos;t&apos;, 5375, 676, &apos;f&apos;) RETURNING id)
 INSERT INTO question_answers (time_taken, option_id,  quiz_answer_id, quiz_question_id) VALUES (634, 6512, (SELECT id FROM qa), 40975);
-CREATE TABLE IF NOT EXISTS discussions (question_id INTEGER, user_id INTEGER, content TEXT, reply_id INTEGER, PRIMARY KEY (question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (question_id) REFERENCES questions(id));
 
-CREATE TABLE IF NOT EXISTS replies (id SERIAL, date TIMESTAMP WITHOUT TIME ZONE, message VARCHAR(255), discussion_question_id INTEGER, discussion_user_id INTEGER, teacher_id INTEGER, PRIMARY KEY (id), FOREIGN KEY (discussion_question_id, discussion_user_id) REFERENCES discussions(question_id, user_id), FOREIGN KEY (teacher_id) REFERENCES users(id));
+CREATE TABLE IF NOT EXISTS discussions (question_id INTEGER, user_id INTEGER, available BOOLEAN DEFAULT false, date TIMESTAMP WITHOUT TIME ZONE, content TEXT, PRIMARY KEY (question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (question_id) REFERENCES questions(id));
+
+CREATE TABLE IF NOT EXISTS replies (id SERIAL, date TIMESTAMP WITHOUT TIME ZONE, message VARCHAR(255), discussion_question_id INTEGER, discussion_user_id INTEGER, user_id INTEGER, PRIMARY KEY (id), FOREIGN KEY (discussion_question_id, discussion_user_id) REFERENCES discussions(question_id, user_id), FOREIGN KEY (user_id) REFERENCES users(id));
 
 INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;DISCUSSION CONTENT&apos;);</stringProp>
           <stringProp name="queryArguments"></stringProp>
@@ -439,8 +440,9 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;
           <stringProp name="queryType">Update Statement</stringProp>
           <stringProp name="query">WITH qa AS(DELETE FROM quiz_answers WHERE user_id = 676 RETURNING id)
 DELETE FROM question_answers WHERE quiz_answer_id = (SELECT id FROM qa);
-DROP TABLE discussions CASCADE;
-DROP TABLE replies CASCADE;</stringProp>
+DELETE FROM replies WHERE user_id = 677;
+DELETE FROM replies WHERE user_id = 676;
+DELETE FROM discussions WHERE user_id = 676;</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
@@ -488,6 +490,43 @@ DROP TABLE replies CASCADE;</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
     </hashTree>
   </hashTree>
 </jmeterTestPlan>
