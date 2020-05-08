@@ -39,9 +39,10 @@
           >
         </div>
       </li>
-      <li class="list-header" >
+      <li class="list-header">
         <div class="col" style="color: white">
-          <v-icon class="mr-2" color="white">mouse</v-icon>Left-click on question's title to view it.
+          <v-icon class="mr-2" color="white">mouse</v-icon>Left-click on
+          question's title to view it.
         </div>
       </li>
     </ul>
@@ -68,7 +69,6 @@ import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import RemoteServices from '@/services/RemoteServices';
 import Review from '@/models/management/Review';
 import Submission from '@/models/management/Submission';
-import Image from '@/models/management/Image';
 import ShowReviewDialog from '@/views/student/questions/ShowReviewDialog.vue';
 import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
 import Question from '@/models/management/Question';
@@ -112,7 +112,9 @@ export default class ReviewView extends Vue {
   }
 
   getSubmission(review: Review) {
-    return this.submissions.find((submission: Submission) => submission.id == review.submissionId);
+    return this.submissions.find(
+      (submission: Submission) => submission.id == review.submissionId
+    );
   }
 
   getReviewStatus(review: Review) {

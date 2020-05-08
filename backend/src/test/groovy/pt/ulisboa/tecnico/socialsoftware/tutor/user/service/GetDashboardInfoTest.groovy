@@ -353,7 +353,7 @@ class GetDashboardInfoTest extends Specification {
     }
 
     @TestConfiguration
-    static class UserServiceImplTestContextConfiguration {
+    static class GetDashboardServicesImplTestContextConfiguration {
         @Bean
         UserService userService() {
             return new UserService()
@@ -387,10 +387,7 @@ class GetDashboardInfoTest extends Specification {
         QuestionService questionService() {
             return new QuestionService()
         }
-    }
 
-    @TestConfiguration
-    static class SubmissionServiceImplTestContextConfiguration {
         @Bean
         SubmissionService submissionService() {
             return new SubmissionService()

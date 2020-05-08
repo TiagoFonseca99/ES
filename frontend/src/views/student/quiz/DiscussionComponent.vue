@@ -4,6 +4,7 @@
       <v-card-title class="justify-left headline comp-title">
         Discussions
       </v-card-title>
+      <reply-component v-if="discussions != null" :discussions="discussions" />
       <div v-if="answered && !hasDiscussion" class="discussion-message">
         <v-textarea
           clearable
@@ -26,9 +27,6 @@
           >
         </v-card-actions>
       </div>
-      <div v-else class="text-left discussion">
-        <span v-html="convertMarkDown(discussion.content)" />
-      </div>
     </v-card>
   </div>
 </template>
@@ -38,12 +36,15 @@ import { Component, Vue, Prop, Emit, Watch } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Question from '@/models/management/Question';
 import Discussion from '@/models/management/Discussion';
+import ReplyComponent from '@/views/student/quiz/ReplyComponent.vue';
 
-@Component
+@Component({
+  components: { 'reply-component': ReplyComponent }
+})
 export default class DiscussionComponent extends Vue {
   @Prop(Boolean) readonly hasDiscussion!: Boolean;
   @Prop(Question) readonly question?: Question;
-  @Prop(Discussion) readonly discussion?: Discussion;
+  @Prop() readonly discussions?: Discussion[];
   @Prop(Boolean) readonly answered!: boolean;
   discussionMessage: string = '';
 
