@@ -196,15 +196,6 @@ let router = new Router({
           }
         },
         {
-          path: 'stats',
-          name: 'stats',
-          component: StatsView,
-          meta: {
-            title: process.env.VUE_APP_NAME + ' - Stats',
-            requiredAuth: 'Student'
-          }
-        },
-        {
           path: 'scan',
           name: 'scan',
           component: ScanView,
