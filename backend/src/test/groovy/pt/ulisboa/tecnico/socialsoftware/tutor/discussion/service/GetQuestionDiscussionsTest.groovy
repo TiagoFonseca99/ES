@@ -26,7 +26,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 
 @DataJpaTest
-class GetUserDiscussions extends Specification {
+class GetQuestionDiscussionsTest extends Specification {
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
@@ -75,7 +75,7 @@ class GetUserDiscussions extends Specification {
 
         def quiz = new Quiz()
         quiz.setKey(1)
-        quiz.setType(Quiz.QuizType.TEST)
+        quiz.setType("TEST")
 
         def quizanswer = new QuizAnswer()
 
@@ -108,14 +108,14 @@ class GetUserDiscussions extends Specification {
         given: "a discussionDto"
         def discussionDto = new DiscussionDto()
         discussionDto.setContent(DISCUSSION_CONTENT)
-        and: "a student id"
+        and: "a question"
         discussionDto.setUserId(student.getId())
         discussionDto.setQuestion(new QuestionDto(question))
         and: "a discussion created"
         discussionService.createDiscussion(discussionDto)
 
-        when: "getting user discussions"
-        def discussion = discussionService.findDiscussionsByUserId(student.getId());
+        when: "getting question discussions"
+        def discussion = discussionService.findDiscussionsByQuestionId(question.getId());
 
         then: "the correct discussion is returned"
         discussion.size == 1
@@ -124,12 +124,12 @@ class GetUserDiscussions extends Specification {
         discussion.get(0).getContent() == discussionDto.getContent()
     }
 
-    def "get discussion of invalid student"(){
-        given: "an invalid student id"
-        def id = -3
+    def "get discussion of invalid question"(){
+        given: "an invalid question id"
+        def questionId = -3
 
-        when: "getting user discussion"
-        def discussions = discussionService.findDiscussionsByUserId(id);
+        when: "getting question discussion"
+        def discussions = discussionService.findDiscussionsByQuestionId(questionId);
 
         then:
         discussions.size() == 0

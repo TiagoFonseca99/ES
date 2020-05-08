@@ -25,6 +25,7 @@
             <v-expansion-panels
               v-if="discussion.replies !== null"
               :popout="true"
+              style="margin-bottom: 20px"
             >
               <v-switch
                 v-model="discussion.available"
@@ -64,6 +65,7 @@
                       class="text"
                       data-cy="ReplyMessage"
                       style="padding-top: 20px;"
+                      :id="'reply' + discussion.userId"
                     ></v-textarea>
                     <v-card-actions>
                       <v-spacer />
@@ -73,6 +75,7 @@
                         @click="
                           setDiscussion(discussion);
                           submitReply();
+                          clearTextarea('#reply' + discussion.userId);
                         "
                         >Submit</v-btn
                       >
@@ -92,6 +95,7 @@
                 label="Message"
                 class="text"
                 data-cy="ReplyMessage"
+                :id="'reply' + discussion.userId"
               ></v-textarea>
               <v-card-actions>
                 <v-switch
@@ -111,6 +115,7 @@
                   @click="
                     setDiscussion(discussion);
                     submitReply();
+                    clearTextarea('#reply' + discussion.userId);
                   "
                   >Submit</v-btn
                 >
@@ -186,6 +191,13 @@ export default class ReplyComponent extends Vue {
 
   setDiscussion(discussion: Discussion) {
     this.discussion = discussion;
+  }
+
+  clearTextarea(name: string) {
+    let textArea: HTMLTextAreaElement;
+    let val = document.querySelector(name)!;
+    textArea = val as HTMLTextAreaElement;
+    textArea.value = '';
   }
 
   convertMarkDown(text: string) {

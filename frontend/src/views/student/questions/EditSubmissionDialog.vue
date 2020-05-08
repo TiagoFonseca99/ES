@@ -9,11 +9,7 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          {{
-            oldQuestionId === null
-              ? 'New Submission'
-              : 'Edit Submission'
-          }}
+          {{ oldQuestionId === null ? 'New Submission' : 'Edit Submission' }}
         </span>
       </v-card-title>
 
@@ -73,20 +69,16 @@
           color="blue darken-1"
           @click="submitQuestion"
           data-cy="submitButton"
-          >
-          {{oldQuestionId === null
-              ? 'Submit'
-              : 'Resubmit'
-          }}
-        </v-btn
         >
+          {{ oldQuestionId === null ? 'Submit' : 'Resubmit' }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-  import {Component, Model, Prop, Vue, Watch} from 'vue-property-decorator';
+import { Component, Model, Prop, Vue, Watch } from 'vue-property-decorator';
 import Question from '@/models/management/Question';
 import RemoteServices from '@/services/RemoteServices';
 import Submission from '@/models/management/Submission';
@@ -105,7 +97,7 @@ export default class EditSubmissionDialog extends Vue {
     this.updateSubmission();
   }
 
-  @Watch('question', { immediate: true, deep: true})
+  @Watch('question', { immediate: true, deep: true })
   updateSubmission() {
     this.editQuestion = new Question(this.question);
     if (this.editQuestion.id != null) {
@@ -131,9 +123,12 @@ export default class EditSubmissionDialog extends Vue {
       this.currentSubmission.questionDto = this.editQuestion;
       this.currentSubmission.courseId = this.$store.getters.getCurrentCourse.courseId;
       const result =
-              this.oldQuestionId != null
-                      ? await RemoteServices.resubmitQuestion(this.currentSubmission, this.oldQuestionId)
-                      : await RemoteServices.submitQuestion(this.currentSubmission);
+        this.oldQuestionId != null
+          ? await RemoteServices.resubmitQuestion(
+              this.currentSubmission,
+              this.oldQuestionId
+            )
+          : await RemoteServices.submitQuestion(this.currentSubmission);
 
       this.$emit('submit-question', result);
     } catch (error) {
