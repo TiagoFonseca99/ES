@@ -25,6 +25,7 @@
             <v-expansion-panels
               v-if="discussion.replies !== null"
               :popout="true"
+              style="margin-bottom: 20px"
             >
               <v-switch
                 v-model="discussion.available"

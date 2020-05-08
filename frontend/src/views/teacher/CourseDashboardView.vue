@@ -44,20 +44,20 @@
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Tournaments</v-card-title>
             <v-data-table
-                    :headers="headers"
-                    :items="tournaments"
-                    :sort-by="['id']"
-                    :hide-default-footer="true"
-                    :mobile-breakpoint="0"
-                    class="fill-height"
+              :headers="headers"
+              :items="tournaments"
+              :sort-by="['id']"
+              :hide-default-footer="true"
+              :mobile-breakpoint="0"
+              class="fill-height"
             >
               <template v-slot:item.startTime="{ item }">
-                <v-chip small color=primary>
+                <v-chip small color="primary">
                   {{ item.startTime }}
                 </v-chip>
               </template>
               <template v-slot:item.endTime="{ item }">
-                <v-chip small color=primary>
+                <v-chip small color="primary">
                   {{ item.endTime }}
                 </v-chip>
               </template>
@@ -131,8 +131,7 @@ import Dashboard from '@/models/management/Dashboard';
 import RemoteServices from '@/services/RemoteServices';
 import AnimatedNumber from '@/components/AnimatedNumber.vue';
 import Course from '@/models/user/Course';
-import Tournament from "@/models/user/Tournament";
-import SolvedQuiz from "@/models/statement/SolvedQuiz";
+import Tournament from '@/models/user/Tournament';
 
 @Component({
   components: { AnimatedNumber }
@@ -154,7 +153,7 @@ export default class DashboardView extends Vue {
       this.info = await RemoteServices.getCourseDashboardInfo(
         this.$store.getters.getCurrentCourse.courseExecutionId
       );
-      if (this.info.joinedTournaments){
+      if (this.info.joinedTournaments) {
         console.log(this.info.joinedTournaments);
         this.tournaments = this.info.joinedTournaments.sort();
       }

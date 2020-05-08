@@ -64,12 +64,12 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-icon
-                      large
-                      class="mr-2"
-                      v-on="on"
-                      @click="showQuestionDialog(item.questionDto)"
-                      data-cy="viewQuestion"
-              >visibility</v-icon
+                large
+                class="mr-2"
+                v-on="on"
+                @click="showQuestionDialog(item.questionDto)"
+                data-cy="viewQuestion"
+                >visibility</v-icon
               >
             </template>
             <span>Show Question</span>
@@ -77,13 +77,13 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-icon
-                      large
-                      class="mr-2"
-                      v-on="on"
-                      @click="deleteSubmission(item)"
-                      color="red"
-                      data-cy="deleteSubmission"
-              >delete</v-icon
+                large
+                class="mr-2"
+                v-on="on"
+                @click="deleteSubmission(item)"
+                color="red"
+                data-cy="deleteSubmission"
+                >delete</v-icon
               >
             </template>
             <span>Delete Question</span>
@@ -91,8 +91,8 @@
         </template>
       </v-data-table>
       <footer>
-        <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to view
-        it.
+        <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to
+        view it.
       </footer>
       <edit-reviews
         v-if="currentSubmission"
@@ -123,9 +123,17 @@
         </template>
         <template v-slot:item.questionDto.title="{ item }">
           <span>
-          <p v-html="convertMarkDown(getSubmission(item).title, getSubmission(item).image)" @click="showQuestionDialog(getSubmission(item))">
-            {{ getSubmission(item).title }}
-          </p>
+            <p
+              v-html="
+                convertMarkDown(
+                  getSubmission(item).title,
+                  getSubmission(item).image
+                )
+              "
+              @click="showQuestionDialog(getSubmission(item))"
+            >
+              {{ getSubmission(item).title }}
+            </p>
           </span>
         </template>
         <template v-slot:item.questionDto.creationDate="{ item }">
@@ -147,12 +155,12 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-icon
-                      large
-                      class="mr-2"
-                      v-on="on"
-                      @click="showQuestionDialog(getSubmission(item))"
-                      data-cy="viewQuestion"
-              >visibility</v-icon
+                large
+                class="mr-2"
+                v-on="on"
+                @click="showQuestionDialog(getSubmission(item))"
+                data-cy="viewQuestion"
+                >visibility</v-icon
               >
             </template>
             <span>Show Question</span>
@@ -160,15 +168,15 @@
         </template>
       </v-data-table>
       <footer>
-        <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to view
-        it.
+        <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to
+        view it.
       </footer>
     </v-card>
     <show-question-dialog
       v-if="currentQuestion"
       v-model="questionDialog"
       :question="currentQuestion"
-      :discussion=false
+      :discussion="false"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
     />
   </div>
