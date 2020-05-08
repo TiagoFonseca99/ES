@@ -29,6 +29,7 @@
             >
               <v-switch
                 v-model="discussion.available"
+                data-cy="changeAvailability"
                 class="ma-4"
                 :label="discussion.available ? 'Public' : 'Private'"
                 @change="
@@ -100,6 +101,7 @@
               <v-card-actions>
                 <v-switch
                   v-model="discussion.available"
+                  data-cy="changeAvailability"
                   class="ma-4"
                   :label="discussion.available ? 'Public' : 'Private'"
                   @change="

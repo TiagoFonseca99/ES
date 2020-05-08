@@ -73,6 +73,8 @@ Cypress.Commands.add(
   }
 );
 
+// TDP
+
 Cypress.Commands.add('createTournament', numberOfQuestions => {
   cy.get('[data-cy="createButton"]')
     .should('be.visible')
@@ -214,6 +216,8 @@ Cypress.Commands.add('cancelTournament', tournament => {
     .click({ force: true });
 });
 
+// DDP
+
 Cypress.Commands.add('answerQuiz', n => {
   cy.get('[data-cy="quizzes"]').click();
   cy.get('[data-cy="availableQuizzes"]').click();
@@ -275,6 +279,51 @@ Cypress.Commands.add('submitEmptyReply', () => {
     .click();
   cy.get('[data-cy="submitReply"]').click();
 });
+
+Cypress.Commands.add('removeAllDiscussions', () => {
+  cy.exec(
+    'PGPASSWORD= psql tutordb -U daniel -h localhost -c "DELETE FROM discussions WHERE 1 = 1;"'
+  );
+});
+
+Cypress.Commands.add('removeAllReplies', () => {
+  cy.exec(
+    'PGPASSWORD= psql tutordb -U daniel -h localhost -c "DELETE FROM replies WHERE 1 = 1;"'
+  );
+});
+
+Cypress.Commands.add('addDiscussion', (available, content, question, user) => {
+
+}
+
+Cypress.Commands.add('addDiscussionSameQuestion', (available, content, user) => {
+  cy.exec(
+    'PGPASSWORD= psql tutordb -U daniel -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, available, content) VALUES (' +
+    user +
+    ', (SELECT id FROM q), ' +
+    available +
+    ', \'' +
+    content +
+    '\');"'
+  );
+}
+
+Cypress.Commands.add('openSolvedQuiz', (number) => {
+  cy.get('[data-cy="quizzes"]').click();
+  cy.get('[data-cy="solvedQuizzes"]').click();
+  cy.get('[data-cy="quiz' + number + '"]').click();
+});
+
+Cypress.Commands.add('clickAvailability', () => {
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="showQuestionDialog"]')
+    .first()
+    .click();
+  cy.get('[data-cy="changeAvailability"]').click({ force: true });
+})
+
+// PPA
 
 Cypress.Commands.add('openSubmissions', () => {
   cy.contains('Questions').click();
@@ -559,6 +608,8 @@ Cypress.Commands.add('seeRejectedQuestionAndResubmit', title => {
   cy.get('[data-cy="resubmit"]').click();
 });
 
+// DASHBOARD
+
 Cypress.Commands.add('openDashboard', () => {
   cy.contains('Dashboard').click();
 });
@@ -583,6 +634,16 @@ Cypress.Commands.add('addTournamentsInfo', () => {
   );
 });
 
+Cypress.Commands.add('addDiscussionsInfo', () => {
+  cy.log('Add 1 public discussions and 1 private discussion');
+  cy.exec(
+    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1504, 676, true, \'Nothing here\');"'
+  );
+  cy.exec(
+    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1339, 676, false, \'Nothing here\');"'
+  );
+});
+
 Cypress.Commands.add('removeSubmissionInfo', () => {
   cy.exec(
     'PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
@@ -594,11 +655,23 @@ Cypress.Commands.add('removeSubmissionInfo', () => {
     'PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
   );
 });
+    
+Cypress.Commands.add('removeDiscussionInfo', () => {
+  cy.exec(
+    'PGPASSWORD= psql tutordb -U daniel -h localhost -c "DELETE FROM discussions WHERE user_id = 676;"'
+  );
+});
 
 Cypress.Commands.add('checkUserInfo', (name, username) => {
   cy.get('[data-cy="name"]').contains(name);
   cy.get('[data-cy="username"]').contains(username);
 });
+
+Cypress.Commands.add('checkDiscussionsInfo', (numDiscussions, numPublicDiscussions) => {
+  cy.get('[data-cy="numDiscussions"]').contains(numDiscussions);
+  cy.get('[data-cy="numPublicDiscussions"]').contains(numPublicDiscussions);
+});
+);
 
 Cypress.Commands.add(
   'checkSubmissionsInfo',
