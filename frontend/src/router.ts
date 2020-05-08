@@ -67,6 +67,15 @@ let router = new Router({
       }
     },
     {
+      path: '/course/dashboard',
+      name: 'course-dashboard',
+      component: CourseDashboardView,
+      meta: {
+        title: process.env.VUE_APP_NAME + ' - Course Dashboard',
+        requiredAuth: 'Teacher'
+      }
+    },
+    {
       path: '/management',
       name: 'management',
       component: ManagementView,
@@ -131,15 +140,6 @@ let router = new Router({
           component: ImpExpView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - ImpExp',
-            requiredAuth: 'Teacher'
-          }
-        },
-        {
-          path: 'dashboard',
-          name: 'course-dashboard',
-          component: CourseDashboardView,
-          meta: {
-            title: process.env.VUE_APP_NAME + ' - Course Dashboard',
             requiredAuth: 'Teacher'
           }
         }

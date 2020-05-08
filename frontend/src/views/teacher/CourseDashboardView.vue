@@ -12,25 +12,25 @@
             <div class="dashInfo" v-if="course">
               <div class="square taller">
                 <b class="infoName">Course Name</b>
-                <span style="color: black">{{ course.name }}</span>
+                <span data-cy="courseName" style="color: black">{{ course.name }}</span>
               </div>
               <div class="square taller">
                 <b class="infoName">Course Acronym</b>
-                <span style="color: black">{{ course.acronym }}</span>
+                <span data-cy="courseAcronym" style="color: black">{{ course.acronym }}</span>
               </div>
               <div class="square taller">
                 <b class="infoName">Academic Term</b>
-                <span style="color: black">{{ course.academicTerm }}</span>
+                <span data-cy="courseTerm" style="color: black">{{ course.academicTerm }}</span>
               </div>
               <div class="square taller">
                 <b class="infoName">Course Type</b>
-                <span style="color: black">{{
+                <span data-cy="courseType" style="color: black">{{
                   course.courseExecutionType
                 }}</span>
               </div>
               <div class="square taller">
                 <b class="infoName">Status</b>
-                <span style="color: black"> {{ course.status }}</span>
+                <span  data-cy="courseStatus" style="color: black"> {{ course.status }}</span>
               </div>
             </div>
             <div v-else>
@@ -69,18 +69,18 @@
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Submissions</v-card-title>
             <div class="dashInfo" v-if="info !== null">
-              <div class="square">
+              <div data-cy="numSubmissions" class="square">
                 <animated-number class="num" :number="info.numSubmissions" />
                 <p class="statName">Total Submissions</p>
               </div>
-              <div class="square">
+              <div data-cy="numApprovedSubmissions" class="square">
                 <animated-number
                   class="num"
                   :number="info.numApprovedSubmissions"
                 />
                 <p class="statName">Total Approved Submissions</p>
               </div>
-              <div class="square">
+              <div data-cy="numRejectedSubmissions" class="square">
                 <animated-number
                   class="num"
                   :number="info.numRejectedSubmissions"

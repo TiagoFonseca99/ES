@@ -186,6 +186,7 @@ enum FilterState {
   }
 })
 export default class QuestionsView extends Vue {
+  items: Question[] = [];
   questions: Question[] = [];
   topics: Topic[] = [];
   currentQuestion: Question | null = null;
