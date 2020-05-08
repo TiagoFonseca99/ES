@@ -11,7 +11,7 @@ describe('Teacher walkthrough', () => {
 
     it('login approves a submission', () => {
 
-        cy.ApproveSubmissions('Test Question','Excelente Pergunta');
+        cy.approveSubmissions('Test Question','Excelente Pergunta');
 
         cy.openTeacherQuestions();
         cy.checkAvailableQuestion('Test Question', 'Question?', 'teste a', 'teste b', 'teste c', 'teste d');

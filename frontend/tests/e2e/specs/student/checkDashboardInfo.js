@@ -1,13 +1,12 @@
 describe('Student walkthrough', () => {
     beforeEach(() => {
         cy.demoStudentLogin()
-        cy.addSubmissionInfo()
-        cy.addDiscussionsInfo()
-        cy.addTournamentsInfo();
+        cy.addSubmissionInfo(676)
+        cy.addDiscussionsInfo(676)
+        cy.addTournamentsInfo()
     })
     afterEach(() => {
-
-        cy.removeDiscussionInfo()
+        cy.removeDiscussionInfo(676)
         cy.removeSubmissionInfo()
         cy.contains('Logout').click()
     })

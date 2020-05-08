@@ -148,10 +148,7 @@ public class CourseService {
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public DashboardDto getDashboardInfo(int courseExecutionId) {
-        CourseExecution courseExecution = courseExecutionRepository.findById(courseExecutionId).orElse(null);
-        if (courseExecution == null) {
-            return new DashboardDto();
-        }
+        CourseExecution courseExecution = courseExecutionRepository.findById(courseExecutionId).orElseThrow(() -> new TutorException(COURSE_EXECUTION_NOT_FOUND, courseExecutionId));
         List<User> allStudents = courseExecution.getUsers().stream().filter(user -> user.getRole().equals(User.Role.STUDENT)).collect(Collectors.toList());
         List<DashboardDto> publicStudentsInfo = allStudents.stream().map(u -> userService.getDashboardInfo(u.getId())).collect(Collectors.toList());
 
@@ -169,7 +166,7 @@ public class CourseService {
         for (DashboardDto studentInfo : publicStudentsInfo) {
             if (studentInfo.isDiscussionStatsPublic()) {
                 numDiscussions += studentInfo.getNumDiscussions();
-                // numPublicDiscussions += studentInfo.getNumPublicDiscussions();
+                numPublicDiscussions += studentInfo.getNumPublicDiscussions();
             }
             if (studentInfo.isSubmissionStatsPublic()) {
                 numSubmissions += studentInfo.getNumSubmissions();
