@@ -2,8 +2,8 @@ describe('Teacher walkthrough', () => {
     beforeEach(() => {
         cy.demoTeacherLogin();
         cy.log('student submits a question');
-        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, key) VALUES (\'old\', \'old content\', \'SUBMITTED\', 2, 1200) RETURNING id)\nINSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" ');
-        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE key=1200)\nINSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste\', \'t\', (SELECT id FROM quest), 0);" ');
+        cy.exec('PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, key) VALUES (\'old\', \'old content\', \'SUBMITTED\', 2, 1200) RETURNING id)\nINSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" ');
+        cy.exec('PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE key=1200)\nINSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste\', \'t\', (SELECT id FROM quest), 0);" ');
     })
 
     afterEach(() => {
@@ -15,8 +15,8 @@ describe('Teacher walkthrough', () => {
         cy.get('[data-cy="submitButton"]').click();
         cy.log('delete student submitted question');
         cy.wait(1000);
-        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews);\n"');
-        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH sub AS (SELECT question_id FROM submissions WHERE id IN (SELECT max(id) FROM submissions)) DELETE FROM options WHERE question_id IN (SELECT * FROM sub);\nWITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);\n"');
+        cy.exec('PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews);\n"');
+        cy.exec('PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH sub AS (SELECT question_id FROM submissions WHERE id IN (SELECT max(id) FROM submissions)) DELETE FROM options WHERE question_id IN (SELECT * FROM sub);\nWITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);\n"');
 
     })
 
@@ -33,8 +33,8 @@ describe('Teacher walkthrough', () => {
 
         cy.log('delete student submitted question');
         cy.wait(1000);
-        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews);\n"');
-        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH sub AS (SELECT question_id FROM submissions WHERE id IN (SELECT max(id) FROM submissions)) DELETE FROM options WHERE question_id IN (SELECT * FROM sub);\nWITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);\n"');
+        cy.exec('PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews);\n"');
+        cy.exec('PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH sub AS (SELECT question_id FROM submissions WHERE id IN (SELECT max(id) FROM submissions)) DELETE FROM options WHERE question_id IN (SELECT * FROM sub);\nWITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);\n"');
 
     })
 
