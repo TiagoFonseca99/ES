@@ -276,6 +276,15 @@ Cypress.Commands.add('submitEmptyReply', () => {
   cy.get('[data-cy="submitReply"]').click();
 });
 
+Cypress.Commands.add('clickAvailability', () => {
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="showQuestionDialog"]')
+    .first()
+    .click();
+  cy.get('[data-cy="changeAvailability"]').click({ force: true });
+})
+
 Cypress.Commands.add('openSubmissions', () => {
   cy.contains('Questions').click();
   cy.contains('Submissions').click();
