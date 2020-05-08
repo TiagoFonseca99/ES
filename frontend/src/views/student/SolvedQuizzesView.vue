@@ -10,9 +10,10 @@
       </li>
       <li
         class="list-row"
-        v-for="quiz in quizzes"
+        v-for="(quiz, index) in quizzes"
         :key="quiz.quizAnswerId"
         @click="showResults(quiz)"
+        :data-cy="'quiz' + index"
       >
         <div class="col">
           {{ quiz.statementQuiz.title }}
