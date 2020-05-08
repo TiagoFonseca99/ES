@@ -27,7 +27,7 @@ describe('Student discussion walkthrough', () => {
 
   it('login, answer quiz create discussion view discussions return to quiz to view solved', () =>  {
     cy.answerQuiz(0)
-    cy.writeDiscussion('I don\' know what this question means')
+    cy.writeDiscussion('I don\'t know what this question means')
     cy.viewMyDiscussions()
     cy.log("Another user creates a public discussion")
     cy.addDiscussionSameQuestion(true, 'I dont know what this means', 677)

@@ -314,6 +314,15 @@ Cypress.Commands.add('openSolvedQuiz', (number) => {
   cy.get('[data-cy="quiz' + number + '"]').click();
 });
 
+Cypress.Commands.add('clickAvailability', () => {
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="filterDiscussions"]').click();
+  cy.get('[data-cy="showQuestionDialog"]')
+    .first()
+    .click();
+  cy.get('[data-cy="changeAvailability"]').click({ force: true });
+})
+
 // PPA
 
 Cypress.Commands.add('openSubmissions', () => {
