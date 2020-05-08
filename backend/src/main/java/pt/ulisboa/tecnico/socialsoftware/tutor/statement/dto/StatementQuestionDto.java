@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 
 public class StatementQuestionDto implements Serializable {
     private QuestionDto question;
-    private DiscussionDto discussion;
+    private List<DiscussionDto> discussions;
+    private boolean hasUserDiscussion = false;
     private Integer quizQuestionId;
     private String content;
     private List<StatementOptionDto> options;
@@ -23,26 +24,41 @@ public class StatementQuestionDto implements Serializable {
         if (questionAnswer.getQuizQuestion().getQuestion().getImage() != null) {
             this.image = new ImageDto(questionAnswer.getQuizQuestion().getQuestion().getImage());
         }
+
         this.setQuestion(new QuestionDto(questionAnswer.getQuizQuestion().getQuestion()));
         this.quizQuestionId = questionAnswer.getQuizQuestion().getId();
         this.options = questionAnswer.getQuizQuestion().getQuestion().getOptions().stream().map(StatementOptionDto::new)
                 .collect(Collectors.toList());
         this.sequence = questionAnswer.getSequence();
 
-        // There will be only 1 due to restrictions on the database, findFirst is correct
-        this.discussion = questionAnswer.getQuizQuestion().getQuestion().getDiscussions().stream()
-                .filter(questionAnswer.getQuizAnswer().getUser().getDiscussions()::contains)
-            .map(DiscussionDto::new)
-            .findFirst()
-            .orElse(null);
+        int userId = questionAnswer.getQuizAnswer().getUser().getId();
+        this.discussions = questionAnswer.getQuizQuestion().getQuestion().getDiscussions().stream()
+                .map(DiscussionDto::new).filter(discussion -> {
+                    if (discussion.isAvailable()) {
+                        return true;
+                    } else if (discussion.getUserId() == userId) {
+                        this.hasUserDiscussion = true;
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }).collect(Collectors.toList());
     }
 
-    public DiscussionDto getDiscussion() {
-        return discussion;
+    public boolean isHasUserDiscussion() {
+		return hasUserDiscussion;
+	}
+
+	public void setHasUserDiscussion(boolean hasUserDiscussion) {
+		this.hasUserDiscussion = hasUserDiscussion;
+	}
+
+	public List<DiscussionDto> getDiscussions() {
+        return discussions;
     }
 
-    public void setDiscussion(DiscussionDto discussion) {
-        this.discussion = discussion;
+    public void addDiscussion(DiscussionDto discussion) {
+        this.discussions.add(discussion);
     }
 
     public QuestionDto getQuestion() {

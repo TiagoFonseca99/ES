@@ -220,11 +220,6 @@
           <v-icon>fa fa-user</v-icon>
         </v-btn>
 
-        <v-btn to="/student/stats" v-if="isStudent && currentCourse" text dark>
-          Stats
-          <v-icon>fas fa-chart-area</v-icon>
-        </v-btn>
-
         <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" text dark>

@@ -20,7 +20,12 @@
           />
 
           <v-spacer />
-          <v-btn to="/student/reviews" color="primary" dark data-cy="submissionsStatus">
+          <v-btn
+            to="/student/reviews"
+            color="primary"
+            dark
+            data-cy="submissionsStatus"
+          >
             Submissions Status
           </v-btn>
           <v-btn
@@ -37,7 +42,8 @@
         <p
           v-html="
             convertMarkDown(item.questionDto.title, item.questionDto.image)
-          " @click="showQuestionDialog(item.questionDto)"
+          "
+          @click="showQuestionDialog(item.questionDto)"
       /></template>
 
       <template v-slot:item.questionDto.status="{ item }">

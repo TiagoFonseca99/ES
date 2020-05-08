@@ -12,12 +12,12 @@
       <v-card-actions>
         <v-spacer />
         <v-btn
-                data-cy="resubmit"
-                dark
-                color="blue darken-1"
-                v-if="review.status == 'REJECTED'"
-                @click="resubmitQuestion"
-        >edit & resubmit</v-btn
+          data-cy="resubmit"
+          dark
+          color="blue darken-1"
+          v-if="review.status === 'REJECTED'"
+          @click="resubmitQuestion"
+          >edit & resubmit</v-btn
         >
         <v-btn
           data-cy="close"
@@ -28,18 +28,18 @@
         >
       </v-card-actions>
       <edit-submission-dialog
-              v-if="currentQuestion"
-              v-model="editSubmissionDialog"
-              :question="currentQuestion"
-              :submission="currentSubmission"
-              v-on:submit-question="onSaveQuestion"
+        v-if="currentQuestion"
+        v-model="editSubmissionDialog"
+        :question="currentQuestion"
+        :submission="currentSubmission"
+        v-on:submit-question="onSaveQuestion"
       />
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import {Component, Vue, Prop, Watch, Model} from 'vue-property-decorator';
+import { Component, Vue, Prop, Watch, Model } from 'vue-property-decorator';
 import Review from '@/models/management/Review';
 import ShowReview from '@/views/student/questions/ShowReview.vue';
 import Question from '@/models/management/Question';

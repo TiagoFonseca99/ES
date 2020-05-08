@@ -51,12 +51,12 @@
       :question="
         statementManager.statementQuiz.questions[questionOrder].question
       "
-      :discussion="
-        statementManager.statementQuiz.questions[questionOrder].discussion
+      :discussions="
+        statementManager.statementQuiz.questions[questionOrder].discussions
       "
       :hasDiscussion="
-        statementManager.statementQuiz.questions[questionOrder].discussion !=
-          null
+        statementManager.statementQuiz.questions[questionOrder]
+          .hasUserDiscussion
       "
       :answered="
         statementManager.statementQuiz.answers[questionOrder].optionId != null
@@ -144,21 +144,21 @@ export default class ResultsView extends Vue {
       const result = await RemoteServices.createDiscussion(this.discussion!);
       this.statementManager.statementQuiz!.questions[
         this.questionOrder
-      ].discussion = this.discussion;
-      this.$emit('submit-discussion', result);
+      ].discussions!.push(result);
+      this.statementManager.statementQuiz!.questions[
+        this.questionOrder
+      ].hasUserDiscussion = true;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
   }
 
   updateDiscussion() {
-    let disc: Discussion | null = this.statementManager.statementQuiz!
-      .questions[this.questionOrder].discussion;
-
-    if (disc == null) {
+    if (
+      !this.statementManager.statementQuiz!.questions[this.questionOrder]
+        .hasUserDiscussion
+    ) {
       this.discussion = new Discussion();
-    } else {
-      this.discussion = disc;
     }
   }
 

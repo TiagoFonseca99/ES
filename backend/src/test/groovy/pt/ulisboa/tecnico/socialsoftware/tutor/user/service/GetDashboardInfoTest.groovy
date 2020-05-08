@@ -234,6 +234,34 @@ class GetDashboardInfoTest extends Specification {
         result.getNumDiscussions() == 0
     }
 
+    def "get number of public discussions from student with 0 public discussions"(){
+        when: "requesting information"
+        def result = userService.getDashboardInfo(student1.getId())
+
+        then:
+        result.getNumPublicDiscussions() == 0
+    }
+
+    def "get number of public discussions from student with 1 public discussion"(){
+        given: "1 discussion made public"
+        userRepository.findByUsername("user username").getDiscussions().stream().findFirst().get().setAvailability(true);
+
+        when: "requesting information"
+        def result = userService.getDashboardInfo(student1.getId())
+
+        then:
+        result.getNumPublicDiscussions() == 1
+    }
+
+    def "get number of discussions from teacher"(){
+        when: "requesting information"
+        userService.getDashboardInfo(teacher.getId())
+
+        then: "an exception is thrown"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+    }
+
     def "get dashboard info from teacher"(){
         when: "requesting information"
         userService.getDashboardInfo(teacher.getId())
@@ -325,7 +353,7 @@ class GetDashboardInfoTest extends Specification {
     }
 
     @TestConfiguration
-    static class UserServiceImplTestContextConfiguration {
+    static class GetDashboardServicesImplTestContextConfiguration {
         @Bean
         UserService userService() {
             return new UserService()
@@ -359,10 +387,7 @@ class GetDashboardInfoTest extends Specification {
         QuestionService questionService() {
             return new QuestionService()
         }
-    }
 
-    @TestConfiguration
-    static class SubmissionServiceImplTestContextConfiguration {
         @Bean
         SubmissionService submissionService() {
             return new SubmissionService()
