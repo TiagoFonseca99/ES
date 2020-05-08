@@ -102,13 +102,14 @@
             >
             <div class="dashInfo" v-if="info !== null">
               <div class="square">
-                <animated-number class="num" :number="info.numDiscussions" />
+                <animated-number class="num" :number="info.numDiscussions" data-cy="numDiscussions" />
                 <p class="statName">Total Discussions</p>
               </div>
               <div class="square">
                 <animated-number
                   class="num"
                   :number="info.numPublicDiscussions"
+                  data-cy="numPublicDiscussions"
                 />
                 <p class="statName">Total Public Discussions</p>
               </div>
