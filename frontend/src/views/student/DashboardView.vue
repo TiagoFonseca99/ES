@@ -162,8 +162,9 @@
             <div class="dashInfo" v-if="info !== null">
               <div class="square">
                 <animated-number
-                  data-cy="numDiscussions"
+                  class="num"
                   :number="info.numDiscussions"
+                  data-cy="numDiscussions"
                 />
                 <p class="statName">Discussions</p>
               </div>
