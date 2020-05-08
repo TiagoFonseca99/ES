@@ -73,6 +73,8 @@ Cypress.Commands.add(
   }
 );
 
+// TDP
+
 Cypress.Commands.add('createTournament', numberOfQuestions => {
   cy.get('[data-cy="createButton"]')
     .should('be.visible')
@@ -214,6 +216,8 @@ Cypress.Commands.add('cancelTournament', tournament => {
     .click({ force: true });
 });
 
+// DDP
+
 Cypress.Commands.add('answerQuiz', n => {
   cy.get('[data-cy="quizzes"]').click();
   cy.get('[data-cy="availableQuizzes"]').click();
@@ -276,6 +280,42 @@ Cypress.Commands.add('submitEmptyReply', () => {
   cy.get('[data-cy="submitReply"]').click();
 });
 
+Cypress.Commands.add('removeAllDiscussions', () => {
+  cy.exec(
+    'PGPASSWORD= psql tutordb -U daniel -h localhost -c "DELETE FROM discussions WHERE 1 = 1;"'
+  );
+});
+
+Cypress.Commands.add('removeAllReplies', () => {
+  cy.exec(
+    'PGPASSWORD= psql tutordb -U daniel -h localhost -c "DELETE FROM replies WHERE 1 = 1;"'
+  );
+});
+
+Cypress.Commands.add('addDiscussion', (available, content, question, user) => {
+
+}
+
+Cypress.Commands.add('addDiscussionSameQuestion', (available, content, user) => {
+  cy.exec(
+    'PGPASSWORD= psql tutordb -U daniel -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, available, content) VALUES (' +
+    user +
+    ', (SELECT id FROM q), ' +
+    available +
+    ', \'' +
+    content +
+    '\');"'
+  );
+}
+
+Cypress.Commands.add('openSolvedQuiz', (number) => {
+  cy.get('[data-cy="quizzes"]').click();
+  cy.get('[data-cy="solvedQuizzes"]').click();
+  cy.get('[data-cy="quiz' + number + '"]').click();
+});
+
+// PPA
+
 Cypress.Commands.add('openSubmissions', () => {
   cy.contains('Questions').click();
   cy.contains('Submissions').click();
@@ -283,18 +323,18 @@ Cypress.Commands.add('openSubmissions', () => {
 
 Cypress.Commands.add('reviewSubmission', (title, status) => {
     //add review for submission
-    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH sub AS (SELECT s.id FROM submissions s JOIN questions q ON s.question_id=q.id WHERE q.title=\'' + title +'\') INSERT INTO reviews(creation_date,justification,status,student_id,submission_id,user_id) VALUES (current_timestamp,\'As opções estão incorretas, e a pergunta pouco clara\', \'REJECTED\', 676, (SELECT * FROM sub), 677);" ')
+    cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH sub AS (SELECT s.id FROM submissions s JOIN questions q ON s.question_id=q.id WHERE q.title=\'' + title +'\') INSERT INTO reviews(creation_date,justification,status,student_id,submission_id,user_id) VALUES (current_timestamp,\'As opções estão incorretas, e a pergunta pouco clara\', \'REJECTED\', 676, (SELECT * FROM sub), 677);" ')
 });
 
 Cypress.Commands.add('addSubmission', (title, qstatus) => {
     //add question and submission
-    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\''+ title +'\', \'Question?\', \''+ qstatus +'\', 2, current_timestamp) RETURNING id) INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" ')
+    cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\''+ title +'\', \'Question?\', \''+ qstatus +'\', 2, current_timestamp) RETURNING id) INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" ')
 
     //add options
-    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' + title +'\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste a\', \'t\', (SELECT id FROM quest), 0);" ')
-    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' + title +'\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste b\', \'f\', (SELECT id FROM quest), 0);" ')
-    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' + title +'\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste c\', \'f\', (SELECT id FROM quest), 0);" ')
-    cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' + title +'\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste d\', \'f\', (SELECT id FROM quest), 0);" ')
+    cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' + title +'\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste a\', \'t\', (SELECT id FROM quest), 0);" ')
+    cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' + title +'\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste b\', \'f\', (SELECT id FROM quest), 0);" ')
+    cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' + title +'\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste c\', \'f\', (SELECT id FROM quest), 0);" ')
+    cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' + title +'\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste d\', \'f\', (SELECT id FROM quest), 0);" ')
 });
 
 
@@ -510,27 +550,45 @@ Cypress.Commands.add('seeRejectedQuestionAndResubmit', title => {
     cy.get('[data-cy="resubmit"]').click();
 });
 
+// DASHBOARD
+
 Cypress.Commands.add('openDashboard', () => {
     cy.contains('Dashboard').click();
 });
 
 Cypress.Commands.add('addSubmissionInfo', () => {
-    cy.log("Add 3 submissions: 1 approved and 2 rejected");
+    cy.log('Add 3 submissions: 1 approved and 2 rejected');
     cy.exec(
-        'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title1\', \'Question1?\', 2,\'AVAILABLE\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque sim\', \'APPROVED\', 676, (SELECT id from subs), 677, current_timestamp);" '
+        'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title1\', \'Question1?\', 2,\'AVAILABLE\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque sim\', \'APPROVED\', 676, (SELECT id from subs), 677, current_timestamp);" '
     );
     cy.exec(
-        'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title2\', \'Question2?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', 676, (SELECT id from subs), 677, current_timestamp);" '
+        'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title2\', \'Question2?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', 676, (SELECT id from subs), 677, current_timestamp);" '
     );
     cy.exec(
-        'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title3\', \'Question3?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', 676, (SELECT id from subs), 677, current_timestamp);" '
+        'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title3\', \'Question3?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', 676, (SELECT id from subs), 677, current_timestamp);" '
     );
 });
 
+Cypress.Commands.add('addDiscussionsInfo', () => {
+  cy.log('Add 1 public discussions and 1 private discussion');
+  cy.exec(
+    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1504, 676, true, \'Nothing here\');"'
+  );
+  cy.exec(
+    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1339, 676, false, \'Nothing here\');"'
+  );
+});
+
 Cypress.Commands.add('removeSubmissionInfo', () => {
-    cy.exec('PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" ');
-    cy.exec('PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" ');
-    cy.exec('PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" ');
+    cy.exec('PASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" ');
+    cy.exec('PASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" ');
+    cy.exec('PASSWORD= psql -d tutordb -U daniel -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" ');
+});
+
+Cypress.Commands.add('removeDiscussionInfo', () => {
+  cy.exec(
+    'PGPASSWORD= psql tutordb -U daniel -h localhost -c "DELETE FROM discussions WHERE user_id = 676;"'
+  );
 });
 
 Cypress.Commands.add('checkUserInfo', (name, username) => {
@@ -543,3 +601,9 @@ Cypress.Commands.add('checkSubmissionsInfo', (numSubmissions, numApprovedSubmiss
     cy.get('[data-cy="numApprovedSubmissions"]').children().contains(numApprovedSubmissions);
     cy.get('[data-cy="numRejectedSubmissions"]').children().contains(numRejectedSubmissions);
 });
+
+Cypress.Commands.add('checkDiscussionsInfo', (numDiscussions, numPublicDiscussions) => {
+  cy.get('[data-cy="numDiscussions"]').contains(numDiscussions);
+  cy.get('[data-cy="numPublicDiscussions"]').contains(numPublicDiscussions);
+});
+);

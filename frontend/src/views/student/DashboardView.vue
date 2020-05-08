@@ -161,13 +161,17 @@
             </div>
             <div class="dashInfo" v-if="info !== null">
               <div class="square">
-                <animated-number class="num" :number="info.numDiscussions" />
+                <animated-number
+                  data-cy="numDiscussions"
+                  :number="info.numDiscussions"
+                />
                 <p class="statName">Discussions</p>
               </div>
               <div class="square">
                 <animated-number
                   class="num"
                   :number="info.numPublicDiscussions"
+                  data-cy="numPublicDiscussions"
                 />
                 <p class="statName">Public Discussions</p>
               </div>

@@ -36,9 +36,9 @@
           }}
         </td>
       </template>
-      <template v-slot:item.replies="{ item }">
-        <td>
-          <v-icon v-if="item.replies !== null" style="color: #1ea62b"
+      <template v-slot:item.available="{ item }">
+        <td class="text-center">
+          <v-icon v-if="item.available" style="color: #1ea62b"
             >fas fa-check</v-icon
           >
           <v-icon v-else style="color: #fc0b03">fas fa-times</v-icon>
@@ -68,6 +68,7 @@
               label="Message"
               class="text"
               data-cy="reply"
+              :id="'reply' + item.questionId"
             ></v-textarea>
             <v-card-actions>
               <v-spacer />
@@ -77,6 +78,7 @@
                 @click="
                   setDiscussion(item);
                   submitReply();
+                  clearTextarea('#reply' + item.questionId);
                 "
                 >Submit</v-btn
               >
@@ -121,7 +123,7 @@ export default class DiscussionView extends Vue {
       value: 'content',
       align: 'center'
     },
-    { text: 'Replies?', align: 'center' }
+    { text: 'Public', value: 'available', align: 'center' }
   ];
 
   async created() {
@@ -158,7 +160,7 @@ export default class DiscussionView extends Vue {
   }
 
   setReplyMessage(message: string) {
-    this.replyMessages.set(this.currentDiscussion.userId!, message);
+    this.replyMessages.set(this.currentDiscussion.questionId!, message);
   }
 
   setDiscussion(discussion: Discussion) {
@@ -168,19 +170,19 @@ export default class DiscussionView extends Vue {
   async submitReply() {
     try {
       if (
-        this.replyMessages.get(this.currentDiscussion.userId!) === undefined
+        this.replyMessages.get(this.currentDiscussion.questionId!) === undefined
       ) {
-        this.replyMessages.set(this.currentDiscussion.userId!, '');
+        this.replyMessages.set(this.currentDiscussion.questionId!, '');
       }
       const reply = await RemoteServices.createReply(
-        this.replyMessages.get(this.currentDiscussion.userId!)!,
+        this.replyMessages.get(this.currentDiscussion.questionId!)!,
         this.currentDiscussion!
       );
       if (this.currentDiscussion.replies === null) {
         this.currentDiscussion.replies = [];
       }
       this.currentDiscussion.replies.push(reply);
-      this.replyMessages.set(this.currentDiscussion.userId!, '');
+      this.replyMessages.set(this.currentDiscussion.questionId!, '');
     } catch (error) {
       await this.$store.dispatch('error', error);
 
@@ -194,6 +196,13 @@ export default class DiscussionView extends Vue {
     }
 
     return true;
+  }
+
+  clearTextarea(name: string) {
+    let textArea: HTMLTextAreaElement;
+    let val = document.querySelector(name)!;
+    textArea = val as HTMLTextAreaElement;
+    textArea.value = '';
   }
 
   convertToMarkdown(text: string) {
