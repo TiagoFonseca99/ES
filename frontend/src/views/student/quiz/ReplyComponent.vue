@@ -49,6 +49,7 @@
                     class="text"
                     data-cy="ReplyMessage"
                     style="padding-top: 20px;"
+                    :id="'reply' + discussion.userId"
                   ></v-textarea>
                   <v-card-actions>
                     <v-spacer />
@@ -58,6 +59,7 @@
                       @click="
                         setDiscussion(discussion);
                         submitReply();
+                        clearTextarea('#reply' + discussion.userId);
                       "
                       >Submit</v-btn
                     >
@@ -78,6 +80,7 @@
               label="Message"
               class="text"
               data-cy="ReplyMessage"
+              :id="'reply' + discussion.userId"
             ></v-textarea>
             <v-card-actions>
               <v-spacer />
@@ -87,6 +90,7 @@
                 @click="
                   setDiscussion(discussion);
                   submitReply();
+                  clearTextarea('#reply' + discussion.userId);
                 "
                 v-if="discussion.userId === userId"
                 >Submit</v-btn
@@ -155,6 +159,13 @@ export default class ReplyComponent extends Vue {
 
   convertMarkDown(text: string) {
     return convertMarkDown(text, null);
+  }
+
+  clearTextarea(name: string) {
+    let textArea: HTMLTextAreaElement;
+    let val = document.querySelector(name)!;
+    textArea = val as HTMLTextAreaElement;
+    textArea.value = '';
   }
 }
 </script>
