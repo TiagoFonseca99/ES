@@ -292,10 +292,6 @@ Cypress.Commands.add('removeAllReplies', () => {
   );
 });
 
-Cypress.Commands.add('addDiscussion', (available, content, question, user) => {
-
-}
-
 Cypress.Commands.add('addDiscussionSameQuestion', (available, content, user) => {
   cy.exec(
     'PGPASSWORD= psql tutordb -U daniel -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, available, content) VALUES (' +
@@ -306,7 +302,7 @@ Cypress.Commands.add('addDiscussionSameQuestion', (available, content, user) => 
     content +
     '\');"'
   );
-}
+});
 
 Cypress.Commands.add('openSolvedQuiz', (number) => {
   cy.get('[data-cy="quizzes"]').click();
@@ -533,7 +529,7 @@ Cypress.Commands.add('approveSubmissions', (title, justification) => {
       .parent()
       .should('have.length', 1)
       .children()
-      .should('have.length', 6)
+      .should('have.length', 7)
       .find('[data-cy="createReview"]')
       .click();
     cy.get('[data-cy="Justification"]').type(justification);
@@ -550,7 +546,7 @@ Cypress.Commands.add('changeSubmission', (title, justification, question_title, 
         .parent().parent().parent()
         .should('have.length', 1)
         .children()
-        .should('have.length', 6)
+        .should('have.length', 7)
         .find('[data-cy="createReview"]')
         .click();
     cy.get('[data-cy="Justification"]').type(justification);
@@ -569,7 +565,7 @@ Cypress.Commands.add('rejectSubmissions', (title, justification) => {
       .parent().parent().parent()
       .should('have.length', 1)
       .children()
-      .should('have.length', 6)
+      .should('have.length', 7)
       .find('[data-cy="createReview"]')
       .click();
     cy.get('[data-cy="Justification"]').type(justification);
@@ -672,7 +668,6 @@ Cypress.Commands.add('checkDiscussionsInfo', (numDiscussions, numPublicDiscussio
   cy.get('[data-cy="numDiscussions"]').contains(numDiscussions);
   cy.get('[data-cy="numPublicDiscussions"]').contains(numPublicDiscussions);
 });
-);
 
 Cypress.Commands.add(
   'checkSubmissionsInfo',

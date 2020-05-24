@@ -36,6 +36,10 @@
             <span>{{ item.questionDto.status }}</span>
           </v-chip>
         </template>
+        <template v-slot:item.anonymous="{ item }">
+          <span v-if="item.anonymous"> <v-icon>fas fa-check</v-icon> </span>
+          <span v-else> <v-icon>fas fa-times</v-icon> </span>
+        </template>
         <template v-slot:item.questionDto.creationDate="{ item }">
           <v-chip small>
             <span>{{ item.questionDto.creationDate }}</span>
@@ -221,6 +225,7 @@ export default class ReviewsView extends Vue {
       value: 'questionDto.creationDate',
       align: 'center'
     },
+    { text: 'Anonymous', value: 'anonymous', align: 'center'},
     { text: 'Status', value: 'questionDto.status', align: 'center' },
     { text: 'Image', value: 'questionDto.image', align: 'center' },
     { text: 'Review', value: 'review', align: 'center' }

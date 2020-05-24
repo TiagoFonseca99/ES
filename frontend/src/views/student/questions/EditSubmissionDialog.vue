@@ -58,6 +58,12 @@
       </v-card-text>
 
       <v-card-actions>
+        <v-switch
+                v-model="currentSubmission.anonymous"
+                class="ma-4"
+                label="Anonymous"
+                v-bind:data-cy="anonymous"
+        />
         <v-spacer />
         <v-btn
           color="blue darken-1"
