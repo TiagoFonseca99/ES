@@ -65,6 +65,8 @@ public class SubmissionService {
 
         Submission submission = new Submission(question, user);
 
+        submission.setAnonymous(submissionDto.isAnonymous());
+
         entityManager.persist(submission);
         return new SubmissionDto(submission);
     }
