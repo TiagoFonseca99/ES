@@ -9,6 +9,8 @@ export default class Review {
   imageDto: Image | null = null;
   status!: string;
   creationDate!: string;
+  studentUsername!: string;
+  teacherUsername!: string;
 
   constructor(jsonObj?: Review) {
     if (jsonObj) {
@@ -20,6 +22,8 @@ export default class Review {
       this.imageDto = jsonObj.imageDto;
       this.status = jsonObj.status;
       this.creationDate = jsonObj.creationDate;
+      this.studentUsername = jsonObj.studentUsername;
+      this.teacherUsername = jsonObj.teacherUsername;
     }
   }
 }

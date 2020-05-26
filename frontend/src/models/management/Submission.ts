@@ -5,6 +5,7 @@ export default class Submission {
   courseId: number | null = null;
   questionDto!: Question;
   studentId: number | null = null;
+  username: string | null = null;
   anonymous!: boolean;
 
   constructor(jsonObj?: Submission) {
@@ -13,6 +14,7 @@ export default class Submission {
       this.courseId = jsonObj.courseId;
       this.questionDto = new Question(jsonObj.questionDto);
       this.studentId = jsonObj.studentId;
+      this.username = jsonObj.username;
       this.anonymous = jsonObj.anonymous;
     }
   }

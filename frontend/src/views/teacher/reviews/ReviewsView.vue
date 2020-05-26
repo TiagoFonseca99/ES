@@ -225,6 +225,7 @@ export default class ReviewsView extends Vue {
       value: 'questionDto.creationDate',
       align: 'center'
     },
+    { text: 'Submitted by', value: 'username', align: 'center'},
     { text: 'Anonymous', value: 'anonymous', align: 'center'},
     { text: 'Status', value: 'questionDto.status', align: 'center' },
     { text: 'Image', value: 'questionDto.image', align: 'center' },
@@ -246,6 +247,7 @@ export default class ReviewsView extends Vue {
       value: 'questionDto.creationDate',
       align: 'center'
     },
+    { text: 'Submitted by', value: 'studentUsername', align: 'center'},
     { text: 'Status', value: 'status', align: 'center' },
     { text: 'Justification', value: 'justification', align: 'center' }
   ];
