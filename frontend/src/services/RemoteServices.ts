@@ -609,6 +609,19 @@ export default class RemoteServices {
       });
   }
 
+  static async getStudentsSubmissions(): Promise<Submission[]> {
+    return httpClient
+        .get('/student/submissions/all')
+        .then(response => {
+          return response.data.map((submission: any) => {
+            return new Submission(submission);
+          });
+        })
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        });
+  }
+
   static async deleteSubmission(questionId: number) {
     return httpClient
       .delete(`/student/submissions/${questionId}`)

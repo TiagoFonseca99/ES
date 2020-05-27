@@ -21,7 +21,6 @@ import AvailableQuizzesView from '@/views/student/AvailableQuizzesView.vue';
 import SolvedQuizzesView from '@/views/student/SolvedQuizzesView.vue';
 import QuizView from '@/views/student/quiz/QuizView.vue';
 import ResultsView from '@/views/student/quiz/ResultsView.vue';
-import StatsView from '@/views/student/StatsView.vue';
 import ScanView from '@/views/student/ScanView.vue';
 import DiscussionView from '@/views/student/discussion/DiscussionView.vue';
 import DashboardView from '@/views/student/DashboardView.vue';
@@ -32,6 +31,7 @@ import ImpExpView from '@/views/teacher/impexp/ImpExpView.vue';
 import AssessmentsView from '@/views/teacher/assessments/AssessmentsView.vue';
 import CreateQuizzesView from '@/views/student/CreateQuizzesView.vue';
 import SubmissionView from './views/student/questions/SubmissionView.vue';
+import AllSubmissionsView from './views/student/questions/AllSubmissionsView.vue';
 import ReviewsView from './views/teacher/reviews/ReviewsView.vue';
 import StudentReviews from './views/student/questions/StudentReviewsView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
@@ -237,6 +237,15 @@ let router = new Router({
           component: SubmissionView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Create Submissions',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'submissions/all',
+          name: 'submissions-all',
+          component: AllSubmissionsView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - All Submissions',
             requiredAuth: 'Student'
           }
         },

@@ -36,6 +36,11 @@
             <span>{{ item.questionDto.status }}</span>
           </v-chip>
         </template>
+        <template v-slot:item.username="{ item }">
+          <v-chip color=primary small>
+            {{ item.username }}
+          </v-chip>
+        </template>
         <template v-slot:item.anonymous="{ item }">
           <span v-if="item.anonymous"> <v-icon>fas fa-check</v-icon> </span>
           <span v-else> <v-icon>fas fa-times</v-icon> </span>
@@ -143,6 +148,11 @@
         <template v-slot:item.questionDto.creationDate="{ item }">
           <v-chip small>
             <span> {{ getSubmission(item).creationDate }}</span>
+          </v-chip>
+        </template>
+        <template v-slot:item.studentUsername="{ item }">
+          <v-chip color=primary small>
+            {{ item.studentUsername }}
           </v-chip>
         </template>
         <template v-slot:item.status="{ item }">
