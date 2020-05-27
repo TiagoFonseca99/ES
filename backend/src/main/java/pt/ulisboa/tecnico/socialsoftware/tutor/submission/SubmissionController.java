@@ -139,4 +139,14 @@ public class SubmissionController {
         return submissionService.getSubmissions(user.getId());
     }
 
+    @GetMapping(value = "/student/submissions/all")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public List<SubmissionDto> getStudentsSubmissions(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        return submissionService.getStudentsSubmissions();
+    }
 }
