@@ -93,6 +93,8 @@ public class SubmissionService {
 
         Submission submission = new Submission(newQuestion, user);
 
+        submission.setAnonymous(submissionDto.isAnonymous());
+
         entityManager.persist(submission);
         return new SubmissionDto(submission);
     }
@@ -184,6 +186,19 @@ public class SubmissionService {
 
     }
 
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<SubmissionDto> getStudentsSubmissions() {
+        List<SubmissionDto> submissions = submissionRepository.findAll().stream().map(SubmissionDto::new).collect(Collectors.toList());
+
+        for(SubmissionDto submission : submissions) {
+            if (submission.isAnonymous()) submission.setUsername(null);
+        }
+
+        return submissions;
+    }
 
     private void updateQuestionStatus(Submission submission, String status) {
         Question question = getQuestion(submission.getQuestion().getId());
@@ -253,7 +268,6 @@ public class SubmissionService {
         return submissionRepository.findById(submissionId).orElseThrow(() -> new TutorException(SUBMISSION_NOT_FOUND, submissionId));
     }
 
-
     private void checkIfReviewHasJustification(ReviewDto reviewDto) {
 
         String justification = reviewDto.getJustification();
@@ -262,4 +276,9 @@ public class SubmissionService {
         }
     }
 
+    private void removeUsernameFromAnonymous(SubmissionDto submission) {
+        if(submission.isAnonymous()) {
+            submission.setUsername(null);
+        }
+    }
 }
