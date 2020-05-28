@@ -219,7 +219,9 @@ export default class DashboardView extends Vue {
   async created() {
     await this.$store.dispatch('loading');
     try {
-      this.info = await RemoteServices.getDashboardInfo();
+      this.info = await RemoteServices.getDashboardInfo(
+        this.$store.getters.getUser.id
+      );
       this.stats = await RemoteServices.getUserStats();
       this.quizzes = await RemoteServices.getSolvedQuizzes();
       if (this.info.joinedTournaments)

@@ -437,7 +437,7 @@ export default class RemoteServices {
 
   static async getCourseDashboardInfo(executionId: number): Promise<Dashboard> {
     return httpClient
-      .get(`/dashboard/${executionId}`)
+      .get('/dashboard/execution?executionId=' + executionId)
       .then(response => {
         return new Dashboard(response.data);
       })
@@ -611,15 +611,15 @@ export default class RemoteServices {
 
   static async getStudentsSubmissions(): Promise<Submission[]> {
     return httpClient
-        .get('/student/submissions/all')
-        .then(response => {
-          return response.data.map((submission: any) => {
-            return new Submission(submission);
-          });
-        })
-        .catch(async error => {
-          throw Error(await this.errorMessage(error));
+      .get('/student/submissions/all')
+      .then(response => {
+        return response.data.map((submission: any) => {
+          return new Submission(submission);
         });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async deleteSubmission(questionId: number) {
@@ -810,9 +810,9 @@ export default class RemoteServices {
       });
   }
 
-  static async getDashboardInfo(): Promise<Dashboard> {
+  static async getDashboardInfo(userId: number): Promise<Dashboard> {
     return httpClient
-      .get('/dashboard')
+      .get('/dashboard?userId=' + userId)
       .then(response => {
         return new Dashboard(response.data);
       })

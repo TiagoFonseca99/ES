@@ -5,12 +5,12 @@ import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
+
+import javax.validation.Valid;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.AUTHENTICATION_ERROR;
 
@@ -21,14 +21,14 @@ public class UserController {
 
     @GetMapping(value = "/dashboard")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public DashboardDto getDashboardInfo(Principal principal) {
+    public DashboardDto getDashboardInfo(Principal principal, @Valid @RequestParam int userId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        return userService.getDashboardInfo(user.getId());
+        return userService.getDashboardInfo(userId);
     }
 
     @PutMapping(value = "/dashboard/discussions")
