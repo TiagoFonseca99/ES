@@ -62,17 +62,22 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    static String getToken(String token){
+        if (token != null && token.startsWith("Bearer ")) {
+            return token.substring(7);
+        } else if (token != null && token.startsWith("AUTH")) {
+            return token.substring(4);
+        } else if (token != null) {
+            return token;
+        }
+
+        return "";
+    }
+
     static String getToken(HttpServletRequest req) {
         String authHeader = req.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        } else if (authHeader != null && authHeader.startsWith("AUTH")) {
-            return authHeader.substring(4);
-        } else if (authHeader != null) {
-            return authHeader;
-        }
-        return "";
+        return getToken(authHeader);
     }
     static int getUserId(String token) {
         try {
