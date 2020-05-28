@@ -4,23 +4,24 @@ import RemoteServices from '@/services/RemoteServices';
 import AuthDto from '@/models/user/AuthDto';
 import Course from '@/models/user/Course';
 import User from '@/models/user/User';
-import * as cookie from '@/cookies';
+import * as storage from '@/storage';
+import * as session from '@/session';
 
 interface State {
   token: string;
-  user: User | null;
   logged: boolean;
+  session: boolean;
+  user: User | null;
   currentCourse: Course | null;
   error: boolean;
   errorMessage: string;
   loading: boolean;
 }
 
-const LOGIN_COOKIE = 'token';
-
 const state: State = {
   token: '',
   logged: false,
+  session: true,
   user: null,
   currentCourse: null,
   error: false,
@@ -38,17 +39,30 @@ export default new Vuex.Store({
       state.token = authResponse.token;
       state.user = authResponse.user;
       state.logged = true;
-      cookie.createCookie(LOGIN_COOKIE, authResponse.token);
+
+      let sessionVal = storage.getLocal(session.SESSION_TOKEN);
+      if (sessionVal == 'true' || sessionVal == 'false') {
+        state.session = sessionVal == 'true';
+      }
+
+      storage.removeAll(session.LOGIN_TOKEN);
+      storage.persist(session.SESSION_TOKEN, String(state.session), false);
+      storage.persist(session.LOGIN_TOKEN, authResponse.token, state.session);
     },
     logout(state) {
       state.token = '';
       state.user = null;
       state.currentCourse = null;
       state.logged = false;
-      cookie.deleteCookie(LOGIN_COOKIE);
+      storage.removeAll(session.LOGIN_TOKEN);
+      storage.removeAll(session.COURSE_TOKEN);
+      storage.persist(session.SESSION_TOKEN, String(state.session), false);
     },
     token(state, token) {
       state.token = token;
+    },
+    session(state, session) {
+      state.session = session;
     },
     error(state, errorMessage: string) {
       state.error = true;
@@ -65,6 +79,11 @@ export default new Vuex.Store({
       state.loading = false;
     },
     currentCourse(state, currentCourse: Course) {
+      storage.persist(
+        session.COURSE_TOKEN,
+        JSON.stringify(currentCourse),
+        state.session
+      );
       state.currentCourse = currentCourse;
     }
   },
@@ -75,15 +94,7 @@ export default new Vuex.Store({
     clearError({ commit }) {
       commit('clearError');
     },
-    async loading({ commit, state }) {
-      if (!state.logged && cookie.checkLogged(LOGIN_COOKIE)) {
-        const authResponse = await RemoteServices.checkToken();
-        if (authResponse != null) {
-          commit('login', authResponse);
-        } else {
-          commit('token', '');
-        }
-      }
+    loading({ commit }) {
       commit('loading');
     },
     clearLoading({ commit }) {
@@ -92,8 +103,6 @@ export default new Vuex.Store({
     async fenixLogin({ commit }, code) {
       const authResponse = await RemoteServices.fenixLogin(code);
       commit('login', authResponse);
-      // localStorage.setItem("token", authResponse.token);
-      // localStorage.setItem("userRole", authResponse.user.role);
     },
     async demoStudentLogin({ commit }) {
       const authResponse = await RemoteServices.demoStudentLogin();
@@ -102,8 +111,6 @@ export default new Vuex.Store({
         'currentCourse',
         (Object.values(authResponse.user.courses)[0] as Course[])[0]
       );
-      // localStorage.setItem("token", authResponse.token);
-      // localStorage.setItem("userRole", authResponse.user.role);
     },
     async demoTeacherLogin({ commit }) {
       const authResponse = await RemoteServices.demoTeacherLogin();
@@ -112,20 +119,14 @@ export default new Vuex.Store({
         'currentCourse',
         (Object.values(authResponse.user.courses)[0] as Course[])[0]
       );
-      // localStorage.setItem("token", authResponse.token);
-      // localStorage.setItem("userRole", authResponse.user.role);
     },
     async demoAdminLogin({ commit }) {
       const authResponse = await RemoteServices.demoAdminLogin();
       commit('login', authResponse);
-      // localStorage.setItem("token", authResponse.token);
-      // localStorage.setItem("userRole", authResponse.user.role);
     },
     logout({ commit }) {
       return new Promise(resolve => {
         commit('logout');
-        // localStorage.removeItem("token");
-        // localStorage.removeItem("userRole");
         resolve();
       });
     },

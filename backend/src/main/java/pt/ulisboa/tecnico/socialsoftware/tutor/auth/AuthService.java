@@ -39,14 +39,10 @@ public class AuthService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public AuthDto checkToken(String token) {
         token = JwtTokenProvider.getToken(token);
-        System.out.println("'" + token + "'");
-        try {
-            User user = this.userService.findById(JwtTokenProvider.getUserId(token));
 
-            return new AuthDto(token, new AuthUserDto(user));
-        } catch (TutorException e) {
-            return null;
-        }
+        User user = this.userService.findById(JwtTokenProvider.getUserId(token));
+
+        return new AuthDto(token, new AuthUserDto(user));
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -79,19 +75,19 @@ public class AuthService {
 
         if (user.getRole() == User.Role.ADMIN) {
             List<CourseDto> allCoursesInDb = courseExecutionRepository.findAll().stream().map(CourseDto::new)
-                    .collect(Collectors.toList());
+                .collect(Collectors.toList());
 
             if (!fenixTeachingCourses.isEmpty()) {
                 User finalUser = user;
                 activeTeachingCourses.stream()
-                        .filter(courseExecution -> !finalUser.getCourseExecutions().contains(courseExecution))
-                        .forEach(user::addCourse);
+                    .filter(courseExecution -> !finalUser.getCourseExecutions().contains(courseExecution))
+                    .forEach(user::addCourse);
 
                 allCoursesInDb.addAll(fenixTeachingCourses);
 
                 String ids = fenixTeachingCourses.stream()
-                        .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
-                        .collect(Collectors.joining(","));
+                    .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
+                    .collect(Collectors.joining(","));
 
                 user.setEnrolledCoursesAcronyms(ids);
             }
@@ -102,8 +98,8 @@ public class AuthService {
         if (!activeAttendingCourses.isEmpty() && user.getRole() == User.Role.STUDENT) {
             User student = user;
             activeAttendingCourses.stream()
-                    .filter(courseExecution -> !student.getCourseExecutions().contains(courseExecution))
-                    .forEach(user::addCourse);
+                .filter(courseExecution -> !student.getCourseExecutions().contains(courseExecution))
+                .forEach(user::addCourse);
             return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user));
         }
 
@@ -111,12 +107,12 @@ public class AuthService {
         if (!fenixTeachingCourses.isEmpty() && user.getRole() == User.Role.TEACHER) {
             User teacher = user;
             activeTeachingCourses.stream()
-                    .filter(courseExecution -> !teacher.getCourseExecutions().contains(courseExecution))
-                    .forEach(user::addCourse);
+                .filter(courseExecution -> !teacher.getCourseExecutions().contains(courseExecution))
+                .forEach(user::addCourse);
 
             String ids = fenixTeachingCourses.stream()
-                    .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
-                    .collect(Collectors.joining(","));
+                .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
+                .collect(Collectors.joining(","));
 
             user.setEnrolledCoursesAcronyms(ids);
             return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user, fenixTeachingCourses));
@@ -132,14 +128,14 @@ public class AuthService {
 
     private List<CourseExecution> getActiveTecnicoCourses(List<CourseDto> courses) {
         return courses.stream().map(courseDto -> {
-            Course course = courseRepository.findByNameType(courseDto.getName(), Course.Type.TECNICO.name())
+                Course course = courseRepository.findByNameType(courseDto.getName(), Course.Type.TECNICO.name())
                     .orElse(null);
-            if (course == null) {
-                return null;
-            }
-            return course.getCourseExecution(courseDto.getAcronym(), courseDto.getAcademicTerm(), Course.Type.TECNICO)
+                if (course == null) {
+                    return null;
+                }
+                return course.getCourseExecution(courseDto.getAcronym(), courseDto.getAcademicTerm(), Course.Type.TECNICO)
                     .orElse(null);
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+            }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Retryable(value = { SQLException.class }, maxAttempts = 2, backoff = @Backoff(delay = 5000))
