@@ -4,18 +4,23 @@ import RemoteServices from '@/services/RemoteServices';
 import AuthDto from '@/models/user/AuthDto';
 import Course from '@/models/user/Course';
 import User from '@/models/user/User';
+import * as cookie from '@/cookies';
 
 interface State {
   token: string;
   user: User | null;
+  logged: boolean;
   currentCourse: Course | null;
   error: boolean;
   errorMessage: string;
   loading: boolean;
 }
 
+const LOGIN_COOKIE = 'token';
+
 const state: State = {
   token: '',
+  logged: false,
   user: null,
   currentCourse: null,
   error: false,
@@ -32,11 +37,18 @@ export default new Vuex.Store({
     login(state, authResponse: AuthDto) {
       state.token = authResponse.token;
       state.user = authResponse.user;
+      state.logged = true;
+      cookie.createCookie(LOGIN_COOKIE, authResponse.token);
     },
     logout(state) {
       state.token = '';
       state.user = null;
       state.currentCourse = null;
+      state.logged = false;
+      cookie.deleteCookie(LOGIN_COOKIE);
+    },
+    token(state, token) {
+      state.token = token;
     },
     error(state, errorMessage: string) {
       state.error = true;
@@ -63,7 +75,15 @@ export default new Vuex.Store({
     clearError({ commit }) {
       commit('clearError');
     },
-    loading({ commit }) {
+    async loading({ commit, state }) {
+      if (!state.logged && cookie.checkLogged(LOGIN_COOKIE)) {
+        const authResponse = await RemoteServices.checkToken();
+        if (authResponse != null) {
+          commit('login', authResponse);
+        } else {
+          commit('token', '');
+        }
+      }
       commit('loading');
     },
     clearLoading({ commit }) {
@@ -115,7 +135,7 @@ export default new Vuex.Store({
   },
   getters: {
     isLoggedIn(state): boolean {
-      return !!state.token;
+      return state.logged;
     },
     isAdmin(state): boolean {
       return (
