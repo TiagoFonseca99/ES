@@ -84,10 +84,10 @@ export default class RemoteServices {
       });
   }
 
-  static async getUserStats(): Promise<StudentStats> {
+  static async getUserStats(username: string): Promise<StudentStats> {
     return httpClient
       .get(
-        `/executions/${Store.getters.getCurrentCourse.courseExecutionId}/stats`
+        `/executions/${Store.getters.getCurrentCourse.courseExecutionId}/stats/${username}`
       )
       .then(response => {
         return new StudentStats(response.data);
@@ -810,9 +810,9 @@ export default class RemoteServices {
       });
   }
 
-  static async getDashboardInfo(userId: number): Promise<Dashboard> {
+  static async getDashboardInfo(username: string): Promise<Dashboard> {
     return httpClient
-      .get('/dashboard?userId=' + userId)
+      .get('/dashboard?username=' + username)
       .then(response => {
         return new Dashboard(response.data);
       })

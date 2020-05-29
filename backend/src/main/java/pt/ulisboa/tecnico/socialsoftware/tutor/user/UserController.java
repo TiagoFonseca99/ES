@@ -13,6 +13,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 import javax.validation.Valid;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.AUTHENTICATION_ERROR;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.USERNAME_NOT_FOUND;
 
 @RestController
 public class UserController {
@@ -21,14 +22,14 @@ public class UserController {
 
     @GetMapping(value = "/dashboard")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public DashboardDto getDashboardInfo(Principal principal, @Valid @RequestParam int userId) {
-        User user = (User) ((Authentication) principal).getPrincipal();
-
+    public DashboardDto getDashboardInfo(@Valid @RequestParam String username) {
+        User user = userService.findByUsername(username);
+        
         if (user == null) {
-            throw new TutorException(AUTHENTICATION_ERROR);
+            throw new TutorException(USERNAME_NOT_FOUND, username);
         }
 
-        return userService.getDashboardInfo(userId);
+        return userService.getDashboardInfo(user.getId());
     }
 
     @PutMapping(value = "/dashboard/discussions")

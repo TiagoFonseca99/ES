@@ -2,8 +2,8 @@
   <v-container
     fluid
     style="height: 100%; position: relative; display: flex; flex-direction: column"
+    :key="componentKey"
   >
-    <h2>Student Dashboard</h2>
     <v-container fluid style="position: relative; max-height: 100%; flex: 1;">
       <v-row style="width: 100%; height: 100%">
         <v-col>
@@ -79,7 +79,10 @@
             <v-card-title class="justify-center">Tournaments</v-card-title>
             <v-switch
               style="flex: 1"
-              v-if="info !== null"
+              v-if="
+                info !== null &&
+                  this.username === this.$store.getters.getUser.username
+              "
               v-model="info.tournamentStatsPublic"
               :label="info.tournamentStatsPublic ? 'Public' : 'Private'"
               @change="toggleTournaments()"
@@ -109,7 +112,10 @@
             >
               <v-switch
                 style="flex: 1"
-                v-if="info !== null"
+                v-if="
+                  info !== null &&
+                    this.username === this.$store.getters.getUser.username
+                "
                 v-model="info.submissionStatsPublic"
                 :label="info.submissionStatsPublic ? 'Public' : 'Private'"
                 @change="toggleSubmissions()"
@@ -153,7 +159,10 @@
             >
               <v-switch
                 style="flex: 1"
-                v-if="info !== null"
+                v-if="
+                  info !== null &&
+                    this.username === this.$store.getters.getUser.username
+                "
                 v-model="info.discussionStatsPublic"
                 :label="info.discussionStatsPublic ? 'Public' : 'Private'"
                 @change="toggleDiscussions()"
@@ -190,7 +199,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import Dashboard from '@/models/management/Dashboard';
 import RemoteServices from '@/services/RemoteServices';
 import StudentStats from '@/models/statement/StudentStats';
@@ -202,12 +211,15 @@ import SolvedQuiz from '@/models/statement/SolvedQuiz';
   components: { AnimatedNumber }
 })
 export default class DashboardView extends Vue {
+  @Prop({ type: String, required: true }) username!: string;
+
   tournamentNamePermission: boolean = false;
   tournamentScorePermission: boolean = false;
   info: Dashboard | null = null;
   stats: StudentStats | null = null;
   tournaments: Tournament[] = [];
   quizzes: SolvedQuiz[] = [];
+  componentKey: number = 0;
 
   headers: object = [
     { text: 'Tournament Number', value: 'id', align: 'center' },
@@ -217,12 +229,16 @@ export default class DashboardView extends Vue {
   ];
 
   async created() {
+    await this.getDashboardInfo();
+  }
+
+  @Watch('username')
+  async getDashboardInfo() {
+    this.componentKey += 1;
     await this.$store.dispatch('loading');
     try {
-      this.info = await RemoteServices.getDashboardInfo(
-        this.$store.getters.getUser.id
-      );
-      this.stats = await RemoteServices.getUserStats();
+      this.info = await RemoteServices.getDashboardInfo(this.username);
+      this.stats = await RemoteServices.getUserStats(this.username);
       this.quizzes = await RemoteServices.getSolvedQuizzes();
       if (this.info.joinedTournaments)
         this.tournaments = this.info.joinedTournaments.sort();
