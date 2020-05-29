@@ -21,7 +21,6 @@ import AvailableQuizzesView from '@/views/student/AvailableQuizzesView.vue';
 import SolvedQuizzesView from '@/views/student/SolvedQuizzesView.vue';
 import QuizView from '@/views/student/quiz/QuizView.vue';
 import ResultsView from '@/views/student/quiz/ResultsView.vue';
-import StatsView from '@/views/student/StatsView.vue';
 import ScanView from '@/views/student/ScanView.vue';
 import DiscussionView from '@/views/student/discussion/DiscussionView.vue';
 import DashboardView from '@/views/student/DashboardView.vue';
@@ -35,6 +34,7 @@ import SubmissionView from './views/student/questions/SubmissionView.vue';
 import ReviewsView from './views/teacher/reviews/ReviewsView.vue';
 import StudentReviews from './views/student/questions/StudentReviewsView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
+import * as session from '@/session';
 
 Vue.use(Router);
 
@@ -295,6 +295,14 @@ let router = new Router({
 });
 
 router.beforeEach(async (to, from, next) => {
+  if (!Store.getters.isLoggedIn && session.checkLogged(session.LOGIN_TOKEN)) {
+    let valid = await session.testToken();
+    if (!valid) {
+      next('/');
+      return;
+    }
+  }
+
   if (to.meta.requiredAuth == 'None') {
     next();
   } else if (to.meta.requiredAuth == 'Admin' && Store.getters.isAdmin) {

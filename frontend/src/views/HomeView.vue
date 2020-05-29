@@ -85,7 +85,7 @@ export default class HomeView extends Vue {
   fenixUrl: string = process.env.VUE_APP_FENIX_URL;
 
   get isLoggedIn() {
-    return Store.state.token;
+    return Store.getters.isLoggedIn;
   }
 
   async demoStudent() {
