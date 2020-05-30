@@ -213,8 +213,6 @@ import SolvedQuiz from '@/models/statement/SolvedQuiz';
 export default class DashboardView extends Vue {
   @Prop({ type: String, required: true }) username!: string;
 
-  tournamentNamePermission: boolean = false;
-  tournamentScorePermission: boolean = false;
   info: Dashboard | null = null;
   stats: StudentStats | null = null;
   tournaments: Tournament[] = [];
@@ -235,6 +233,8 @@ export default class DashboardView extends Vue {
   @Watch('username')
   async getDashboardInfo() {
     this.componentKey += 1;
+    this.info = null;
+    this.stats = null;
     await this.$store.dispatch('loading');
     try {
       this.info = await RemoteServices.getDashboardInfo(this.username);
@@ -242,8 +242,6 @@ export default class DashboardView extends Vue {
       this.quizzes = await RemoteServices.getSolvedQuizzes();
       if (this.info.joinedTournaments)
         this.tournaments = this.info.joinedTournaments.sort();
-      this.tournamentNamePermission = this.info.tournamentNamePermission;
-      this.tournamentScorePermission = this.info.tournamentScorePermission;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

@@ -39,8 +39,8 @@
       </template>
 
       <template v-slot:item.username="{ item }">
-        <v-chip color="primary" small>
-          <span v-if="item.anonymous"> {{ 'Anonymous' }} </span>
+        <v-chip color="primary" small @click="openStudentDashboardDialog(item)">
+          <span v-if="item.anonymous"> {{ 'ANONYMOUS' }} </span>
           <span v-else> {{ item.username }} </span>
         </v-chip>
       </template>
@@ -79,13 +79,20 @@
     </v-data-table>
     <footer>
       <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to view
-      it.
+      it. <v-icon class="mr-2">mouse</v-icon>Left-click on user's username to
+      view dashboard preview.
     </footer>
     <show-question-dialog
       v-if="currentQuestion"
       v-model="questionDialog"
       :question="currentQuestion"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
+    />
+    <show-dashboard-dialog
+      v-if="currentUsername"
+      v-model="dashboardDialog"
+      :username="currentUsername"
+      v-on:close-show-dashboard-dialog="onCloseShowDashboardDialog"
     />
   </v-card>
 </template>
@@ -98,9 +105,12 @@ import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
 import Image from '@/models/management/Image';
 import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
+import DashboardDialogView from '@/views/student/dashboard/DashboardDialogView.vue';
+
 @Component({
   components: {
-    'show-question-dialog': ShowQuestionDialog
+    'show-question-dialog': ShowQuestionDialog,
+    'show-dashboard-dialog': DashboardDialogView
   }
 })
 export default class AllSubmissionsView extends Vue {
@@ -108,6 +118,8 @@ export default class AllSubmissionsView extends Vue {
   currentQuestion: Question | null = null;
   questionDialog: boolean = false;
   search: string = '';
+  dashboardDialog: boolean = false;
+  currentUsername: string | null = null;
 
   headers: object = [
     {
@@ -192,6 +204,17 @@ export default class AllSubmissionsView extends Vue {
     if (status === 'AVAILABLE') return 'green';
     else if (status === 'DEPRECATED') return 'red';
     else return 'pink';
+  }
+
+  openStudentDashboardDialog(submission: Submission) {
+    if (!submission.anonymous) {
+      this.dashboardDialog = true;
+      this.currentUsername = submission.username;
+    }
+  }
+
+  onCloseShowDashboardDialog() {
+    this.dashboardDialog = false;
   }
 }
 </script>

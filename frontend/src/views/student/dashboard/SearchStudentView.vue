@@ -23,17 +23,15 @@
       </template>
 
       <template v-slot:item.username="{ item }">
-        <v-chip color="primary" small>
+        <v-chip color="primary" small :to="openStudentDashboard(item)">
           {{ item.username }}
         </v-chip>
       </template>
-
-      <template v-slot:item.dashboard="{ item }">
-        <v-btn :to="openStudentDashboard(item)" color="primary" dark>
-          View
-        </v-btn>
-      </template>
     </v-data-table>
+    <footer>
+      <v-icon class="mr-2">mouse</v-icon>Left-click on user's username to view
+      dashboard.
+    </footer>
   </v-card>
 </template>
 
@@ -46,10 +44,10 @@ import { Student } from '@/models/management/Student';
 export default class StudentsView extends Vue {
   students: Student[] = [];
   search: string = '';
+
   headers: object = [
     { text: 'Name', value: 'name', align: 'center' },
-    { text: 'Username', value: 'username', align: 'center' },
-    { text: 'Dashboard', value: 'dashboard', align: 'center' }
+    { text: 'Username', value: 'username', align: 'center' }
   ];
 
   async created() {
