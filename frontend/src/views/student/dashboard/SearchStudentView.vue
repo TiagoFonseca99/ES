@@ -56,6 +56,9 @@ export default class StudentsView extends Vue {
       this.students = await RemoteServices.getCourseStudents(
         this.$store.getters.getCurrentCourse
       );
+      this.students = this.students.filter(
+        s => s.username != this.$store.getters.getUser.username
+      );
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
