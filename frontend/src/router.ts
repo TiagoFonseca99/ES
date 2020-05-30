@@ -37,6 +37,7 @@ import ReviewsView from './views/teacher/reviews/ReviewsView.vue';
 import StudentReviews from './views/student/questions/StudentReviewsView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
 import { Student } from '@/models/management/Student';
+import * as session from '@/session';
 
 Vue.use(Router);
 
@@ -326,6 +327,14 @@ let router = new Router({
 });
 
 router.beforeEach(async (to, from, next) => {
+  if (!Store.getters.isLoggedIn && session.checkLogged(session.LOGIN_TOKEN)) {
+    let valid = await session.testToken();
+    if (!valid) {
+      next('/');
+      return;
+    }
+  }
+
   if (to.meta.requiredAuth == 'None') {
     next();
   } else if (to.meta.requiredAuth == 'Admin' && Store.getters.isAdmin) {

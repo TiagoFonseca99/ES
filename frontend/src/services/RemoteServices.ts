@@ -40,6 +40,17 @@ httpClient.interceptors.request.use(
 );
 
 export default class RemoteServices {
+  static async checkToken(): Promise<AuthDto> {
+    return httpClient
+      .get('/auth/check')
+      .then(response => {
+        return new AuthDto(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async fenixLogin(code: string): Promise<AuthDto> {
     return httpClient
       .get(`/auth/fenix?code=${code}`)
