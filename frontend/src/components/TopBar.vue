@@ -221,9 +221,7 @@
         <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
           <template v-slot:activator="{ on }">
             <v-btn
-              :to="
-                '/student/dashboard?username=' + $store.getters.getUser.username
-              "
+              :to="'/student/user?username=' + $store.getters.getUser.username"
               v-on="on"
               text
               dark
@@ -515,14 +513,18 @@
           <!-- ----------- -->
 
           <v-list-item
-            :to="
-              '/student/dashboard?username=' + $store.getters.getUser.username
-            "
+            :to="'/student/user?username=' + $store.getters.getUser.username"
           >
             <v-list-item-action>
               <v-icon>fas fa-user</v-icon>
             </v-list-item-action>
             <v-list-item-content>Dashboard</v-list-item-content>
+          </v-list-item>
+          <v-list-item to="/student/search">
+            <v-list-item-action>
+              <v-icon>fas fa-search</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Search User </v-list-item-content>
           </v-list-item>
 
           <v-list-item to="/student/stats">
