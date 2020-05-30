@@ -170,7 +170,7 @@ public class TournamentController {
         }
     }
 
-    @PutMapping(value = "/tournaments/removeTournament")
+    @DeleteMapping(value = "/tournaments/removeTournament")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void removeTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
