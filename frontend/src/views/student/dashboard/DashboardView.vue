@@ -301,29 +301,6 @@ export default class DashboardView extends Vue {
     return score;
   }
 
-  async switchTournamentNamePermission() {
-    try {
-      await RemoteServices.switchTournamentNamePermission();
-      this.tournamentNamePermission = !this.tournamentNamePermission;
-      if (!this.tournamentNamePermission) {
-        this.tournamentScorePermission = false;
-      }
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-      return;
-    }
-  }
-
-  async switchTournamentScorePermission() {
-    try {
-      await RemoteServices.switchTournamentScorePermission();
-      this.tournamentScorePermission = !this.tournamentScorePermission;
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-      return;
-    }
-  }
-
   getPercentageColor(score: string) {
     let res = score.split('/');
     let percentage = (parseInt(res[0]) / parseInt(res[1])) * 100;

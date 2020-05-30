@@ -35,7 +35,7 @@ class DashboardInfoVisibilityTest extends Specification {
         def result = userService.toggleDiscussionStatsVisibility(student.getId())
 
         then:
-        result.discussionStatsPublic == false
+        !result.discussionStatsPublic
     }
 
     def "student change submission stats from public to private"(){
@@ -43,7 +43,7 @@ class DashboardInfoVisibilityTest extends Specification {
         def result = userService.toggleSubmissionStatsVisibility(student.getId())
 
         then:
-        result.submissionStatsPublic == false
+        !result.submissionStatsPublic
     }
 
     def "student change discussion stats from private to public"(){
@@ -54,7 +54,7 @@ class DashboardInfoVisibilityTest extends Specification {
         def result = userService.toggleDiscussionStatsVisibility(student.getId())
 
         then:
-        result.discussionStatsPublic == true
+        result.discussionStatsPublic
     }
 
     def "student change submission stats from private to public"(){
@@ -65,7 +65,7 @@ class DashboardInfoVisibilityTest extends Specification {
         def result = userService.toggleSubmissionStatsVisibility(student.getId())
 
         then:
-        result.submissionStatsPublic == true
+        result.submissionStatsPublic
     }
 
     def "teacher change discussion stats visibility"(){

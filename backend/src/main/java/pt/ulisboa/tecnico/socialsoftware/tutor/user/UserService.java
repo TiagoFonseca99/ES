@@ -180,61 +180,6 @@ public class UserService {
         return user;
     }
 
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void switchTournamentNamePermission(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-
-        if (user.getTournamentNamePermission()) {
-            user.setTournamentNamePermission(false);
-            user.setTournamentScorePermission(false);
-        }
-        else {
-            user.setTournamentNamePermission(true);
-        }
-    }
-
-
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void switchTournamentScorePermission(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-
-        if (!user.getTournamentNamePermission()) {
-            throw new TutorException(USER_TOURNAMENT_PERMISSIONS_NOT_CONSISTENT, user.getUsername());
-        }
-
-        user.setTournamentScorePermission(!user.getTournamentScorePermission());
-    }
-
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public boolean getTournamentNamePermission(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-
-        return user.getTournamentNamePermission();
-    }
-
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public boolean getTournamentScorePermission(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-
-        return user.getTournamentScorePermission();
-    }
-
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public User createDemoStudent() {
         String birthDate = DateHandler.now().toString();
