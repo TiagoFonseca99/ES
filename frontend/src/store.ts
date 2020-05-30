@@ -1,14 +1,12 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import RemoteServices from '@/services/RemoteServices';
-import AuthDto from '@/models/user/AuthDto';
 import Course from '@/models/user/Course';
 import User from '@/models/user/User';
 import * as storage from '@/storage';
 import * as session from '@/session';
 
 interface State {
-  token: string;
   logged: boolean;
   session: boolean;
   user: User | null;
@@ -19,7 +17,6 @@ interface State {
 }
 
 const state: State = {
-  token: '',
   logged: false,
   session: true,
   user: null,
@@ -35,9 +32,8 @@ Vue.config.devtools = true;
 export default new Vuex.Store({
   state: state,
   mutations: {
-    login(state, authResponse: AuthDto) {
-      state.token = authResponse.token;
-      state.user = authResponse.user;
+    login(state, user: User) {
+      state.user = user;
       state.logged = true;
 
       let sessionVal = storage.getLocal(session.SESSION_TOKEN);
@@ -45,21 +41,14 @@ export default new Vuex.Store({
         state.session = sessionVal == 'true';
       }
 
-      storage.removeAll(session.LOGIN_TOKEN);
       storage.persist(session.SESSION_TOKEN, String(state.session), false);
-      storage.persist(session.LOGIN_TOKEN, authResponse.token, state.session);
     },
     logout(state) {
-      state.token = '';
       state.user = null;
       state.currentCourse = null;
       state.logged = false;
-      storage.removeAll(session.LOGIN_TOKEN);
       storage.removeAll(session.COURSE_TOKEN);
       storage.persist(session.SESSION_TOKEN, String(state.session), false);
-    },
-    token(state, token) {
-      state.token = token;
     },
     session(state, session) {
       state.session = session;
@@ -105,24 +94,18 @@ export default new Vuex.Store({
       commit('login', authResponse);
     },
     async demoStudentLogin({ commit }) {
-      const authResponse = await RemoteServices.demoStudentLogin();
-      commit('login', authResponse);
-      commit(
-        'currentCourse',
-        (Object.values(authResponse.user.courses)[0] as Course[])[0]
-      );
+      const user = await RemoteServices.demoStudentLogin();
+      commit('login', user);
+      commit('currentCourse', (Object.values(user.courses)[0] as Course[])[0]);
     },
     async demoTeacherLogin({ commit }) {
-      const authResponse = await RemoteServices.demoTeacherLogin();
-      commit('login', authResponse);
-      commit(
-        'currentCourse',
-        (Object.values(authResponse.user.courses)[0] as Course[])[0]
-      );
+      const user = await RemoteServices.demoTeacherLogin();
+      commit('login', user);
+      commit('currentCourse', (Object.values(user.courses)[0] as Course[])[0]);
     },
     async demoAdminLogin({ commit }) {
-      const authResponse = await RemoteServices.demoAdminLogin();
-      commit('login', authResponse);
+      const user = await RemoteServices.demoAdminLogin();
+      commit('login', user);
     },
     logout({ commit }) {
       return new Promise(resolve => {
@@ -140,23 +123,15 @@ export default new Vuex.Store({
     },
     isAdmin(state): boolean {
       return (
-        !!state.token &&
         state.user !== null &&
         (state.user.role == 'ADMIN' || state.user.role == 'DEMO_ADMIN')
       );
     },
     isTeacher(state): boolean {
-      return (
-        !!state.token && state.user !== null && state.user.role == 'TEACHER'
-      );
+      return state.user !== null && state.user.role == 'TEACHER';
     },
     isStudent(state): boolean {
-      return (
-        !!state.token && state.user !== null && state.user.role == 'STUDENT'
-      );
-    },
-    getToken(state): string {
-      return state.token;
+      return state.user !== null && state.user.role == 'STUDENT';
     },
     getUser(state): User | null {
       return state.user;

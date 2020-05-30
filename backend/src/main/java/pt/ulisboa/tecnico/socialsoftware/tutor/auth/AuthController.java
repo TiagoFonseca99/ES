@@ -2,14 +2,18 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.AuthUserDto;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
+
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class AuthController {
@@ -29,33 +33,33 @@ public class AuthController {
     private String callbackUrl;
 
     @GetMapping("/auth/check")
-    public AuthDto checkToken(@RequestHeader(value = "Authorization", required = false) String token) {
+    public ResponseEntity<AuthUserDto> checkToken(@RequestHeader(value = "Authorization", required = false) String token, HttpServletResponse response) {
         if (token == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        return this.authService.checkToken(token);
+        return this.authService.checkToken(token, response);
     }
 
     @GetMapping("/auth/fenix")
-    public AuthDto fenixAuth(@RequestParam String code) {
+    public ResponseEntity<AuthUserDto> fenixAuth(@RequestParam String code, HttpServletResponse response) {
         FenixEduInterface fenix = new FenixEduInterface(baseUrl, oauthConsumerKey, oauthConsumerSecret, callbackUrl);
         fenix.authenticate(code);
-        return this.authService.fenixAuth(fenix);
+        return this.authService.fenixAuth(fenix, response);
     }
 
     @GetMapping("/auth/demo/student")
-    public AuthDto demoStudentAuth() {
-        return this.authService.demoStudentAuth();
+    public ResponseEntity<AuthUserDto> demoStudentAuth(HttpServletResponse response) {
+        return this.authService.demoStudentAuth(response);
     }
 
     @GetMapping("/auth/demo/teacher")
-    public AuthDto demoTeacherAuth() {
-        return this.authService.demoTeacherAuth();
+    public ResponseEntity<AuthUserDto> demoTeacherAuth(HttpServletResponse response) {
+        return this.authService.demoTeacherAuth(response);
     }
 
     @GetMapping("/auth/demo/admin")
-    public AuthDto demoAdminAuth() {
-        return this.authService.demoAdminAuth();
+    public ResponseEntity<AuthUserDto> demoAdminAuth(HttpServletResponse response) {
+        return this.authService.demoAdminAuth(response);
     }
 }

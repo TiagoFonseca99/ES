@@ -10,7 +10,7 @@ import SolvedQuiz from '@/models/statement/SolvedQuiz';
 import Topic from '@/models/management/Topic';
 import { Student } from '@/models/management/Student';
 import Assessment from '@/models/management/Assessment';
-import AuthDto from '@/models/user/AuthDto';
+import User from '@/models/user/User';
 import StatementAnswer from '@/models/statement/StatementAnswer';
 import { QuizAnswers } from '@/models/management/QuizAnswers';
 import Tournament from '@/models/user/Tournament';
@@ -23,72 +23,59 @@ import Dashboard from '@/models/management/Dashboard';
 const httpClient = axios.create();
 httpClient.defaults.timeout = 10000;
 httpClient.defaults.baseURL = process.env.VUE_APP_ROOT_API;
+httpClient.defaults.withCredentials = true;
 httpClient.defaults.headers.post['Content-Type'] = 'application/json';
-httpClient.interceptors.request.use(
-  config => {
-    if (!config.headers.Authorization) {
-      const token = Store.getters.getToken;
-
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-
-    return config;
-  },
-  error => Promise.reject(error)
-);
 
 export default class RemoteServices {
-  static async checkToken(): Promise<AuthDto> {
+  static async checkToken(): Promise<User> {
     return httpClient
       .get('/auth/check')
       .then(response => {
-        return new AuthDto(response.data);
+        return new User(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
   }
 
-  static async fenixLogin(code: string): Promise<AuthDto> {
+  static async fenixLogin(code: string): Promise<User> {
     return httpClient
       .get(`/auth/fenix?code=${code}`)
       .then(response => {
-        return new AuthDto(response.data);
+        return new User(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
   }
 
-  static async demoStudentLogin(): Promise<AuthDto> {
+  static async demoStudentLogin(): Promise<User> {
     return httpClient
       .get('/auth/demo/student')
       .then(response => {
-        return new AuthDto(response.data);
+        return new User(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
   }
 
-  static async demoTeacherLogin(): Promise<AuthDto> {
+  static async demoTeacherLogin(): Promise<User> {
     return httpClient
       .get('/auth/demo/teacher')
       .then(response => {
-        return new AuthDto(response.data);
+        return new User(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
   }
 
-  static async demoAdminLogin(): Promise<AuthDto> {
+  static async demoAdminLogin(): Promise<User> {
     return httpClient
       .get('/auth/demo/admin')
       .then(response => {
-        return new AuthDto(response.data);
+        return new User(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));

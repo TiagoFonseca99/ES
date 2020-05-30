@@ -1,14 +1,13 @@
 import store from '@/store';
 import * as storage from '@/storage';
-import AuthDto from '@/models/user/AuthDto';
 import RemoteServices from '@/services/RemoteServices';
 import Course from '@/models/user/Course';
+import User from '@/models/user/User';
 
-export const LOGIN_TOKEN = 'token';
 export const SESSION_TOKEN = 'session';
 export const COURSE_TOKEN = 'course';
 
-export function checkLogged(name: string) {
+/*export function checkLogged(name: string) {
   let session = storage.getLocal(SESSION_TOKEN);
 
   let token: string | null;
@@ -28,37 +27,34 @@ export function checkLogged(name: string) {
     store.commit('token', '');
     return false;
   }
-}
+}*/
 
 export async function testToken() {
-  let authResponse: AuthDto | null;
+  let user: User | null;
 
   try {
-    authResponse = await RemoteServices.checkToken();
+    user = await RemoteServices.checkToken();
   } catch (Error) {
-    authResponse = null;
+    user = null;
   }
 
   // Variable has a good value
   // checkLogged ensures this
   let session = storage.getLocal(SESSION_TOKEN);
 
-  if (authResponse != null) {
+  if (user != null) {
     store.commit('session', session == 'true');
-    store.commit('login', authResponse);
+    store.commit('login', user);
 
     // Check if more than 1 course
-    if (
-      store.getters.getCurrentCourse == null &&
-      authResponse.user.coursesNumber != 1
-    ) {
+    if (store.getters.getCurrentCourse == null && user.coursesNumber != 1) {
       let course = storage.get(COURSE_TOKEN, session == 'true');
 
       try {
         if (course && JSON.parse(course)) {
           let parsed = new Course(JSON.parse(course));
 
-          let array = authResponse.user.courses[parsed.name!];
+          let array = user.courses[parsed.name!];
           if (array) {
             for (let i = 0; i < array.length; i++) {
               if (array[i].courseExecutionId == parsed.courseExecutionId) {
@@ -72,18 +68,16 @@ export async function testToken() {
       } catch (Error) {}
 
       storage.remove(COURSE_TOKEN, session == 'true');
-      storage.removeAll(LOGIN_TOKEN);
       store.commit('logout');
 
       return false;
     } else {
       store.commit(
         'currentCourse',
-        (Object.values(authResponse.user.courses)[0] as Course[])[0]
+        (Object.values(user.courses)[0] as Course[])[0]
       );
     }
   } else {
-    storage.removeAll(LOGIN_TOKEN);
     storage.removeAll(COURSE_TOKEN);
     store.commit('token', '');
   }

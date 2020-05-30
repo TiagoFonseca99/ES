@@ -10,6 +10,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -26,6 +27,8 @@ public class JwtTokenProvider {
     private UserRepository userRepository;
     private static PublicKey publicKey;
     private static PrivateKey privateKey;
+    public static final String tokenCookieName = "auth";
+    public static final int expiration = 1000*60*60*24;
 
     public JwtTokenProvider(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -52,7 +55,7 @@ public class JwtTokenProvider {
         claims.put("role", user.getRole());
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + 1000*60*60*24);
+        Date expiryDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -74,13 +77,29 @@ public class JwtTokenProvider {
         return "";
     }
 
-    static String getToken(HttpServletRequest req) {
+    static String getTokenFromHeader(HttpServletRequest req) {
         String authHeader = req.getHeader("Authorization");
 
         return getToken(authHeader);
     }
+
+    static String getTokenFromCookie(HttpServletRequest req) {
+        Cookie[] cookies = req.getCookies();
+
+        String token = null;
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(tokenCookieName)) {
+                token = cookie.getValue();
+                break;
+            }
+        }
+
+        return getToken(token);
+    }
+
     static int getUserId(String token) {
         try {
+            verifyToken(token);
             return Integer.parseInt(Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token).getBody().getSubject());
         } catch (MalformedJwtException ex) {
             logger.error("Invalkey JWT token");
@@ -92,6 +111,10 @@ public class JwtTokenProvider {
             logger.error("JWT claims string is empty.");
         }
         throw new TutorException(AUTHENTICATION_ERROR);
+    }
+
+    static void verifyToken(String token) {
+        
     }
 
     Authentication getAuthentication(String token) {

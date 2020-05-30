@@ -1,7 +1,11 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.auth;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -37,17 +41,18 @@ public class AuthService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public AuthDto checkToken(String token) {
+    public ResponseEntity<AuthUserDto> checkToken(String token, HttpServletResponse response) {
         token = JwtTokenProvider.getToken(token);
+        // Check token validity
 
         User user = this.userService.findById(JwtTokenProvider.getUserId(token));
 
-        return new AuthDto(token, new AuthUserDto(user));
+        return ResponseEntity.ok().body(new AuthUserDto(user));
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public AuthDto fenixAuth(FenixEduInterface fenix) {
+    public ResponseEntity<AuthUserDto> fenixAuth(FenixEduInterface fenix, HttpServletResponse response) {
         String username = fenix.getPersonUsername();
         List<CourseDto> fenixAttendingCourses = fenix.getPersonAttendingCourses();
         List<CourseDto> fenixTeachingCourses = fenix.getPersonTeachingCourses();
@@ -75,52 +80,59 @@ public class AuthService {
 
         if (user.getRole() == User.Role.ADMIN) {
             List<CourseDto> allCoursesInDb = courseExecutionRepository.findAll().stream().map(CourseDto::new)
-                .collect(Collectors.toList());
+                    .collect(Collectors.toList());
 
             if (!fenixTeachingCourses.isEmpty()) {
                 User finalUser = user;
                 activeTeachingCourses.stream()
-                    .filter(courseExecution -> !finalUser.getCourseExecutions().contains(courseExecution))
-                    .forEach(user::addCourse);
+                        .filter(courseExecution -> !finalUser.getCourseExecutions().contains(courseExecution))
+                        .forEach(user::addCourse);
 
                 allCoursesInDb.addAll(fenixTeachingCourses);
 
                 String ids = fenixTeachingCourses.stream()
-                    .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
-                    .collect(Collectors.joining(","));
+                        .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
+                        .collect(Collectors.joining(","));
 
                 user.setEnrolledCoursesAcronyms(ids);
             }
-            return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user, allCoursesInDb));
+
+            setCookie(JwtTokenProvider.tokenCookieName, JwtTokenProvider.generateToken(user), response, true);
+            return ResponseEntity.ok().body(new AuthUserDto(user, allCoursesInDb));
         }
 
         // Update student courses
         if (!activeAttendingCourses.isEmpty() && user.getRole() == User.Role.STUDENT) {
             User student = user;
             activeAttendingCourses.stream()
-                .filter(courseExecution -> !student.getCourseExecutions().contains(courseExecution))
-                .forEach(user::addCourse);
-            return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user));
+                    .filter(courseExecution -> !student.getCourseExecutions().contains(courseExecution))
+                    .forEach(user::addCourse);
+
+            setCookie(JwtTokenProvider.tokenCookieName, JwtTokenProvider.generateToken(user), response, true);
+            return ResponseEntity.ok().body(new AuthUserDto(user));
         }
 
         // Update teacher courses
         if (!fenixTeachingCourses.isEmpty() && user.getRole() == User.Role.TEACHER) {
             User teacher = user;
             activeTeachingCourses.stream()
-                .filter(courseExecution -> !teacher.getCourseExecutions().contains(courseExecution))
-                .forEach(user::addCourse);
+                    .filter(courseExecution -> !teacher.getCourseExecutions().contains(courseExecution))
+                    .forEach(user::addCourse);
 
             String ids = fenixTeachingCourses.stream()
-                .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
-                .collect(Collectors.joining(","));
+                    .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
+                    .collect(Collectors.joining(","));
 
             user.setEnrolledCoursesAcronyms(ids);
-            return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user, fenixTeachingCourses));
+
+            setCookie(JwtTokenProvider.tokenCookieName, JwtTokenProvider.generateToken(user), response, true);
+            return ResponseEntity.ok().body(new AuthUserDto(user, fenixTeachingCourses));
         }
 
         // Previous teacher without active courses
         if (user.getRole() == User.Role.TEACHER) {
-            return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user));
+            setCookie(JwtTokenProvider.tokenCookieName, JwtTokenProvider.generateToken(user), response, true);
+            return ResponseEntity.ok().body(new AuthUserDto(user));
         }
 
         throw new TutorException(USER_NOT_ENROLLED, username);
@@ -128,19 +140,19 @@ public class AuthService {
 
     private List<CourseExecution> getActiveTecnicoCourses(List<CourseDto> courses) {
         return courses.stream().map(courseDto -> {
-                Course course = courseRepository.findByNameType(courseDto.getName(), Course.Type.TECNICO.name())
+            Course course = courseRepository.findByNameType(courseDto.getName(), Course.Type.TECNICO.name())
                     .orElse(null);
-                if (course == null) {
-                    return null;
-                }
-                return course.getCourseExecution(courseDto.getAcronym(), courseDto.getAcademicTerm(), Course.Type.TECNICO)
+            if (course == null) {
+                return null;
+            }
+            return course.getCourseExecution(courseDto.getAcronym(), courseDto.getAcademicTerm(), Course.Type.TECNICO)
                     .orElse(null);
-            }).filter(Objects::nonNull).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Retryable(value = { SQLException.class }, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public AuthDto demoStudentAuth() {
+    public ResponseEntity<AuthUserDto> demoStudentAuth(HttpServletResponse response) {
         User user;
         // if (activeProfile.equals("dev")) {
         // user = this.userService.createDemoStudent();
@@ -148,22 +160,46 @@ public class AuthService {
         user = this.userService.getDemoStudent();
         // }
 
-        return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user));
+        setCookie(JwtTokenProvider.tokenCookieName, JwtTokenProvider.generateToken(user), response, true);
+        return ResponseEntity.ok().body(new AuthUserDto(user));
     }
 
     @Retryable(value = { SQLException.class }, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public AuthDto demoTeacherAuth() {
+    public ResponseEntity<AuthUserDto> demoTeacherAuth(HttpServletResponse response) {
         User user = this.userService.getDemoTeacher();
 
-        return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user));
+        setCookie(JwtTokenProvider.tokenCookieName, JwtTokenProvider.generateToken(user), response, true);
+        return ResponseEntity.ok().body(new AuthUserDto(user));
     }
 
     @Retryable(value = { SQLException.class }, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public AuthDto demoAdminAuth() {
+    public ResponseEntity<AuthUserDto> demoAdminAuth(HttpServletResponse response) {
         User user = this.userService.getDemoAdmin();
 
-        return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user));
+        setCookie(JwtTokenProvider.tokenCookieName, JwtTokenProvider.generateToken(user), response, true);
+        return ResponseEntity.ok().body(new AuthUserDto(user));
+    }
+
+    public void setCookie(String name, String value, HttpServletResponse response) {
+        setCookie(name, value, response, null, null);
+    }
+
+    public void setCookie(String name, String value, HttpServletResponse response, boolean http) {
+        setCookie(name, value, response, http, null);
+    }
+
+    public void setCookie(String name, String value, HttpServletResponse response, int age) {
+        setCookie(name, value, response, null, age);
+    }
+
+    public void setCookie(String name, String value, HttpServletResponse response, Boolean http, Integer age) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setHttpOnly(http != null ? http : false);
+        cookie.setSecure(true);
+        cookie.setMaxAge(age != null ? age : JwtTokenProvider.expiration);
+
+        response.addCookie(cookie);
     }
 }
