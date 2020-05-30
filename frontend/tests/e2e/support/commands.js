@@ -40,7 +40,7 @@ Cypress.Commands.add('closeErrorMessage', message => {
       .find('button')
       .click();
   } else {
-    cy.contains(message)
+    cy.find(message)
       .parent()
       .find('button')
       .click();
@@ -213,6 +213,17 @@ Cypress.Commands.add('cancelTournament', tournament => {
     .should('have.length', 9)
     .eq(8)
     .find('[data-cy="CancelTournament"]')
+    .click({ force: true });
+});
+
+Cypress.Commands.add('removeTournament', tournament => {
+  cy.get('tbody')
+    .children()
+    .eq(tournament)
+    .children()
+    .should('have.length', 9)
+    .eq(8)
+    .find('[data-cy="RemoveTournament"]')
     .click({ force: true });
 });
 
