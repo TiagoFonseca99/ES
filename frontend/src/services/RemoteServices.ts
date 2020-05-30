@@ -1048,7 +1048,7 @@ export default class RemoteServices {
 
   static cancelTournament(tournament: Tournament) {
     return httpClient
-      .delete('tournaments/cancelTournament', tournament)
+      .put('tournaments/cancelTournament', tournament)
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
@@ -1056,7 +1056,7 @@ export default class RemoteServices {
 
   static removeTournament(tournament: Tournament) {
     return httpClient
-      .put('tournaments/removeTournament', tournament)
+      .delete('tournaments/removeTournament', tournament)
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
