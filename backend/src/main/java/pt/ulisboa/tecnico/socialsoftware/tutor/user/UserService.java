@@ -43,6 +43,10 @@ public class UserService {
         return this.userRepository.findByKey(key);
     }
 
+    public User findById(Integer id) {
+        return this.userRepository.findById(id).get();
+    }
+
     public Integer getMaxUserNumber() {
         Integer result = userRepository.getMaxUserNumber();
         return result != null ? result : 0;

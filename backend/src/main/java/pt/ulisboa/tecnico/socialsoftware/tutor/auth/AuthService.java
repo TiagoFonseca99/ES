@@ -35,9 +35,17 @@ public class AuthService {
     @Autowired
     private CourseExecutionRepository courseExecutionRepository;
 
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public AuthDto checkToken(String token) {
+        token = JwtTokenProvider.getToken(token);
+
+        User user = this.userService.findById(JwtTokenProvider.getUserId(token));
+
+        return new AuthDto(token, new AuthUserDto(user));
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public AuthDto fenixAuth(FenixEduInterface fenix) {
         String username = fenix.getPersonUsername();
@@ -66,41 +74,48 @@ public class AuthService {
         user.setLastAccess(DateHandler.now());
 
         if (user.getRole() == User.Role.ADMIN) {
-            List<CourseDto> allCoursesInDb = courseExecutionRepository.findAll().stream().map(CourseDto::new).collect(Collectors.toList());
+            List<CourseDto> allCoursesInDb = courseExecutionRepository.findAll().stream().map(CourseDto::new)
+                .collect(Collectors.toList());
 
             if (!fenixTeachingCourses.isEmpty()) {
                 User finalUser = user;
-                activeTeachingCourses.stream().filter(courseExecution -> !finalUser.getCourseExecutions().contains(courseExecution)).forEach(user::addCourse);
+                activeTeachingCourses.stream()
+                    .filter(courseExecution -> !finalUser.getCourseExecutions().contains(courseExecution))
+                    .forEach(user::addCourse);
 
                 allCoursesInDb.addAll(fenixTeachingCourses);
 
                 String ids = fenixTeachingCourses.stream()
-                        .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
-                        .collect(Collectors.joining(","));
+                    .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
+                    .collect(Collectors.joining(","));
 
                 user.setEnrolledCoursesAcronyms(ids);
             }
-            return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user,allCoursesInDb));
+            return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user, allCoursesInDb));
         }
 
         // Update student courses
         if (!activeAttendingCourses.isEmpty() && user.getRole() == User.Role.STUDENT) {
             User student = user;
-            activeAttendingCourses.stream().filter(courseExecution -> !student.getCourseExecutions().contains(courseExecution)).forEach(user::addCourse);
+            activeAttendingCourses.stream()
+                .filter(courseExecution -> !student.getCourseExecutions().contains(courseExecution))
+                .forEach(user::addCourse);
             return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user));
         }
 
         // Update teacher courses
         if (!fenixTeachingCourses.isEmpty() && user.getRole() == User.Role.TEACHER) {
             User teacher = user;
-            activeTeachingCourses.stream().filter(courseExecution -> !teacher.getCourseExecutions().contains(courseExecution)).forEach(user::addCourse);
+            activeTeachingCourses.stream()
+                .filter(courseExecution -> !teacher.getCourseExecutions().contains(courseExecution))
+                .forEach(user::addCourse);
 
             String ids = fenixTeachingCourses.stream()
-                    .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
-                    .collect(Collectors.joining(","));
+                .map(courseDto -> courseDto.getAcronym() + courseDto.getAcademicTerm())
+                .collect(Collectors.joining(","));
 
             user.setEnrolledCoursesAcronyms(ids);
-            return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user,  fenixTeachingCourses));
+            return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user, fenixTeachingCourses));
         }
 
         // Previous teacher without active courses
@@ -112,39 +127,31 @@ public class AuthService {
     }
 
     private List<CourseExecution> getActiveTecnicoCourses(List<CourseDto> courses) {
-        return courses.stream()
-                .map(courseDto ->  {
-                    Course course = courseRepository.findByNameType(courseDto.getName(), Course.Type.TECNICO.name()).orElse(null);
-                    if (course == null) {
-                        return null;
-                    }
-                    return course.getCourseExecution(courseDto.getAcronym(),courseDto.getAcademicTerm(), Course.Type.TECNICO)
-                                .orElse(null);
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return courses.stream().map(courseDto -> {
+                Course course = courseRepository.findByNameType(courseDto.getName(), Course.Type.TECNICO.name())
+                    .orElse(null);
+                if (course == null) {
+                    return null;
+                }
+                return course.getCourseExecution(courseDto.getAcronym(), courseDto.getAcademicTerm(), Course.Type.TECNICO)
+                    .orElse(null);
+            }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    @Retryable(
-            value = { SQLException.class },
-            maxAttempts = 2,
-            backoff = @Backoff(delay = 5000))
+    @Retryable(value = { SQLException.class }, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public AuthDto demoStudentAuth() {
         User user;
-//        if (activeProfile.equals("dev")) {
-//            user = this.userService.createDemoStudent();
-//        } else {
-            user = this.userService.getDemoStudent();
-//        }
+        // if (activeProfile.equals("dev")) {
+        // user = this.userService.createDemoStudent();
+        // } else {
+        user = this.userService.getDemoStudent();
+        // }
 
         return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user));
     }
 
-    @Retryable(
-            value = { SQLException.class },
-            maxAttempts = 2,
-            backoff = @Backoff(delay = 5000))
+    @Retryable(value = { SQLException.class }, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public AuthDto demoTeacherAuth() {
         User user = this.userService.getDemoTeacher();
@@ -152,10 +159,7 @@ public class AuthService {
         return new AuthDto(JwtTokenProvider.generateToken(user), new AuthUserDto(user));
     }
 
-    @Retryable(
-            value = { SQLException.class },
-            maxAttempts = 2,
-            backoff = @Backoff(delay = 5000))
+    @Retryable(value = { SQLException.class }, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public AuthDto demoAdminAuth() {
         User user = this.userService.getDemoAdmin();

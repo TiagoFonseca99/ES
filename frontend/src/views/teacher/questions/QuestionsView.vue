@@ -3,7 +3,7 @@
     <v-data-table
       :headers="headers"
       :custom-filter="customFilter"
-      :items="questions"
+      :items="items"
       :search="search"
       :sort-by="['creationDate']"
       sort-desc
@@ -280,6 +280,7 @@ export default class QuestionsView extends Vue {
     );
     if (question) {
       question.topics = changedTopics;
+      this.discussionFilter();
     }
   }
 
@@ -302,6 +303,8 @@ export default class QuestionsView extends Vue {
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
+
+    this.discussionFilter();
   }
 
   getStatusColor(status: string) {
@@ -320,6 +323,8 @@ export default class QuestionsView extends Vue {
       } catch (error) {
         await this.$store.dispatch('error', error);
       }
+
+      this.discussionFilter();
     }
   }
 
@@ -338,6 +343,7 @@ export default class QuestionsView extends Vue {
     this.currentQuestion = new Question();
     this.editQuestionDialog = true;
     this.discussion = false;
+    this.discussionFilter();
   }
 
   editQuestion(question: Question, e?: Event) {
@@ -345,6 +351,7 @@ export default class QuestionsView extends Vue {
     this.currentQuestion = question;
     this.discussion = false;
     this.editQuestionDialog = true;
+    this.discussionFilter();
   }
 
   duplicateQuestion(question: Question) {
@@ -356,6 +363,7 @@ export default class QuestionsView extends Vue {
     this.currentQuestion.image = null;
     this.editQuestionDialog = true;
     this.discussion = false;
+    this.discussionFilter();
   }
 
   async onSaveQuestion(question: Question) {
@@ -363,6 +371,7 @@ export default class QuestionsView extends Vue {
     this.questions.unshift(question);
     this.editQuestionDialog = false;
     this.currentQuestion = null;
+    this.discussionFilter();
   }
 
   async exportCourseQuestions() {
@@ -390,6 +399,7 @@ export default class QuestionsView extends Vue {
         this.questions = this.questions.filter(
           question => question.id != toDeletequestion.id
         );
+        this.discussionFilter();
       } catch (error) {
         await this.$store.dispatch('error', error);
       }
