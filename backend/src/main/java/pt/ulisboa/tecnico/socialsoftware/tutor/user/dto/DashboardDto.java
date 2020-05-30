@@ -14,6 +14,7 @@ public class DashboardDto implements Serializable {
     private boolean discussionStatsPublic;
     private boolean submissionStatsPublic;
     private boolean tournamentStatsPublic;
+    private boolean userStatsPublic;
     private Integer numDiscussions;
     private Integer numPublicDiscussions;
     private Integer numSubmissions;
@@ -30,6 +31,7 @@ public class DashboardDto implements Serializable {
         this.discussionStatsPublic = user.isDiscussionStatsPublic();
         this.submissionStatsPublic = user.isSubmissionStatsPublic();
         this.tournamentStatsPublic = user.isTournamentStatsPublic();
+        this.userStatsPublic = user.isUserStatsPublic();
         this.numDiscussions = user.getDiscussions().size();
         this.numPublicDiscussions = user.getPublicDiscussions().size();
         this.numSubmissions = user.getSubmissions().size();
@@ -58,19 +60,16 @@ public class DashboardDto implements Serializable {
     public boolean isTournamentStatsPublic() {
         return tournamentStatsPublic;
     }
-    
-    public void setDiscussionStatsPublic(boolean discussionStatsPublic) {
-        this.discussionStatsPublic = discussionStatsPublic;
-    }
 
-    public void setSubmissionStatsPublic(boolean submissionStatsPublic) {
-        this.submissionStatsPublic = submissionStatsPublic;
-    }
+    public boolean isUserStatsPublic() { return userStatsPublic; }
 
+    public void setDiscussionStatsPublic(boolean discussionStatsPublic) { this.discussionStatsPublic = discussionStatsPublic; }
 
-    public void setTournamentStatsPublic(boolean tournamentStatsPublic) {
-        this.tournamentStatsPublic = tournamentStatsPublic;
-    }
+    public void setSubmissionStatsPublic(boolean submissionStatsPublic) { this.submissionStatsPublic = submissionStatsPublic; }
+
+    public void setTournamentStatsPublic(boolean tournamentStatsPublic) { this.tournamentStatsPublic = tournamentStatsPublic; }
+
+    public void setUserStatsPublic(boolean userStatsPublic) { this.userStatsPublic = userStatsPublic; }
 
     public String getUsername() {
         return username;

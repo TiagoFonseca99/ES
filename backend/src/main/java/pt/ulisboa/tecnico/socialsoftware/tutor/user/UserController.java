@@ -67,4 +67,16 @@ public class UserController {
 
         return userService.toggleSubmissionStatsVisibility(user.getId());
     }
+
+    @PutMapping(value = "/dashboard/stats")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public DashboardDto toggleUserStats(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return userService.toggleUserStatsVisibility(user.getId());
+    }
 }

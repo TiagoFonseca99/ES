@@ -30,15 +30,27 @@
                   <animated-number
                     class="num"
                     :number="info.joinedTournaments.length"
+                    v-if="info.tournamentStatsPublic"
                   />
+                  <v-icon left large v-else color="red">fa lock</v-icon>
                   <p class="statName">Tournaments</p>
                 </div>
                 <div class="square justify-center" data-cy="numSubmissions">
-                  <animated-number class="num" :number="info.numSubmissions" />
+                  <animated-number
+                    class="num"
+                    :number="info.numSubmissions"
+                    v-if="info.submissionStatsPublic"
+                  />
+                  <v-icon left large v-else color="red">fa lock</v-icon>
                   <p class="statName">Submissions</p>
                 </div>
                 <div class="square justify-center" data-cy="numDiscussions">
-                  <animated-number class="num" :number="info.numDiscussions" />
+                  <animated-number
+                    class="num"
+                    :number="info.numDiscussions"
+                    v-if="info.discussionStatsPublic"
+                  />
+                  <v-icon left large v-else color="red">fa lock</v-icon>
                   <p class="statName">Discussions</p>
                 </div>
               </div>
@@ -49,7 +61,10 @@
               </div>
             </v-col>
             <v-col>
-              <div class="statsContainer" v-if="stats !== null">
+              <div
+                class="statsContainer"
+                v-if="stats !== null && info.userStatsPublic"
+              >
                 <div class="square text-center">
                   <animated-number class="num" :number="stats.totalQuizzes" />
                   <p class="statName">Total Quizzes Solved</p>
@@ -90,6 +105,10 @@
                   >
                   <p class="statName">Questions Seen</p>
                 </div>
+              </div>
+              <div v-else-if="stats !== null" class="square justify-center">
+                <v-icon left large color="red">fa lock</v-icon>
+                <p class="statName">Stats</p>
               </div>
               <div v-else>
                 <p class="description" style="color: inherit">

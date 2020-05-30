@@ -23,7 +23,29 @@
             <v-container>
               <v-col>
                 <v-card-title class="justify-center">Statistics</v-card-title>
-                <div id="statsContainer" v-if="stats !== null">
+                <div
+                  class="switchContainer"
+                  style="display: flex; flex-direction: row; position: relative;"
+                >
+                  <v-switch
+                    style="flex: 1"
+                    v-if="
+                      info !== null &&
+                        this.username === this.$store.getters.getUser.username
+                    "
+                    v-model="info.userStatsPublic"
+                    :label="info.userStatsPublic ? 'Public' : 'Private'"
+                    @change="toggleStats()"
+                  />
+                </div>
+                <div
+                  id="statsContainer"
+                  v-if="
+                    stats !== null &&
+                      (this.username === this.$store.getters.getUser.username ||
+                        this.info.userStatsPublic)
+                  "
+                >
                   <div class="square text-center">
                     <animated-number class="num" :number="stats.totalQuizzes" />
                     <p class="statName">Total Quizzes Solved</p>
@@ -65,6 +87,13 @@
                     <p class="statName">Questions Seen</p>
                   </div>
                 </div>
+                <v-icon
+                  v-else-if="stats !== null"
+                  x-large
+                  color="red"
+                  class="padlock"
+                  >fa lock</v-icon
+                >
                 <div v-else>
                   <p class="description" style="color: inherit">
                     No stats to show
@@ -94,6 +123,11 @@
               :hide-default-footer="true"
               :mobile-breakpoint="0"
               class="fill-height"
+              v-if="
+                this.info !== null &&
+                  (this.username === this.$store.getters.getUser.username ||
+                    this.info.tournamentStatsPublic)
+              "
             >
               <template v-slot:item.score="{ item }">
                 <v-chip :color="getPercentageColor(score(item))">
@@ -101,6 +135,13 @@
                 </v-chip>
               </template>
             </v-data-table>
+            <v-icon
+              v-else-if="info !== null"
+              x-large
+              color="red"
+              class="padlock"
+              >fa lock</v-icon
+            >
           </v-card>
         </v-col>
         <v-col :cols="2">
@@ -121,7 +162,14 @@
                 @change="toggleSubmissions()"
               />
             </div>
-            <div class="dashInfo" v-if="info !== null">
+            <div
+              class="dashInfo"
+              v-if="
+                info !== null &&
+                  (this.username === this.$store.getters.getUser.username ||
+                    this.info.submissionStatsPublic)
+              "
+            >
               <div class="square" data-cy="numSubmissions">
                 <animated-number class="num" :number="info.numSubmissions" />
                 <p class="statName">Submissions</p>
@@ -141,6 +189,13 @@
                 <p class="statName">Rejected Submissions</p>
               </div>
             </div>
+            <v-icon
+              v-else-if="info !== null"
+              x-large
+              color="red"
+              class="padlock"
+              >fa lock</v-icon
+            >
             <div v-else>
               <p class="description" style="color: inherit">
                 No submission stats to show
@@ -168,7 +223,14 @@
                 @change="toggleDiscussions()"
               />
             </div>
-            <div class="dashInfo" v-if="info !== null">
+            <div
+              class="dashInfo"
+              v-if="
+                info !== null &&
+                  (this.username === this.$store.getters.getUser.username ||
+                    this.info.discussionStatsPublic)
+              "
+            >
               <div class="square">
                 <animated-number
                   class="num"
@@ -186,6 +248,13 @@
                 <p class="statName">Public Discussions</p>
               </div>
             </div>
+            <v-icon
+              class="padlock"
+              v-else-if="info !== null"
+              x-large
+              color="red"
+              >fa lock</v-icon
+            >
             <div v-else>
               <p class="description">
                 No discussions stats to show
@@ -268,6 +337,14 @@ export default class DashboardView extends Vue {
   async toggleTournaments() {
     try {
       this.info = await RemoteServices.toggleTournamentStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  async toggleStats() {
+    try {
+      this.info = await RemoteServices.toggleUserStats();
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -382,5 +459,9 @@ export default class DashboardView extends Vue {
   font-size: 15pt;
   font-weight: bold;
   color: inherit;
+}
+
+.padlock {
+  height: 100%;
 }
 </style>
