@@ -3,7 +3,7 @@
         <v-data-table
                 :headers="headers"
                 :custom-filter="customFilter"
-                :items="submissions"
+                :items="items"
                 :search="search"
                 multi-sort
                 :mobile-breakpoint="0"
@@ -18,8 +18,12 @@
                             label="Search"
                             class="mx-2"
                     />
-
                     <v-spacer />
+                    <v-btn-toggle class="button-group">
+                       <v-btn color="primary" dark @click="filterSubmissions('all')">{{"See All"}}</v-btn>
+                       <v-btn color="primary" dark @click="filterSubmissions('accepted')">{{"See Accepted"}}</v-btn>
+                       <v-btn color="primary" dark @click="filterSubmissions('rejected')">{{"See Rejected"}}</v-btn>
+                    </v-btn-toggle>
                 </v-card-title>
             </template>
 
@@ -86,107 +90,120 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue, Watch } from 'vue-property-decorator';
-    import RemoteServices from '@/services/RemoteServices';
-    import { convertMarkDown } from '@/services/ConvertMarkdownService';
-    import Question from '@/models/management/Question';
-    import Submission from '@/models/management/Submission';
-    import Image from '@/models/management/Image';
-    import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
-    @Component({
-        components: {
-            'show-question-dialog': ShowQuestionDialog
-        }
-    })
-    export default class AllSubmissionsView extends Vue {
-        submissions: Submission[] = [];
-        currentQuestion: Question | null = null;
-        questionDialog: boolean = false;
-        search: string = '';
+import { Component, Vue, Watch } from 'vue-property-decorator';
+import RemoteServices from '@/services/RemoteServices';
+import { convertMarkDown } from '@/services/ConvertMarkdownService';
+import Question from '@/models/management/Question';
+import Submission from '@/models/management/Submission';
+import Image from '@/models/management/Image';
+import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
 
-        headers: object = [
-            {
-                text: 'Actions',
-                value: 'action',
-                align: 'left',
-                width: '15%',
-                sortable: false
-            },
-            { text: 'Title', value: 'questionDto.title', align: 'center' },
-            { text: 'Submitted by', value: 'username', align: 'center' },
-            { text: 'Status', value: 'questionDto.status', align: 'center' },
-            {
-                text: 'Creation Date',
-                value: 'questionDto.creationDate',
-                align: 'center'
-            },
-            {
-                text: 'Image',
-                value: 'questionDto.image',
-                align: 'center',
-                sortable: false
-            }
-        ];
-
-        async created() {
-            await this.$store.dispatch('loading');
-            try {
-                [this.submissions] = await Promise.all([RemoteServices.getStudentsSubmissions()]);
-                this.submissions.sort((a, b) => this.sortNewestFirst(a, b));
-            } catch (error) {
-                await this.$store.dispatch('error', error);
-            }
-            await this.$store.dispatch('clearLoading');
-        }
-
-        sortNewestFirst(a: Submission, b: Submission) {
-            if (a.questionDto.creationDate && b.questionDto.creationDate)
-                return a.questionDto.creationDate < b.questionDto.creationDate ? 1 : -1;
-            else return 0;
-        }
-
-        customFilter(value: string, search: string, question: Question) {
-            // noinspection SuspiciousTypeOfGuard,SuspiciousTypeOfGuard
-            return (
-                search != null &&
-                JSON.stringify(question)
-                    .toLowerCase()
-                    .indexOf(search.toLowerCase()) !== -1
-            );
-        }
-
-        convertMarkDown(text: string, image: Image | null = null): string {
-            return convertMarkDown(text, image);
-        }
-
-        async handleFileUpload(event: File, question: Question) {
-            if (question.id) {
-                try {
-                    const imageURL = await RemoteServices.uploadImage(event, question.id);
-                    question.image = new Image();
-                    question.image.url = imageURL;
-                    confirm('Image ' + imageURL + ' was uploaded!');
-                } catch (error) {
-                    await this.$store.dispatch('error', error);
-                }
-            }
-        }
-
-        showQuestionDialog(question: Question) {
-            this.currentQuestion = question;
-            this.questionDialog = true;
-        }
-
-        onCloseShowQuestionDialog() {
-            this.questionDialog = false;
-        }
-
-        getStatusColor(status: string) {
-            if (status === 'AVAILABLE') return 'green';
-            else if (status === 'DEPRECATED') return 'red';
-            else return 'pink';
-        }
+@Component({
+    components: {
+        'show-question-dialog': ShowQuestionDialog
     }
+})
+export default class AllSubmissionsView extends Vue {
+    submissions: Submission[] = [];
+    items: Submission[] = [];
+    currentQuestion: Question | null = null;
+    questionDialog: boolean = false;
+    search: string = '';
+
+    headers: object = [
+        {
+         text: 'Actions',
+         value: 'action',
+         align: 'left',
+         width: '15%',
+         sortable: false
+        },
+        { text: 'Title', value: 'questionDto.title', align: 'center' },
+        { text: 'Submitted by', value: 'username', align: 'center' },
+        { text: 'Status', value: 'questionDto.status', align: 'center' },
+        {
+         text: 'Creation Date',
+         value: 'questionDto.creationDate',
+         align: 'center'
+        },
+        {
+         text: 'Image',
+         value: 'questionDto.image',
+         align: 'center',
+         sortable: false
+        }
+       ];
+
+    async created() {
+        await this.$store.dispatch('loading');
+        try {
+           [this.submissions] = await Promise.all([RemoteServices.getStudentsSubmissions()]);
+           this.submissions.sort((a, b) => this.sortNewestFirst(a, b));
+           this.items = this.submissions;
+        } catch (error) {
+           await this.$store.dispatch('error', error);
+        }
+        await this.$store.dispatch('clearLoading');
+    }
+
+    sortNewestFirst(a: Submission, b: Submission) {
+        if (a.questionDto.creationDate && b.questionDto.creationDate)
+          return a.questionDto.creationDate < b.questionDto.creationDate ? 1 : -1;
+        else return 0;
+    }
+
+     customFilter(value: string, search: string, question: Question) {
+     // noinspection SuspiciousTypeOfGuard,SuspiciousTypeOfGuard
+        return (
+          search != null &&
+          JSON.stringify(question)
+          .toLowerCase()
+          .indexOf(search.toLowerCase()) !== -1
+        );
+     }
+
+     convertMarkDown(text: string, image: Image | null = null): string {
+        return convertMarkDown(text, image);
+     }
+
+     async handleFileUpload(event: File, question: Question) {
+        if (question.id) {
+           try {
+               const imageURL = await RemoteServices.uploadImage(event, question.id);
+               question.image = new Image();
+               question.image.url = imageURL;
+               confirm('Image ' + imageURL + ' was uploaded!');
+           } catch (error) {
+               await this.$store.dispatch('error', error);
+           }
+        }
+     }
+
+     showQuestionDialog(question: Question) {
+         this.currentQuestion = question;
+         this.questionDialog = true;
+     }
+
+     onCloseShowQuestionDialog() {
+        this.questionDialog = false;
+     }
+
+     getStatusColor(status: string) {
+        if (status === 'AVAILABLE') return 'green';
+        else if (status === 'DEPRECATED') return 'red';
+        else return 'pink';
+     }
+
+     filterSubmissions(value: String) {
+        if (value == 'all') {
+            this.items = this.submissions;
+        } else if (value == 'accepted') {
+            this.items = this.submissions.filter(submission => {return submission.questionDto.status == 'AVAILABLE';});
+        } else {
+            this.items = this.submissions.filter(submission => {return submission.questionDto.status == 'DEPRECATED';});
+        }
+     }
+}
 </script>
 
 <style lang="scss" scoped>
