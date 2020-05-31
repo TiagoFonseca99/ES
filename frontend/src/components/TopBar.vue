@@ -190,6 +190,14 @@
                 <v-list-item-title>Reviews</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item to="/student/all-submissions">
+              <v-list-item-action>
+                <v-icon>fas fa-users</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>All Submissions</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list>
         </v-menu>
 
@@ -210,15 +218,29 @@
 
         <!-- ------------- -->
 
-        <v-btn
-          to="/student/dashboard"
-          v-if="isStudent && currentCourse"
-          text
-          dark
-        >
-          Dashboard
-          <v-icon>fa fa-user</v-icon>
-        </v-btn>
+        <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :to="'/student/user?username=' + $store.getters.getUser.username"
+              v-on="on"
+              text
+              dark
+            >
+              Dashboard
+              <v-icon>fa fa-id-card-alt</v-icon>
+            </v-btn>
+          </template>
+          <v-list dense>
+            <v-list-item to="/student/search">
+              <v-list-item-action>
+                <v-icon>fas fa-search</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Search User</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-menu>
 
         <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
           <template v-slot:activator="{ on }">
@@ -445,6 +467,13 @@
             <v-list-item-content>Reviews</v-list-item-content>
           </v-list-item>
 
+          <v-list-item to="/student/submissions/all">
+            <v-list-item-action>
+              <v-icon>fas fa-users</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>All Submissions</v-list-item-content>
+          </v-list-item>
+
           <!-- ----------- -->
 
           <!-- ----DDP---- -->
@@ -483,11 +512,19 @@
 
           <!-- ----------- -->
 
-          <v-list-item to="/student/dashboard">
+          <v-list-item
+            :to="'/student/user?username=' + $store.getters.getUser.username"
+          >
             <v-list-item-action>
               <v-icon>fas fa-user</v-icon>
             </v-list-item-action>
             <v-list-item-content>Dashboard</v-list-item-content>
+          </v-list-item>
+          <v-list-item to="/student/search">
+            <v-list-item-action>
+              <v-icon>fas fa-search</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Search User </v-list-item-content>
           </v-list-item>
 
           <v-list-item to="/student/stats">

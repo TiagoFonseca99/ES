@@ -2,8 +2,8 @@
   <v-container
     fluid
     style="height: 100%; position: relative; display: flex; flex-direction: column"
+    :key="componentKey"
   >
-    <h2>Student Dashboard</h2>
     <v-container fluid style="position: relative; max-height: 100%; flex: 1;">
       <v-row style="width: 100%; height: 100%">
         <v-col>
@@ -23,7 +23,29 @@
             <v-container>
               <v-col>
                 <v-card-title class="justify-center">Statistics</v-card-title>
-                <div id="statsContainer" v-if="stats !== null">
+                <div
+                  class="switchContainer"
+                  style="display: flex; flex-direction: row; position: relative;"
+                >
+                  <v-switch
+                    style="flex: 1"
+                    v-if="
+                      info !== null &&
+                        this.username === this.$store.getters.getUser.username
+                    "
+                    v-model="info.userStatsPublic"
+                    :label="info.userStatsPublic ? 'Public' : 'Private'"
+                    @change="toggleStats()"
+                  />
+                </div>
+                <div
+                  id="statsContainer"
+                  v-if="
+                    stats !== null &&
+                      (this.username === this.$store.getters.getUser.username ||
+                        this.info.userStatsPublic)
+                  "
+                >
                   <div class="square text-center">
                     <animated-number class="num" :number="stats.totalQuizzes" />
                     <p class="statName">Total Quizzes Solved</p>
@@ -65,6 +87,9 @@
                     <p class="statName">Questions Seen</p>
                   </div>
                 </div>
+                <v-icon v-else-if="stats !== null" size="500%" color="red"
+                  >lock</v-icon
+                >
                 <div v-else>
                   <p class="description" style="color: inherit">
                     No stats to show
@@ -79,7 +104,10 @@
             <v-card-title class="justify-center">Tournaments</v-card-title>
             <v-switch
               style="flex: 1"
-              v-if="info !== null"
+              v-if="
+                info !== null &&
+                  this.username === this.$store.getters.getUser.username
+              "
               v-model="info.tournamentStatsPublic"
               :label="info.tournamentStatsPublic ? 'Public' : 'Private'"
               @change="toggleTournaments()"
@@ -91,6 +119,11 @@
               :hide-default-footer="true"
               :mobile-breakpoint="0"
               class="fill-height"
+              v-if="
+                this.info !== null &&
+                  (this.username === this.$store.getters.getUser.username ||
+                    this.info.tournamentStatsPublic)
+              "
             >
               <template v-slot:item.score="{ item }">
                 <v-chip :color="getPercentageColor(score(item))">
@@ -98,6 +131,9 @@
                 </v-chip>
               </template>
             </v-data-table>
+            <v-icon v-else-if="info !== null" color="red" size="500%"
+              >lock</v-icon
+            >
           </v-card>
         </v-col>
         <v-col :cols="2">
@@ -109,13 +145,23 @@
             >
               <v-switch
                 style="flex: 1"
-                v-if="info !== null"
+                v-if="
+                  info !== null &&
+                    this.username === this.$store.getters.getUser.username
+                "
                 v-model="info.submissionStatsPublic"
                 :label="info.submissionStatsPublic ? 'Public' : 'Private'"
                 @change="toggleSubmissions()"
               />
             </div>
-            <div class="dashInfo" v-if="info !== null">
+            <div
+              class="dashInfo"
+              v-if="
+                info !== null &&
+                  (this.username === this.$store.getters.getUser.username ||
+                    this.info.submissionStatsPublic)
+              "
+            >
               <div class="square" data-cy="numSubmissions">
                 <animated-number class="num" :number="info.numSubmissions" />
                 <p class="statName">Submissions</p>
@@ -135,6 +181,9 @@
                 <p class="statName">Rejected Submissions</p>
               </div>
             </div>
+            <v-icon v-else-if="info !== null" size="500%" color="red"
+              >lock</v-icon
+            >
             <div v-else>
               <p class="description" style="color: inherit">
                 No submission stats to show
@@ -153,13 +202,23 @@
             >
               <v-switch
                 style="flex: 1"
-                v-if="info !== null"
+                v-if="
+                  info !== null &&
+                    this.username === this.$store.getters.getUser.username
+                "
                 v-model="info.discussionStatsPublic"
                 :label="info.discussionStatsPublic ? 'Public' : 'Private'"
                 @change="toggleDiscussions()"
               />
             </div>
-            <div class="dashInfo" v-if="info !== null">
+            <div
+              class="dashInfo"
+              v-if="
+                info !== null &&
+                  (this.username === this.$store.getters.getUser.username ||
+                    this.info.discussionStatsPublic)
+              "
+            >
               <div class="square">
                 <animated-number
                   class="num"
@@ -177,6 +236,9 @@
                 <p class="statName">Public Discussions</p>
               </div>
             </div>
+            <v-icon v-else-if="info !== null" size="500%" color="red"
+              >lock</v-icon
+            >
             <div v-else>
               <p class="description">
                 No discussions stats to show
@@ -190,7 +252,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import Dashboard from '@/models/management/Dashboard';
 import RemoteServices from '@/services/RemoteServices';
 import StudentStats from '@/models/statement/StudentStats';
@@ -202,12 +264,13 @@ import SolvedQuiz from '@/models/statement/SolvedQuiz';
   components: { AnimatedNumber }
 })
 export default class DashboardView extends Vue {
-  tournamentNamePermission: boolean = false;
-  tournamentScorePermission: boolean = false;
+  @Prop({ type: String, required: true }) username!: string;
+
   info: Dashboard | null = null;
   stats: StudentStats | null = null;
   tournaments: Tournament[] = [];
   quizzes: SolvedQuiz[] = [];
+  componentKey: number = 0;
 
   headers: object = [
     { text: 'Tournament Number', value: 'id', align: 'center' },
@@ -217,15 +280,21 @@ export default class DashboardView extends Vue {
   ];
 
   async created() {
+    await this.getDashboardInfo();
+  }
+
+  @Watch('username')
+  async getDashboardInfo() {
+    this.componentKey += 1;
+    this.info = null;
+    this.stats = null;
     await this.$store.dispatch('loading');
     try {
-      this.info = await RemoteServices.getDashboardInfo();
-      this.stats = await RemoteServices.getUserStats();
+      this.info = await RemoteServices.getDashboardInfo(this.username);
+      this.stats = await RemoteServices.getUserStats(this.username);
       this.quizzes = await RemoteServices.getSolvedQuizzes();
       if (this.info.joinedTournaments)
         this.tournaments = this.info.joinedTournaments.sort();
-      this.tournamentNamePermission = this.info.tournamentNamePermission;
-      this.tournamentScorePermission = this.info.tournamentScorePermission;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -257,6 +326,14 @@ export default class DashboardView extends Vue {
     }
   }
 
+  async toggleStats() {
+    try {
+      this.info = await RemoteServices.toggleUserStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
   calculateScore(quiz: SolvedQuiz) {
     let correct = 0;
     for (let i = 0; i < quiz.statementQuiz.questions.length; i++) {
@@ -281,29 +358,6 @@ export default class DashboardView extends Vue {
 
     if (score == '') return 'NOT SOLVED';
     return score;
-  }
-
-  async switchTournamentNamePermission() {
-    try {
-      await RemoteServices.switchTournamentNamePermission();
-      this.tournamentNamePermission = !this.tournamentNamePermission;
-      if (!this.tournamentNamePermission) {
-        this.tournamentScorePermission = false;
-      }
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-      return;
-    }
-  }
-
-  async switchTournamentScorePermission() {
-    try {
-      await RemoteServices.switchTournamentScorePermission();
-      this.tournamentScorePermission = !this.tournamentScorePermission;
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-      return;
-    }
   }
 
   getPercentageColor(score: string) {

@@ -303,10 +303,6 @@ Cypress.Commands.add('removeAllReplies', () => {
   );
 });
 
-Cypress.Commands.add('addDiscussion', (available, content, question, user) => {
-
-}
-
 Cypress.Commands.add('addDiscussionSameQuestion', (available, content, user) => {
   cy.exec(
     'PGPASSWORD= psql tutordb -U daniel -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, available, content) VALUES (' +
@@ -317,7 +313,7 @@ Cypress.Commands.add('addDiscussionSameQuestion', (available, content, user) => 
     content +
     '\');"'
   );
-}
+});
 
 Cypress.Commands.add('openSolvedQuiz', (number) => {
   cy.get('[data-cy="quizzes"]').click();
@@ -350,14 +346,14 @@ Cypress.Commands.add('reviewSubmission', (title, status) => {
   );
 });
 
-Cypress.Commands.add('addSubmission', (title, qstatus) => {
+Cypress.Commands.add('addSubmission', (title, qstatus, userId = 676, anon=false) => {
   //add question and submission
   cy.exec(
     'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
       title +
       '\', \'Question?\', \'' +
       qstatus +
-      '\', 2, current_timestamp) RETURNING id) INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" '
+      '\', 2, current_timestamp) RETURNING id) INSERT INTO submissions (question_id, user_id, anonymous) VALUES ((SELECT id from quest), '+ userId +', '+anon+');" '
   );
 
   //add options
@@ -439,6 +435,14 @@ Cypress.Commands.add(
     cy.wait(500);
   }
 );
+
+Cypress.Commands.add('checkAllStudentsSubmission', (title1, title2, title3) => {
+    cy.contains('Questions').click();
+    cy.contains('All Submissions').click();
+    cy.contains(title1);
+    cy.contains(title2);
+    cy.contains(title3);
+});
 
 Cypress.Commands.add('viewQuestion', (title, content, op1, op2, op3, op4) => {
   cy.contains(title)
@@ -544,7 +548,7 @@ Cypress.Commands.add('approveSubmissions', (title, justification) => {
       .parent()
       .should('have.length', 1)
       .children()
-      .should('have.length', 6)
+      .should('have.length', 8)
       .find('[data-cy="createReview"]')
       .click();
     cy.get('[data-cy="Justification"]').type(justification);
@@ -561,7 +565,7 @@ Cypress.Commands.add('changeSubmission', (title, justification, question_title, 
         .parent().parent().parent()
         .should('have.length', 1)
         .children()
-        .should('have.length', 6)
+        .should('have.length', 8)
         .find('[data-cy="createReview"]')
         .click();
     cy.get('[data-cy="Justification"]').type(justification);
@@ -580,7 +584,7 @@ Cypress.Commands.add('rejectSubmissions', (title, justification) => {
       .parent().parent().parent()
       .should('have.length', 1)
       .children()
-      .should('have.length', 6)
+      .should('have.length', 8)
       .find('[data-cy="createReview"]')
       .click();
     cy.get('[data-cy="Justification"]').type(justification);
@@ -595,7 +599,7 @@ Cypress.Commands.add('getSubmissionStatus', (title, status) => {
     .parent()
     .should('have.length', 1)
     .children()
-    .should('have.length', 5)
+    .should('have.length', 6)
     .find('[data-cy="view"]')
     .click();
   cy.get('[data-cy="close"]').click();
@@ -608,7 +612,7 @@ Cypress.Commands.add('seeRejectedQuestionAndResubmit', title => {
     .parent()
     .should('have.length', 1)
     .children()
-    .should('have.length', 5)
+    .should('have.length', 6)
     .find('[data-cy="view"]')
     .click();
   cy.get('[data-cy="resubmit"]').click();
@@ -683,7 +687,6 @@ Cypress.Commands.add('checkDiscussionsInfo', (numDiscussions, numPublicDiscussio
   cy.get('[data-cy="numDiscussions"]').contains(numDiscussions);
   cy.get('[data-cy="numPublicDiscussions"]').contains(numPublicDiscussions);
 });
-);
 
 Cypress.Commands.add(
   'checkSubmissionsInfo',

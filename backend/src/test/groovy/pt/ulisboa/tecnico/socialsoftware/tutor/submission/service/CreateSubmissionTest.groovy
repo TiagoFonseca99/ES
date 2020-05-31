@@ -99,8 +99,28 @@ class CreateSubmissionTest extends Specification {
         result.getQuestion() != null
         result.getQuestion() == question
         result.getQuestion().getCourse().getId() == course.getId()
+        !result.isAnonymous()
     }
 
+    def "create an anonymous submission with question not null"(){
+        given: "a submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setCourseId(course.getId())
+        submissionDto.setStudentId(student.getId())
+        submissionDto.setAnonymous(true);
+
+        when: submissionService.createSubmission(question.getId(), submissionDto)
+
+        then: "the correct submission is in the repository"
+        submissionRepository.count() == 1L
+        def result = submissionRepository.findAll().get(0)
+        result.getId() != null
+        result.getUser() == student
+        result.getQuestion() != null
+        result.getQuestion() == question
+        result.getQuestion().getCourse().getId() == course.getId()
+        result.isAnonymous()
+    }
 
     def "user is not a student"(){
         given: "a submissionDto for a teacher"

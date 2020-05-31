@@ -10,7 +10,8 @@ public class SubmissionDto implements Serializable {
     private Integer courseId;
     private QuestionDto questionDto;
     private Integer studentId;
-
+    private String username;
+    private boolean anonymous;
 
     public SubmissionDto(){}
 
@@ -20,6 +21,8 @@ public class SubmissionDto implements Serializable {
         if(submission.getQuestion() != null)
             this.questionDto = new QuestionDto(submission.getQuestion());
         this.studentId = submission.getUser().getId();
+        this.username = submission.getUser().getUsername();
+        this.anonymous = submission.isAnonymous();
     }
 
     public Integer getId() { return id; }
@@ -37,4 +40,12 @@ public class SubmissionDto implements Serializable {
     public Integer getStudentId() { return studentId; }
 
     public void setStudentId(Integer studentId) { this.studentId = studentId; }
+
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) { this.username = username; }
+
+    public boolean isAnonymous() { return anonymous; }
+
+    public void setAnonymous(boolean anonymous) { this.anonymous = anonymous; }
 }

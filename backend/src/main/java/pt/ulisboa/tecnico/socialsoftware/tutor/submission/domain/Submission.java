@@ -23,6 +23,9 @@ public class Submission {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(columnDefinition = "boolean default false", nullable = false)
+    private boolean anonymous;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "submission", fetch=FetchType.LAZY, orphanRemoval=true)
     private Set<Review> reviews = new HashSet<>();
 
@@ -47,6 +50,10 @@ public class Submission {
     public void setUser(User user) { this.user = user; }
 
     public int getStudentId() { return this.user.getId(); }
+
+    public boolean isAnonymous() { return anonymous; }
+
+    public void setAnonymous(boolean anonymous) { this.anonymous = anonymous; }
 
     @Override
     public String toString() {

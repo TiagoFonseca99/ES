@@ -55,9 +55,6 @@ public class User implements UserDetails, DomainEntity {
     private Integer numberOfCorrectStudentAnswers;
     private Integer numberOfApprovedSubmissions;
     private Integer numberOfRejectedSubmissions;
-    private Boolean tournamentNamePermission;
-    private Boolean tournamentScorePermission;
-    private Boolean submissionPermission;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
@@ -95,6 +92,9 @@ public class User implements UserDetails, DomainEntity {
     @Column(columnDefinition = "boolean default true")
     private boolean tournamentStatsPublic = true;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean userStatsPublic = true;
+
     public User() {
     }
 
@@ -115,8 +115,6 @@ public class User implements UserDetails, DomainEntity {
         this.numberOfCorrectStudentAnswers = 0;
         this.numberOfApprovedSubmissions = 0;
         this.numberOfRejectedSubmissions = 0;
-        this.tournamentNamePermission = false;
-        this.tournamentScorePermission = false;
     }
 
     @Override
@@ -345,38 +343,6 @@ public class User implements UserDetails, DomainEntity {
     public Integer getNumberOfRejectedSubmissions() { return numberOfRejectedSubmissions; }
 
     public void setNumberOfRejectedSubmissions(Integer numberOfRejectedSubmissions) { this.numberOfRejectedSubmissions = numberOfRejectedSubmissions; }
-    
-    public boolean getTournamentNamePermission() {
-        if (tournamentNamePermission == null)
-            this.tournamentNamePermission = false;
-        return tournamentNamePermission;
-    }
-
-    public Boolean getTournamentNamePermissionB() {
-        if (tournamentNamePermission == null)
-            this.tournamentNamePermission = Boolean.FALSE;
-        return tournamentNamePermission;
-    }
-
-    public void setTournamentNamePermission(boolean tournamentNamePermission) {
-        this.tournamentNamePermission = tournamentNamePermission;
-    }
-
-    public boolean getTournamentScorePermission() {
-        if (tournamentScorePermission == null)
-            this.tournamentScorePermission = false;
-        return tournamentScorePermission;
-    }
-
-    public Boolean getTournamentScorePermissionB() {
-        if (tournamentScorePermission == null)
-            this.tournamentScorePermission = Boolean.FALSE;
-        return tournamentScorePermission;
-    }
-
-    public void setTournamentScorePermission(boolean tournamentScorePermission) {
-        this.tournamentScorePermission = tournamentScorePermission;
-    }
 
     @Override
     public String toString() {
@@ -604,5 +570,11 @@ public class User implements UserDetails, DomainEntity {
 
     public void toggleTournamentStatsVisibility() {
         this.tournamentStatsPublic = !this.tournamentStatsPublic;
+    }
+
+    public boolean isUserStatsPublic() { return userStatsPublic; }
+
+    public void toggleUserStatsVisibility() {
+        this.userStatsPublic = !this.userStatsPublic;
     }
 }

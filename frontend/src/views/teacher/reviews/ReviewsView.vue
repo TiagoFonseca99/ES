@@ -36,6 +36,15 @@
             <span>{{ item.questionDto.status }}</span>
           </v-chip>
         </template>
+        <template v-slot:item.username="{ item }">
+          <v-chip color=primary small>
+            {{ item.username }}
+          </v-chip>
+        </template>
+        <template v-slot:item.anonymous="{ item }">
+          <span v-if="item.anonymous"> <v-icon>fas fa-check</v-icon> </span>
+          <span v-else> <v-icon>fas fa-times</v-icon> </span>
+        </template>
         <template v-slot:item.questionDto.creationDate="{ item }">
           <v-chip small>
             <span>{{ item.questionDto.creationDate }}</span>
@@ -141,6 +150,11 @@
             <span> {{ getSubmission(item).creationDate }}</span>
           </v-chip>
         </template>
+        <template v-slot:item.studentUsername="{ item }">
+          <v-chip color=primary small>
+            {{ item.studentUsername }}
+          </v-chip>
+        </template>
         <template v-slot:item.status="{ item }">
           <v-chip :color="changeColor(item.status)" small>
             <span>{{ item.status }}</span>
@@ -221,6 +235,8 @@ export default class ReviewsView extends Vue {
       value: 'questionDto.creationDate',
       align: 'center'
     },
+    { text: 'Submitted by', value: 'username', align: 'center'},
+    { text: 'Anonymous', value: 'anonymous', align: 'center'},
     { text: 'Status', value: 'questionDto.status', align: 'center' },
     { text: 'Image', value: 'questionDto.image', align: 'center' },
     { text: 'Review', value: 'review', align: 'center' }
@@ -241,6 +257,7 @@ export default class ReviewsView extends Vue {
       value: 'questionDto.creationDate',
       align: 'center'
     },
+    { text: 'Submitted by', value: 'studentUsername', align: 'center'},
     { text: 'Status', value: 'status', align: 'center' },
     { text: 'Justification', value: 'justification', align: 'center' }
   ];

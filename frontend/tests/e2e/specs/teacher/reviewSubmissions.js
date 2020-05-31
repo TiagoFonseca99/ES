@@ -15,7 +15,7 @@ describe('Teacher walkthrough', () => {
         cy.approveSubmissions('OIOI','Excelente Pergunta');
         cy.log('delete student submited question');
         cy.wait(1000);
-        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "With rev as (delete from reviews where user_id = 677 returning submission_id) delete from submissions where id = (select submission_id from rev); delete from questions where title = \'OIOI\'"');
+        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);"');
 
     });
 
@@ -24,7 +24,7 @@ describe('Teacher walkthrough', () => {
         cy.rejectSubmissions('OIOI','Porque me apeteceu');
         cy.log('delete student submited question');
         cy.wait(1000);
-        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "With rev as (delete from reviews where user_id = 677 returning submission_id) delete from submissions where id = (select submission_id from rev); delete from questions where title = \'OIOI\'"');
+        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);"');
 
     });
 
@@ -38,7 +38,7 @@ describe('Teacher walkthrough', () => {
         cy.get('[data-cy="cancelButton"]').click();
 
         cy.log('delete student submited question');
-        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "delete from submissions where user_id=676; delete from questions where title = \'OIOI\'"');
+        cy.exec('PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);"');
 
     });
 });
