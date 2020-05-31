@@ -32,7 +32,7 @@
                     :number="info.joinedTournaments.length"
                     v-if="info.tournamentStatsPublic"
                   />
-                  <v-icon left large v-else color="red">fa lock</v-icon>
+                  <v-icon x-large v-else color="red">lock</v-icon>
                   <p class="statName">Tournaments</p>
                 </div>
                 <div class="square justify-center" data-cy="numSubmissions">
@@ -41,7 +41,7 @@
                     :number="info.numSubmissions"
                     v-if="info.submissionStatsPublic"
                   />
-                  <v-icon left large v-else color="red">fa lock</v-icon>
+                  <v-icon x-large v-else color="red">lock</v-icon>
                   <p class="statName">Submissions</p>
                 </div>
                 <div class="square justify-center" data-cy="numDiscussions">
@@ -50,7 +50,7 @@
                     :number="info.numDiscussions"
                     v-if="info.discussionStatsPublic"
                   />
-                  <v-icon left large v-else color="red">fa lock</v-icon>
+                  <v-icon x-large v-else color="red">lock</v-icon>
                   <p class="statName">Discussions</p>
                 </div>
               </div>
@@ -107,7 +107,7 @@
                 </div>
               </div>
               <div v-else-if="stats !== null" class="square justify-center">
-                <v-icon left large color="red">fa lock</v-icon>
+                <v-icon x-large color="red">lock</v-icon>
                 <p class="statName">Stats</p>
               </div>
               <div v-else>

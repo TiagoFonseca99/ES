@@ -87,12 +87,8 @@
                     <p class="statName">Questions Seen</p>
                   </div>
                 </div>
-                <v-icon
-                  v-else-if="stats !== null"
-                  x-large
-                  color="red"
-                  class="padlock"
-                  >fa lock</v-icon
+                <v-icon v-else-if="stats !== null" size="500%" color="red"
+                  >lock</v-icon
                 >
                 <div v-else>
                   <p class="description" style="color: inherit">
@@ -135,12 +131,8 @@
                 </v-chip>
               </template>
             </v-data-table>
-            <v-icon
-              v-else-if="info !== null"
-              x-large
-              color="red"
-              class="padlock"
-              >fa lock</v-icon
+            <v-icon v-else-if="info !== null" color="red" size="500%"
+              >lock</v-icon
             >
           </v-card>
         </v-col>
@@ -189,12 +181,8 @@
                 <p class="statName">Rejected Submissions</p>
               </div>
             </div>
-            <v-icon
-              v-else-if="info !== null"
-              x-large
-              color="red"
-              class="padlock"
-              >fa lock</v-icon
+            <v-icon v-else-if="info !== null" size="500%" color="red"
+              >lock</v-icon
             >
             <div v-else>
               <p class="description" style="color: inherit">
@@ -248,12 +236,8 @@
                 <p class="statName">Public Discussions</p>
               </div>
             </div>
-            <v-icon
-              class="padlock"
-              v-else-if="info !== null"
-              x-large
-              color="red"
-              >fa lock</v-icon
+            <v-icon v-else-if="info !== null" size="500%" color="red"
+              >lock</v-icon
             >
             <div v-else>
               <p class="description">
@@ -459,9 +443,5 @@ export default class DashboardView extends Vue {
   font-size: 15pt;
   font-weight: bold;
   color: inherit;
-}
-
-.padlock {
-  height: 100%;
 }
 </style>

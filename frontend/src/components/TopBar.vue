@@ -190,7 +190,7 @@
                 <v-list-item-title>Reviews</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item to="/student/submissions/all">
+            <v-list-item to="/student/all-submissions">
               <v-list-item-action>
                 <v-icon>fas fa-users</v-icon>
               </v-list-item-action>

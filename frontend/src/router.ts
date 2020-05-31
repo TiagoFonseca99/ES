@@ -244,8 +244,8 @@ let router = new Router({
           }
         },
         {
-          path: 'submissions/all',
-          name: 'submissions-all',
+          path: 'all-submissions',
+          name: 'all-submissions',
           component: AllSubmissionsView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - All Submissions',
