@@ -13,10 +13,10 @@
             <template v-slot:top>
                 <v-card-title>
                     <v-text-field
-                            v-model="search"
-                            append-icon="search"
-                            label="Search"
-                            class="mx-2"
+                      v-model="search"
+                      append-icon="search"
+                      label="Search"
+                      class="mx-2"
                     />
                     <v-spacer />
                     <v-btn-toggle class="button-group">
