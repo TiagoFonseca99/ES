@@ -210,7 +210,6 @@ public class Tournament {
         return false;
     }
 
-
     public void remove() {
         creator = null;
         courseExecution = null;
@@ -221,5 +220,4 @@ public class Tournament {
         getParticipants().forEach(participant -> participant.getTournaments().remove(this));
         getParticipants().clear();
     }
-
 }
