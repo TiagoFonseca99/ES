@@ -137,7 +137,6 @@ export default class ReviewView extends Vue {
 
   showReviewDialog(review: Review) {
     this.currentReview = review;
-    this.reviewDialog = false;
     this.reviewDialog = true;
   }
 
