@@ -2,9 +2,10 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +14,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.AuthUserDto;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
@@ -32,34 +34,53 @@ public class AuthController {
     @Value("${callback.url}")
     private String callbackUrl;
 
-    @GetMapping("/auth/check")
-    public ResponseEntity<AuthUserDto> checkToken(@RequestHeader(value = "Authorization", required = false) String token, HttpServletResponse response) {
+    @PostMapping("/auth/logout")
+    public boolean logout(@CookieValue(value = JwtTokenProvider.TOKEN_COOKIE_NAME, required = false) String token,
+            HttpServletRequest request, HttpServletResponse response) {
         if (token == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        return this.authService.checkToken(token, response);
+        this.authService.removeCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, request, response);
+        return true;
+    }
+
+    @GetMapping("/auth/check")
+    public AuthUserDto checkToken(
+            @CookieValue(value = JwtTokenProvider.TOKEN_COOKIE_NAME, required = false) String token,
+            HttpServletRequest request, HttpServletResponse response) {
+        if (token == null) {
+            this.authService.removeCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, request, response);
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return this.authService.checkToken(token, request, response);
     }
 
     @GetMapping("/auth/fenix")
-    public ResponseEntity<AuthUserDto> fenixAuth(@RequestParam String code, HttpServletResponse response) {
+    public AuthUserDto fenixAuth(@CookieValue(value = "session", required = false) Boolean session,
+            @RequestParam String code, HttpServletResponse response) {
         FenixEduInterface fenix = new FenixEduInterface(baseUrl, oauthConsumerKey, oauthConsumerSecret, callbackUrl);
         fenix.authenticate(code);
-        return this.authService.fenixAuth(fenix, response);
+
+        return this.authService.fenixAuth(session, fenix, response);
     }
 
     @GetMapping("/auth/demo/student")
-    public ResponseEntity<AuthUserDto> demoStudentAuth(HttpServletResponse response) {
-        return this.authService.demoStudentAuth(response);
+    public AuthUserDto demoStudentAuth(@CookieValue(value = "session", required = false) Boolean session,
+            HttpServletResponse response) {
+        return this.authService.demoStudentAuth(session, response);
     }
 
     @GetMapping("/auth/demo/teacher")
-    public ResponseEntity<AuthUserDto> demoTeacherAuth(HttpServletResponse response) {
-        return this.authService.demoTeacherAuth(response);
+    public AuthUserDto demoTeacherAuth(@CookieValue(value = "session", required = false) Boolean session,
+            HttpServletResponse response) {
+        return this.authService.demoTeacherAuth(session, response);
     }
 
     @GetMapping("/auth/demo/admin")
-    public ResponseEntity<AuthUserDto> demoAdminAuth(HttpServletResponse response) {
-        return this.authService.demoAdminAuth(response);
+    public AuthUserDto demoAdminAuth(@CookieValue(value = "session", required = false) Boolean session,
+            HttpServletResponse response) {
+        return this.authService.demoAdminAuth(session, response);
     }
 }

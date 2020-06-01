@@ -6,28 +6,21 @@ import User from '@/models/user/User';
 
 export const SESSION_TOKEN = 'session';
 export const COURSE_TOKEN = 'course';
+export const LOGGED_TOKEN = 'logged';
 
-/*export function checkLogged(name: string) {
-  let session = storage.getLocal(SESSION_TOKEN);
+export function checkLogged() {
+  let session = storage.getCookie(SESSION_TOKEN);
 
-  let token: string | null;
-
-  // Check if session is set
-  if (session == 'false' || session == 'true') {
-    token = storage.get(name, session == 'true');
-  } else {
-    storage.persist(SESSION_TOKEN, 'true');
-    token = storage.getSession(LOGIN_TOKEN);
+  if (session == 'true' || session == 'false') {
+    let logged = storage.getLocal(LOGGED_TOKEN);
+    storage.persist(LOGGED_TOKEN, String(logged == 'true'), false);
+    return logged == 'true';
   }
 
-  if (token != null && token.trim().length != 0) {
-    store.commit('token', token);
-    return true;
-  } else {
-    store.commit('token', '');
-    return false;
-  }
-}*/
+  storage.createCookie(SESSION_TOKEN, 'true');
+  storage.persist(LOGGED_TOKEN, 'false', false);
+  return false;
+}
 
 export async function testToken() {
   let user: User | null;
@@ -38,9 +31,7 @@ export async function testToken() {
     user = null;
   }
 
-  // Variable has a good value
-  // checkLogged ensures this
-  let session = storage.getLocal(SESSION_TOKEN);
+  let session = storage.getCookie(SESSION_TOKEN);
 
   if (user != null) {
     store.commit('session', session == 'true');
@@ -79,8 +70,13 @@ export async function testToken() {
     }
   } else {
     storage.removeAll(COURSE_TOKEN);
-    store.commit('token', '');
   }
 
   return true;
+}
+
+export async function logout() {
+  await RemoteServices.logout();
+  storage.persist(LOGGED_TOKEN, 'false', false);
+  storage.removeAll(COURSE_TOKEN);
 }

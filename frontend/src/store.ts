@@ -36,19 +36,19 @@ export default new Vuex.Store({
       state.user = user;
       state.logged = true;
 
-      let sessionVal = storage.getLocal(session.SESSION_TOKEN);
+      let sessionVal = storage.getCookie(session.SESSION_TOKEN);
       if (sessionVal == 'true' || sessionVal == 'false') {
         state.session = sessionVal == 'true';
       }
 
-      storage.persist(session.SESSION_TOKEN, String(state.session), false);
+      storage.createCookie(session.SESSION_TOKEN, String(state.session));
+      storage.persist(session.LOGGED_TOKEN, 'true', false);
     },
     logout(state) {
       state.user = null;
       state.currentCourse = null;
       state.logged = false;
-      storage.removeAll(session.COURSE_TOKEN);
-      storage.persist(session.SESSION_TOKEN, String(state.session), false);
+      session.logout();
     },
     session(state, session) {
       state.session = session;

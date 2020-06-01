@@ -82,6 +82,17 @@ export default class RemoteServices {
       });
   }
 
+  static async logout(): Promise<Boolean> {
+    return httpClient
+      .post('/auth/logout')
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async getUserStats(): Promise<StudentStats> {
     return httpClient
       .get(
