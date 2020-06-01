@@ -4,7 +4,6 @@
       :headers="headers"
       :items="tournaments"
       :search="search"
-      :sort-by="['id']"
       disable-pagination
       :hide-default-footer="true"
       :mobile-breakpoint="0"
@@ -170,10 +169,17 @@ export default class OpenTournamentView extends Vue {
     await this.$store.dispatch('loading');
     try {
       this.tournaments = await RemoteServices.getOpenTournaments();
+      this.tournaments.sort((a, b) => this.sortById(a, b));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
+  }
+
+  sortById(a: Tournament, b: Tournament) {
+    if (a.id && b.id)
+      return a.id > b.id ? 1 : -1;
+    else return 0;
   }
 
   newTournament() {

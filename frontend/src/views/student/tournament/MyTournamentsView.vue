@@ -4,10 +4,10 @@
       :headers="headers"
       :items="tournaments"
       :search="search"
-      :sort-by="['id']"
       disable-pagination
       :hide-default-footer="true"
       :mobile-breakpoint="0"
+      :items-per-page="15"
       multi-sort
       data-cy="allTournaments"
     >
@@ -58,6 +58,20 @@
             >
           </template>
           <span>Cancel Tournament</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              small
+              class="mr-2"
+              v-on="on"
+              @click="removeTournament(item)"
+              color="red"
+              data-cy="RemoveTournament"
+              >delete</v-icon
+            >
+          </template>
+          <span>Remove Tournament</span>
         </v-tooltip>
       </template>
     </v-data-table>
@@ -146,10 +160,16 @@ export default class MyTournamentsView extends Vue {
     await this.$store.dispatch('loading');
     try {
       this.tournaments = await RemoteServices.getUserTournaments();
+      this.tournaments.sort((a, b) => this.sortById(a, b));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
+  }
+
+  sortById(a: Tournament, b: Tournament) {
+    if (a.id && b.id) return a.id > b.id ? 1 : -1;
+    else return 0;
   }
 
   editTournament(tournamentToEdit: Tournament) {
@@ -198,21 +218,42 @@ export default class MyTournamentsView extends Vue {
   }
 
   async cancelTournament(tournamentToCancel: Tournament) {
-    const enrolled = tournamentToCancel.enrolled;
-    const topics = tournamentToCancel.topics;
-    tournamentToCancel.enrolled = false;
-    tournamentToCancel.topics = [];
-    try {
-      await RemoteServices.cancelTournament(tournamentToCancel);
-    } catch (error) {
-      await this.$store.dispatch('error', error);
+    if (confirm('Are you sure you want to cancel this tournament?')) {
+      const enrolled = tournamentToCancel.enrolled;
+      const topics = tournamentToCancel.topics;
+      tournamentToCancel.enrolled = false;
+      tournamentToCancel.topics = [];
+      try {
+        await RemoteServices.cancelTournament(tournamentToCancel);
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+        tournamentToCancel.enrolled = enrolled;
+        tournamentToCancel.topics = topics;
+        return;
+      }
       tournamentToCancel.enrolled = enrolled;
       tournamentToCancel.topics = topics;
-      return;
+      tournamentToCancel.state = 'CANCELED';
     }
-    tournamentToCancel.enrolled = enrolled;
-    tournamentToCancel.topics = topics;
-    tournamentToCancel.state = 'CANCELED';
+  }
+
+  async removeTournament(tournamentToRemove: Tournament) {
+    if (confirm('Are you sure you want to delete this tournament?')) {
+      const enrolled = tournamentToRemove.enrolled;
+      const topics = tournamentToRemove.topics;
+      tournamentToRemove.enrolled = false;
+      tournamentToRemove.topics = [];
+      try {
+        if (tournamentToRemove.id)
+          await RemoteServices.removeTournament(tournamentToRemove.id);
+        this.tournaments = await RemoteServices.getUserTournaments();
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+        tournamentToRemove.enrolled = enrolled;
+        tournamentToRemove.topics = topics;
+        return;
+      }
+    }
   }
 }
 </script>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.2.1">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Web Service getDashboardInfo" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Web Service getSubmissions" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
@@ -29,9 +29,9 @@
             <stringProp name="Argument.value">8080</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="username" elementType="Argument">
-            <stringProp name="Argument.name">username</stringProp>
-            <stringProp name="Argument.value">Demo-Student</stringProp>
+          <elementProp name="submissionId" elementType="Argument">
+            <stringProp name="Argument.name">submissionId</stringProp>
+            <stringProp name="Argument.value">10000</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -72,24 +72,22 @@
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
-          <stringProp name="query">WITH question AS (SELECT id FROM questions ORDER BY id ASC LIMIT 1) INSERT INTO discussions (user_id, question_id, content) VALUES (676, (SELECT id FROM question), &apos;DISCUSSION CONTENT&apos;);
+          <stringProp name="queryType">Update Statement</stringProp>
+          <stringProp name="query">WITH quest AS (INSERT INTO questions (title, content, status, course_id) VALUES (&apos;question1&apos;, &apos;content1&apos;, &apos;SUBMITTED&apos;, 2) RETURNING id)
+INSERT INTO submissions (question_id, user_id, anonymous) VALUES ((SELECT id from quest), 676, false);
 
-WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (&apos;Title1&apos;, &apos;Question1?&apos;, 2,&apos;AVAILABLE&apos;, current_timestamp) RETURNING id), 
-	subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) 
-INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (&apos;Porque sim&apos;, &apos;APPROVED&apos;, 676, (SELECT id from subs), 677, current_timestamp);
+WITH quest AS (INSERT INTO questions (title, content, status, course_id) VALUES (&apos;question2&apos;, &apos;content2&apos;, &apos;SUBMITTED&apos;, 2) RETURNING id)
+INSERT INTO submissions (question_id, user_id, anonymous) VALUES ((SELECT id from quest), 678, true);
 
-WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (&apos;Title2&apos;, &apos;Question2?&apos;, 2,&apos;DEPRECATED&apos;, current_timestamp) RETURNING id), 
-	subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), 676) RETURNING id) 
-INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (&apos;Porque nao&apos;, &apos;REJECTED&apos;, 676, (SELECT id from subs), 677, current_timestamp);
-</stringProp>
+WITH quest AS (INSERT INTO questions (title, content, status, course_id) VALUES (&apos;question3&apos;, &apos;content3&apos;, &apos;SUBMITTED&apos;, 2) RETURNING id)
+INSERT INTO submissions (question_id, user_id, anonymous) VALUES ((SELECT id from quest), 679, true);</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
-          <stringProp name="queryTimeout"></stringProp>
-          <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="resultSetHandler">Store as String</stringProp>
-          <stringProp name="resultSetMaxRows"></stringProp>
-          <stringProp name="resultVariable"></stringProp>
           <stringProp name="variableNames"></stringProp>
+          <stringProp name="resultVariable">@PathVariable</stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
         </JDBCSampler>
         <hashTree/>
         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
@@ -130,7 +128,7 @@ INSERT INTO reviews (justification, status, student_id, submission_id, user_id, 
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Users Thread Group" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
@@ -185,15 +183,25 @@ INSERT INTO reviews (justification, status, student_id, submission_id, user_id, 
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-              <collectionProp name="Arguments.arguments"/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request to get submissions" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+&#xd;
+}&#xd;
+</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
             </elementProp>
             <stringProp name="HTTPSampler.domain">${server}</stringProp>
             <stringProp name="HTTPSampler.port">${port}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/dashboard?username=${username}</stringProp>
+            <stringProp name="HTTPSampler.path">/student/submissions/all</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -204,45 +212,81 @@ INSERT INTO reviews (justification, status, student_id, submission_id, user_id, 
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert number of discussions" enabled="true">
-              <stringProp name="JSON_PATH">$.numDiscussions</stringProp>
-              <stringProp name="EXPECTED_VALUE">1</stringProp>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert user id 1" enabled="true">
+              <stringProp name="JSON_PATH">$[0].studentId</stringProp>
+              <stringProp name="EXPECTED_VALUE">676</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>
               <boolProp name="ISREGEX">false</boolProp>
             </JSONPathAssertion>
             <hashTree/>
-            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert number of public discussions" enabled="true">
-              <stringProp name="JSON_PATH">$.numPublicDiscussions</stringProp>
-              <stringProp name="EXPECTED_VALUE">0</stringProp>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert username 1" enabled="true">
+              <stringProp name="JSON_PATH">$[0].username</stringProp>
+              <stringProp name="EXPECTED_VALUE">Demo-Student</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>
               <boolProp name="ISREGEX">false</boolProp>
             </JSONPathAssertion>
             <hashTree/>
-            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert number of submissions" enabled="true">
-              <stringProp name="JSON_PATH">$.numSubmissions</stringProp>
-              <stringProp name="EXPECTED_VALUE">2</stringProp>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert anonymous 1" enabled="true">
+              <stringProp name="JSON_PATH">$[0].anonymous</stringProp>
+              <stringProp name="EXPECTED_VALUE">false</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>
               <boolProp name="ISREGEX">false</boolProp>
             </JSONPathAssertion>
             <hashTree/>
-            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert number of approved submissions" enabled="true">
-              <stringProp name="JSON_PATH">$.numApprovedSubmissions</stringProp>
-              <stringProp name="EXPECTED_VALUE">1</stringProp>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert user id 2" enabled="true">
+              <stringProp name="JSON_PATH">$[1].studentId</stringProp>
+              <stringProp name="EXPECTED_VALUE">678</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>
               <boolProp name="ISREGEX">false</boolProp>
             </JSONPathAssertion>
             <hashTree/>
-            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert number of rejected submissions" enabled="true">
-              <stringProp name="JSON_PATH">$.numRejectedSubmissions</stringProp>
-              <stringProp name="EXPECTED_VALUE">1</stringProp>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert username 2" enabled="true">
+              <stringProp name="JSON_PATH">$[1].username</stringProp>
+              <stringProp name="EXPECTED_VALUE"></stringProp>
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              <boolProp name="EXPECT_NULL">true</boolProp>
+              <boolProp name="INVERT">false</boolProp>
+              <boolProp name="ISREGEX">false</boolProp>
+            </JSONPathAssertion>
+            <hashTree/>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert anonymous 2" enabled="true">
+              <stringProp name="JSON_PATH">$[1].anonymous</stringProp>
+              <stringProp name="EXPECTED_VALUE">true</stringProp>
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              <boolProp name="INVERT">false</boolProp>
+              <boolProp name="ISREGEX">false</boolProp>
+            </JSONPathAssertion>
+            <hashTree/>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert user id 3" enabled="true">
+              <stringProp name="JSON_PATH">$[2].studentId</stringProp>
+              <stringProp name="EXPECTED_VALUE">679</stringProp>
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              <boolProp name="INVERT">false</boolProp>
+              <boolProp name="ISREGEX">false</boolProp>
+            </JSONPathAssertion>
+            <hashTree/>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert username 3" enabled="true">
+              <stringProp name="JSON_PATH">$[2].username</stringProp>
+              <stringProp name="EXPECTED_VALUE"></stringProp>
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              <boolProp name="EXPECT_NULL">true</boolProp>
+              <boolProp name="INVERT">false</boolProp>
+              <boolProp name="ISREGEX">false</boolProp>
+            </JSONPathAssertion>
+            <hashTree/>
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert anonymous 3" enabled="true">
+              <stringProp name="JSON_PATH">$[2].anonymous</stringProp>
+              <stringProp name="EXPECTED_VALUE">true</stringProp>
               <boolProp name="JSONVALIDATION">true</boolProp>
               <boolProp name="EXPECT_NULL">false</boolProp>
               <boolProp name="INVERT">false</boolProp>
@@ -361,23 +405,17 @@ INSERT INTO reviews (justification, status, student_id, submission_id, user_id, 
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
-          <stringProp name="query">WITH question AS (SELECT id FROM questions ORDER BY id ASC LIMIT 1) DELETE FROM discussions WHERE question_id = (SELECT id FROM question) AND user_id = 676;
-
-WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id),
-     sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) 
-DELETE FROM questions WHERE id IN (SELECT * FROM sub);
-
-WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id),
-     sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) 
-DELETE FROM questions WHERE id IN (SELECT * FROM sub);</stringProp>
+          <stringProp name="queryType">Update Statement</stringProp>
+          <stringProp name="query">WITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);
+WITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);
+WITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
-          <stringProp name="queryTimeout"></stringProp>
-          <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="resultSetHandler">Store as String</stringProp>
-          <stringProp name="resultSetMaxRows"></stringProp>
-          <stringProp name="resultVariable"></stringProp>
           <stringProp name="variableNames"></stringProp>
+          <stringProp name="resultVariable"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
         </JDBCSampler>
         <hashTree/>
         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
@@ -418,43 +456,6 @@ DELETE FROM questions WHERE id IN (SELECT * FROM sub);</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
-        <boolProp name="ResultCollector.error_logging">false</boolProp>
-        <objProp>
-          <name>saveConfig</name>
-          <value class="SampleSaveConfiguration">
-            <time>true</time>
-            <latency>true</latency>
-            <timestamp>true</timestamp>
-            <success>true</success>
-            <label>true</label>
-            <code>true</code>
-            <message>true</message>
-            <threadName>true</threadName>
-            <dataType>true</dataType>
-            <encoding>false</encoding>
-            <assertions>true</assertions>
-            <subresults>true</subresults>
-            <responseData>false</responseData>
-            <samplerData>false</samplerData>
-            <xml>false</xml>
-            <fieldNames>true</fieldNames>
-            <responseHeaders>false</responseHeaders>
-            <requestHeaders>false</requestHeaders>
-            <responseDataOnError>false</responseDataOnError>
-            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
-            <assertionsResultsToSave>0</assertionsResultsToSave>
-            <bytes>true</bytes>
-            <sentBytes>true</sentBytes>
-            <url>true</url>
-            <threadCounts>true</threadCounts>
-            <idleTime>true</idleTime>
-            <connectTime>true</connectTime>
-          </value>
-        </objProp>
-        <stringProp name="filename"></stringProp>
-      </ResultCollector>
-      <hashTree/>
     </hashTree>
   </hashTree>
 </jmeterTestPlan>
