@@ -26,7 +26,7 @@ public class Reply {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne
+    @ManyToOne
     private Discussion discussion;
 
     @NotNull
@@ -91,6 +91,12 @@ public class Reply {
 
     public void setDiscussion(Discussion discussion) {
         this.discussion = discussion;
+    }
+
+    public void remove() {
+        this.discussion.getReplies().remove(this);
+        this.user.getReplies().remove(this);
+        this.discussion = null;
     }
 
     private void checkEmptyMessage(ReplyDto reply) {
