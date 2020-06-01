@@ -170,15 +170,15 @@ public class TournamentController {
         }
     }
 
-    @DeleteMapping(value = "/tournaments/removeTournament")
+    @DeleteMapping(value = "/tournaments/removeTournament/{tournamentId}")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public void removeTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
+    public void removeTournament(Principal principal, @PathVariable Integer tournamentId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
             throw new TutorException(AUTHENTICATION_ERROR);
         }
-        tournamentService.removeTournament(user.getId(), tournamentDto);
+        tournamentService.removeTournament(user.getId(), tournamentId);
     }
 
     @GetMapping(value = "/tournaments/getTournamentParticipants")

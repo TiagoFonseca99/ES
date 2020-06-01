@@ -168,8 +168,7 @@ export default class MyTournamentsView extends Vue {
   }
 
   sortById(a: Tournament, b: Tournament) {
-    if (a.id && b.id)
-      return a.id > b.id ? 1 : -1;
+    if (a.id && b.id) return a.id > b.id ? 1 : -1;
     else return 0;
   }
 
@@ -245,7 +244,9 @@ export default class MyTournamentsView extends Vue {
       tournamentToRemove.enrolled = false;
       tournamentToRemove.topics = [];
       try {
-        await RemoteServices.removeTournament(tournamentToRemove);
+        if (tournamentToRemove.id)
+          await RemoteServices.removeTournament(tournamentToRemove.id);
+        this.tournaments = await RemoteServices.getUserTournaments();
       } catch (error) {
         await this.$store.dispatch('error', error);
         tournamentToRemove.enrolled = enrolled;
