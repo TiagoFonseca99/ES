@@ -1063,10 +1063,14 @@ export default class RemoteServices {
   }
 
   static removeTournament(tournament: Tournament) {
-    return httpClient
-      .delete('tournaments/removeTournament', tournament)
-      .catch(async error => {
-        throw Error(await this.errorMessage(error));
-      });
+    return (
+      httpClient
+        // @ts-ignore
+        .delete('tournaments/removeTournament', tournament)
+        // @ts-ignore
+        .catch(async error => {
+          throw Error(await this.errorMessage(error));
+        })
+    );
   }
 }
