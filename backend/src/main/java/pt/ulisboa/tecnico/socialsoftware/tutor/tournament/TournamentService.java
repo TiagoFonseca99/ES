@@ -189,7 +189,7 @@ public class TournamentService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void joinTournament(Integer userId, TournamentDto tournamentDto) {
+    public void joinTournament(Integer userId, TournamentDto tournamentDto, String password) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
@@ -213,6 +213,11 @@ public class TournamentService {
         }
         if (!user.getCourseExecutions().contains(tournament.getCourseExecution())) {
             throw new TutorException(STUDENT_NO_COURSE_EXECUTION, user.getId());
+        }
+        if (tournament.isPrivateTournament()) {
+            if (!password.equals(tournament.getPassword())) {
+                throw new TutorException(WRONG_TOURNAMENT_PASSWORD, tournament.getId());
+            }
         }
 
         tournament.addParticipant(user);
@@ -250,6 +255,8 @@ public class TournamentService {
             tournament.setQuizId(statementQuizDto.getId());
         }
     }
+
+
 
     @Retryable(
             value = { SQLException.class },
