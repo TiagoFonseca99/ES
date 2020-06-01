@@ -30,12 +30,20 @@ class DashboardInfoVisibilityTest extends Specification {
         userRepository.save(student);
     }
 
+    def "student change tournament stats from public to private"(){
+        when:
+        def result = userService.toggleTournamentStatsVisibility(student.getId())
+
+        then:
+        !result.tournamentStatsPublic
+    }
+
     def "student change discussion stats from public to private"(){
         when:
         def result = userService.toggleDiscussionStatsVisibility(student.getId())
 
         then:
-        result.discussionStatsPublic == false
+        !result.discussionStatsPublic
     }
 
     def "student change submission stats from public to private"(){
@@ -43,7 +51,26 @@ class DashboardInfoVisibilityTest extends Specification {
         def result = userService.toggleSubmissionStatsVisibility(student.getId())
 
         then:
-        result.submissionStatsPublic == false
+        !result.submissionStatsPublic
+    }
+
+    def "student change user stats from public to private"(){
+        when:
+        def result = userService.toggleUserStatsVisibility(student.getId())
+
+        then:
+        !result.userStatsPublic
+    }
+
+    def "student change tournament stats from private to public"(){
+        given: "a student with private information (default is public = true)"
+        student.toggleTournamentStatsVisibility()
+
+        when:
+        def result = userService.toggleTournamentStatsVisibility(student.getId())
+
+        then:
+        result.tournamentStatsPublic
     }
 
     def "student change discussion stats from private to public"(){
@@ -54,7 +81,7 @@ class DashboardInfoVisibilityTest extends Specification {
         def result = userService.toggleDiscussionStatsVisibility(student.getId())
 
         then:
-        result.discussionStatsPublic == true
+        result.discussionStatsPublic
     }
 
     def "student change submission stats from private to public"(){
@@ -65,7 +92,31 @@ class DashboardInfoVisibilityTest extends Specification {
         def result = userService.toggleSubmissionStatsVisibility(student.getId())
 
         then:
-        result.submissionStatsPublic == true
+        result.submissionStatsPublic
+    }
+
+    def "student change user stats from private to public"(){
+        given: "a student with private information (default is public = true)"
+        student.toggleUserStatsVisibility()
+
+        when:
+        def result = userService.toggleUserStatsVisibility(student.getId())
+
+        then:
+        result.userStatsPublic
+    }
+
+    def "teacher change tournament stats visibility"(){
+        given: "a teacher"
+        def teacher = new User(USER_NAME + "1", USER_USERNAME + "1", 2, User.Role.TEACHER)
+        userRepository.save(teacher)
+
+        when:
+        userService.toggleTournamentStatsVisibility(teacher.getId())
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
     }
 
     def "teacher change discussion stats visibility"(){
@@ -88,6 +139,19 @@ class DashboardInfoVisibilityTest extends Specification {
 
         when:
         userService.toggleSubmissionStatsVisibility(teacher.getId())
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_STUDENT
+    }
+
+    def "teacher change user stats visibility"(){
+        given: "a teacher"
+        def teacher = new User(USER_NAME + "1", USER_USERNAME + "1", 2, User.Role.TEACHER)
+        userRepository.save(teacher)
+
+        when:
+        userService.toggleUserStatsVisibility(teacher.getId())
 
         then:
         def exception = thrown(TutorException)

@@ -23,7 +23,8 @@ import QuizView from '@/views/student/quiz/QuizView.vue';
 import ResultsView from '@/views/student/quiz/ResultsView.vue';
 import ScanView from '@/views/student/ScanView.vue';
 import DiscussionView from '@/views/student/discussion/DiscussionView.vue';
-import DashboardView from '@/views/student/DashboardView.vue';
+import DashboardView from '@/views/student/dashboard/DashboardView.vue';
+import SearchStudentView from '@/views/student/dashboard/SearchStudentView.vue';
 
 import AdminManagementView from '@/views/admin/AdminManagementView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
@@ -35,6 +36,7 @@ import AllSubmissionsView from './views/student/questions/AllSubmissionsView.vue
 import ReviewsView from './views/teacher/reviews/ReviewsView.vue';
 import StudentReviews from './views/student/questions/StudentReviewsView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
+import { Student } from '@/models/management/Student';
 import * as session from '@/session';
 
 Vue.use(Router);
@@ -242,8 +244,8 @@ let router = new Router({
           }
         },
         {
-          path: 'submissions/all',
-          name: 'submissions-all',
+          path: 'all-submissions',
+          name: 'all-submissions',
           component: AllSubmissionsView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - All Submissions',
@@ -269,11 +271,21 @@ let router = new Router({
           }
         },
         {
-          path: 'dashboard',
+          path: 'user',
           name: 'dashboard',
           component: DashboardView,
+          props: route => ({ username: route.query.username }),
           meta: {
-            title: process.env.VUE_APP_NAME + ' - Dashboard',
+            title: process.env.VUE_APP_NAME + ' - User Dashboard',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'search',
+          name: 'search',
+          component: SearchStudentView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Search Student',
             requiredAuth: 'Student'
           }
         }
