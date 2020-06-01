@@ -246,6 +246,7 @@ export default class MyTournamentsView extends Vue {
       try {
         if (tournamentToRemove.id)
           await RemoteServices.removeTournament(tournamentToRemove.id);
+        this.tournaments = await RemoteServices.getUserTournaments();
       } catch (error) {
         await this.$store.dispatch('error', error);
         tournamentToRemove.enrolled = enrolled;
