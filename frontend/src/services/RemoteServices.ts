@@ -1062,9 +1062,9 @@ export default class RemoteServices {
       });
   }
 
-  static removeTournament(tournament: Tournament) {
+  static removeTournament(tournamentId: number) {
     return httpClient
-      .delete('tournaments/removeTournament', tournament)
+      .delete(`/tournaments/removeTournament/${tournamentId}`)
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });

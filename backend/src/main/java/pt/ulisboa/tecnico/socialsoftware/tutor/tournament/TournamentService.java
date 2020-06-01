@@ -146,12 +146,12 @@ public class TournamentService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void removeTournament(Integer userId, TournamentDto tournamentDto) {
+    public void removeTournament(Integer userId, Integer tournamentId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
-        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
-                .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentId));
 
         if (tournament.getCreator() != user) {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
