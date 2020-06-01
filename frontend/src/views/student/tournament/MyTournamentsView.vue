@@ -4,10 +4,10 @@
       :headers="headers"
       :items="tournaments"
       :search="search"
-      :sort-by="['id']"
       disable-pagination
       :hide-default-footer="true"
       :mobile-breakpoint="0"
+      :items-per-page="15"
       multi-sort
       data-cy="allTournaments"
     >
@@ -160,10 +160,17 @@ export default class MyTournamentsView extends Vue {
     await this.$store.dispatch('loading');
     try {
       this.tournaments = await RemoteServices.getUserTournaments();
+      this.tournaments.sort((a, b) => this.sortById(a, b));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
+  }
+
+  sortById(a: Tournament, b: Tournament) {
+    if (a.id && b.id)
+      return a.id > b.id ? 1 : -1;
+    else return 0;
   }
 
   editTournament(tournamentToEdit: Tournament) {
