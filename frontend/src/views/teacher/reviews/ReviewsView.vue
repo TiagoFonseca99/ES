@@ -37,13 +37,15 @@
           </v-chip>
         </template>
         <template v-slot:item.username="{ item }">
-          <v-chip color=primary small>
+          <v-chip color="primary" small>
             {{ item.username }}
           </v-chip>
         </template>
         <template v-slot:item.anonymous="{ item }">
-          <span v-if="item.anonymous"> <v-icon>fas fa-check</v-icon> </span>
-          <span v-else> <v-icon>fas fa-times</v-icon> </span>
+          <span v-if="item.anonymous">
+            <v-icon color="green">fa-check</v-icon>
+          </span>
+          <span v-else> <v-icon color="red">fa-times</v-icon> </span>
         </template>
         <template v-slot:item.questionDto.creationDate="{ item }">
           <v-chip small>
@@ -151,7 +153,7 @@
           </v-chip>
         </template>
         <template v-slot:item.studentUsername="{ item }">
-          <v-chip color=primary small>
+          <v-chip color="primary" small>
             {{ item.studentUsername }}
           </v-chip>
         </template>
@@ -160,10 +162,18 @@
             <span>{{ item.status }}</span>
           </v-chip>
         </template>
-        <template v-slot:item.justication="{ item }">
-          <v-chip small>
-            <span>{{ item.justification }}</span>
-          </v-chip>
+        <template v-slot:item.justification="{ item }">
+          <span>
+            <v-btn
+              small
+              color="primary"
+              data-cy="view"
+              dark
+              @click="showReviewDialog(item)"
+            >
+              View
+            </v-btn>
+          </span>
         </template>
         <template v-slot:item.action="{ item }">
           <v-tooltip bottom>
@@ -193,6 +203,12 @@
       :discussion="false"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
     />
+    <show-review-dialog
+      v-if="currentReview"
+      v-model="reviewDialog"
+      :review="currentReview"
+      v-on:close-show-review-dialog="onCloseShowReviewDialog"
+    />
   </div>
 </template>
 
@@ -206,11 +222,13 @@ import Image from '@/models/management/Image';
 import EditReview from '@/views/teacher/reviews/EditReview.vue';
 import Review from '@/models/management/Review';
 import ShowQuestionDialog from '@/views/teacher/questions/ShowQuestionDialog.vue';
+import ShowReviewDialog from '@/views/teacher/reviews/ShowJustificationDialog.vue';
 
 @Component({
   components: {
     'show-question-dialog': ShowQuestionDialog,
-    'edit-reviews': EditReview
+    'edit-reviews': EditReview,
+    'show-review-dialog': ShowReviewDialog
   }
 })
 export default class ReviewsView extends Vue {
@@ -220,6 +238,8 @@ export default class ReviewsView extends Vue {
   searchSubmissions: string = '';
   currentQuestion: Question | null = null;
   questionDialog: boolean = false;
+  currentReview: Review | null = null;
+  reviewDialog: boolean = false;
 
   headers: object = [
     {
@@ -235,8 +255,8 @@ export default class ReviewsView extends Vue {
       value: 'questionDto.creationDate',
       align: 'center'
     },
-    { text: 'Submitted by', value: 'username', align: 'center'},
-    { text: 'Anonymous', value: 'anonymous', align: 'center'},
+    { text: 'Submitted by', value: 'username', align: 'center' },
+    { text: 'Anonymous', value: 'anonymous', align: 'center' },
     { text: 'Status', value: 'questionDto.status', align: 'center' },
     { text: 'Image', value: 'questionDto.image', align: 'center' },
     { text: 'Review', value: 'review', align: 'center' }
@@ -257,7 +277,7 @@ export default class ReviewsView extends Vue {
       value: 'questionDto.creationDate',
       align: 'center'
     },
-    { text: 'Submitted by', value: 'studentUsername', align: 'center'},
+    { text: 'Submitted by', value: 'studentUsername', align: 'center' },
     { text: 'Status', value: 'status', align: 'center' },
     { text: 'Justification', value: 'justification', align: 'center' }
   ];
@@ -368,6 +388,16 @@ export default class ReviewsView extends Vue {
         await this.$store.dispatch('error', error);
       }
     }
+  }
+
+  showReviewDialog(review: Review) {
+    this.currentReview = review;
+    this.reviewDialog = false;
+    this.reviewDialog = true;
+  }
+
+  onCloseShowReviewDialog() {
+    this.reviewDialog = false;
   }
 }
 </script>
