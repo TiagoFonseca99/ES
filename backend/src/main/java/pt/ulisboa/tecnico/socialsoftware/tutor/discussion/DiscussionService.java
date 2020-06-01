@@ -129,7 +129,7 @@ public class DiscussionService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void removeReply(Integer userId, ReplyDto replyDto) {
+    public boolean removeReply(Integer userId, ReplyDto replyDto) {
         checkReplyDto(replyDto);
 
         User user = userRepository.findById(userId)
@@ -144,6 +144,8 @@ public class DiscussionService {
         reply.remove();
 
         replyRepository.deleteById(reply.getId());
+
+        return true;
     }
 
     private void checkReplyDto(ReplyDto replyDto) {
