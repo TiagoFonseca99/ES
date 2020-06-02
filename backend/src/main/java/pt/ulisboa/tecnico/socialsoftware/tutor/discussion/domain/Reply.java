@@ -6,7 +6,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -93,10 +92,14 @@ public class Reply {
         this.discussion = discussion;
     }
 
-    public void remove() {
-        this.discussion.getReplies().remove(this);
+    public void discussionRemove() {
         this.user.getReplies().remove(this);
         this.discussion = null;
+    }
+
+    public void remove() {
+        this.discussion.getReplies().remove(this);
+        discussionRemove();
     }
 
     private void checkEmptyMessage(ReplyDto reply) {

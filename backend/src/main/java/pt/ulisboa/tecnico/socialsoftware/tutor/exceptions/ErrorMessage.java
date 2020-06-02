@@ -116,6 +116,7 @@ public enum ErrorMessage {
     DISCUSSION_NOT_FOUND("Discussion not found with user id %d and question id %d"),
     DISCUSSION_NOT_STUDENT_CREATOR("Teacher cannot create discussion"),
     DISCUSSION_NOT_SUBMITTED_BY_REQUESTER("Discussion was not created by user with id %d"),
+    DISCUSSION_UNAUTHORIZED_DELETER("User with id %d cannot delete this discussion"),
     DUPLICATE_DISCUSSION("Duplicate discussion for user id %d and question id %d"),
     DUPLICATE_REPLY("Duplicate Reply for teacher: %d"),
     QUESTION_NOT_ANSWERED("Question not answered with id %d"),
