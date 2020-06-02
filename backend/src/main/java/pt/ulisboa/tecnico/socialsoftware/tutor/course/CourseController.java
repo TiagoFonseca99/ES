@@ -10,6 +10,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.StudentDto;
 
+import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
@@ -53,14 +54,14 @@ public class CourseController {
     }
 
     @GetMapping("/executions/{executionId}/students")
-    @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#executionId, 'EXECUTION.ACCESS')")
+    @PreAuthorize("hasRole('ROLE_STUDENT') or (hasRole('ROLE_TEACHER') and hasPermission(#executionId, 'EXECUTION.ACCESS'))")
     public List<StudentDto> getCourseStudents(@PathVariable int executionId) {
         return courseService.courseStudents(executionId);
     }
 
-    @GetMapping("/dashboard/{executionId}")
+    @GetMapping("/dashboard/execution")
     @PreAuthorize("hasRole('ROLE_TEACHER') and hasPermission(#executionId, 'EXECUTION.ACCESS')")
-    public DashboardDto getDashBoardInfo(@PathVariable int executionId) {
+    public DashboardDto getDashBoardInfo(@Valid @RequestParam int executionId) {
         return courseService.getDashboardInfo(executionId);
     }
 

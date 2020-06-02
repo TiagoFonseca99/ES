@@ -12,8 +12,7 @@ export default class Dashboard {
   discussionStatsPublic!: boolean;
   submissionStatsPublic!: boolean;
   tournamentStatsPublic!: boolean;
-  tournamentNamePermission!: boolean;
-  tournamentScorePermission!: boolean;
+  userStatsPublic!: boolean;
 
   constructor(jsonObj?: Dashboard) {
     if (jsonObj) {
@@ -26,9 +25,8 @@ export default class Dashboard {
       this.discussionStatsPublic = jsonObj.discussionStatsPublic;
       this.submissionStatsPublic = jsonObj.submissionStatsPublic;
       this.tournamentStatsPublic = jsonObj.tournamentStatsPublic;
+      this.userStatsPublic = jsonObj.userStatsPublic;
       this.numRejectedSubmissions = jsonObj.numRejectedSubmissions;
-      this.tournamentNamePermission = jsonObj.tournamentNamePermission;
-      this.tournamentScorePermission = jsonObj.tournamentScorePermission;
 
       if (jsonObj.joinedTournaments !== null) {
         this.joinedTournaments = [];

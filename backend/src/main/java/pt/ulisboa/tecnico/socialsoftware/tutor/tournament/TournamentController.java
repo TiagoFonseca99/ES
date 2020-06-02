@@ -170,6 +170,17 @@ public class TournamentController {
         }
     }
 
+    @DeleteMapping(value = "/tournaments/removeTournament")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public void removeTournament(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if(user == null){
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+        tournamentService.removeTournament(user.getId(), tournamentDto);
+    }
+
     @GetMapping(value = "/tournaments/getTournamentParticipants")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT') or hasRole('ROLE_ADMIN')")
     public List<UserDto> getTournamentParticipants(Principal principal, @Valid @RequestBody TournamentDto tournamentDto) {

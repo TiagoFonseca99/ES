@@ -95,10 +95,10 @@ export default class RemoteServices {
       });
   }
 
-  static async getUserStats(): Promise<StudentStats> {
+  static async getUserStats(username: string): Promise<StudentStats> {
     return httpClient
       .get(
-        `/executions/${Store.getters.getCurrentCourse.courseExecutionId}/stats`
+        `/executions/${Store.getters.getCurrentCourse.courseExecutionId}/stats/${username}`
       )
       .then(response => {
         return new StudentStats(response.data);
@@ -448,7 +448,7 @@ export default class RemoteServices {
 
   static async getCourseDashboardInfo(executionId: number): Promise<Dashboard> {
     return httpClient
-      .get(`/dashboard/${executionId}`)
+      .get('/dashboard/execution?executionId=' + executionId)
       .then(response => {
         return new Dashboard(response.data);
       })
@@ -622,15 +622,15 @@ export default class RemoteServices {
 
   static async getStudentsSubmissions(): Promise<Submission[]> {
     return httpClient
-        .get('/student/submissions/all')
-        .then(response => {
-          return response.data.map((submission: any) => {
-            return new Submission(submission);
-          });
-        })
-        .catch(async error => {
-          throw Error(await this.errorMessage(error));
+      .get('/student/submissions/all')
+      .then(response => {
+        return response.data.map((submission: any) => {
+          return new Submission(submission);
         });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async deleteSubmission(questionId: number) {
@@ -799,6 +799,17 @@ export default class RemoteServices {
       });
   }
 
+  static async toggleUserStats(): Promise<Dashboard> {
+    return httpClient
+      .put('/dashboard/stats')
+      .then(response => {
+        return new Dashboard(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async exportAll() {
     return httpClient
       .get('/admin/export', {
@@ -821,9 +832,9 @@ export default class RemoteServices {
       });
   }
 
-  static async getDashboardInfo(): Promise<Dashboard> {
+  static async getDashboardInfo(username: string): Promise<Dashboard> {
     return httpClient
-      .get('/dashboard')
+      .get('/dashboard?username=' + username)
       .then(response => {
         return new Dashboard(response.data);
       })
@@ -1035,22 +1046,6 @@ export default class RemoteServices {
       });
   }
 
-  static switchTournamentNamePermission() {
-    return httpClient
-      .put('/switchTournamentNamePermission')
-      .catch(async error => {
-        throw Error(await this.errorMessage(error));
-      });
-  }
-
-  static switchTournamentScorePermission() {
-    return httpClient
-      .put('/switchTournamentScorePermission')
-      .catch(async error => {
-        throw Error(await this.errorMessage(error));
-      });
-  }
-
   static leaveTournament(tournament: Tournament) {
     return httpClient
       .put('tournaments/leaveTournament', tournament)
@@ -1062,6 +1057,14 @@ export default class RemoteServices {
   static cancelTournament(tournament: Tournament) {
     return httpClient
       .put('tournaments/cancelTournament', tournament)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static removeTournament(tournament: Tournament) {
+    return httpClient
+      .delete('tournaments/removeTournament', tournament)
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
