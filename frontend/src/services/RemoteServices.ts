@@ -766,6 +766,17 @@ export default class RemoteServices {
       });
   }
 
+  static async deleteReply(reply: number): Promise<Boolean> {
+    return httpClient
+      .delete(`/discussions/replies/${reply}`)
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async toggleDiscussionStats(): Promise<Dashboard> {
     return httpClient
       .put('/dashboard/discussions')

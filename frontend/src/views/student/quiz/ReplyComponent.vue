@@ -34,7 +34,20 @@
                   <b v-if="$store.getters.getUser.id !== reply.userId"
                     >{{ reply.userName }} on {{ reply.date }}:
                   </b>
-                  <b v-else>You on {{ reply.date }}:</b>
+                  <div v-else>
+                    <b>You on {{ reply.date }}:</b>
+                    <v-icon
+                      class="mr-2"
+                      style="float: right"
+                      @click="
+                        setDiscussion(discussion);
+                        setReply(reply);
+                        deleteReply();
+                      "
+                      color="red"
+                      >delete</v-icon
+                    >
+                  </div>
                   <span v-html="convertMarkDown(reply.message)" />
                 </div>
                 <div class="reply-message" v-if="discussion.userId === userId">
@@ -108,6 +121,7 @@ import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
 import RemoteServices from '../../../services/RemoteServices';
+import Reply from '@/models/management/Reply';
 
 @Component
 export default class ReplyComponent extends Vue {
@@ -115,6 +129,7 @@ export default class ReplyComponent extends Vue {
   discussion: Discussion = this.discussions[0];
   replyMessages: Map<number, string> = new Map();
   userId: number = this.$store.getters.getUser.id;
+  reply: Reply | undefined;
 
   @Emit('submit')
   async submitReply() {
@@ -155,6 +170,21 @@ export default class ReplyComponent extends Vue {
 
   setDiscussion(discussion: Discussion) {
     this.discussion = discussion;
+  }
+
+  setReply(reply: Reply) {
+    this.reply = reply;
+  }
+
+  async deleteReply() {
+    try {
+      await RemoteServices.deleteReply(this.reply!.id);
+      this.discussion.replies = this.discussion.replies!.filter(
+        obj => obj !== this.reply
+      );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
   }
 
   convertMarkDown(text: string) {
