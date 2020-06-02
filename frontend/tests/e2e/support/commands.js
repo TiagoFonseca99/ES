@@ -338,7 +338,7 @@ Cypress.Commands.add('reviewSubmission', (title, status) => {
 Cypress.Commands.add('addSubmission', (title, qstatus, userId = 676, anon=false) => {
   //add question and submission
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
       title +
       '\', \'Question?\', \'' +
       qstatus +
@@ -347,22 +347,22 @@ Cypress.Commands.add('addSubmission', (title, qstatus, userId = 676, anon=false)
 
   //add options
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
       title +
       '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste a\', \'t\', (SELECT id FROM quest), 0);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
       title +
       '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste b\', \'f\', (SELECT id FROM quest), 0);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
       title +
       '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste c\', \'f\', (SELECT id FROM quest), 0);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
       title +
       '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste d\', \'f\', (SELECT id FROM quest), 0);" '
   );
@@ -431,6 +431,12 @@ Cypress.Commands.add('checkAllStudentsSubmission', (title1, title2, title3) => {
     cy.contains(title1);
     cy.contains(title2);
     cy.contains(title3);
+});
+
+Cypress.Commands.add('seesExcludingSubmissions', (title1, title2) => {
+    cy.contains('Exclude').click();
+    cy.contains(title1);
+    cy.contains(title2);
 });
 
 Cypress.Commands.add('viewQuestion', (title, content, op1, op2, op3, op4) => {

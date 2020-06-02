@@ -19,10 +19,12 @@
                       class="mx-2"
                     />
                     <v-spacer />
+                    <v-btn color="primary" data-cy="Exclude" dark @click="toggleAnswers">{{ filterLabel }}</v-btn>
+                    <v-spacer />
                     <v-btn-toggle class="button-group">
-                       <v-btn color="primary" dark @click="filterSubmissions('all')">{{"See All"}}</v-btn>
-                       <v-btn color="primary" dark @click="filterSubmissions('accepted')">{{"See Accepted"}}</v-btn>
-                       <v-btn color="primary" dark @click="filterSubmissions('rejected')">{{"See Rejected"}}</v-btn>
+                       <v-btn color="primary" data-cy="SeeAll" @click="filterSubmissions('all')">{{"See All"}}</v-btn>
+                       <v-btn color="primary" data-cy="SeeApproved" @click="filterSubmissions('accepted')">{{"See Accepted"}}</v-btn>
+                       <v-btn color="primary" data-cy="SeeRejected" @click="filterSubmissions('rejected')">{{"See Rejected"}}</v-btn>
                     </v-btn-toggle>
                 </v-card-title>
             </template>
@@ -98,12 +100,18 @@ import Submission from '@/models/management/Submission';
 import Image from '@/models/management/Image';
 import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
 
+enum FilterState {
+    INCLUDE = 'Include my submissions',
+    EXCLUDE = 'Exclude my submissions'
+}
+
 @Component({
     components: {
         'show-question-dialog': ShowQuestionDialog
     }
 })
 export default class AllSubmissionsView extends Vue {
+    filterLabel: FilterState = FilterState.EXCLUDE;
     submissions: Submission[] = [];
     items: Submission[] = [];
     currentQuestion: Question | null = null;
@@ -198,11 +206,20 @@ export default class AllSubmissionsView extends Vue {
         if (value == 'all') {
             this.items = this.submissions;
         } else if (value == 'accepted') {
-            this.items = this.submissions.filter(submission => {return submission.questionDto.status == 'AVAILABLE';});
+            this.items = this.submissions.filter(submission => { return submission.questionDto.status == 'AVAILABLE'; });
         } else {
-            this.items = this.submissions.filter(submission => {return submission.questionDto.status == 'DEPRECATED';});
+            this.items = this.submissions.filter(submission => { return submission.questionDto.status == 'DEPRECATED'; });
         }
      }
+    toggleAnswers() {
+        if (this.filterLabel == FilterState.INCLUDE) {
+            this.filterLabel = FilterState.EXCLUDE;
+            this.items = this.submissions;
+        } else {
+            this.filterLabel = FilterState.INCLUDE;
+            this.items = this.submissions.filter(submission => { return submission.studentId !== this.$store.getters.getUser.id; });
+        }
+    }
 }
 </script>
 
