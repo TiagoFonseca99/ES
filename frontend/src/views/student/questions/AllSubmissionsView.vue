@@ -124,7 +124,8 @@ enum FilterState {
 })
 export default class AllSubmissionsView extends Vue {
     filterLabel: FilterState = FilterState.EXCLUDE;
-    submissions: Submission[] = [];
+    allsubmissions: Submission[] = [];
+    choosensubmissions: Submission[] = [];
     items: Submission[] = [];
     currentQuestion: Question | null = null;
     questionDialog: boolean = false;
@@ -159,9 +160,10 @@ export default class AllSubmissionsView extends Vue {
     async created() {
         await this.$store.dispatch('loading');
         try {
-           [this.submissions] = await Promise.all([RemoteServices.getStudentsSubmissions()]);
-           this.submissions.sort((a, b) => this.sortNewestFirst(a, b));
-           this.items = this.submissions;
+           [this.allsubmissions] = await Promise.all([RemoteServices.getStudentsSubmissions()]);
+           this.allsubmissions.sort((a, b) => this.sortNewestFirst(a, b));
+           this.items = this.allsubmissions;
+           this.choosensubmissions = this.allsubmissions;
         } catch (error) {
            await this.$store.dispatch('error', error);
         }
@@ -228,21 +230,42 @@ export default class AllSubmissionsView extends Vue {
      }
 
      filterSubmissions(value: String) {
-        if (value == 'all') {
-            this.items = this.submissions;
-        } else if (value == 'accepted') {
-            this.items = this.submissions.filter(submission => { return submission.questionDto.status == 'AVAILABLE'; });
+        this.choosensubmissions = this.allsubmissions;
+        if (this.filterLabel == FilterState.EXCLUDE) {
+            if (value == 'all') {
+                this.choosensubmissions = this.allsubmissions;
+            } else if (value == 'accepted') {
+                this.choosensubmissions = this.allsubmissions.filter(submission => {
+                    return submission.questionDto.status == 'AVAILABLE';
+                });
+            } else {
+                this.choosensubmissions = this.allsubmissions.filter(submission => {
+                    return submission.questionDto.status == 'DEPRECATED';
+                });
+            }
+            this.items = this.choosensubmissions;
         } else {
-            this.items = this.submissions.filter(submission => { return submission.questionDto.status == 'DEPRECATED'; });
+            if (value == 'all') {
+
+            } else if (value == 'accepted') {
+                this.choosensubmissions = this.choosensubmissions.filter(submission => {
+                    return submission.questionDto.status == 'AVAILABLE';
+                });
+            } else {
+                this.choosensubmissions = this.choosensubmissions.filter(submission => {
+                    return submission.questionDto.status == 'DEPRECATED';
+                });
+            }
+            this.items = this.choosensubmissions.filter(submission => { return submission.studentId !== this.$store.getters.getUser.id; });
         }
      }
     toggleAnswers() {
         if (this.filterLabel == FilterState.INCLUDE) {
             this.filterLabel = FilterState.EXCLUDE;
-            this.items = this.submissions;
+            this.items = this.choosensubmissions;
         } else {
             this.filterLabel = FilterState.INCLUDE;
-            this.items = this.submissions.filter(submission => { return submission.studentId !== this.$store.getters.getUser.id; });
+            this.items = this.choosensubmissions.filter(submission => { return submission.studentId !== this.$store.getters.getUser.id; });
         }
     }
 }
