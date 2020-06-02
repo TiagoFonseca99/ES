@@ -118,7 +118,7 @@ class RemoveReplyTest extends Specification {
         def replyDto = discussionService.giveReply(reply, discussion)
 
         when: "deleting the reply"
-        discussionService.removeReply(student.getId(), replyDto)
+        discussionService.removeReply(student.getId(), replyDto.getId())
 
         then:
         replyRepository.count() == 0L
@@ -141,7 +141,7 @@ class RemoveReplyTest extends Specification {
         userRepository.save(teacher)
 
         when: "deleting the reply"
-        discussionService.removeReply(teacher.getId(), replyDto)
+        discussionService.removeReply(teacher.getId(), replyDto.getId())
 
         then:
         replyRepository.count() == 0L
@@ -164,7 +164,7 @@ class RemoveReplyTest extends Specification {
         userRepository.save(other)
 
         when: "deleting the reply"
-        discussionService.removeReply(other.getId(), replyDto)
+        discussionService.removeReply(other.getId(), replyDto.getId())
 
         then:
         def exception = thrown(TutorException)
@@ -179,7 +179,7 @@ class RemoveReplyTest extends Specification {
         reply.setId(-1)
 
         when: "deleting the reply"
-        discussionService.removeReply(student.getId(), reply)
+        discussionService.removeReply(student.getId(), reply.getId())
 
         then:
         def exception = thrown(TutorException)

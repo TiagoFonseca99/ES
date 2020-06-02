@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -78,9 +79,9 @@ public class DiscussionController {
 
     }
 
-    @DeleteMapping(value = "/discussions/replies/remove")
+    @DeleteMapping(value = "/discussions/replies/{reply}")
     @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT')")
-    public boolean removeReply(Principal principal, @Valid @RequestBody ReplyDto reply) {
+    public boolean removeReply(Principal principal, @Valid @PathVariable Integer reply) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if (user == null) {

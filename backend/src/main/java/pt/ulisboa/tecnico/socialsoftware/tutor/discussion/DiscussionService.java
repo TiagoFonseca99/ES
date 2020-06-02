@@ -129,17 +129,15 @@ public class DiscussionService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public boolean removeReply(Integer userId, ReplyDto replyDto) {
-        checkReplyDto(replyDto);
-
+    public boolean removeReply(Integer userId, Integer replyId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new TutorException(USER_NOT_FOUND, replyDto.getUserId()));
+            .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
-        if (!user.isTeacher() && !userId.equals(replyDto.getUserId())) {
+        Reply reply = replyRepository.findById(replyId).orElseThrow(() -> new TutorException(REPLY_NOT_FOUND, replyId));
+
+        if (!user.isTeacher() && !userId.equals(reply.getUser().getId())) {
             throw new TutorException(REPLY_UNAUTHORIZED_DELETER, userId);
         }
-
-        Reply reply = replyRepository.findById(replyDto.getId()).orElseThrow(() -> new TutorException(REPLY_NOT_FOUND));
 
         reply.remove();
 

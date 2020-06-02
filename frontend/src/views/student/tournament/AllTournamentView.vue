@@ -168,8 +168,7 @@ export default class AllTournamentView extends Vue {
   }
 
   sortById(a: Tournament, b: Tournament) {
-    if (a.id && b.id)
-      return a.id > b.id ? 1 : -1;
+    if (a.id && b.id) return a.id > b.id ? 1 : -1;
     else return 0;
   }
 
