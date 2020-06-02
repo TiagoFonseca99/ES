@@ -9,6 +9,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
@@ -30,6 +33,7 @@ class CreateSubmissionTest extends Specification {
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
+    public static final String TOPIC_NAME = "Topic"
     public static final String QUESTION_TITLE = "Question?"
     public static final String QUESTION_CONTENT = "Answer"
     public static final String STUDENT_NAME = "João Silva"
@@ -54,6 +58,9 @@ class CreateSubmissionTest extends Specification {
 
     @Autowired
     QuestionRepository questionRepository
+
+    @Autowired
+    TopicRepository topicRepository
 
     @Shared
     def student
@@ -120,6 +127,36 @@ class CreateSubmissionTest extends Specification {
         result.getQuestion() == question
         result.getQuestion().getCourse().getId() == course.getId()
         result.isAnonymous()
+    }
+
+    def "create submission with a topic associated and question not null"(){
+        given: "a submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setCourseId(course.getId())
+        submissionDto.setStudentId(student.getId())
+        and: "a topic for question"
+        def topicDto = new TopicDto()
+        topicDto.setName(TOPIC_NAME)
+        def topic = new Topic(course, topicDto)
+        topicRepository.save(topic)
+        def topics = new HashSet<Topic>();
+        topics.add(topic)
+        question.updateTopics(topics)
+        questionRepository.save(question)
+
+        when: submissionService.createSubmission(question.getId(), submissionDto)
+
+        then: "the correct submission is in the repository"
+        submissionRepository.count() == 1L
+        def result = submissionRepository.findAll().get(0)
+        result.getId() != null
+        result.getUser() == student
+        result.getQuestion() != null
+        result.getQuestion() == question
+        result.getQuestion().getCourse().getId() == course.getId()
+        !result.isAnonymous()
+        result.getQuestion().getTopics().size() == 1
+        result.getQuestion().getTopics().getAt(0) == topic
     }
 
     def "user is not a student"(){
