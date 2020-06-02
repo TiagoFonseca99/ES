@@ -172,13 +172,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&#xd;
-	&quot;id&quot;: 1,&#xd;
-	&quot;startTime&quot;: &quot;${startTime}&quot;,&#xd;
-	&quot;endTime&quot;: &quot;${endTime}&quot;,&#xd;
-	&quot;numberOfQuestions&quot;: 2,&#xd;
-	&quot;state&quot;: &quot;NOT_CANCELED&quot;&#xd;
-}&#xd;
+                  <stringProp name="Argument.value">&#xd;
 </stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
@@ -188,7 +182,7 @@
             <stringProp name="HTTPSampler.port">${port}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/tournaments/removeTournament</stringProp>
+            <stringProp name="HTTPSampler.path">/tournaments/removeTournament/1</stringProp>
             <stringProp name="HTTPSampler.method">DELETE</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>

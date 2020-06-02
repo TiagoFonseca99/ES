@@ -111,7 +111,7 @@ class RemoveTournamentTest extends Specification {
         given:
 
         when:
-        tournamentService.removeTournament(user.getId(), tournamentDto)
+        tournamentService.removeTournament(user.getId(), tournamentDto.getId())
 
         then:
         tournamentRepository.count() == 0L
@@ -127,7 +127,7 @@ class RemoveTournamentTest extends Specification {
         userRepository.save(user2)
 
         when:
-        tournamentService.removeTournament(user2.getId(), tournamentDto)
+        tournamentService.removeTournament(user2.getId(), tournamentDto.getId())
 
         then:
         def exception = thrown(TutorException)
@@ -154,7 +154,7 @@ class RemoveTournamentTest extends Specification {
         tournamentDto2 = tournamentService.createTournament(user2.getId(), topics, tournamentDto2)
 
         when:
-        tournamentService.removeTournament(user.getId(), tournamentDto)
+        tournamentService.removeTournament(user.getId(), tournamentDto.getId())
 
         then:
         tournamentRepository.count() == 1L
