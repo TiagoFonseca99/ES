@@ -40,6 +40,11 @@
           {{ getEnrolledName(item.enrolled) }}
         </v-chip>
       </template>
+      <template v-slot:item.privateTournament="{ item }">
+        <v-chip :color="getPrivateColor(item.privateTournament)">
+          {{ getPrivateName(item.privateTournament) }}
+        </v-chip>
+      </template>
       <template v-slot:item.action="{ item }">
         <v-tooltip bottom v-if="isNotEnrolled(item)">
           <template v-slot:activator="{ on }">
@@ -132,6 +137,12 @@ export default class OpenTournamentView extends Vue {
       width: '10%'
     },
     {
+      text: 'Privacy',
+      value: 'privateTournament',
+      align: 'center',
+      width: '10%'
+    },
+    {
       text: 'Start Time',
       value: 'startTime',
       align: 'center',
@@ -218,6 +229,15 @@ export default class OpenTournamentView extends Vue {
     else return 'YOU NEED TO JOIN';
   }
 
+  getPrivateColor(privateTournament : boolean) {
+    if (privateTournament) return 'red';
+    else return 'green';
+  }
+  getPrivateName(privateTournament : boolean) {
+    if (privateTournament) return 'private';
+    else return 'public';
+  }
+
   isNotEnrolled(tournamentToJoin: Tournament) {
     return !tournamentToJoin.enrolled;
   }
@@ -227,8 +247,12 @@ export default class OpenTournamentView extends Vue {
     const topics = tournamentToJoin.topics;
     tournamentToJoin.enrolled = undefined;
     tournamentToJoin.topics = [];
+    const password = '';
     try {
-      await RemoteServices.joinTournament(tournamentToJoin);
+      if (tournamentToJoin.privateTournament == true) {
+        // TODO PEDIR PASSWORD e atualizar variavel
+      }
+      await RemoteServices.joinTournament(tournamentToJoin, password);
     } catch (error) {
       await this.$store.dispatch('error', error);
       tournamentToJoin.enrolled = enrolled;
