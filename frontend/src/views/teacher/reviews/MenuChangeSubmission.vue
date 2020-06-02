@@ -69,7 +69,6 @@ export default class MenuChangeSubmission extends Vue {
 
   async acceptReview() {
     try {
-      console.log(this.currentReview);
       const result = await RemoteServices.createReview(this.currentReview);
       this.$emit('no-changes', result);
       this.ChangeSubmissions = false;
