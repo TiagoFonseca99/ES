@@ -83,6 +83,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-icon
+              v-if="item.questionDto.status !== 'AVAILABLE'"
               large
               class="mr-2"
               v-on="on"
