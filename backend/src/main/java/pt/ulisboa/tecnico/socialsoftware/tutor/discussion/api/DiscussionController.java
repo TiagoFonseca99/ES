@@ -91,6 +91,18 @@ public class DiscussionController {
         return discussionService.removeReply(user.getId(), reply);
     }
 
+    @DeleteMapping(value = "/discussions/{userId}/{questionId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT')")
+    public boolean removeDiscussion(Principal principal, @Valid @PathVariable("userId") Integer userId, @Valid @PathVariable("questionId") Integer questionId) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        return discussionService.removeDiscussion(user.getId(), userId, questionId);
+    }
+
     @GetMapping(value = "/discussions")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public List<DiscussionDto> getDiscussions(Principal principal, @Valid @RequestParam Integer userId) {
