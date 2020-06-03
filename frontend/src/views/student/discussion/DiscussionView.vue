@@ -27,6 +27,25 @@
           }}</v-btn>
         </v-card-title>
       </template>
+      <template v-slot:item.action="{ item }">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              large
+              class="mr-2"
+              style="float: right"
+              v-on="on"
+              @click="
+                setDiscussion(item);
+                deleteDiscussion();
+              "
+              color="red"
+              >delete</v-icon
+            >
+          </template>
+          <span>Delete Discussion</span>
+        </v-tooltip>
+      </template>
       <template v-slot:item.content="{ item }">
         <td class="justify-center">
           {{
@@ -127,6 +146,7 @@ export default class DiscussionView extends Vue {
   reply: Reply | undefined;
 
   headers: object = [
+    { text: 'Actions', value: 'action', align: 'center' },
     { text: '', value: 'data-table-expand' },
     {
       text: 'Question Title',
@@ -159,7 +179,7 @@ export default class DiscussionView extends Vue {
   customFilter() {
     if (this.filterLabel == FilterState.REPLY) {
       this.items = this.discussions.filter(discussion => {
-        return discussion.replies !== [];
+        return discussion.replies! && discussion.replies!.length !== 0;
       });
     } else {
       this.items = this.discussions;
@@ -230,6 +250,22 @@ export default class DiscussionView extends Vue {
       this.currentDiscussion.replies = this.currentDiscussion.replies!.filter(
         obj => obj !== this.reply
       );
+      this.customFilter();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  async deleteDiscussion() {
+    try {
+      await RemoteServices.deleteDiscussion(
+        this.currentDiscussion.userId,
+        this.currentDiscussion.questionId
+      );
+      this.discussions = this.discussions.filter(
+        obj => obj !== this.currentDiscussion
+      );
+      this.customFilter();
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

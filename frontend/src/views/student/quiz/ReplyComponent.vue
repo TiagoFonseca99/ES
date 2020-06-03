@@ -14,7 +14,23 @@
               class="text-left"
               style="flex: 1; position: relative; max-width: 100%;"
             >
-              <b>{{ discussion.userName }} on {{ discussion.date }}:</b>
+              <b v-if="$store.getters.getUser.id !== discussion.userId"
+                >{{ discussion.userName }} on {{ discussion.date }}:</b
+              >
+              <div v-else>
+                <b>You on {{ discussion.date }}:</b>
+                <v-icon
+                  large
+                  class="mr-2"
+                  style="float: right"
+                  @click="
+                    setDiscussion(discussion);
+                    deleteDiscussion();
+                  "
+                  color="red"
+                  >delete</v-icon
+                >
+              </div>
               <span v-html="convertMarkDown(discussion.content)" />
             </div>
           </div>
@@ -182,6 +198,19 @@ export default class ReplyComponent extends Vue {
       this.discussion.replies = this.discussion.replies!.filter(
         obj => obj !== this.reply
       );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  @Emit('discussions')
+  async deleteDiscussion() {
+    try {
+      await RemoteServices.deleteDiscussion(
+        this.discussion.userId,
+        this.discussion.questionId
+      );
+      return this.discussions.filter(obj => obj !== this.discussion);
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

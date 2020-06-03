@@ -19,6 +19,16 @@
                 style="flex: 1; position: relative; max-width: 100%"
               >
                 <b>{{ discussion.userName }} on {{ discussion.date }}:</b>
+                <v-icon
+                  class="mr-2"
+                  style="float: right"
+                  @click="
+                    setDiscussion(discussion);
+                    deleteDiscussion();
+                  "
+                  color="red"
+                  >delete</v-icon
+                >
                 <span v-html="convertMarkDown(discussion.content)" />
               </div>
             </div>
@@ -220,12 +230,26 @@ export default class ReplyComponent extends Vue {
     this.reply = reply;
   }
 
+  @Emit('replies')
   async deleteReply() {
     try {
       await RemoteServices.deleteReply(this.reply!.id);
       this.discussion.replies = this.discussion.replies!.filter(
         obj => obj !== this.reply
       );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  @Emit('discussions')
+  async deleteDiscussion() {
+    try {
+      await RemoteServices.deleteDiscussion(
+        this.discussion.userId,
+        this.discussion.questionId
+      );
+      return this.discussions.filter(obj => obj !== this.discussion);
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
