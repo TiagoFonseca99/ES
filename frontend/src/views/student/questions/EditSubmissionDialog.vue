@@ -59,9 +59,9 @@
 
       <v-card-actions>
         <v-switch
-                v-model="currentSubmission.anonymous"
-                class="ma-4"
-                label="Anonymous"
+          v-model="currentSubmission.anonymous"
+          class="ma-4"
+          label="Anonymous"
         />
         <v-spacer />
         <v-btn
