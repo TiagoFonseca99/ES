@@ -121,14 +121,12 @@
       </v-col>
       <v-card-actions>
         <v-spacer />
+        <v-btn color="primary" @click="$emit('dialog', false)">Close</v-btn>
         <v-btn
-          color="blue darken-1"
+          color="primary"
           @click="$emit('dialog', false)"
           :to="openStudentDashboard()"
           >Open Dashboard</v-btn
-        >
-        <v-btn color="blue darken-1" @click="$emit('dialog', false)"
-          >Close</v-btn
         >
       </v-card-actions>
     </v-card>

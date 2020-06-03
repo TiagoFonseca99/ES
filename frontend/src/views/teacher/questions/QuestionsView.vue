@@ -64,6 +64,10 @@
         >
       </template>
 
+      <template v-slot:item.creationDate="{ item }">
+        <v-chip small>{{ item.creationDate }}</v-chip>
+      </template>
+
       <template v-slot:item.status="{ item }">
         <v-select
           v-model="item.status"

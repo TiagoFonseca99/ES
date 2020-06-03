@@ -27,7 +27,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn
-            color="blue darken-1"
+            color="primary"
             data-cy="createDiscussion"
             @click="submitDiscussion"
             >Submit</v-btn
