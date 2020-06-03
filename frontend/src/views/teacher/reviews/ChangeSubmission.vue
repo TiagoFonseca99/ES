@@ -59,16 +59,10 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="blue darken-1"
-          @click="cancelButton"
-          data-cy="cancelButton1"
+        <v-btn color="primary" @click="cancelButton" data-cy="cancelButton1"
           >Cancel</v-btn
         >
-        <v-btn
-          color="blue darken-1"
-          @click="changeQuestion"
-          data-cy="submitButton"
+        <v-btn color="primary" @click="changeQuestion" data-cy="submitButton"
           >Submit</v-btn
         >
       </v-card-actions>
