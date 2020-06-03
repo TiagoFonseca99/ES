@@ -3,7 +3,7 @@
     <v-data-table
       :headers="headers"
       :custom-filter="customFilter"
-      :items="submissions"
+      :items="items"
       :search="search"
       multi-sort
       :mobile-breakpoint="0"
@@ -18,8 +18,35 @@
             label="Search"
             class="mx-2"
           />
-
           <v-spacer />
+          <v-btn
+            color="primary"
+            data-cy="Exclude"
+            dark
+            @click="toggleAnswers"
+            >{{ filterLabel }}</v-btn
+          >
+          <v-spacer />
+          <v-btn-toggle class="button-group">
+            <v-btn
+              color="primary"
+              data-cy="SeeAll"
+              @click="filterSubmissions('all')"
+              >{{ 'See All' }}</v-btn
+            >
+            <v-btn
+              color="primary"
+              data-cy="SeeApproved"
+              @click="filterSubmissions('accepted')"
+              >{{ 'See Accepted' }}</v-btn
+            >
+            <v-btn
+              color="primary"
+              data-cy="SeeRejected"
+              @click="filterSubmissions('rejected')"
+              >{{ 'See Rejected' }}</v-btn
+            >
+          </v-btn-toggle>
         </v-card-title>
       </template>
 
@@ -51,14 +78,8 @@
         </v-chip>
       </template>
 
-      <template v-slot:item.questionDto.image="{ item }">
-        <v-file-input
-          show-size
-          dense
-          small-chips
-          @change="handleFileUpload($event, item.questionDto)"
-          accept="image/*"
-        />
+      <template v-slot:item.questionDto.topics="{ item }">
+        <view-submission-topics :submission="item" :topics="topics" />
       </template>
 
       <template v-slot:item.action="{ item }">
@@ -105,58 +126,69 @@ import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
 import Image from '@/models/management/Image';
 import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
-import DashboardDialogView from '@/views/student/dashboard/DashboardDialogView.vue';
+import ShowDashboardDialog from '@/views/student/dashboard/DashboardDialogView.vue';
+import ViewSubmissionTopics from '@/views/student/questions/ViewSubmissionTopics.vue';
+
+
+enum FilterState {
+  INCLUDE = 'Include my submissions',
+  EXCLUDE = 'Exclude my submissions'
+}
 
 @Component({
   components: {
     'show-question-dialog': ShowQuestionDialog,
-    'show-dashboard-dialog': DashboardDialogView
+    'show-dashboard-dialog': ShowDashboardDialog,
+    'view-submission-topics': ViewSubmissionTopics
   }
 })
 export default class AllSubmissionsView extends Vue {
-  submissions: Submission[] = [];
-  currentQuestion: Question | null = null;
-  questionDialog: boolean = false;
-  search: string = '';
-  dashboardDialog: boolean = false;
-  currentUsername: string | null = null;
+    filterLabel: FilterState = FilterState.EXCLUDE;
+    allsubmissions: Submission[] = [];
+    choosensubmissions: Submission[] = [];
+    items: Submission[] = [];
+    currentQuestion: Question | null = null;
+    questionDialog: boolean = false;
+    search: string = '';
+    currentUsername: string | null = null;
+    dashboardDialog: boolean = false;
 
-  headers: object = [
-    {
-      text: 'Actions',
-      value: 'action',
-      align: 'left',
-      width: '15%',
-      sortable: false
-    },
-    { text: 'Title', value: 'questionDto.title', align: 'center' },
-    { text: 'Submitted by', value: 'username', align: 'center' },
-    { text: 'Status', value: 'questionDto.status', align: 'center' },
-    {
-      text: 'Creation Date',
-      value: 'questionDto.creationDate',
-      align: 'center'
-    },
-    {
-      text: 'Image',
-      value: 'questionDto.image',
-      align: 'center',
-      sortable: false
-    }
-  ];
+    headers: object = [
+        {
+         text: 'Actions',
+         value: 'action',
+         align: 'left',
+         width: '15%',
+         sortable: false
+        },
+        { text: 'Title', value: 'questionDto.title', align: 'center' },
+        { text: 'Submitted by', value: 'username', align: 'center' },
+        { text: 'Status', value: 'questionDto.status', align: 'center' },
+        {
+         text: 'Creation Date',
+         value: 'questionDto.creationDate',
+         align: 'center'
+        },
+        {
+         text: 'Image',
+         value: 'questionDto.image',
+         align: 'center',
+         sortable: false
+        }
+       ];
 
-  async created() {
-    await this.$store.dispatch('loading');
-    try {
-      [this.submissions] = await Promise.all([
-        RemoteServices.getStudentsSubmissions()
-      ]);
-      this.submissions.sort((a, b) => this.sortNewestFirst(a, b));
-    } catch (error) {
-      await this.$store.dispatch('error', error);
+    async created() {
+        await this.$store.dispatch('loading');
+        try {
+           [this.allsubmissions] = await Promise.all([RemoteServices.getStudentsSubmissions()]);
+           this.allsubmissions.sort((a, b) => this.sortNewestFirst(a, b));
+           this.items = this.allsubmissions;
+           this.choosensubmissions = this.allsubmissions;
+        } catch (error) {
+           await this.$store.dispatch('error', error);
+        }
+        await this.$store.dispatch('clearLoading');
     }
-    await this.$store.dispatch('clearLoading');
-  }
 
   sortNewestFirst(a: Submission, b: Submission) {
     if (a.questionDto.creationDate && b.questionDto.creationDate)
@@ -176,19 +208,6 @@ export default class AllSubmissionsView extends Vue {
 
   convertMarkDown(text: string, image: Image | null = null): string {
     return convertMarkDown(text, image);
-  }
-
-  async handleFileUpload(event: File, question: Question) {
-    if (question.id) {
-      try {
-        const imageURL = await RemoteServices.uploadImage(event, question.id);
-        question.image = new Image();
-        question.image.url = imageURL;
-        confirm('Image ' + imageURL + ' was uploaded!');
-      } catch (error) {
-        await this.$store.dispatch('error', error);
-      }
-    }
   }
 
   showQuestionDialog(question: Question) {
@@ -215,6 +234,48 @@ export default class AllSubmissionsView extends Vue {
 
   onCloseShowDashboardDialog() {
     this.dashboardDialog = false;
+  }
+
+
+  filterSubmissions(value: String) {
+     this.choosensubmissions = this.allsubmissions;
+     if (this.filterLabel == FilterState.EXCLUDE) {
+         if (value == 'all') {
+             this.choosensubmissions = this.allsubmissions;
+         } else if (value == 'accepted') {
+             this.choosensubmissions = this.allsubmissions.filter(submission => {
+                return submission.questionDto.status == 'AVAILABLE';
+             });
+         } else {
+             this.choosensubmissions = this.allsubmissions.filter(submission => {
+                 return submission.questionDto.status == 'DEPRECATED';
+             });
+         }
+         this.items = this.choosensubmissions;
+     } else {
+         if (value == 'all') {
+          } else if (value == 'accepted') {
+             this.choosensubmissions = this.choosensubmissions.filter(submission => {
+                 return submission.questionDto.status == 'AVAILABLE';
+             });
+         } else {
+             this.choosensubmissions = this.choosensubmissions.filter(submission => {
+                 return submission.questionDto.status == 'DEPRECATED';
+             });
+         }
+         this.items = this.choosensubmissions.filter(submission => { return submission.studentId !== this.$store.getters.getUser.id; });
+     }
+  }
+  toggleAnswers() {
+    if (this.filterLabel == FilterState.INCLUDE) {
+      this.filterLabel = FilterState.EXCLUDE;
+      this.items = this.choosensubmissions;
+    } else {
+      this.filterLabel = FilterState.INCLUDE;
+      this.items = this.choosensubmissions.filter(submission => {
+        return submission.studentId !== this.$store.getters.getUser.id;
+      });
+    }
   }
 }
 </script>
