@@ -10,6 +10,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -26,6 +27,8 @@ public class JwtTokenProvider {
     private UserRepository userRepository;
     private static PublicKey publicKey;
     private static PrivateKey privateKey;
+    public static final String TOKEN_COOKIE_NAME = "auth";
+    public static final int TOKEN_EXPIRATION = 1000 * 60 * 60 * 24;
 
     public JwtTokenProvider(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -52,17 +55,13 @@ public class JwtTokenProvider {
         claims.put("role", user.getRole());
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + 1000*60*60*24);
+        Date expiryDate = new Date(now.getTime() + TOKEN_EXPIRATION);
 
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
-                .signWith(privateKey)
+        return Jwts.builder().setClaims(claims).setIssuedAt(new Date()).setExpiration(expiryDate).signWith(privateKey)
                 .compact();
     }
 
-    static String getToken(String token){
+    static String getToken(String token) {
         if (token != null && token.startsWith("Bearer ")) {
             return token.substring(7);
         } else if (token != null && token.startsWith("AUTH")) {
@@ -74,14 +73,32 @@ public class JwtTokenProvider {
         return "";
     }
 
-    static String getToken(HttpServletRequest req) {
+    static String getTokenFromHeader(HttpServletRequest req) {
         String authHeader = req.getHeader("Authorization");
 
         return getToken(authHeader);
     }
+
+    static String getTokenFromCookie(HttpServletRequest req) {
+        Cookie[] cookies = req.getCookies();
+
+        String token = null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(TOKEN_COOKIE_NAME)) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        return getToken(token);
+    }
+
     static int getUserId(String token) {
         try {
-            return Integer.parseInt(Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token).getBody().getSubject());
+            return Integer.parseInt(
+                    Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token).getBody().getSubject());
         } catch (MalformedJwtException ex) {
             logger.error("Invalkey JWT token");
         } catch (ExpiredJwtException ex) {
@@ -95,7 +112,8 @@ public class JwtTokenProvider {
     }
 
     Authentication getAuthentication(String token) {
-        User user = this.userRepository.findById(getUserId(token)).orElseThrow(() -> new TutorException(USER_NOT_FOUND, getUserId(token)));
+        User user = this.userRepository.findById(getUserId(token))
+                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, getUserId(token)));
         return new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
     }
 }

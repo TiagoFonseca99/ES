@@ -17,13 +17,13 @@ public class WebConfiguration extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/images/questions/**").addResourceLocations("file:" + figuresDir);
 
         registry.addResourceHandler("swagger-ui.html")
-                .addResourceLocations("classpath:/META-INF/resources/");
+            .addResourceLocations("classpath:/META-INF/resources/");
 
         registry.addResourceHandler("/webjars/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+            .addResourceLocations("classpath:/META-INF/resources/webjars/");
 
         registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/static/");
+            .addResourceLocations("classpath:/static/");
     }
 
     private static final long MAX_AGE_SECS = 3600;
@@ -31,8 +31,9 @@ public class WebConfiguration extends WebMvcConfigurationSupport {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("HEAD", "OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE")
-                .maxAge(MAX_AGE_SECS);
+            .allowedOrigins("*")
+            .allowCredentials(true)
+            .allowedMethods("HEAD", "OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE")
+            .maxAge(MAX_AGE_SECS);
     }
 }
