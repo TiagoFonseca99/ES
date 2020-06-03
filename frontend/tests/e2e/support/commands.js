@@ -40,7 +40,7 @@ Cypress.Commands.add('closeErrorMessage', message => {
       .find('button')
       .click();
   } else {
-    cy.find(message)
+    cy.contains(message)
       .parent()
       .find('button')
       .click();
@@ -303,19 +303,22 @@ Cypress.Commands.add('removeAllReplies', () => {
   );
 });
 
-Cypress.Commands.add('addDiscussionSameQuestion', (available, content, user) => {
-  cy.exec(
-    'PGPASSWORD= psql tutordb -U daniel -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, available, content) VALUES (' +
-    user +
-    ', (SELECT id FROM q), ' +
-    available +
-    ', \'' +
-    content +
-    '\');"'
-  );
-});
+Cypress.Commands.add(
+  'addDiscussionSameQuestion',
+  (available, content, user) => {
+    cy.exec(
+      'PGPASSWORD= psql tutordb -U daniel -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, available, content) VALUES (' +
+        user +
+        ', (SELECT id FROM q), ' +
+        available +
+        ', \'' +
+        content +
+        '\');"'
+    );
+  }
+);
 
-Cypress.Commands.add('openSolvedQuiz', (number) => {
+Cypress.Commands.add('openSolvedQuiz', number => {
   cy.get('[data-cy="quizzes"]').click();
   cy.get('[data-cy="solvedQuizzes"]').click();
   cy.get('[data-cy="quiz' + number + '"]').click();
@@ -328,7 +331,7 @@ Cypress.Commands.add('clickAvailability', () => {
     .first()
     .click();
   cy.get('[data-cy="changeAvailability"]').click({ force: true });
-})
+});
 
 // PPA
 
@@ -346,10 +349,11 @@ Cypress.Commands.add('reviewSubmission', (title, status) => {
   );
 });
 
+<<<<<<< HEAD
 Cypress.Commands.add('addSubmission', (title, qstatus, userId = 676, anon=false) => {
   //add question and submission
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
       title +
       '\', \'Question?\', \'' +
       qstatus +
@@ -358,26 +362,67 @@ Cypress.Commands.add('addSubmission', (title, qstatus, userId = 676, anon=false)
 
   //add options
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
       title +
       '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste a\', \'t\', (SELECT id FROM quest), 0);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
       title +
       '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste b\', \'f\', (SELECT id FROM quest), 0);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
       title +
       '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste c\', \'f\', (SELECT id FROM quest), 0);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+    'PGPASSWORD=fartodisto psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
       title +
       '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste d\', \'f\', (SELECT id FROM quest), 0);" '
   );
 });
+=======
+Cypress.Commands.add(
+  'addSubmission',
+  (title, qstatus, userId = 676, anon = false) => {
+    //add question and submission
+    cy.exec(
+      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
+        title +
+        '\', \'Question?\', \'' +
+        qstatus +
+        '\', 2, current_timestamp) RETURNING id) INSERT INTO submissions (question_id, user_id, anonymous) VALUES ((SELECT id from quest), ' +
+        userId +
+        ', ' +
+        anon +
+        ');" '
+    );
+
+    //add options
+    cy.exec(
+      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+        title +
+        '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste a\', \'t\', (SELECT id FROM quest), 0);" '
+    );
+    cy.exec(
+      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+        title +
+        '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste b\', \'f\', (SELECT id FROM quest), 0);" '
+    );
+    cy.exec(
+      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+        title +
+        '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste c\', \'f\', (SELECT id FROM quest), 0);" '
+    );
+    cy.exec(
+      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+        title +
+        '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste d\', \'f\', (SELECT id FROM quest), 0);" '
+    );
+  }
+);
+>>>>>>> 6ab577fa6c18f7edac80f4a54467df100a60901a
 
 Cypress.Commands.add('openTeacherQuestions', () => {
   cy.get('[data-cy="Management"]').click();
@@ -437,11 +482,17 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('checkAllStudentsSubmission', (title1, title2, title3) => {
-    cy.contains('Questions').click();
-    cy.contains('All Submissions').click();
+  cy.contains('Questions').click();
+  cy.contains('All Submissions').click();
+  cy.contains(title1);
+  cy.contains(title2);
+  cy.contains(title3);
+});
+
+Cypress.Commands.add('seesExcludingSubmissions', (title1, title2) => {
+    cy.contains('Exclude').click();
     cy.contains(title1);
     cy.contains(title2);
-    cy.contains(title3);
 });
 
 Cypress.Commands.add('viewQuestion', (title, content, op1, op2, op3, op4) => {
@@ -538,6 +589,27 @@ Cypress.Commands.add('teacherReviewsSubmission', () => {
 });
 
 Cypress.Commands.add('approveSubmissions', (title, justification) => {
+  cy.get('[data-cy="Management"]').click();
+  cy.get('[data-cy="Reviews"]').click();
+  cy.get('[data-cy="Search"]').click();
+  cy.wait(1000);
+  cy.contains(title)
+    .parent()
+    .parent()
+    .parent()
+    .should('have.length', 1)
+    .children()
+    .should('have.length', 8)
+    .find('[data-cy="createReview"]')
+    .click();
+  cy.get('[data-cy="Justification"]').type(justification);
+  cy.get('[data-cy="Approve"]').click();
+  cy.get('[data-cy="NoButton"]').click();
+});
+
+Cypress.Commands.add(
+  'changeSubmission',
+  (title, justification, question_title, question_content) => {
     cy.get('[data-cy="Management"]').click();
     cy.get('[data-cy="Reviews"]').click();
     cy.get('[data-cy="Search"]').click();
@@ -551,23 +623,6 @@ Cypress.Commands.add('approveSubmissions', (title, justification) => {
       .should('have.length', 8)
       .find('[data-cy="createReview"]')
       .click();
-    cy.get('[data-cy="Justification"]').type(justification);
-    cy.get('[data-cy="Approve"]').click();
-    cy.get('[data-cy="NoButton"]').click();
-});
-
-Cypress.Commands.add('changeSubmission', (title, justification, question_title, question_content) => {
-    cy.get('[data-cy="Management"]').click();
-    cy.get('[data-cy="Reviews"]').click();
-    cy.get('[data-cy="Search"]').click();
-    cy.wait(1000);
-    cy.contains(title)
-        .parent().parent().parent()
-        .should('have.length', 1)
-        .children()
-        .should('have.length', 8)
-        .find('[data-cy="createReview"]')
-        .click();
     cy.get('[data-cy="Justification"]').type(justification);
     cy.get('[data-cy="Approve"]').click();
     cy.get('[data-cy="YesButton"]').click();
@@ -577,18 +632,20 @@ Cypress.Commands.add('changeSubmission', (title, justification, question_title, 
 );
 
 Cypress.Commands.add('rejectSubmissions', (title, justification) => {
-    cy.get('[data-cy="Management"]').click();
-    cy.get('[data-cy="Reviews"]').click();
-    cy.get('[data-cy="Search"]').click();
-    cy.contains(title)
-      .parent().parent().parent()
-      .should('have.length', 1)
-      .children()
-      .should('have.length', 8)
-      .find('[data-cy="createReview"]')
-      .click();
-    cy.get('[data-cy="Justification"]').type(justification);
-    cy.get('[data-cy="Reject"]').click();
+  cy.get('[data-cy="Management"]').click();
+  cy.get('[data-cy="Reviews"]').click();
+  cy.get('[data-cy="Search"]').click();
+  cy.contains(title)
+    .parent()
+    .parent()
+    .parent()
+    .should('have.length', 1)
+    .children()
+    .should('have.length', 8)
+    .find('[data-cy="createReview"]')
+    .click();
+  cy.get('[data-cy="Justification"]').type(justification);
+  cy.get('[data-cy="Reject"]').click();
 });
 
 Cypress.Commands.add('getSubmissionStatus', (title, status) => {
@@ -624,16 +681,28 @@ Cypress.Commands.add('openDashboard', () => {
   cy.contains('Dashboard').click();
 });
 
-Cypress.Commands.add('addSubmissionInfo', (id) => {
+Cypress.Commands.add('addSubmissionInfo', id => {
   cy.log('Add 3 submissions: 1 approved and 2 rejected');
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title1\', \'Question1?\', 2,\'AVAILABLE\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), ' + id + ') RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque sim\', \'APPROVED\', ' + id + ', (SELECT id from subs), 677, current_timestamp);" '
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title1\', \'Question1?\', 2,\'AVAILABLE\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), ' +
+      id +
+      ') RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque sim\', \'APPROVED\', ' +
+      id +
+      ', (SELECT id from subs), 677, current_timestamp);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title2\', \'Question2?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), ' + id + ') RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' + id + ', (SELECT id from subs), 677, current_timestamp);" '
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title2\', \'Question2?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), ' +
+      id +
+      ') RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' +
+      id +
+      ', (SELECT id from subs), 677, current_timestamp);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title3\', \'Question3?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), ' + id + ') RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' + id + ', (SELECT id from subs), 677, current_timestamp);" '
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title3\', \'Question3?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), ' +
+      id +
+      ') RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' +
+      id +
+      ', (SELECT id from subs), 677, current_timestamp);" '
   );
 });
 
@@ -644,21 +713,23 @@ Cypress.Commands.add('addTournamentsInfo', () => {
   );
 });
 
-Cypress.Commands.add('addDiscussionsInfo', (id) => {
+Cypress.Commands.add('addDiscussionsInfo', id => {
   cy.log('Add 1 public discussions and 1 private discussion');
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1504, ' + id + ', true, \'Nothing here\');"'
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1504, ' +
+      id +
+      ', true, \'Nothing here\');"'
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1339, ' + id + ', false, \'Nothing here\');"'
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1339, ' +
+      id +
+      ', false, \'Nothing here\');"'
   );
 });
 
-  
 Cypress.Commands.add('openCourseDashboard', () => {
-    cy.contains('Course Dashboard').click();
+  cy.contains('Course Dashboard').click();
 });
-
 
 Cypress.Commands.add('removeSubmissionInfo', () => {
   cy.exec(
@@ -671,10 +742,12 @@ Cypress.Commands.add('removeSubmissionInfo', () => {
     'PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
   );
 });
-    
-Cypress.Commands.add('removeDiscussionInfo', (id) => {
+
+Cypress.Commands.add('removeDiscussionInfo', id => {
   cy.exec(
-    'PGPASSWORD= psql tutordb -U dserafim1999 -h localhost -c "DELETE FROM discussions WHERE user_id = ' + id + ';"'
+    'PGPASSWORD= psql tutordb -U dserafim1999 -h localhost -c "DELETE FROM discussions WHERE user_id = ' +
+      id +
+      ';"'
   );
 });
 
@@ -683,10 +756,13 @@ Cypress.Commands.add('checkUserInfo', (name, username) => {
   cy.get('[data-cy="username"]').contains(username);
 });
 
-Cypress.Commands.add('checkDiscussionsInfo', (numDiscussions, numPublicDiscussions) => {
-  cy.get('[data-cy="numDiscussions"]').contains(numDiscussions);
-  cy.get('[data-cy="numPublicDiscussions"]').contains(numPublicDiscussions);
-});
+Cypress.Commands.add(
+  'checkDiscussionsInfo',
+  (numDiscussions, numPublicDiscussions) => {
+    cy.get('[data-cy="numDiscussions"]').contains(numDiscussions);
+    cy.get('[data-cy="numPublicDiscussions"]').contains(numPublicDiscussions);
+  }
+);
 
 Cypress.Commands.add(
   'checkSubmissionsInfo',
@@ -716,10 +792,13 @@ Cypress.Commands.add('checkTournamentsInfo', () => {
     .contains(1);
 });
 
-Cypress.Commands.add('checkCourseInfo', (courseName, courseAcronym, courseTerm, courseType, courseStatus) => {
+Cypress.Commands.add(
+  'checkCourseInfo',
+  (courseName, courseAcronym, courseTerm, courseType, courseStatus) => {
     cy.get('[data-cy="courseName"]').contains(courseName);
     cy.get('[data-cy="courseAcronym"]').contains(courseAcronym);
     cy.get('[data-cy="courseTerm"]').contains(courseTerm);
     cy.get('[data-cy="courseType"]').contains(courseType);
     cy.get('[data-cy="courseStatus"]').contains(courseStatus);
-});
+  }
+);
