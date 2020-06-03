@@ -172,6 +172,10 @@ export default class MyTournamentsView extends Vue {
     try {
       this.tournaments = await RemoteServices.getUserTournaments();
       this.tournaments.sort((a, b) => this.sortById(a, b));
+      this.tournaments.map(tournament => {
+        if (tournament.privateTournament === undefined)
+          tournament.privateTournament = true;
+      });
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -224,13 +228,14 @@ export default class MyTournamentsView extends Vue {
     else return 'YOU NEED TO JOIN';
   }
 
-  getPrivateColor(privateTournament : boolean) {
+  getPrivateColor(privateTournament: boolean) {
     if (privateTournament) return 'red';
     else return 'green';
   }
-  getPrivateName(privateTournament : boolean) {
-    if (privateTournament) return 'private';
-    else return 'public';
+
+  getPrivateName(privateTournament: boolean) {
+    if (privateTournament) return 'Private';
+    else return 'Public';
   }
 
   isNotCanceled(tournamentToCancel: Tournament) {

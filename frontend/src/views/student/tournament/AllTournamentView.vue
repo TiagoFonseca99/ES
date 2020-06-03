@@ -47,13 +47,26 @@
         </v-chip>
       </template>
       <template v-slot:item.action="{ item }">
-        <v-tooltip bottom v-if="isNotEnrolled(item)">
+        <v-tooltip bottom v-if="isNotEnrolled(item) && !isPrivate(item)">
           <template v-slot:activator="{ on }">
             <v-icon
               small
               class="mr-2"
               v-on="on"
-              @click="joinTournament(item)"
+              @click="joinPublicTournament(item)"
+              data-cy="JoinTournament"
+              >fas fa-sign-in-alt</v-icon
+            >
+          </template>
+          <span>Join Tournament</span>
+        </v-tooltip>
+        <v-tooltip bottom v-if="isNotEnrolled(item) && isPrivate(item)">
+          <template v-slot:activator="{ on }">
+            <v-icon
+              small
+              class="mr-2"
+              v-on="on"
+              @click="openPasswordDialog(item)"
               data-cy="JoinTournament"
               >fas fa-sign-in-alt</v-icon
             >
@@ -83,6 +96,13 @@
       v-on:new-tournament="onCreateTournament"
       v-on:close-dialog="onCloseDialog"
     />
+    <edit-password-dialog
+      v-if="currentTournament"
+      v-model="editPasswordDialog"
+      :tournament="currentTournament"
+      v-on:enter-password="joinPrivateTournament"
+      v-on:close-password-dialog="onClosePasswordDialog"
+    />
   </v-card>
 </template>
 
@@ -91,17 +111,21 @@ import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
 import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
+import EditPasswordDialog from '@/views/student/tournament/PasswordTournamentView.vue';
 
 @Component({
   components: {
-    'edit-tournament-dialog': CreateTournamentDialog
+    'edit-tournament-dialog': CreateTournamentDialog,
+    'edit-password-dialog': EditPasswordDialog
   }
 })
 export default class AllTournamentView extends Vue {
   tournaments: Tournament[] = [];
   currentTournament: Tournament | null = null;
   createTournamentDialog: boolean = false;
+  editPasswordDialog: boolean = false;
   search: string = '';
+  password: string = '';
   headers: object = [
     {
       text: 'Course Acronym',
@@ -172,6 +196,10 @@ export default class AllTournamentView extends Vue {
     try {
       this.tournaments = await RemoteServices.getTournaments();
       this.tournaments.sort((a, b) => this.sortById(a, b));
+      this.tournaments.map(tournament => {
+        if (tournament.privateTournament === undefined)
+          tournament.privateTournament = true;
+      });
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -179,8 +207,7 @@ export default class AllTournamentView extends Vue {
   }
 
   sortById(a: Tournament, b: Tournament) {
-    if (a.id && b.id)
-      return a.id > b.id ? 1 : -1;
+    if (a.id && b.id) return a.id > b.id ? 1 : -1;
     else return 0;
   }
 
@@ -197,6 +224,16 @@ export default class AllTournamentView extends Vue {
 
   onCloseDialog() {
     this.createTournamentDialog = false;
+    this.currentTournament = null;
+  }
+
+  openPasswordDialog(tournamentToJoin: Tournament) {
+    this.currentTournament = tournamentToJoin;
+    this.editPasswordDialog = true;
+  }
+
+  onClosePasswordDialog() {
+    this.editPasswordDialog = false;
     this.currentTournament = null;
   }
 
@@ -220,30 +257,40 @@ export default class AllTournamentView extends Vue {
     else return 'YOU NEED TO JOIN';
   }
 
-  getPrivateColor(privateTournament : boolean) {
+  getPrivateColor(privateTournament: boolean) {
     if (privateTournament) return 'red';
     else return 'green';
   }
-  getPrivateName(privateTournament : boolean) {
-    if (privateTournament) return 'private';
-    else return 'public';
+
+  getPrivateName(privateTournament: boolean) {
+    if (privateTournament) return 'Private';
+    else return 'Public';
   }
 
   isNotEnrolled(tournamentToJoin: Tournament) {
     return !tournamentToJoin.enrolled;
   }
 
-  async joinTournament(tournamentToJoin: Tournament) {
+  isPrivate(tournamentToJoin: Tournament) {
+    return tournamentToJoin.privateTournament;
+  }
+
+  async joinPrivateTournament(password: string) {
+    this.password = password;
+    if (this.currentTournament)
+      await this.joinPublicTournament(this.currentTournament);
+    this.editPasswordDialog = false;
+    this.currentTournament = null;
+    this.password = '';
+  }
+
+  async joinPublicTournament(tournamentToJoin: Tournament) {
     const enrolled = tournamentToJoin.enrolled;
     const topics = tournamentToJoin.topics;
     tournamentToJoin.enrolled = false;
     tournamentToJoin.topics = [];
-    const password = ''
     try {
-      if (tournamentToJoin.privateTournament == true) {
-        // TODO PEDIR PASSWORD e atualizar variavel
-      }
-      await RemoteServices.joinTournament(tournamentToJoin, password);
+      await RemoteServices.joinTournament(tournamentToJoin, this.password);
     } catch (error) {
       await this.$store.dispatch('error', error);
       tournamentToJoin.enrolled = enrolled;
@@ -257,7 +304,7 @@ export default class AllTournamentView extends Vue {
   async leaveTournament(tournamentToJoin: Tournament) {
     const enrolled = tournamentToJoin.enrolled;
     const topics = tournamentToJoin.topics;
-    tournamentToJoin.enrolled = undefined;
+    tournamentToJoin.enrolled = true;
     tournamentToJoin.topics = [];
     try {
       await RemoteServices.leaveTournament(tournamentToJoin);

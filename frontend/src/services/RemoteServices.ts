@@ -1039,11 +1039,8 @@ export default class RemoteServices {
   }
 
   static joinTournament(tournament: Tournament, password: String) {
-    let path: string = 'tournaments/joinTournament?password=' + '\'' + password + '\'';
-    console.log(password);
-    return httpClient
-      .put(path, tournament)
-      .catch(async error => {
+    let path: string = 'tournaments/joinTournament?password=' + password;
+    return httpClient.put(path, tournament).catch(async error => {
       throw Error(await this.errorMessage(error));
     });
   }
