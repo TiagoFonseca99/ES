@@ -230,9 +230,7 @@ public class Tournament {
         getParticipants().clear();
     }
 
-    public boolean isPrivateTournament() {
-        return privateTournament;
-    }
+    public boolean isPrivateTournament() { return privateTournament; }
 
     public void setPrivateTournament(boolean privateTournament) {
         this.privateTournament = privateTournament;

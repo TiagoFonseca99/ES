@@ -214,10 +214,8 @@ public class TournamentService {
         if (!user.getCourseExecutions().contains(tournament.getCourseExecution())) {
             throw new TutorException(STUDENT_NO_COURSE_EXECUTION, user.getId());
         }
-        if (tournament.isPrivateTournament()) {
-            if (!password.equals(tournament.getPassword())) {
-                throw new TutorException(WRONG_TOURNAMENT_PASSWORD, tournament.getId());
-            }
+        if (tournament.isPrivateTournament() && !password.equals(tournament.getPassword())) {
+            throw new TutorException(WRONG_TOURNAMENT_PASSWORD, tournament.getId());
         }
 
         tournament.addParticipant(user);
