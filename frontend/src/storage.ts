@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie';
+
 export function persist(name: string, value: string, session: boolean = true) {
   if (session) {
     sessionStorage.setItem(name, value);
@@ -33,4 +35,19 @@ export function remove(name: string, session: boolean = true) {
 export function removeAll(name: string) {
   sessionStorage.removeItem(name);
   localStorage.removeItem(name);
+}
+
+export function createCookie(
+  name: string,
+  value: string,
+  expiry: number | undefined = undefined
+) {
+  Cookies.set(name, value, { expires: expiry, sameSite: 'strict' });
+}
+
+export function getCookie(name: string) {
+  return Cookies.get(name);
+}
+export function removeCookie(name: string) {
+  Cookies.remove(name);
 }
