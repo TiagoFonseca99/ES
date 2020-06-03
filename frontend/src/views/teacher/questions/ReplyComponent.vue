@@ -23,7 +23,9 @@
               </div>
             </div>
             <v-expansion-panels
-              v-if="discussion.replies !== null"
+              v-if="
+                discussion.replies !== null && discussion.replies.length !== 0
+              "
               :popout="true"
               style="margin-bottom: 20px"
             >
@@ -52,6 +54,17 @@
                       >{{ reply.userName }} on {{ reply.date }}:
                     </b>
                     <b v-else>You on {{ reply.date }}:</b>
+                    <v-icon
+                      class="mr-2"
+                      style="float: right"
+                      @click="
+                        setDiscussion(discussion);
+                        setReply(reply);
+                        deleteReply();
+                      "
+                      color="red"
+                      >delete</v-icon
+                    >
                     <span v-html="convertMarkDown(reply.message)" />
                   </div>
                   <div class="reply-message">
@@ -135,11 +148,13 @@ import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
 import RemoteServices from '../../../services/RemoteServices';
+import Reply from '@/models/management/Reply';
 
 @Component
 export default class ReplyComponent extends Vue {
   @Prop() readonly discussions!: Discussion[];
   discussion: Discussion = this.discussions[0];
+  reply: Reply | undefined;
   replyMessages: Map<number, string> = new Map();
 
   @Emit('submit')
@@ -181,7 +196,6 @@ export default class ReplyComponent extends Vue {
         this.discussion,
         this.discussion.available
       );
-      console.log(this.discussion.available);
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -200,6 +214,21 @@ export default class ReplyComponent extends Vue {
     let val = document.querySelector(name)!;
     textArea = val as HTMLTextAreaElement;
     textArea.value = '';
+  }
+
+  setReply(reply: Reply) {
+    this.reply = reply;
+  }
+
+  async deleteReply() {
+    try {
+      await RemoteServices.deleteReply(this.reply!.id);
+      this.discussion.replies = this.discussion.replies!.filter(
+        obj => obj !== this.reply
+      );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
   }
 
   convertMarkDown(text: string) {

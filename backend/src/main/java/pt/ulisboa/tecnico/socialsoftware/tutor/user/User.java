@@ -432,13 +432,13 @@ public class User implements UserDetails, DomainEntity {
     }
 
 
-    public Boolean isStudent() {
+    public boolean isStudent() {
         return this.role == User.Role.STUDENT;
     }
 
     public void removeTournament(Tournament tournament) { this.tournaments.remove(tournament); }
 
-    public Boolean isTeacher() {
+    public boolean isTeacher() {
         return this.role == User.Role.TEACHER;
     }
 
@@ -542,6 +542,10 @@ public class User implements UserDetails, DomainEntity {
 
     public void addReply(Reply reply) {
         replies.add(reply);
+    }
+
+    public Set<Reply> getReplies() {
+        return this.replies;
     }
 
     public DashboardDto getDashboardInfo() {

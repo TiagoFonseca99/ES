@@ -236,7 +236,7 @@ public class SubmissionService {
 
     private User getStudent(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-        if(user.isStudent() != null && !user.isStudent())
+        if(!user.isStudent())
             throw new TutorException(USER_NOT_STUDENT, user.getUsername());
         return user;
     }
@@ -258,7 +258,7 @@ public class SubmissionService {
         if(teacherId == null)
             throw new TutorException(USER_NOT_FOUND);
         User user = userRepository.findById(teacherId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, teacherId));
-        if (user.isTeacher() != null && !user.isTeacher())
+        if (!user.isTeacher())
             throw new TutorException(USER_NOT_TEACHER, user.getUsername());
         return user;
     }
