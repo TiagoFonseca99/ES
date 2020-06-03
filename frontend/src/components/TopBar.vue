@@ -164,17 +164,23 @@
           </v-list>
         </v-menu>
 
-        <!-- ---- PPA ---- -->
-
         <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" text dark>
+            <v-btn v-on="on" text dark data-cy="questions">
               Questions
               <v-icon>fas fa-question-circle</v-icon>
             </v-btn>
           </template>
           <v-list dense>
-            <v-list-item to="/student/submissions">
+            <v-list-item to="/student/discussions" data-cy="discussions">
+              <v-list-item-action>
+                <v-icon>fas fa-comment-alt</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Discussions</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item to="/student/submissions" data-cy="submissions">
               <v-list-item-action>
                 <v-icon>fas fa-user-edit</v-icon>
               </v-list-item-action>
@@ -190,7 +196,10 @@
                 <v-list-item-title>Reviews</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item to="/student/all-submissions">
+            <v-list-item
+              to="/student/all-submissions"
+              data-cy="all-submissions"
+            >
               <v-list-item-action>
                 <v-icon>fas fa-users</v-icon>
               </v-list-item-action>
@@ -200,23 +209,6 @@
             </v-list-item>
           </v-list>
         </v-menu>
-
-        <!-- ------------- -->
-
-        <!-- ---- DDP ---- -->
-
-        <v-btn
-          to="/student/discussions"
-          v-if="isStudent && currentCourse"
-          text
-          dark
-          data-cy="discussions"
-        >
-          Discussions
-          <v-icon>fas fa-comment-alt</v-icon>
-        </v-btn>
-
-        <!-- ------------- -->
 
         <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
           <template v-slot:activator="{ on }">
@@ -451,6 +443,16 @@
             <v-list-item-content>Solved Quizzes</v-list-item-content>
           </v-list-item>
 
+          <!-- ----DDP---- -->
+
+          <v-list-item to="/student/discussions">
+            <v-list-item-action>
+              <v-icon>fas fa-comment-alt</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Discussions</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
           <!-- ----PPA---- -->
 
           <v-list-item to="/student/submissions">
@@ -472,17 +474,6 @@
               <v-icon>fas fa-users</v-icon>
             </v-list-item-action>
             <v-list-item-content>All Submissions</v-list-item-content>
-          </v-list-item>
-
-          <!-- ----------- -->
-
-          <!-- ----DDP---- -->
-
-          <v-list-item to="/student/discussions">
-            <v-list-item-action>
-              <v-icon>fas fa-comment-alt</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>Discussions</v-list-item-content>
           </v-list-item>
 
           <!-- ----------- -->

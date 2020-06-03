@@ -26,8 +26,13 @@
             @click="toggleAnswers"
             >{{ filterLabel }}</v-btn
           >
-          <v-spacer />
-          <v-btn-toggle class="button-group">
+          <v-btn-toggle
+            dense
+            borderless
+            mandatory
+            background-color="primary"
+            color="white"
+          >
             <v-btn
               color="primary"
               data-cy="SeeAll"
@@ -66,9 +71,16 @@
       </template>
 
       <template v-slot:item.username="{ item }">
-        <v-chip color="primary" small @click="openStudentDashboardDialog(item)">
-          <span v-if="item.anonymous"> {{ 'ANONYMOUS' }} </span>
-          <span v-else> {{ item.username }} </span>
+        <v-chip color="error" small v-if="item.anonymous">
+          <span> {{ 'Anonymous User' }} </span>
+        </v-chip>
+        <v-chip
+          color="primary"
+          small
+          v-else
+          @click="openStudentDashboardDialog(item)"
+        >
+          <span> {{ item.username }} </span>
         </v-chip>
       </template>
 

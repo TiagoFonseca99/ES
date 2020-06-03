@@ -67,7 +67,7 @@
                   <v-card-actions>
                     <v-spacer />
                     <v-btn
-                      color="blue darken-1"
+                      color="primary"
                       data-cy="submitReply"
                       @click="
                         setDiscussion(discussion);
@@ -98,7 +98,7 @@
             <v-card-actions>
               <v-spacer />
               <v-btn
-                color="blue darken-1"
+                color="primary"
                 data-cy="submitReply"
                 @click="
                   setDiscussion(discussion);
