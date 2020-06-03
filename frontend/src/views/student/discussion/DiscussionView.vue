@@ -54,7 +54,20 @@
                 <b v-if="$store.getters.getUser.id !== reply.userId"
                   >{{ reply.userName }} on {{ reply.date }}:
                 </b>
-                <b v-else>You on {{ reply.date }}:</b>
+                <div v-else>
+                  <b>You on {{ reply.date }}:</b>
+                  <v-icon
+                    class="mr-2"
+                    style="float: right"
+                    @click="
+                      setDiscussion(item);
+                      setReply(reply);
+                      deleteReply();
+                    "
+                    color="red"
+                    >delete</v-icon
+                  >
+                </div>
                 <span v-html="convertToMarkdown(reply.message)" />
               </div>
             </div>
@@ -95,6 +108,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
 import RemoteServices from '@/services/RemoteServices';
+import Reply from '@/models/management/Reply';
 
 enum FilterState {
   REPLY = 'See all discussions',
@@ -110,6 +124,7 @@ export default class DiscussionView extends Vue {
   expanded = [];
   currentDiscussion!: Discussion;
   replyMessages: Map<number, string> = new Map();
+  reply: Reply | undefined;
 
   headers: object = [
     { text: '', value: 'data-table-expand' },
@@ -203,6 +218,21 @@ export default class DiscussionView extends Vue {
     let val = document.querySelector(name)!;
     textArea = val as HTMLTextAreaElement;
     textArea.value = '';
+  }
+
+  setReply(reply: Reply) {
+    this.reply = reply;
+  }
+
+  async deleteReply() {
+    try {
+      await RemoteServices.deleteReply(this.reply!.id);
+      this.currentDiscussion.replies = this.currentDiscussion.replies!.filter(
+        obj => obj !== this.reply
+      );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
   }
 
   convertToMarkdown(text: string) {

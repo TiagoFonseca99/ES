@@ -6,7 +6,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -26,7 +25,7 @@ public class Reply {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne
+    @ManyToOne
     private Discussion discussion;
 
     @NotNull
@@ -91,6 +90,16 @@ public class Reply {
 
     public void setDiscussion(Discussion discussion) {
         this.discussion = discussion;
+    }
+
+    public void discussionRemove() {
+        this.user.getReplies().remove(this);
+        this.discussion = null;
+    }
+
+    public void remove() {
+        this.discussion.getReplies().remove(this);
+        discussionRemove();
     }
 
     private void checkEmptyMessage(ReplyDto reply) {
