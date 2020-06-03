@@ -141,7 +141,26 @@ public class DiscussionService {
 
         reply.remove();
 
-        replyRepository.deleteById(reply.getId());
+        this.entityManager.remove(reply);
+
+        return true;
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public boolean removeDiscussion(Integer userId, Integer creatorId, Integer questionId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
+
+        Discussion discussion = discussionRepository.findByUserIdQuestionId(creatorId, questionId).orElseThrow(() -> new TutorException(DISCUSSION_NOT_FOUND, creatorId, questionId));
+
+        if (!user.isTeacher() && !userId.equals(discussion.getId().getUserId())) {
+            throw new TutorException(DISCUSSION_UNAUTHORIZED_DELETER, userId);
+        }
+
+        discussion.remove();
+
+        this.entityManager.remove(discussion);
 
         return true;
     }
@@ -153,7 +172,7 @@ public class DiscussionService {
     }
 
     private void checkUserAndDiscussion(User user, DiscussionDto discussion) {
-        if (user.getRole() != User.Role.TEACHER && !user.getId().equals(discussion.getUserId())) {
+        if (user.getRole() != User.Role.TEACHER && !user.getId().equals(discussion.getUserId()) && !discussion.isAvailable()) {
             throw new TutorException(REPLY_UNAUTHORIZED_USER);
         }
     }
