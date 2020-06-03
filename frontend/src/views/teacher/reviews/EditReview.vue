@@ -30,21 +30,21 @@
       </v-card-text>
 
       <v-card-actions>
+        <v-spacer />
         <v-btn
-          color="blue darken-1"
+          color="primary"
           data-cy="cancelButton"
           @click="$emit('dialog', false)"
           >Cancel</v-btn
         >
-        <v-spacer />
         <v-btn
-          color="blue darken-1"
+          color="primary"
           data-cy="Reject"
           @click="createReview('REJECTED')"
           >Reject</v-btn
         >
         <v-btn
-          color="blue darken-1"
+          color="primary"
           data-cy="Approve"
           @click="menuChangeSubmission('APPROVED')"
           >Approve</v-btn
