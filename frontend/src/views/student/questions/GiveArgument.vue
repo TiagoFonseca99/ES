@@ -31,7 +31,7 @@
 
             <v-card-actions>
                 <v-spacer />
-                <v-btn color="blue darken-1" data-cy="Reject" @click="submitQuestion"
+                <v-btn color="blue darken-1" data-cy="Submit" @click="submitQuestion"
                 >Submit</v-btn
                 >
             </v-card-actions>
@@ -46,7 +46,7 @@ import RemoteServices from '@/services/RemoteServices';
 @Component
 export default class GiveArgument extends Vue {
     @Prop({type: Submission, required: true}) submission!: Submission;
-    @Prop({ type: Number, required: true }) oldQuestionId!: number;
+    @Prop({type: Number, required: false }) oldQuestionId!: number;
     @Model('dialog', Boolean) dialog!: boolean;
 
     editSubmission!: Submission;
@@ -56,7 +56,6 @@ export default class GiveArgument extends Vue {
     }
 
     async submitQuestion() {
-
         try {
             const result =
                 this.oldQuestionId != null

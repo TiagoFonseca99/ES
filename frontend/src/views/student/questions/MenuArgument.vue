@@ -15,11 +15,11 @@
 
             <v-card-actions>
                 <v-spacer />
-                <v-btn color="blue darken-1" data-cy="YesButton" @click="give_Argument"
+                <v-btn color="primary" data-cy="YesButton" @click="giveArgument"
                 >Yes</v-btn
                 >
                 <v-spacer />
-                <v-btn color="blue darken-1" data-cy="NoButton" @click="submitQuestion"
+                <v-btn color="primary" data-cy="NoButton" @click="submitQuestion"
                 >No</v-btn
                 >
                 <v-spacer />
@@ -28,7 +28,7 @@
                     v-if="editSubmission"
                     v-model="GiveArgument"
                     :submission="editSubmission"
-                    :number="oldQuestionId"
+                    :old-question-id="oldQuestionId"
                     v-on:argument-given="onSaveChange"
             />
         </v-card>
@@ -48,16 +48,14 @@
     })
     export default class MenuArgument extends Vue {
         @Prop({ type: Submission, required: true }) submission!: Submission;
-        @Prop({ type: Number, required: true }) oldQuestionId!: number;
+        @Prop({ type: Number, required: false }) oldQuestionId: number | null = null;
         @Model('dialog', Boolean) dialog!: boolean;
-
 
         editSubmission!: Submission;
         GiveArgument: boolean = false;
 
         async created() {
             this.editSubmission = this.submission;
-
         }
 
         async submitQuestion() {
@@ -73,7 +71,7 @@
             }
         }
 
-        give_Argument() {
+        giveArgument() {
             this.GiveArgument = true;
         }
 

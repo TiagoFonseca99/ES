@@ -82,7 +82,7 @@
         v-if="currentSubmission"
         v-model="MenuArgument"
         :submission="currentSubmission"
-        :number="oldQuestionId"
+        :old-question-id="oldQuestionId"
         v-on:no-changes="onSaveSubmission"
         />
     </v-card>
@@ -94,6 +94,7 @@ import { Component, Model, Prop, Vue, Watch } from 'vue-property-decorator';
 import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
 import MenuArgument from '@/views/student/questions/MenuArgument.vue';
+import Option from '@/models/management/Option';
 
 @Component({
   components: {
@@ -125,6 +126,18 @@ export default class EditSubmissionDialog extends Vue {
   }
 
   async menuArgument() {
+    if (!this.checkCorrectOptions(this.editQuestion.options)) {
+      await this.$store.dispatch('error',
+              'Question must have 1 and only 1 correct option'
+      );
+      return
+    }
+    if (!this.checkInvalidOptions(this.editQuestion.options)) {
+      await this.$store.dispatch('error',
+              'Question with invalid option'
+      );
+      return
+    }
     if (this.editQuestion && (!this.editQuestion.title || !this.editQuestion.content)) {
       await this.$store.dispatch('error',
               'Question must have title and content'
@@ -140,6 +153,30 @@ export default class EditSubmissionDialog extends Vue {
     this.MenuArgument = false;
     this.$emit('submit-question');
     await this.$store.dispatch('clearLoading');
+  }
+
+  checkCorrectOptions(options: Option[]) {
+    let count = 0;
+    let i = 0;
+    for (i = 0; i < options.length; i++) {
+      if (options[i].correct == true) {
+        count++;
+      }
+    }
+    if (count == 1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  checkInvalidOptions(options: Option[]) {
+    let i = 0;
+    for (i = 0; i < options.length; i++) {
+      if (options[i].content.length === 0 || !options[i].content.trim()) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 </script>

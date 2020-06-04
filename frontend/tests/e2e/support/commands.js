@@ -344,7 +344,7 @@ Cypress.Commands.add('openSubmissions', () => {
 Cypress.Commands.add('reviewSubmission', (title, status) => {
   //add review for submission
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH sub AS (SELECT s.id FROM submissions s JOIN questions q ON s.question_id=q.id WHERE q.title=\'' +
+    'PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH sub AS (SELECT s.id FROM submissions s JOIN questions q ON s.question_id=q.id WHERE q.title=\'' +
       title +
       '\') INSERT INTO reviews(creation_date,justification,status,student_id,submission_id,user_id) VALUES (current_timestamp,\'As opções estão incorretas, e a pergunta pouco clara\', \'REJECTED\', 676, (SELECT * FROM sub), 677);" '
   );
@@ -355,7 +355,7 @@ Cypress.Commands.add(
   (title, qstatus, userId = 676, anon = false) => {
     //add question and submission
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
+      'PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
         title +
         '\', \'Question?\', \'' +
         qstatus +
@@ -368,22 +368,22 @@ Cypress.Commands.add(
 
     //add options
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+      'PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
         title +
         '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste a\', \'t\', (SELECT id FROM quest), 0);" '
     );
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+      'PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
         title +
         '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste b\', \'f\', (SELECT id FROM quest), 0);" '
     );
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+      'PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
         title +
         '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste c\', \'f\', (SELECT id FROM quest), 0);" '
     );
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+      'PGPASSWORD= psql -d tutordb -U tomas -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
         title +
         '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste d\', \'f\', (SELECT id FROM quest), 0);" '
     );
@@ -408,6 +408,8 @@ Cypress.Commands.add(
     cy.get('[data-cy="Option3"]').type(opt3);
     cy.get('[data-cy="Option4"]').type(opt4);
     cy.get('[data-cy="submitButton"]').click();
+    cy.get('[data-cy="NoButton"]').click();
+    cy.wait(1500);
     cy.contains(title)
       .parent()
       .parent()
@@ -420,8 +422,36 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add(
-  'resubmitQuestion',
-  (title, content, opt1, opt2, opt3, opt4) => {
+    'submitQuestionArgument',
+    (title, content, opt1, opt2, opt3, opt4, arg) => {
+        cy.openSubmissions();
+        cy.get('[data-cy="submitQuestion"]').click();
+        cy.get('[data-cy="QuestionTitle"]').type(title);
+        cy.get('[data-cy="QuestionContent"]').type(content);
+        cy.get('[data-cy="Switch1"]').click({ force: true });
+        cy.get('[data-cy="Option1"]').type(opt1);
+        cy.get('[data-cy="Option2"]').type(opt2);
+        cy.get('[data-cy="Option3"]').type(opt3);
+        cy.get('[data-cy="Option4"]').type(opt4);
+        cy.get('[data-cy="submitButton"]').click();
+        cy.get('[data-cy="YesButton"]').click();
+        cy.get('[data-cy="Argument"]').type(arg);
+        cy.get('[data-cy="Submit"]').click();
+        cy.wait(1500);
+        cy.contains(title)
+            .parent()
+            .parent()
+            .parent()
+            .should('have.length', 1)
+            .children()
+            .should('have.length', 5);
+        cy.wait(500);
+    }
+);
+
+Cypress.Commands.add(
+  'resubmitQuestionArgument',
+  (title, content, opt1, opt2, opt3, opt4, arg) => {
     cy.get('[data-cy="QuestionTitle"]')
       .clear()
       .type(title);
@@ -443,8 +473,40 @@ Cypress.Commands.add(
       .clear()
       .type(opt4);
     cy.get('[data-cy="submitButton"]').click();
+    cy.get('[data-cy="YesButton"]').click();
+    cy.get('[data-cy="Argument"]').type(arg);
+    cy.get('[data-cy="Submit"]').click();
     cy.wait(500);
   }
+);
+
+Cypress.Commands.add(
+    'resubmitQuestion',
+    (title, content, opt1, opt2, opt3, opt4) => {
+        cy.get('[data-cy="QuestionTitle"]')
+            .clear()
+            .type(title);
+        cy.get('[data-cy="QuestionContent"]')
+            .clear()
+            .type(content);
+        cy.get('[data-cy="Switch1"]').click({ force: true });
+        cy.get('[data-cy="Option1"]')
+            .clear()
+            .type(opt1);
+        cy.get('[data-cy="Option2"]')
+            .clear()
+            .type(opt2);
+        cy.get('[data-cy="Switch3"]').click({ force: true });
+        cy.get('[data-cy="Option3"]')
+            .clear()
+            .type(opt3);
+        cy.get('[data-cy="Option4"]')
+            .clear()
+            .type(opt4);
+        cy.get('[data-cy="submitButton"]').click();
+        cy.get('[data-cy="NoButton"]').click();
+        cy.wait(500);
+    }
 );
 
 Cypress.Commands.add('checkAllStudentsSubmission', (title1, title2, title3) => {
@@ -515,6 +577,8 @@ Cypress.Commands.add('submitInvalidQuestion', (title, content) => {
   cy.get('[data-cy="QuestionContent"]').type(content);
   cy.get('[data-cy="Switch1"]').click({ force: true });
   cy.get('[data-cy="submitButton"]').click();
+  cy.wait(1500);
+
 });
 
 Cypress.Commands.add('resubmitInvalidQuestion', title => {
@@ -523,6 +587,8 @@ Cypress.Commands.add('resubmitInvalidQuestion', title => {
     .type(title);
   cy.get('[data-cy="QuestionContent"]').clear();
   cy.get('[data-cy="submitButton"]').click();
+  cy.wait(1500);
+
 });
 
 Cypress.Commands.add('deleteSubmission', title => {
