@@ -71,13 +71,20 @@
           >Cancel</v-btn
         >
         <v-btn
+          @click="menuArgument"
           color="blue darken-1"
-          @click="submitQuestion"
           data-cy="submitButton"
         >
           {{ oldQuestionId === null ? 'Submit' : 'Resubmit' }}
         </v-btn>
       </v-card-actions>
+      <menu-argument
+        v-if="currentSubmission"
+        v-model="MenuArgument"
+        :submission="currentSubmission"
+        :number="oldQuestionId"
+        v-on:no-changes="onSaveSubmission"
+        />
     </v-card>
   </v-dialog>
 </template>
@@ -85,10 +92,14 @@
 <script lang="ts">
 import { Component, Model, Prop, Vue, Watch } from 'vue-property-decorator';
 import Question from '@/models/management/Question';
-import RemoteServices from '@/services/RemoteServices';
 import Submission from '@/models/management/Submission';
+import MenuArgument from '@/views/student/questions/MenuArgument.vue';
 
-@Component
+@Component({
+  components: {
+    'menu-argument': MenuArgument
+  }
+})
 export default class EditSubmissionDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
   @Prop({ type: Question, required: true }) readonly question!: Question;
@@ -97,6 +108,7 @@ export default class EditSubmissionDialog extends Vue {
   editQuestion!: Question;
   oldQuestionId: number | null = null;
   currentSubmission!: Submission;
+  MenuArgument: boolean = false;
 
   created() {
     this.updateSubmission();
@@ -112,33 +124,22 @@ export default class EditSubmissionDialog extends Vue {
     this.currentSubmission = new Submission(this.submission);
   }
 
-  async submitQuestion() {
-    if (
-      this.editQuestion &&
-      (!this.editQuestion.title || !this.editQuestion.content)
-    ) {
-      await this.$store.dispatch(
-        'error',
-        'Question must have title and content'
+  async menuArgument() {
+    if (this.editQuestion && (!this.editQuestion.title || !this.editQuestion.content)) {
+      await this.$store.dispatch('error',
+              'Question must have title and content'
       );
       return;
     }
+    this.currentSubmission.questionDto = this.editQuestion;
+    this.currentSubmission.courseId = this.$store.getters.getCurrentCourse.courseId;
+    this.MenuArgument = true;
+  }
 
-    try {
-      this.currentSubmission.questionDto = this.editQuestion;
-      this.currentSubmission.courseId = this.$store.getters.getCurrentCourse.courseId;
-      const result =
-        this.oldQuestionId != null
-          ? await RemoteServices.resubmitQuestion(
-              this.currentSubmission,
-              this.oldQuestionId
-            )
-          : await RemoteServices.submitQuestion(this.currentSubmission);
-
-      this.$emit('submit-question', result);
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-    }
+  async onSaveSubmission() {
+    this.MenuArgument = false;
+    this.$emit('submit-question');
+    await this.$store.dispatch('clearLoading');
   }
 }
 </script>

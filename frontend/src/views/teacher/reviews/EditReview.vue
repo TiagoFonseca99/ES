@@ -16,6 +16,13 @@
       <v-card-text class="text-left" v-if="currentReview">
         <v-container grid-list-md fluid>
           <v-layout column wrap>
+            <v-flex>
+              <v-textarea readonly v-if="submission.argument"
+                      v-model="submission.argument"
+                      data-cy="Argument"
+                      label="Student's Argument"
+              ></v-textarea>
+            </v-flex>
             <v-flex xs24 sm12 md12>
               <v-textarea
                 outline

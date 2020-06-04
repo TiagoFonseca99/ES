@@ -67,6 +67,8 @@ public class SubmissionService {
 
         submission.setAnonymous(submissionDto.isAnonymous());
 
+        submission.setArgument(submissionDto.getArgument());
+
         entityManager.persist(submission);
         return new SubmissionDto(submission);
     }
@@ -94,6 +96,9 @@ public class SubmissionService {
         Submission submission = new Submission(newQuestion, user);
 
         submission.setAnonymous(submissionDto.isAnonymous());
+
+        if (!submissionDto.getArgument().isBlank())
+            submission.setArgument(submissionDto.getArgument());
 
         entityManager.persist(submission);
         return new SubmissionDto(submission);

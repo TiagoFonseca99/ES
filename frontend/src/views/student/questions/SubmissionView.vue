@@ -106,7 +106,7 @@
       v-model="editSubmissionDialog"
       :question="currentQuestion"
       :submission="currentSubmission"
-      v-on:submit-question="onSaveQuestion"
+      v-on:submit-question="onSaveQuestion(currentSubmission)"
     />
     <show-question-dialog
       v-if="currentQuestion"
@@ -244,9 +244,18 @@ export default class SubmissionView extends Vue {
   }
 
   async onSaveQuestion(submission: Submission) {
+    this.editSubmissionDialog = false;
     this.submissions = this.submissions.filter(s => s.id !== submission.id);
     this.submissions.unshift(submission);
-    this.editSubmissionDialog = false;
+    try {
+      [this.submissions, this.topics] = await Promise.all([
+        RemoteServices.getSubmissions(),
+        RemoteServices.getTopics()
+      ]);
+      this.submissions.sort((a, b) => this.sortNewestFirst(a, b));
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
     this.currentQuestion = null;
     this.currentSubmission = null;
   }
