@@ -33,7 +33,16 @@
             <v-icon
               large
               class="mr-2"
-              style="float: right"
+              v-on="on"
+              @click="
+                setDiscussion(item);
+                editDiscussion();
+              "
+              >edit</v-icon
+            >
+            <v-icon
+              large
+              class="mr-2"
               v-on="on"
               @click="
                 setDiscussion(item);
@@ -119,6 +128,12 @@
         </td>
       </template>
     </v-data-table>
+    <edit-discussion-dialog
+      :discussion="currentDiscussion"
+      :dialog="edit"
+      v-on:dialog="setDialog"
+      v-on:save-discussion="onSaveDiscussion"
+    />
   </v-card>
 </template>
 
@@ -128,13 +143,18 @@ import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
 import RemoteServices from '@/services/RemoteServices';
 import Reply from '@/models/management/Reply';
+import EditDiscussionDialog from '@/views/student/discussion/EditDiscussionDialog.vue';
 
 enum FilterState {
   REPLY = 'See all discussions',
   ALL = 'See discussions with reply'
 }
 
-@Component
+@Component({
+  components: {
+    'edit-discussion-dialog': EditDiscussionDialog
+  }
+})
 export default class DiscussionView extends Vue {
   discussions: Discussion[] = [];
   search: String = '';
@@ -144,10 +164,11 @@ export default class DiscussionView extends Vue {
   currentDiscussion!: Discussion;
   replyMessages: Map<number, string> = new Map();
   reply: Reply | undefined;
+  edit: Boolean = false;
 
   headers: object = [
-    { text: 'Actions', value: 'action', align: 'center' },
     { text: '', value: 'data-table-expand' },
+    { text: 'Actions', value: 'action', align: 'center' },
     {
       text: 'Question Title',
       value: 'question.title',
@@ -254,6 +275,28 @@ export default class DiscussionView extends Vue {
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
+  }
+
+  editDiscussion() {
+    this.edit = true;
+  }
+
+  setDialog(dialog: boolean) {
+    this.edit = dialog;
+  }
+
+  async onSaveDiscussion(edited: Discussion) {
+    this.currentDiscussion = edited;
+    this.setDialog(false);
+
+    for (let i = 0; i < this.discussions.length; i++) {
+      if (this.discussions[i].questionId == edited.questionId) {
+        this.discussions.splice(i, 1);
+        break;
+      }
+    }
+
+    this.discussions.unshift(edited);
   }
 
   async deleteDiscussion() {

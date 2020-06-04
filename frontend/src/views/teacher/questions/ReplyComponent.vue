@@ -7,9 +7,9 @@
       <div class="discussion">
         <ul>
           <li
-            v-for="discussion in discussions"
+            v-for="(discussion, index) in discussions"
             :key="discussion.content"
-            @focus="setDiscussion(discussion)"
+            @focus="setDiscussion(discussion, index)"
           >
             <div
               style="display: flex; justify-content: space-between; position: relative"
@@ -23,7 +23,16 @@
                   class="mr-2"
                   style="float: right"
                   @click="
-                    setDiscussion(discussion);
+                    setDiscussion(discussion, index);
+                    editDiscussion();
+                  "
+                  >edit</v-icon
+                >
+                <v-icon
+                  class="mr-2"
+                  style="float: right"
+                  @click="
+                    setDiscussion(discussion, index);
                     deleteDiscussion();
                   "
                   color="red"
@@ -45,7 +54,7 @@
                 class="ma-4"
                 :label="discussion.available ? 'Public' : 'Private'"
                 @change="
-                  setDiscussion(discussion);
+                  setDiscussion(discussion, index);
                   setAvailability();
                 "
                 style="flex: 1; position: relative"
@@ -68,7 +77,7 @@
                       class="mr-2"
                       style="float: right"
                       @click="
-                        setDiscussion(discussion);
+                        setDiscussion(discussion, index);
                         setReply(reply);
                         deleteReply();
                       "
@@ -82,7 +91,7 @@
                       clearable
                       outlined
                       auto-grow
-                      v-on:focus="setDiscussion(discussion)"
+                      v-on:focus="setDiscussion(discussion, index)"
                       @input="setReplyMessage"
                       rows="2"
                       label="Message"
@@ -97,7 +106,7 @@
                         color="primary"
                         data-cy="submitReply"
                         @click="
-                          setDiscussion(discussion);
+                          setDiscussion(discussion, index);
                           submitReply();
                           clearTextarea('#reply' + discussion.userId);
                         "
@@ -113,7 +122,7 @@
                 clearable
                 outlined
                 auto-grow
-                v-on:focus="setDiscussion(discussion)"
+                v-on:focus="setDiscussion(discussion, index)"
                 @input="setReplyMessage"
                 rows="2"
                 label="Message"
@@ -128,7 +137,7 @@
                   class="ma-4"
                   :label="discussion.available ? 'Public' : 'Private'"
                   @change="
-                    setDiscussion(discussion);
+                    setDiscussion(discussion, index);
                     setAvailability();
                   "
                   style="flex: 1; position: relative"
@@ -138,7 +147,7 @@
                   color="primary"
                   data-cy="submitReply"
                   @click="
-                    setDiscussion(discussion);
+                    setDiscussion(discussion, index);
                     submitReply();
                     clearTextarea('#reply' + discussion.userId);
                   "
@@ -150,6 +159,12 @@
         </ul>
       </div>
     </v-card>
+    <edit-discussion-dialog
+      :dialog="edit"
+      :discussion="discussion"
+      v-on:dialog="setDialog"
+      v-on:save-discussion="onSaveDiscussion"
+    />
   </div>
 </template>
 
@@ -157,15 +172,22 @@
 import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
-import RemoteServices from '../../../services/RemoteServices';
+import RemoteServices from '@/services/RemoteServices';
 import Reply from '@/models/management/Reply';
+import EditDiscussionDialog from '@/views/teacher/questions/EditDiscussionDialog.vue';
 
-@Component
+@Component({
+  components: {
+    'edit-discussion-dialog': EditDiscussionDialog
+  }
+})
 export default class ReplyComponent extends Vue {
   @Prop() readonly discussions!: Discussion[];
-  discussion: Discussion = this.discussions[0];
+  discussion!: Discussion;
+  discussionInd!: number;
   reply: Reply | undefined;
   replyMessages: Map<number, string> = new Map();
+  edit: Boolean = false;
 
   @Emit('submit')
   async submitReply() {
@@ -215,8 +237,9 @@ export default class ReplyComponent extends Vue {
     this.replyMessages.set(this.discussion.userId!, message);
   }
 
-  setDiscussion(discussion: Discussion) {
+  setDiscussion(discussion: Discussion, index: number) {
     this.discussion = discussion;
+    this.discussionInd = index;
   }
 
   clearTextarea(name: string) {
@@ -230,26 +253,44 @@ export default class ReplyComponent extends Vue {
     this.reply = reply;
   }
 
-  @Emit('replies')
   async deleteReply() {
     try {
       await RemoteServices.deleteReply(this.reply!.id);
-      this.discussion.replies = this.discussion.replies!.filter(
-        obj => obj !== this.reply
+      this.$emit(
+        'replies',
+        (this.discussion.replies = this.discussion.replies!.filter(
+          obj => obj !== this.reply
+        ))
       );
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
   }
 
-  @Emit('discussions')
+  editDiscussion() {
+    this.edit = true;
+  }
+
+  setDialog(dialog: Boolean) {
+    this.edit = dialog;
+  }
+
+  onSaveDiscussion(discussion: Discussion) {
+    this.discussion = discussion;
+    this.discussions[this.discussionInd] = discussion;
+    this.setDialog(false);
+  }
+
   async deleteDiscussion() {
     try {
       await RemoteServices.deleteDiscussion(
         this.discussion.userId,
         this.discussion.questionId
       );
-      return this.discussions.filter(obj => obj !== this.discussion);
+      this.$emit(
+        'discussions',
+        this.discussions.filter(obj => obj !== this.discussion)
+      );
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

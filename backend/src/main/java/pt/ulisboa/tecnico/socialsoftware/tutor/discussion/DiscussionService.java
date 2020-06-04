@@ -180,6 +180,10 @@ public class DiscussionService {
             throw new TutorException(DISCUSSION_UNAUTHORIZED_EDITOR);
         }
 
+        if (user.isTeacher()) {
+            discussion.setAvailability(discussionDto.isAvailable());
+        }
+
         discussion.setContent(discussionDto.getContent());
 
         this.entityManager.merge(discussion);

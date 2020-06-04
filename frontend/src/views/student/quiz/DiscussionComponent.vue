@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="discussion-container"
-    v-if="(answered || hasDiscussion) && discussions.length !== 0"
-  >
+  <div class="discussion-container" v-if="answered || hasDiscussion">
     <v-card>
       <v-card-title class="justify-left headline comp-title">
         Discussions

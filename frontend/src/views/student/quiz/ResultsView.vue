@@ -167,6 +167,9 @@ export default class ResultsView extends Vue {
     this.statementManager.statementQuiz!.questions[
       this.questionOrder
     ].discussions = discussions;
+    this.statementManager.statementQuiz!.questions[
+      this.questionOrder
+    ].hasUserDiscussion = false;
   }
 
   updateMessage(message: string) {
