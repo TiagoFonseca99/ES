@@ -128,7 +128,7 @@ import Image from '@/models/management/Image';
 import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
 import ShowDashboardDialog from '@/views/student/dashboard/DashboardDialogView.vue';
 import ViewSubmissionTopics from '@/views/student/questions/ViewSubmissionTopics.vue';
-
+import Topic from '@/models/management/Topic';
 
 enum FilterState {
   INCLUDE = 'Include my submissions',
@@ -143,52 +143,57 @@ enum FilterState {
   }
 })
 export default class AllSubmissionsView extends Vue {
-    filterLabel: FilterState = FilterState.EXCLUDE;
-    allsubmissions: Submission[] = [];
-    choosensubmissions: Submission[] = [];
-    items: Submission[] = [];
-    currentQuestion: Question | null = null;
-    questionDialog: boolean = false;
-    search: string = '';
-    currentUsername: string | null = null;
-    dashboardDialog: boolean = false;
+  filterLabel: FilterState = FilterState.EXCLUDE;
+  allsubmissions: Submission[] = [];
+  choosensubmissions: Submission[] = [];
+  items: Submission[] = [];
+  topics: Topic[] = [];
+  currentQuestion: Question | null = null;
+  questionDialog: boolean = false;
+  search: string = '';
+  currentUsername: string | null = null;
+  dashboardDialog: boolean = false;
 
-    headers: object = [
-        {
-         text: 'Actions',
-         value: 'action',
-         align: 'left',
-         width: '15%',
-         sortable: false
-        },
-        { text: 'Title', value: 'questionDto.title', align: 'center' },
-        { text: 'Submitted by', value: 'username', align: 'center' },
-        { text: 'Status', value: 'questionDto.status', align: 'center' },
-        {
-         text: 'Creation Date',
-         value: 'questionDto.creationDate',
-         align: 'center'
-        },
-        {
-         text: 'Image',
-         value: 'questionDto.image',
-         align: 'center',
-         sortable: false
-        }
-       ];
-
-    async created() {
-        await this.$store.dispatch('loading');
-        try {
-           [this.allsubmissions] = await Promise.all([RemoteServices.getStudentsSubmissions()]);
-           this.allsubmissions.sort((a, b) => this.sortNewestFirst(a, b));
-           this.items = this.allsubmissions;
-           this.choosensubmissions = this.allsubmissions;
-        } catch (error) {
-           await this.$store.dispatch('error', error);
-        }
-        await this.$store.dispatch('clearLoading');
+  headers: object = [
+    {
+      text: 'Actions',
+      value: 'action',
+      align: 'left',
+      width: '15%',
+      sortable: false
+    },
+    { text: 'Title', value: 'questionDto.title', align: 'center' },
+    { text: 'Submitted by', value: 'username', align: 'center' },
+    { text: 'Status', value: 'questionDto.status', align: 'center' },
+    {
+      text: 'Topics',
+      value: 'questionDto.topics',
+      align: 'center',
+      width: '20%',
+      sortable: false
+    },
+    {
+      text: 'Creation Date',
+      value: 'questionDto.creationDate',
+      align: 'center'
     }
+  ];
+
+  async created() {
+    await this.$store.dispatch('loading');
+    try {
+      [this.allsubmissions, this.topics] = await Promise.all([
+        RemoteServices.getStudentsSubmissions(),
+        RemoteServices.getTopics()
+      ]);
+      this.allsubmissions.sort((a, b) => this.sortNewestFirst(a, b));
+      this.items = this.allsubmissions;
+      this.choosensubmissions = this.allsubmissions;
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+    await this.$store.dispatch('clearLoading');
+  }
 
   sortNewestFirst(a: Submission, b: Submission) {
     if (a.questionDto.creationDate && b.questionDto.creationDate)
@@ -236,35 +241,36 @@ export default class AllSubmissionsView extends Vue {
     this.dashboardDialog = false;
   }
 
-
   filterSubmissions(value: String) {
-     this.choosensubmissions = this.allsubmissions;
-     if (this.filterLabel == FilterState.EXCLUDE) {
-         if (value == 'all') {
-             this.choosensubmissions = this.allsubmissions;
-         } else if (value == 'accepted') {
-             this.choosensubmissions = this.allsubmissions.filter(submission => {
-                return submission.questionDto.status == 'AVAILABLE';
-             });
-         } else {
-             this.choosensubmissions = this.allsubmissions.filter(submission => {
-                 return submission.questionDto.status == 'DEPRECATED';
-             });
-         }
-         this.items = this.choosensubmissions;
-     } else {
-         if (value == 'all') {
-          } else if (value == 'accepted') {
-             this.choosensubmissions = this.choosensubmissions.filter(submission => {
-                 return submission.questionDto.status == 'AVAILABLE';
-             });
-         } else {
-             this.choosensubmissions = this.choosensubmissions.filter(submission => {
-                 return submission.questionDto.status == 'DEPRECATED';
-             });
-         }
-         this.items = this.choosensubmissions.filter(submission => { return submission.studentId !== this.$store.getters.getUser.id; });
-     }
+    this.choosensubmissions = this.allsubmissions;
+    if (this.filterLabel == FilterState.EXCLUDE) {
+      if (value == 'all') {
+        this.choosensubmissions = this.allsubmissions;
+      } else if (value == 'accepted') {
+        this.choosensubmissions = this.allsubmissions.filter(submission => {
+          return submission.questionDto.status == 'AVAILABLE';
+        });
+      } else {
+        this.choosensubmissions = this.allsubmissions.filter(submission => {
+          return submission.questionDto.status == 'DEPRECATED';
+        });
+      }
+      this.items = this.choosensubmissions;
+    } else {
+      if (value == 'all') {
+      } else if (value == 'accepted') {
+        this.choosensubmissions = this.choosensubmissions.filter(submission => {
+          return submission.questionDto.status == 'AVAILABLE';
+        });
+      } else {
+        this.choosensubmissions = this.choosensubmissions.filter(submission => {
+          return submission.questionDto.status == 'DEPRECATED';
+        });
+      }
+      this.items = this.choosensubmissions.filter(submission => {
+        return submission.studentId !== this.$store.getters.getUser.id;
+      });
+    }
   }
   toggleAnswers() {
     if (this.filterLabel == FilterState.INCLUDE) {

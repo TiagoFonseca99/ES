@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.mock.web.MockHttpServletResponse
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.AuthService
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.FenixEduInterface
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.*
@@ -37,6 +38,7 @@ class FenixAuthTest extends Specification {
 
     def client
     def courses
+    def response
 
     def setup() {
         client = Mock(FenixEduInterface)
@@ -46,6 +48,8 @@ class FenixAuthTest extends Specification {
         courses.add(courseDto)
         courseDto = new CourseDto("Tópicos Avançados em Engenharia de Software", "TAES", ACADEMIC_TERM)
         courses.add(courseDto)
+
+        response = new MockHttpServletResponse()
     }
 
     def "no teacher has courses create teacher"() {
@@ -56,11 +60,11 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> courses
 
         when:
-        def result = authService.fenixAuth(client)
+        def result = authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
-        result.user.username == USERNAME
-        result.user.name == PERSON_NAME
+        result.username == USERNAME
+        result.name == PERSON_NAME
         and: 'the user is created in the db'
         userRepository.findAll().size() == 1
         userRepository.findByUsername(USERNAME) != null
@@ -81,11 +85,11 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> courses
 
         when:
-        def result = authService.fenixAuth(client)
+        def result = authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
-        result.user.username == USERNAME
-        result.user.name == PERSON_NAME
+        result.username == USERNAME
+        result.name == PERSON_NAME
         and: 'the user is created in the db'
         userRepository.findAll().size() == 1
         def user = userRepository.findByUsername(USERNAME)
@@ -103,7 +107,7 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> new ArrayList<>()
 
         when:
-        authService.fenixAuth(client)
+        authService.fenixAuth(true, client, response)
 
         then:
         thrown(TutorException)
@@ -129,11 +133,11 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> courses
 
         when:
-        def result = authService.fenixAuth(client)
+        def result = authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
-        result.user.username == USERNAME
-        result.user.name == PERSON_NAME
+        result.username == USERNAME
+        result.name == PERSON_NAME
         and: 'the user is created in the db'
         userRepository.findAll().size() == 1
         userRepository.findByUsername(USERNAME) != null
@@ -157,11 +161,11 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> new ArrayList<>()
 
         when:
-        def result = authService.fenixAuth(client)
+        def result = authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
-        result.user.username == USERNAME
-        result.user.name == PERSON_NAME
+        result.username == USERNAME
+        result.name == PERSON_NAME
         and: 'the user is created in the db'
         userRepository.findAll().size() == 1
         userRepository.findByUsername(USERNAME) != null
@@ -189,11 +193,11 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> courses
 
         when:
-        def result = authService.fenixAuth(client)
+        def result = authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
-        result.user.username == USERNAME
-        result.user.name == PERSON_NAME
+        result.username == USERNAME
+        result.name == PERSON_NAME
         and: 'the user is created in the db'
         userRepository.findAll().size() == 1
         def user2 = userRepository.findByUsername(USERNAME)
@@ -211,7 +215,7 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> new ArrayList<>()
 
         when:
-        authService.fenixAuth(client)
+        authService.fenixAuth(true, client, response)
 
         then:
         thrown(TutorException)
@@ -230,7 +234,7 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> new ArrayList<>()
 
         when:
-        authService.fenixAuth(client)
+        authService.fenixAuth(true, client, response)
 
         then:
         thrown(TutorException)
@@ -253,11 +257,11 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> new ArrayList<>()
 
         when:
-        def result = authService.fenixAuth(client)
+        def result = authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
-        result.user.username == USERNAME
-        result.user.name == PERSON_NAME
+        result.username == USERNAME
+        result.name == PERSON_NAME
         and: 'the user is created in the db'
         userRepository.findAll().size() == 1
         User user = userRepository.findByUsername(USERNAME)
@@ -282,7 +286,7 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> new ArrayList<>()
 
         when:
-        authService.fenixAuth(client)
+        authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
         thrown(TutorException)
@@ -307,7 +311,7 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> new ArrayList<>()
 
         when:
-        authService.fenixAuth(client)
+        authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
         thrown(TutorException)
@@ -336,11 +340,11 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> new ArrayList<>()
 
         when:
-        def result = authService.fenixAuth(client)
+        def result = authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
-        result.user.username == USERNAME
-        result.user.name == PERSON_NAME
+        result.username == USERNAME
+        result.name == PERSON_NAME
         and: 'the user is created in the db'
         userRepository.findAll().size() == 1
         userRepository.findByUsername(USERNAME).getRole() == User.Role.STUDENT
@@ -368,7 +372,7 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> courses
 
         when:
-        authService.fenixAuth(client)
+        authService.fenixAuth(true, client, response)
 
         then:
         thrown(TutorException)
@@ -398,11 +402,11 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> new ArrayList<>()
 
         when:
-        def result = authService.fenixAuth(client)
+        def result = authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
-        result.user.username == USERNAME
-        result.user.name == PERSON_NAME
+        result.username == USERNAME
+        result.name == PERSON_NAME
         and: 'the user is created in the db'
         userRepository.findAll().size() == 1
         userRepository.findByUsername(USERNAME).getRole() == User.Role.TEACHER
@@ -429,11 +433,11 @@ class FenixAuthTest extends Specification {
         client.getPersonTeachingCourses() >> courses
 
         when:
-        def result = authService.fenixAuth(client)
+        def result = authService.fenixAuth(true, client, response)
 
         then: "the returned data are correct"
-        result.user.username == USERNAME
-        result.user.name == PERSON_NAME
+        result.username == USERNAME
+        result.name == PERSON_NAME
         and: 'the user is created in the db'
         userRepository.findAll().size() == 1
         userRepository.findByUsername(USERNAME).getRole() == User.Role.TEACHER
