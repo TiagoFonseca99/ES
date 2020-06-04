@@ -24,21 +24,6 @@
               <v-col>
                 <v-card-title class="justify-center">Statistics</v-card-title>
                 <div
-                  class="switchContainer"
-                  style="display: flex; flex-direction: row; position: relative;"
-                >
-                  <v-switch
-                    style="flex: 1"
-                    v-if="
-                      info !== null &&
-                        this.username === this.$store.getters.getUser.username
-                    "
-                    v-model="info.userStatsPublic"
-                    :label="info.userStatsPublic ? 'Public' : 'Private'"
-                    @change="toggleStats()"
-                  />
-                </div>
-                <div
                   id="statsContainer"
                   v-if="
                     stats !== null &&
@@ -102,16 +87,6 @@
         <v-col :cols="5">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Tournaments</v-card-title>
-            <v-switch
-              style="flex: 1"
-              v-if="
-                info !== null &&
-                  this.username === this.$store.getters.getUser.username
-              "
-              v-model="info.tournamentStatsPublic"
-              :label="info.tournamentStatsPublic ? 'Public' : 'Private'"
-              @change="toggleTournaments()"
-            />
             <v-data-table
               :headers="headers"
               :items="tournaments"
@@ -139,21 +114,6 @@
         <v-col :cols="2">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Submissions</v-card-title>
-            <div
-              class="switchContainer"
-              style="display: flex; flex-direction: row; position: relative;"
-            >
-              <v-switch
-                style="flex: 1"
-                v-if="
-                  info !== null &&
-                    this.username === this.$store.getters.getUser.username
-                "
-                v-model="info.submissionStatsPublic"
-                :label="info.submissionStatsPublic ? 'Public' : 'Private'"
-                @change="toggleSubmissions()"
-              />
-            </div>
             <div
               class="dashInfo"
               v-if="
@@ -196,21 +156,6 @@
             <v-card-title class="justify-center" style="display: block;"
               >Discussions</v-card-title
             >
-            <div
-              class="switchContainer"
-              style="display: flex; flex-direction: row; position: relative;"
-            >
-              <v-switch
-                style="flex: 1"
-                v-if="
-                  info !== null &&
-                    this.username === this.$store.getters.getUser.username
-                "
-                v-model="info.discussionStatsPublic"
-                :label="info.discussionStatsPublic ? 'Public' : 'Private'"
-                @change="toggleDiscussions()"
-              />
-            </div>
             <div
               class="dashInfo"
               v-if="
@@ -300,38 +245,6 @@ export default class DashboardView extends Vue {
     }
 
     await this.$store.dispatch('clearLoading');
-  }
-
-  async toggleDiscussions() {
-    try {
-      this.info = await RemoteServices.toggleDiscussionStats();
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-    }
-  }
-
-  async toggleSubmissions() {
-    try {
-      this.info = await RemoteServices.toggleSubmissionStats();
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-    }
-  }
-
-  async toggleTournaments() {
-    try {
-      this.info = await RemoteServices.toggleTournamentStats();
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-    }
-  }
-
-  async toggleStats() {
-    try {
-      this.info = await RemoteServices.toggleUserStats();
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-    }
   }
 
   calculateScore(quiz: SolvedQuiz) {

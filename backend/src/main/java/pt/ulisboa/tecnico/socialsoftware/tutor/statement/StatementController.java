@@ -11,17 +11,22 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementAnswerDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementCreationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementQuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.AUTHENTICATION_ERROR;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.USERNAME_NOT_FOUND;
 
 @RestController
 public class StatementController {
     @Autowired
     private StatementService statementService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/executions/{executionId}/quizzes/available")
     @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#executionId, 'EXECUTION.ACCESS')")
@@ -48,12 +53,12 @@ public class StatementController {
     }
 
     @GetMapping("/executions/{executionId}/quizzes/solved")
-    @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#executionId, 'EXECUTION.ACCESS')")
-    public List<SolvedQuizDto> getSolvedQuizzes(Principal principal, @PathVariable int executionId) {
-        User user = (User) ((Authentication) principal).getPrincipal();
+    @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#executionId, 'EXECUTION.ACCESS') or hasRole('ROLE_TEACHER')")
+    public List<SolvedQuizDto> getSolvedQuizzes(@Valid @RequestParam String username, @PathVariable int executionId) {
+        User user = userRepository.findByUsername(username);
 
         if (user == null) {
-            throw new TutorException(AUTHENTICATION_ERROR);
+            throw new TutorException(USERNAME_NOT_FOUND, username);
         }
 
         return statementService.getSolvedQuizzes(user.getId(), executionId);

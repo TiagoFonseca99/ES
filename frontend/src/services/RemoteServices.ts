@@ -260,10 +260,13 @@ export default class RemoteServices {
       });
   }
 
-  static async getSolvedQuizzes(): Promise<SolvedQuiz[]> {
+  static async getSolvedQuizzes(username: string): Promise<SolvedQuiz[]> {
     return httpClient
       .get(
-        `/executions/${Store.getters.getCurrentCourse.courseExecutionId}/quizzes/solved`
+        '/executions/' +
+          Store.getters.getCurrentCourse.courseExecutionId +
+          '/quizzes/solved?username=' +
+          username
       )
       .then(response => {
         return response.data.map((solvedQuiz: any) => {
