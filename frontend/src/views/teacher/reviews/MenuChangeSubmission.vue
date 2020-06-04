@@ -15,14 +15,11 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="blue darken-1"
-          data-cy="YesButton"
-          @click="changeSubmission"
+        <v-btn color="primary" data-cy="YesButton" @click="changeSubmission"
           >Yes</v-btn
         >
         <v-spacer />
-        <v-btn color="blue darken-1" data-cy="NoButton" @click="acceptReview"
+        <v-btn color="primary" data-cy="NoButton" @click="acceptReview"
           >No</v-btn
         >
         <v-spacer />

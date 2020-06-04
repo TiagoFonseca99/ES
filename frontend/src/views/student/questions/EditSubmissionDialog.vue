@@ -65,14 +65,14 @@
         />
         <v-spacer />
         <v-btn
-          color="blue darken-1"
+          color="primary"
           @click="$emit('dialog', false)"
           data-cy="cancelButton"
           >Cancel</v-btn
         >
         <v-btn
+          color="primary"
           @click="menuArgument"
-          color="blue darken-1"
           data-cy="submitButton"
         >
           {{ oldQuestionId === null ? 'Submit' : 'Resubmit' }}
