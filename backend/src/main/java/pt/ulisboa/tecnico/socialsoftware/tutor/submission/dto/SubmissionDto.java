@@ -23,7 +23,8 @@ public class SubmissionDto implements Serializable {
             this.questionDto = new QuestionDto(submission.getQuestion());
         this.studentId = submission.getUser().getId();
         this.username = submission.getUser().getUsername();
-        this.argument = submission.getArgument();
+        if (submission.getArgument() != null)
+            this.argument = submission.getArgument();
         this.anonymous = submission.isAnonymous();
     }
 
