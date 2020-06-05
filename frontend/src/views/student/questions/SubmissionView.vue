@@ -244,7 +244,6 @@ export default class SubmissionView extends Vue {
   }
 
   async onSaveQuestion(submission: Submission) {
-
     this.editSubmissionDialog = false;
     this.submissions = this.submissions.filter(s => s.id !== submission.id);
     this.submissions.unshift(submission);

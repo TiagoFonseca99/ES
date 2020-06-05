@@ -70,11 +70,7 @@
           data-cy="cancelButton"
           >Cancel</v-btn
         >
-        <v-btn
-          color="primary"
-          @click="menuArgument"
-          data-cy="submitButton"
-        >
+        <v-btn color="primary" @click="menuArgument" data-cy="submitButton">
           {{ oldQuestionId === null ? 'Submit' : 'Resubmit' }}
         </v-btn>
       </v-card-actions>
@@ -84,7 +80,7 @@
         :submission="currentSubmission"
         :old-question-id="oldQuestionId"
         v-on:no-changes="onSaveSubmission"
-        />
+      />
     </v-card>
   </v-dialog>
 </template>
@@ -127,20 +123,23 @@ export default class EditSubmissionDialog extends Vue {
 
   async menuArgument() {
     if (!this.checkCorrectOptions(this.editQuestion.options)) {
-      await this.$store.dispatch('error',
-              'Question must have 1 and only 1 correct option'
+      await this.$store.dispatch(
+        'error',
+        'Question must have 1 and only 1 correct option'
       );
-      return
+      return;
     }
     if (!this.checkInvalidOptions(this.editQuestion.options)) {
-      await this.$store.dispatch('error',
-              'Question with invalid option'
-      );
-      return
+      await this.$store.dispatch('error', 'Question with invalid option');
+      return;
     }
-    if (this.editQuestion && (!this.editQuestion.title || !this.editQuestion.content)) {
-      await this.$store.dispatch('error',
-              'Question must have title and content'
+    if (
+      this.editQuestion &&
+      (!this.editQuestion.title || !this.editQuestion.content)
+    ) {
+      await this.$store.dispatch(
+        'error',
+        'Question must have title and content'
       );
       return;
     }
