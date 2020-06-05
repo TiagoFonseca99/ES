@@ -260,10 +260,13 @@ export default class RemoteServices {
       });
   }
 
-  static async getSolvedQuizzes(): Promise<SolvedQuiz[]> {
+  static async getSolvedQuizzes(username: string): Promise<SolvedQuiz[]> {
     return httpClient
       .get(
-        `/executions/${Store.getters.getCurrentCourse.courseExecutionId}/quizzes/solved`
+        '/executions/' +
+          Store.getters.getCurrentCourse.courseExecutionId +
+          '/quizzes/solved?username=' +
+          username
       )
       .then(response => {
         return response.data.map((solvedQuiz: any) => {
@@ -702,6 +705,31 @@ export default class RemoteServices {
       .post('/discussions', discussion)
       .then(response => {
         return new Discussion(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async editDiscussion(discussion: Discussion): Promise<Discussion> {
+    return httpClient
+      .put('/discussions/edit', discussion)
+      .then(response => {
+        return new Discussion(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async deleteDiscussion(
+    userId: number,
+    questionId: number
+  ): Promise<Boolean> {
+    return httpClient
+      .delete(`/discussions/${userId}/${questionId}`)
+      .then(response => {
+        return response.data;
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));

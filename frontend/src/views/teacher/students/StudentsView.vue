@@ -4,9 +4,9 @@
       :headers="headers"
       :items="students"
       :search="search"
-      disable-pagination
-      :hide-default-footer="true"
+      multi-sort
       :mobile-breakpoint="0"
+      :footer-props="{ itemsPerPageOptions: [15, 30, 50, 100] }"
     >
       <template v-slot:top>
         <v-card-title>
@@ -19,6 +19,12 @@
 
           <v-spacer />
         </v-card-title>
+      </template>
+
+      <template v-slot:item.username="{ item }">
+        <v-chip color="primary" small @click="openStudentDashboardDialog(item)">
+          <span> {{ item.username }} </span>
+        </v-chip>
       </template>
 
       <template v-slot:item.percentageOfCorrectAnswers="{ item }">
@@ -37,6 +43,16 @@
         >
       </template>
     </v-data-table>
+    <footer>
+      <v-icon class="mr-2">mouse</v-icon>Left-click on user's username to view
+      dashboard preview.
+    </footer>
+    <show-dashboard-dialog
+      v-if="currentUsername"
+      v-model="dashboardDialog"
+      :username="currentUsername"
+      v-on:close-show-dashboard-dialog="onCloseShowDashboardDialog"
+    />
   </v-card>
 </template>
 
@@ -45,14 +61,18 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
 import Course from '@/models/user/Course';
 import { Student } from '@/models/management/Student';
+import ShowDashboardDialog from '@/views/teacher/students/DashboardDialogView.vue';
 
-@Component
+@Component({ components: { 'show-dashboard-dialog': ShowDashboardDialog } })
 export default class StudentsView extends Vue {
   course: Course | null = null;
   students: Student[] = [];
+  currentUsername: string | null = null;
+  dashboardDialog: boolean = false;
   search: string = '';
   headers: object = [
     { text: 'Name', value: 'name', align: 'left', width: '40%' },
+    { text: 'Username', value: 'username', align: 'center' },
     {
       text: 'Teacher Quizzes',
       value: 'numberOfTeacherQuizzes',
@@ -119,6 +139,15 @@ export default class StudentsView extends Vue {
     else if (percentage < 50) return 'orange';
     else if (percentage < 75) return 'lime';
     else return 'green';
+  }
+
+  openStudentDashboardDialog(student: Student) {
+    this.dashboardDialog = true;
+    this.currentUsername = student.username;
+  }
+
+  onCloseShowDashboardDialog() {
+    this.dashboardDialog = false;
   }
 }
 </script>

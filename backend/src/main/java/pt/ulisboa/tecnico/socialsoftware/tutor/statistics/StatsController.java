@@ -25,7 +25,7 @@ public class StatsController {
     private UserService userService;
 
     @GetMapping("/executions/{executionId}/stats/{username}")
-    @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#executionId, 'EXECUTION.ACCESS')")
+    @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#executionId, 'EXECUTION.ACCESS') or hasRole('ROLE_TEACHER')")
     public StatsDto getStats(Principal principal, @PathVariable int executionId, @PathVariable String username) {
         User user = userService.findByUsername(username);
 
