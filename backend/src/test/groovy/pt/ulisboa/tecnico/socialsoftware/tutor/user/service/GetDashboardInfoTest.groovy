@@ -319,7 +319,7 @@ class GetDashboardInfoTest extends Specification {
 
     def "get number of tournaments from student enrolled in 1 tournament"() {
         given: "student enrolled in tournament 1"
-        tournamentService.joinTournament(student1.getId(), tournamentDto1)
+        tournamentService.joinTournament(student1.getId(), tournamentDto1, "")
 
         when: "requesting information"
         def result = userService.getDashboardInfo(student1.getId())
@@ -330,10 +330,10 @@ class GetDashboardInfoTest extends Specification {
 
     def "get number of tournaments from student enrolled in 2 tournaments"() {
         given: "student enrolled in tournament 1"
-        tournamentService.joinTournament(student1.getId(), tournamentDto1)
+        tournamentService.joinTournament(student1.getId(), tournamentDto1, "")
 
         and: "student enrolled in tournament 2"
-        tournamentService.joinTournament(student1.getId(), tournamentDto2)
+        tournamentService.joinTournament(student1.getId(), tournamentDto2, "")
 
         when: "requesting information"
         def result = userService.getDashboardInfo(student1.getId())

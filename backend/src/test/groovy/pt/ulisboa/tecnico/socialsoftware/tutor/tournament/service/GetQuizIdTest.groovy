@@ -142,7 +142,7 @@ class GetQuizIdTest extends Specification {
         user2.addCourse(courseExecution)
         userRepository.save(user2)
 
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         when:
         def result = tournamentService.solveQuiz(user2.getId(), tournamentDto);
@@ -163,8 +163,8 @@ class GetQuizIdTest extends Specification {
         user3.addCourse(courseExecution)
         userRepository.save(user3)
 
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
-        tournamentService.joinTournament(user3.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
+        tournamentService.joinTournament(user3.getId(), tournamentDto, "")
 
         when:
         def result = tournamentService.solveQuiz(user2.getId(), tournamentDto);

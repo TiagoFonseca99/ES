@@ -90,6 +90,23 @@ Cypress.Commands.add('createTournament', numberOfQuestions => {
   cy.get('[data-cy="saveButton"]').click();
 });
 
+Cypress.Commands.add('createPrivateTournament', numberOfQuestions => {
+  cy.get('[data-cy="createButton"]')
+    .should('be.visible')
+    .click({ force: true });
+  cy.time('Start Time', 16, 0);
+  cy.wait(100);
+  cy.time('End Time', 18, 1);
+  cy.get('[data-cy="NumberOfQuestions"]').type(numberOfQuestions, {
+    force: true
+  });
+  cy.get('[data-cy="SwitchPrivacy"]').click({ force: true });
+  cy.get('[data-cy="Password"]').type('123');
+  cy.selectTopic('Adventure Builder');
+  cy.selectTopic('Architectural Style');
+  cy.get('[data-cy="saveButton"]').click();
+});
+
 Cypress.Commands.add('time', (date, day, type) => {
   let get1 = '';
   let get2 = '';
@@ -155,10 +172,23 @@ Cypress.Commands.add('joinTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 9)
-    .eq(8)
+    .should('have.length', 10)
+    .eq(9)
     .find('[data-cy="JoinTournament"]')
     .click({ force: true });
+});
+
+Cypress.Commands.add('joinPrivateTournament', tournament => {
+  cy.get('tbody')
+    .children()
+    .eq(tournament)
+    .children()
+    .should('have.length', 10)
+    .eq(9)
+    .find('[data-cy="JoinTournament"]')
+    .click({ force: true });
+
+  cy.get('[data-cy="Password"]').type('123');
 });
 
 Cypress.Commands.add('solveTournament', tournament => {
@@ -166,8 +196,8 @@ Cypress.Commands.add('solveTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 9)
-    .eq(8)
+    .should('have.length', 10)
+    .eq(9)
     .find('[data-cy="SolveQuiz"]')
     .click({ force: true });
 });
@@ -177,8 +207,8 @@ Cypress.Commands.add('leaveTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 9)
-    .eq(8)
+    .should('have.length', 10)
+    .eq(9)
     .find('[data-cy="LeaveTournament"]')
     .click({ force: true });
 });
@@ -188,8 +218,8 @@ Cypress.Commands.add('editTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 9)
-    .eq(8)
+    .should('have.length', 10)
+    .eq(9)
     .find('[data-cy="EditTournament"]')
     .click({ force: true });
 
@@ -210,8 +240,8 @@ Cypress.Commands.add('cancelTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 9)
-    .eq(8)
+    .should('have.length', 10)
+    .eq(9)
     .find('[data-cy="CancelTournament"]')
     .click({ force: true });
 });
@@ -221,8 +251,8 @@ Cypress.Commands.add('removeTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 9)
-    .eq(8)
+    .should('have.length', 10)
+    .eq(9)
     .find('[data-cy="RemoveTournament"]')
     .click({ force: true });
 });

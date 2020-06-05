@@ -141,7 +141,7 @@ class StudentLeaveTournamentTest extends Specification {
         def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
         user2.addCourse(courseExecution)
         userRepository.save(user2)
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         when:
         tournamentService.leaveTournament(user2.getId(), tournamentDto)

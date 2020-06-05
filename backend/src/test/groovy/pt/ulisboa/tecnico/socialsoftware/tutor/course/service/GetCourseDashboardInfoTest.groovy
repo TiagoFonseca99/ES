@@ -216,8 +216,8 @@ class GetCourseDashboardInfoTest extends Specification {
 
         tournamentDto1 = tournamentService.createTournament(student1.getId(), topics, tournamentDto1)
         tournamentDto2 = tournamentService.createTournament(student1.getId(), topics, tournamentDto2)
-        tournamentService.joinTournament(student2.getId(), tournamentDto1)
-        tournamentService.joinTournament(student2.getId(), tournamentDto2)
+        tournamentService.joinTournament(student2.getId(), tournamentDto1, "")
+        tournamentService.joinTournament(student2.getId(), tournamentDto2, "")
 
         submission1 = new Submission()
         submission1.setQuestion(submittedQuestion1)

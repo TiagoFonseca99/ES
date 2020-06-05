@@ -32,6 +32,11 @@
           {{ getEnrolledName(item.enrolled) }}
         </v-chip>
       </template>
+      <template v-slot:item.privateTournament="{ item }">
+        <v-chip :color="getPrivateColor(item.privateTournament)">
+          {{ getPrivateName(item.privateTournament) }}
+        </v-chip>
+      </template>
       <template v-slot:item.action="{ item }">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
@@ -119,6 +124,12 @@ export default class MyTournamentsView extends Vue {
     {
       text: 'State',
       value: 'state',
+      align: 'center',
+      width: '10%'
+    },
+    {
+      text: 'Privacy',
+      value: 'privateTournament',
       align: 'center',
       width: '10%'
     },
@@ -211,6 +222,16 @@ export default class MyTournamentsView extends Vue {
   getEnrolledName(enrolled: string) {
     if (enrolled) return 'YOU ARE IN';
     else return 'YOU NEED TO JOIN';
+  }
+
+  getPrivateColor(privateTournament: boolean) {
+    if (privateTournament) return 'red';
+    else return 'green';
+  }
+
+  getPrivateName(privateTournament: boolean) {
+    if (privateTournament) return 'Private';
+    else return 'Public';
   }
 
   isNotCanceled(tournamentToCancel: Tournament) {

@@ -58,6 +58,13 @@ public class Tournament {
     @Column(name = "quizID")
     private Integer quizId;
 
+    @Column(name = "privateTournament")
+    private boolean privateTournament;
+
+    @Column(name = "password")
+    private String password;
+
+
     public Tournament() {
     }
 
@@ -70,6 +77,8 @@ public class Tournament {
         setCourseExecution(user);
         setTopics(topics);
         topicsAddTournament(topics, this);
+        setPassword(tournamentDto.getPassword());
+        setPrivateTournament(tournamentDto.isPrivateTournament());
     }
 
     public Integer getId() {
@@ -219,5 +228,19 @@ public class Tournament {
 
         getParticipants().forEach(participant -> participant.getTournaments().remove(this));
         getParticipants().clear();
+    }
+
+    public boolean isPrivateTournament() { return privateTournament; }
+
+    public void setPrivateTournament(boolean privateTournament) {
+        this.privateTournament = privateTournament;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

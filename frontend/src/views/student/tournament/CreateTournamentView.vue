@@ -41,18 +41,67 @@
               </v-col>
             </v-row>
             <v-flex xs24 sm12 md8>
-              <p>
-                <b>Number Of Questions:</b>
-                {{ editTournament.numberOfQuestions }}
-              </p>
-              <v-text-field
-                min="1"
-                step="1"
-                type="number"
-                v-model="editTournament.numberOfQuestions"
-                label="Number Of Questions"
-                data-cy="NumberOfQuestions"
-              />
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <p>
+                    <b>Number Of Questions:</b>
+                    {{ editTournament.numberOfQuestions }}
+                  </p>
+                  <v-text-field
+                    min="1"
+                    step="1"
+                    type="number"
+                    v-model="editTournament.numberOfQuestions"
+                    label="Number Of Questions"
+                    data-cy="NumberOfQuestions"
+                  />
+                </v-col>
+                <v-spacer></v-spacer>
+                <v-col cols="12" sm="6">
+                  <v-row>
+                    <v-col cols="6" sm="3">
+                      <b>Privacy:</b>
+                    </v-col>
+                    <v-spacer></v-spacer>
+                    <v-col cols="6" sm="9">
+                      <div
+                        class="switchContainer"
+                        style="display: flex; flex-direction: row; position: relative;"
+                      >
+                        <v-switch
+                          style="flex: 1"
+                          data-cy="SwitchPrivacy"
+                          v-model="editTournament.privateTournament"
+                          :label="
+                            editTournament.privateTournament
+                              ? 'Private'
+                              : 'Public'
+                          "
+                          @change="togglePrivacy()"
+                        />
+                      </div>
+                    </v-col>
+                  </v-row>
+
+                  <v-text-field
+                    v-if="this.typePassword"
+                    :type="passwordFieldType"
+                    v-model="password"
+                    label="Password"
+                    data-cy="Password"
+                  >
+                    <template slot="append">
+                      <v-icon
+                        v-if="this.typePassword"
+                        medium
+                        class="mr-2"
+                        @click="switchVisibility()"
+                        >visibility</v-icon
+                      >
+                    </template>
+                  </v-text-field>
+                </v-col>
+              </v-row>
             </v-flex>
           </v-layout>
         </v-container>
@@ -212,6 +261,10 @@ export default class CreateTournamentDialog extends Vue {
   newStartTime: string = '';
   newEndTime: string = '';
 
+  typePassword: boolean = false;
+  passwordFieldType: string = 'password';
+  password: string = '';
+
   topicsID: Number[] = [];
 
   topicHeaders: object = [
@@ -261,12 +314,25 @@ export default class CreateTournamentDialog extends Vue {
       return;
     }
 
+    if (
+      this.editTournament &&
+      this.editTournament.privateTournament &&
+      this.password === ''
+    ) {
+      await this.$store.dispatch(
+        'error',
+        'Tournament must have a password in order to be private'
+      );
+      return;
+    }
+
     if (this.editTournament && this.editTournament.id == null) {
       const enrolled = this.editTournament.enrolled;
       const topics = this.editTournament.topics;
       this.editTournament.enrolled = undefined;
       this.editTournament.topics = [];
       this.editTournament.state = 'NOT_CANCELED';
+      this.editTournament.password = this.password;
 
       this.topicsID = this.currentTopics.map(topic => {
         return topic.id;
@@ -286,6 +352,17 @@ export default class CreateTournamentDialog extends Vue {
       this.editTournament.enrolled = enrolled;
       this.editTournament.topics = topics;
     }
+  }
+
+  async togglePrivacy() {
+    this.tournament.privateTournament = !this.tournament.privateTournament;
+    this.typePassword = !this.typePassword;
+    this.password = '';
+  }
+
+  async switchVisibility() {
+    this.passwordFieldType =
+      this.passwordFieldType === 'password' ? 'text' : 'password';
   }
 
   topicFilter(value: string, search: string, topic: Topic) {

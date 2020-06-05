@@ -21,7 +21,7 @@ describe('Student walkthrough', () => {
   it('login sees open tournaments', () => {
     cy.get('[data-cy="changeButton"]')
       .should('be.visible')
-      .click();
+      .click({ force: true });
   });
 
   it('login creates a tournament and joins', () => {
@@ -66,8 +66,8 @@ describe('Student walkthrough', () => {
   it('login creates, joins and leaves tournament', () => {
     cy.createTournament('3');
     cy.wait(100);
-    cy.joinTournament('-1');
-    cy.leaveTournament('-1');
+    cy.joinTournament('0');
+    cy.leaveTournament('0');
   });
 
   it('login joins tournament', () => {
@@ -78,7 +78,15 @@ describe('Student walkthrough', () => {
     cy.leaveTournament('-1');
   });
 
-  it('login joins and solves tournament', () => {
+  it('login creates private tournament', () => {
+    cy.createPrivateTournament('3');
+  });
+
+  it('login joins private tournament', () => {
+    cy.joinPrivateTournament('-1');
+  });
+
+  /*it('login joins and solves tournament', () => {
     cy.addTournamentsInfo();
     cy.get('[data-cy="changeButton"]')
       .should('be.visible')
@@ -86,5 +94,5 @@ describe('Student walkthrough', () => {
     cy.wait(100);
     cy.joinTournament('0');
     cy.solveTournament('0');
-  });
+  });*/
 });
