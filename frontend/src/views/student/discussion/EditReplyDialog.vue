@@ -7,19 +7,19 @@
     max-height="80%"
   >
     <v-card>
-      <v-card-title><span class="headline">Edit Discussion</span></v-card-title>
+      <v-card-title><span class="headline">Edit Reply</span></v-card-title>
       <v-card-text>
         <v-textarea
           outline
           rows="10"
-          v-model="editDiscussion.content"
+          v-model="editReply.message"
           label="Content"
         ></v-textarea>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <v-btn color="primary" @click="$emit('dialog', false)">Cancel</v-btn>
-        <v-btn color="primary" @click="saveDiscussion">Save</v-btn>
+        <v-btn color="primary" @click="saveReply">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -27,38 +27,37 @@
 
 <script lang="ts">
 import { Component, Model, Prop, Vue, Watch } from 'vue-property-decorator';
-import Discussion from '@/models/management/Discussion';
 import RemoteServices from '@/services/RemoteServices';
+import Reply from '@/models/management/Reply';
 
 @Component
-export default class EditDiscussionDialog extends Vue {
+export default class EditReplyDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
-  @Prop(Discussion) readonly discussion!: Discussion;
+  @Prop(Reply) readonly reply!: Reply;
 
-  editDiscussion!: Discussion;
+  editReply!: Reply;
 
   created() {
-    this.updateDiscussion();
+    this.updateReply();
   }
 
-  @Watch('discussion', { immediate: true, deep: true })
-  updateDiscussion() {
-    this.editDiscussion = new Discussion(this.discussion);
+  @Watch('reply', { immediate: true, deep: true })
+  updateReply() {
+    this.editReply = new Reply(this.reply);
   }
 
-  async saveDiscussion() {
+  async saveReply() {
     if (
-      this.editDiscussion &&
-      (!this.editDiscussion.content ||
-        this.editDiscussion.content.trim().length === 0)
+      this.editReply &&
+      (!this.editReply.message || this.editReply.message.trim().length === 0)
     ) {
-      await this.$store.dispatch('error', 'Discussion must have content');
+      await this.$store.dispatch('error', 'Reply must have content');
       return;
     }
 
     try {
-      const result = await RemoteServices.editDiscussion(this.editDiscussion);
-      this.$emit('save-discussion', result);
+      const result = await RemoteServices.editReply(this.editReply);
+      this.$emit('save-reply', result);
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
