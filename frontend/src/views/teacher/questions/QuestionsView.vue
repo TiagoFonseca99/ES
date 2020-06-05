@@ -162,6 +162,8 @@
       :discussion="discussion"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
       v-on:submittedDiscussion="updateQuestion"
+      v-on:updateDiscussions="updateDiscussions"
+      v-on:updateReplies="updateReplies"
     />
   </v-card>
 </template>
@@ -441,6 +443,16 @@ export default class QuestionsView extends Vue {
 
   updateQuestion(allReplies: boolean) {
     this.currentQuestion!.hasAllReplies = allReplies;
+    this.discussionFilter();
+  }
+
+  updateReplies(replies: boolean) {
+    this.currentQuestion!.hasAllReplies! = replies;
+    this.discussionFilter();
+  }
+
+  updateDiscussions(discussions: boolean) {
+    this.currentQuestion!.hasDiscussions! = discussions;
     this.discussionFilter();
   }
 }

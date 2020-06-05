@@ -708,6 +708,31 @@ export default class RemoteServices {
       });
   }
 
+  static async editDiscussion(discussion: Discussion): Promise<Discussion> {
+    return httpClient
+      .put('/discussions/edit', discussion)
+      .then(response => {
+        return new Discussion(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async deleteDiscussion(
+    userId: number,
+    questionId: number
+  ): Promise<Boolean> {
+    return httpClient
+      .delete(`/discussions/${userId}/${questionId}`)
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async getDiscussions(userId: number): Promise<Discussion[]> {
     return httpClient
       .get('/discussions?userId=' + userId)

@@ -27,6 +27,34 @@
           }}</v-btn>
         </v-card-title>
       </template>
+      <template v-slot:item.action="{ item }">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              large
+              class="mr-2"
+              v-on="on"
+              @click="
+                setDiscussion(item);
+                editDiscussion();
+              "
+              >edit</v-icon
+            >
+            <v-icon
+              large
+              class="mr-2"
+              v-on="on"
+              @click="
+                setDiscussion(item);
+                deleteDiscussion();
+              "
+              color="red"
+              >delete</v-icon
+            >
+          </template>
+          <span>Delete Discussion</span>
+        </v-tooltip>
+      </template>
       <template v-slot:item.content="{ item }">
         <td class="justify-center">
           {{
@@ -100,6 +128,12 @@
         </td>
       </template>
     </v-data-table>
+    <edit-discussion-dialog
+      :discussion="currentDiscussion"
+      :dialog="edit"
+      v-on:dialog="setDialog"
+      v-on:save-discussion="onSaveDiscussion"
+    />
   </v-card>
 </template>
 
@@ -109,13 +143,18 @@ import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
 import RemoteServices from '@/services/RemoteServices';
 import Reply from '@/models/management/Reply';
+import EditDiscussionDialog from '@/views/student/discussion/EditDiscussionDialog.vue';
 
 enum FilterState {
   REPLY = 'See all discussions',
   ALL = 'See discussions with reply'
 }
 
-@Component
+@Component({
+  components: {
+    'edit-discussion-dialog': EditDiscussionDialog
+  }
+})
 export default class DiscussionView extends Vue {
   discussions: Discussion[] = [];
   search: String = '';
@@ -125,9 +164,11 @@ export default class DiscussionView extends Vue {
   currentDiscussion!: Discussion;
   replyMessages: Map<number, string> = new Map();
   reply: Reply | undefined;
+  edit: Boolean = false;
 
   headers: object = [
     { text: '', value: 'data-table-expand' },
+    { text: 'Actions', value: 'action', align: 'center' },
     {
       text: 'Question Title',
       value: 'question.title',
@@ -159,7 +200,7 @@ export default class DiscussionView extends Vue {
   customFilter() {
     if (this.filterLabel == FilterState.REPLY) {
       this.items = this.discussions.filter(discussion => {
-        return discussion.replies !== [];
+        return discussion.replies! && discussion.replies!.length !== 0;
       });
     } else {
       this.items = this.discussions;
@@ -230,6 +271,44 @@ export default class DiscussionView extends Vue {
       this.currentDiscussion.replies = this.currentDiscussion.replies!.filter(
         obj => obj !== this.reply
       );
+      this.customFilter();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  editDiscussion() {
+    this.edit = true;
+  }
+
+  setDialog(dialog: boolean) {
+    this.edit = dialog;
+  }
+
+  async onSaveDiscussion(edited: Discussion) {
+    this.currentDiscussion = edited;
+    this.setDialog(false);
+
+    for (let i = 0; i < this.discussions.length; i++) {
+      if (this.discussions[i].questionId == edited.questionId) {
+        this.discussions.splice(i, 1);
+        break;
+      }
+    }
+
+    this.discussions.unshift(edited);
+  }
+
+  async deleteDiscussion() {
+    try {
+      await RemoteServices.deleteDiscussion(
+        this.currentDiscussion.userId,
+        this.currentDiscussion.questionId
+      );
+      this.discussions = this.discussions.filter(
+        obj => obj !== this.currentDiscussion
+      );
+      this.customFilter();
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

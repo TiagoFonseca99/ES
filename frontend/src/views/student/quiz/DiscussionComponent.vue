@@ -4,7 +4,11 @@
       <v-card-title class="justify-left headline comp-title">
         Discussions
       </v-card-title>
-      <reply-component v-if="discussions != null" :discussions="discussions" />
+      <reply-component
+        v-if="discussions != null"
+        :discussions="discussions"
+        v-on:discussions="onDiscussions"
+      />
       <div v-if="answered && !hasDiscussion" class="discussion-message">
         <v-textarea
           clearable
@@ -62,6 +66,11 @@ export default class DiscussionComponent extends Vue {
   @Watch('question')
   onQuestionChange() {
     this.discussionMessage = '';
+  }
+
+  @Emit('discussions')
+  onDiscussions(discussions: Discussion[]) {
+    return discussions;
   }
 
   convertMarkDown(text: string) {
