@@ -21,6 +21,19 @@ describe('Student walkthrough', () => {
         cy.deleteSubmission('New Test Question');
     });
 
+    it('login edits and resubmits a question that was rejected with an argument', () => {
+        cy.seeRejectedQuestionAndResubmit('Test Question');
+
+        cy.resubmitQuestionArgument('New Test Question','How many years will this pandemic last?','1','2','3','300','Argument');
+
+        cy.openSubmissions();
+        cy.viewQuestion('New Test Question','How many years will this pandemic last?','1','2','3','300');
+
+        cy.deleteSubmission('Test Question');
+        cy.deleteSubmission('New Test Question');
+    });
+
+
     it('login edits and resubmits an invalid question', () => {
         cy.seeRejectedQuestionAndResubmit('Test Question');
 

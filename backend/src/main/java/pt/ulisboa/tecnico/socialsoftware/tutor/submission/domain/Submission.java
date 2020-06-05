@@ -19,6 +19,9 @@ public class Submission {
     @OneToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval=true)
     private Question question;
 
+    @Column(columnDefinition = "TEXT")
+    private String argument;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -54,6 +57,10 @@ public class Submission {
     public boolean isAnonymous() { return anonymous; }
 
     public void setAnonymous(boolean anonymous) { this.anonymous = anonymous; }
+
+    public String getArgument() { return argument; }
+
+    public void setArgument(String argument) { this.argument = argument; }
 
     @Override
     public String toString() {
