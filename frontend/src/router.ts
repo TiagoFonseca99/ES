@@ -24,6 +24,7 @@ import ResultsView from '@/views/student/quiz/ResultsView.vue';
 import ScanView from '@/views/student/ScanView.vue';
 import DiscussionView from '@/views/student/discussion/DiscussionView.vue';
 import DashboardView from '@/views/student/dashboard/DashboardView.vue';
+import StudentDashboardView from '@/views/teacher/students/DashboardView.vue';
 import SearchStudentView from '@/views/student/dashboard/SearchStudentView.vue';
 
 import AdminManagementView from '@/views/admin/AdminManagementView.vue';
@@ -134,6 +135,16 @@ let router = new Router({
           component: StudentsView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Students',
+            requiredAuth: 'Teacher'
+          }
+        },
+        {
+          path: 'user',
+          name: 'student-dashboard',
+          component: StudentDashboardView,
+          props: route => ({ username: route.query.username }),
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - User Dashboard',
             requiredAuth: 'Teacher'
           }
         },
