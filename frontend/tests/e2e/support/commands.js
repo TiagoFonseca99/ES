@@ -408,6 +408,8 @@ Cypress.Commands.add(
     cy.get('[data-cy="Option3"]').type(opt3);
     cy.get('[data-cy="Option4"]').type(opt4);
     cy.get('[data-cy="submitButton"]').click();
+    cy.get('[data-cy="NoButton"]').click();
+    cy.wait(1500);
     cy.contains(title)
       .parent()
       .parent()
@@ -415,6 +417,65 @@ Cypress.Commands.add(
       .should('have.length', 1)
       .children()
       .should('have.length', 5);
+    cy.wait(500);
+  }
+);
+
+Cypress.Commands.add(
+  'submitQuestionArgument',
+  (title, content, opt1, opt2, opt3, opt4, arg) => {
+    cy.openSubmissions();
+    cy.get('[data-cy="submitQuestion"]').click();
+    cy.get('[data-cy="QuestionTitle"]').type(title);
+    cy.get('[data-cy="QuestionContent"]').type(content);
+    cy.get('[data-cy="Switch1"]').click({ force: true });
+    cy.get('[data-cy="Option1"]').type(opt1);
+    cy.get('[data-cy="Option2"]').type(opt2);
+    cy.get('[data-cy="Option3"]').type(opt3);
+    cy.get('[data-cy="Option4"]').type(opt4);
+    cy.get('[data-cy="submitButton"]').click();
+    cy.get('[data-cy="YesButton"]').click();
+    cy.get('[data-cy="Argument"]').type(arg);
+    cy.get('[data-cy="Submit"]').click();
+    cy.wait(1500);
+    cy.contains(title)
+      .parent()
+      .parent()
+      .parent()
+      .should('have.length', 1)
+      .children()
+      .should('have.length', 5);
+    cy.wait(500);
+  }
+);
+
+Cypress.Commands.add(
+  'resubmitQuestionArgument',
+  (title, content, opt1, opt2, opt3, opt4, arg) => {
+    cy.get('[data-cy="QuestionTitle"]')
+      .clear()
+      .type(title);
+    cy.get('[data-cy="QuestionContent"]')
+      .clear()
+      .type(content);
+    cy.get('[data-cy="Switch1"]').click({ force: true });
+    cy.get('[data-cy="Option1"]')
+      .clear()
+      .type(opt1);
+    cy.get('[data-cy="Option2"]')
+      .clear()
+      .type(opt2);
+    cy.get('[data-cy="Switch3"]').click({ force: true });
+    cy.get('[data-cy="Option3"]')
+      .clear()
+      .type(opt3);
+    cy.get('[data-cy="Option4"]')
+      .clear()
+      .type(opt4);
+    cy.get('[data-cy="submitButton"]').click();
+    cy.get('[data-cy="YesButton"]').click();
+    cy.get('[data-cy="Argument"]').type(arg);
+    cy.get('[data-cy="Submit"]').click();
     cy.wait(500);
   }
 );
@@ -443,6 +504,7 @@ Cypress.Commands.add(
       .clear()
       .type(opt4);
     cy.get('[data-cy="submitButton"]').click();
+    cy.get('[data-cy="NoButton"]').click();
     cy.wait(500);
   }
 );
@@ -515,6 +577,7 @@ Cypress.Commands.add('submitInvalidQuestion', (title, content) => {
   cy.get('[data-cy="QuestionContent"]').type(content);
   cy.get('[data-cy="Switch1"]').click({ force: true });
   cy.get('[data-cy="submitButton"]').click();
+  cy.wait(1500);
 });
 
 Cypress.Commands.add('resubmitInvalidQuestion', title => {
@@ -523,6 +586,7 @@ Cypress.Commands.add('resubmitInvalidQuestion', title => {
     .type(title);
   cy.get('[data-cy="QuestionContent"]').clear();
   cy.get('[data-cy="submitButton"]').click();
+  cy.wait(1500);
 });
 
 Cypress.Commands.add('deleteSubmission', title => {

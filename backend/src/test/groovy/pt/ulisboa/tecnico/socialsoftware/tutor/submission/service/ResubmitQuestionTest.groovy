@@ -42,6 +42,8 @@ class ResubmitQuestionTest extends Specification {
     public static final String NEW_OPTION_CONTENT = "new optionId content"
     public static final String STUDENT_NAME = "João Silva"
     public static final String STUDENT_USERNAME = "joaosilva"
+    public static final String ARGUMENT = "Argumento"
+
 
     @Autowired
     SubmissionService submissionService
@@ -158,6 +160,7 @@ class ResubmitQuestionTest extends Specification {
         submissionDto.setCourseId(course.getId())
         submissionDto.setStudentId(student.getId())
 
+
         when: submissionService.resubmitQuestion(question.getId(), newQuestion.getId(), submissionDto)
 
         then: "a new submission is created with the question changed"
@@ -185,6 +188,37 @@ class ResubmitQuestionTest extends Specification {
         resOptionTwo.getCorrect()
     }
 
+    def "edit question with argument and resubmit"() {
+        given: "a changed question"
+        def questionDto = new QuestionDto()
+        questionDto.setTitle(NEW_QUESTION_TITLE)
+        questionDto.setContent(NEW_QUESTION_CONTENT)
+        and: '2 changed options'
+        def optionsList= new ArrayList<OptionDto>()
+        def optionDto = new OptionDto()
+        optionDto.setContent(NEW_OPTION_CONTENT)
+        optionDto.setCorrect(false)
+        optionDto.setSequence(0)
+        optionsList.add(optionDto)
+        optionDto = new OptionDto()
+        optionDto.setContent(OPTION_CONTENT)
+        optionDto.setCorrect(true)
+        optionDto.setSequence(1)
+        optionsList.add(optionDto)
+        questionDto.setOptions(optionsList)
+        and: "the new submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setQuestionDto(questionDto)
+        submissionDto.setCourseId(course.getId())
+        submissionDto.setStudentId(student.getId())
+        submissionDto.setArgument(ARGUMENT)
+
+        when: submissionService.resubmitQuestion(question.getId(), newQuestion.getId(), submissionDto)
+
+        then: "a new submission is created with the question changed and argument"
+        def result = submissionRepository.findAll().get(1)
+        result.getArgument() == ARGUMENT
+    }
 
     def "edit question with missing data"(){
         given: "a changed question"

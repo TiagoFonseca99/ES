@@ -39,6 +39,11 @@
             <stringProp name="Argument.value">676</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="argument" elementType="Argument">
+            <stringProp name="Argument.name">argument</stringProp>
+            <stringProp name="Argument.value">argument</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </Arguments>
       <hashTree/>
@@ -70,7 +75,7 @@
           <stringProp name="checkQuery"></stringProp>
           <stringProp name="dbUrl">jdbc:postgresql://localhost:5432/tutordb?autoReconnect=true</stringProp>
           <stringProp name="driver">org.postgresql.Driver</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">tomas</stringProp>
           <stringProp name="password"></stringProp>
           <stringProp name="connectionProperties"></stringProp>
         </JDBCDataSource>
@@ -194,7 +199,7 @@ INSERT INTO options(content, correct, question_id, sequence) VALUES (&apos;teste
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">tomas</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request (question Id)" enabled="true">
@@ -238,6 +243,7 @@ INSERT INTO options(content, correct, question_id, sequence) VALUES (&apos;teste
                 <stringProp name="Argument.value">{&#xd;
 	&quot;courseId&quot;: 2,&#xd;
 	&quot;userId&quot;: 676,&#xd;
+	&quot;argument&quot;: &quot;${argument}&quot;,&#xd;
 	&quot;questionDto&quot;: {&#xd;
 		&quot;title&quot;: &quot;new&quot;,&#xd;
 		&quot;content&quot;: &quot;new content&quot;,&#xd;
@@ -273,6 +279,15 @@ INSERT INTO options(content, correct, question_id, sequence) VALUES (&apos;teste
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert StudentId" enabled="true">
             <stringProp name="JSON_PATH">$.studentId</stringProp>
             <stringProp name="EXPECTED_VALUE">${studentId}</stringProp>
+            <boolProp name="JSONVALIDATION">true</boolProp>
+            <boolProp name="EXPECT_NULL">false</boolProp>
+            <boolProp name="INVERT">false</boolProp>
+            <boolProp name="ISREGEX">false</boolProp>
+          </JSONPathAssertion>
+          <hashTree/>
+          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert Argument" enabled="true">
+            <stringProp name="JSON_PATH">$.argument</stringProp>
+            <stringProp name="EXPECTED_VALUE">${argument}</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
             <boolProp name="INVERT">false</boolProp>
@@ -495,7 +510,7 @@ SELECT * FROM options o JOIN quest q ON o.question_id = q.question_id;
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">tomas</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">

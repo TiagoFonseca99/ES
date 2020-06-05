@@ -9,7 +9,7 @@
     <v-card>
       <v-card-title>
         <span class="headline">{{
-          'Do you want to change the submission?'
+          'Do you want to edit the submission?'
         }}</span>
       </v-card-title>
 
