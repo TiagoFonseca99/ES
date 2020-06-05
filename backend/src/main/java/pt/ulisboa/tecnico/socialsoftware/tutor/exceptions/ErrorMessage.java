@@ -110,6 +110,7 @@ public enum ErrorMessage {
     TOURNAMENT_TOPIC_MISMATCH("Tournament %s does not have topic %d"),
     TOURNAMENT_CREATOR("User %s can not cancel this tournament"),
     USER_NOT_JOINED("User has not joined tournament: %s"),
+    WRONG_TOURNAMENT_PASSWORD("Wrong tournament password for private tournament %d"),
 
     // Ddp
     DISCUSSION_MISSING_DATA("Missing information for discussion"),

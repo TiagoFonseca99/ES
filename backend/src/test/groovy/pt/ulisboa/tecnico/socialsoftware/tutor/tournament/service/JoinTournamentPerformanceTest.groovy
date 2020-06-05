@@ -140,7 +140,7 @@ class JoinTournamentPerformanceTest extends Specification {
         })
 
         when:
-        0.upto(1, {tournamentService.joinTournament(user.getId() + it, tournamentDto)})
+        0.upto(1, {tournamentService.joinTournament(user.getId() + it, tournamentDto, "")})
         1.upto(1, {tournamentService.getTournamentParticipants(tournamentDto)})
 
         then: "the student has joined the tournament"

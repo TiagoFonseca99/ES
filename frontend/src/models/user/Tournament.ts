@@ -13,6 +13,8 @@ export default class Tournament {
   topics!: String[];
   participants!: User[];
   quizId!: number | undefined;
+  privateTournament!: boolean;
+  password!: string;
 
   constructor(jsonObj?: Tournament, user?: User) {
     if (jsonObj) {
@@ -39,6 +41,9 @@ export default class Tournament {
 
       const p: User[] = jsonObj.participants;
       this.enrolled = false;
+      this.quizId = jsonObj.quizId;
+      this.privateTournament = jsonObj.privateTournament;
+      this.password = jsonObj.password;
       if (user) {
         p.forEach(pUser => {
           if (user.id == pUser.id) {
@@ -53,7 +58,6 @@ export default class Tournament {
           }
         }
       }
-      this.quizId = jsonObj.quizId;
     }
   }
 }
