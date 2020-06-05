@@ -46,7 +46,7 @@ import GiveArgument from '@/views/student/questions/GiveArgument.vue';
 })
 export default class MenuArgument extends Vue {
   @Prop({ type: Submission, required: true }) submission!: Submission;
-  @Prop({ type: Number, required: false }) oldQuestionId: number | null = null;
+  @Prop({ type: Number, required: false }) oldQuestionId?: number;
   @Model('dialog', Boolean) dialog!: boolean;
 
   editSubmission!: Submission;
@@ -59,7 +59,7 @@ export default class MenuArgument extends Vue {
   async submitQuestion() {
     try {
       const result =
-        this.oldQuestionId != null
+        this.oldQuestionId !== undefined
           ? await RemoteServices.resubmitQuestion(
               this.editSubmission,
               this.oldQuestionId

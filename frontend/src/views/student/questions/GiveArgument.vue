@@ -9,7 +9,7 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          {{ 'Give Argument' }}
+          {{ 'Argument' }}
         </span>
       </v-card-title>
 
@@ -18,7 +18,7 @@
           <v-layout column wrap>
             <v-flex xs24 sm12 md12>
               <v-textarea
-                outline
+                outlined
                 rows="10"
                 v-model="editSubmission.argument"
                 data-cy="Argument"
@@ -31,7 +31,8 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn color="blue darken-1" data-cy="Submit" @click="submitQuestion"
+        <v-btn color="primary" @click="$emit('dialog', false)">Cancel</v-btn>
+        <v-btn color="primary" data-cy="Submit" @click="submitQuestion"
           >Submit</v-btn
         >
       </v-card-actions>
@@ -46,7 +47,7 @@ import RemoteServices from '@/services/RemoteServices';
 @Component
 export default class GiveArgument extends Vue {
   @Prop({ type: Submission, required: true }) submission!: Submission;
-  @Prop({ type: Number, required: false }) oldQuestionId!: number;
+  @Prop({ type: Number, required: false }) oldQuestionId?: number;
   @Model('dialog', Boolean) dialog!: boolean;
 
   editSubmission!: Submission;
@@ -58,7 +59,7 @@ export default class GiveArgument extends Vue {
   async submitQuestion() {
     try {
       const result =
-        this.oldQuestionId != null
+        this.oldQuestionId !== undefined
           ? await RemoteServices.resubmitQuestion(
               this.editSubmission,
               this.oldQuestionId

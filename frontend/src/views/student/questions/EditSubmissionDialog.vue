@@ -9,7 +9,9 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          {{ oldQuestionId === null ? 'New Submission' : 'Edit Submission' }}
+          {{
+            oldQuestionId === undefined ? 'New Submission' : 'Edit Submission'
+          }}
         </span>
       </v-card-title>
 
@@ -71,7 +73,7 @@
           >Cancel</v-btn
         >
         <v-btn color="primary" @click="menuArgument" data-cy="submitButton">
-          {{ oldQuestionId === null ? 'Submit' : 'Resubmit' }}
+          {{ oldQuestionId === undefined ? 'Submit' : 'Resubmit' }}
         </v-btn>
       </v-card-actions>
       <menu-argument
@@ -103,7 +105,7 @@ export default class EditSubmissionDialog extends Vue {
   @Prop({ type: Submission, required: true }) readonly submission!: Submission;
 
   editQuestion!: Question;
-  oldQuestionId: number | null = null;
+  oldQuestionId: number | undefined | null = null;
   currentSubmission!: Submission;
   MenuArgument: boolean = false;
 
@@ -117,6 +119,8 @@ export default class EditSubmissionDialog extends Vue {
     if (this.editQuestion.id != null) {
       this.oldQuestionId = this.editQuestion.id;
       this.editQuestion.id = null;
+    } else {
+      this.oldQuestionId = undefined;
     }
     this.currentSubmission = new Submission(this.submission);
   }

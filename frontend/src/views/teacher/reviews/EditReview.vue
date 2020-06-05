@@ -19,6 +19,9 @@
             <v-flex>
               <v-textarea
                 readonly
+                outlined
+                auto-grow
+                row-height="1"
                 v-if="submission.argument"
                 v-model="submission.argument"
                 data-cy="Argument"
@@ -27,8 +30,8 @@
             </v-flex>
             <v-flex xs24 sm12 md12>
               <v-textarea
-                outline
-                rows="10"
+                outlined
+                rows="5"
                 v-model="currentReview.justification"
                 data-cy="Justification"
                 label="Justification"
