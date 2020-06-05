@@ -40,7 +40,7 @@ Cypress.Commands.add('closeErrorMessage', message => {
       .find('button')
       .click();
   } else {
-    cy.find(message)
+    cy.contains(message)
       .parent()
       .find('button')
       .click();
@@ -281,13 +281,9 @@ Cypress.Commands.add('writeDiscussion', content => {
   cy.get('[data-cy="createDiscussion"]').click();
 });
 
-Cypress.Commands.add('viewMyDiscussions', () => {
-  cy.get('[data-cy="discussions"]').click();
-});
-
 Cypress.Commands.add('replyTeacherDiscussion', content => {
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO replies (discussion_user_id, user_id, message, date) VALUES (676, 677, \'' +
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "INSERT INTO replies (discussion_user_id, user_id, message, date) VALUES (676, 677, \'' +
       content +
       '\', \'2020-01-01 00:00:01\')"'
   );
@@ -300,6 +296,11 @@ Cypress.Commands.add('replyDiscussion', content => {
 
 Cypress.Commands.add('openDiscussion', n => {
   cy.get('tbody > :nth-child(' + n + 1 + ') > .text-start').click();
+});
+
+Cypress.Commands.add('viewMyDiscussions', n => {
+  cy.get('[data-cy="questions"]').click();
+  cy.get('[data-cy="discussions"]').click();
 });
 
 Cypress.Commands.add('submitReply', message => {
@@ -323,13 +324,13 @@ Cypress.Commands.add('submitEmptyReply', () => {
 
 Cypress.Commands.add('removeAllDiscussions', () => {
   cy.exec(
-    'PGPASSWORD= psql tutordb -U daniel -h localhost -c "DELETE FROM discussions WHERE 1 = 1;"'
+    'PGPASSWORD= psql tutordb -U dserafim1999 -h localhost -c "DELETE FROM discussions WHERE 1 = 1;"'
   );
 });
 
 Cypress.Commands.add('removeAllReplies', () => {
   cy.exec(
-    'PGPASSWORD= psql tutordb -U daniel -h localhost -c "DELETE FROM replies WHERE 1 = 1;"'
+    'PGPASSWORD= psql tutordb -U dserafim1999 -h localhost -c "DELETE FROM replies WHERE 1 = 1;"'
   );
 });
 
@@ -337,7 +338,7 @@ Cypress.Commands.add(
   'addDiscussionSameQuestion',
   (available, content, user) => {
     cy.exec(
-      'PGPASSWORD= psql tutordb -U daniel -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, available, content) VALUES (' +
+      'PGPASSWORD= psql tutordb -U dserafim1999 -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, available, content) VALUES (' +
         user +
         ', (SELECT id FROM q), ' +
         available +
@@ -366,8 +367,8 @@ Cypress.Commands.add('clickAvailability', () => {
 // PPA
 
 Cypress.Commands.add('openSubmissions', () => {
-  cy.contains('Questions').click();
-  cy.contains('Submissions').click();
+  cy.get('[data-cy="questions"]').click();
+  cy.get('[data-cy="submissions"]').click();
 });
 
 Cypress.Commands.add('reviewSubmission', (title, status) => {
@@ -477,11 +478,17 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('checkAllStudentsSubmission', (title1, title2, title3) => {
-  cy.contains('Questions').click();
-  cy.contains('All Submissions').click();
+  cy.get('[data-cy="questions"]').click();
+  cy.get('[data-cy="all-submissions"]').click();
   cy.contains(title1);
   cy.contains(title2);
   cy.contains(title3);
+});
+
+Cypress.Commands.add('seesExcludingSubmissions', (title1, title2) => {
+  cy.contains('Exclude').click();
+  cy.contains(title1);
+  cy.contains(title2);
 });
 
 Cypress.Commands.add('viewQuestion', (title, content, op1, op2, op3, op4) => {
@@ -573,7 +580,7 @@ Cypress.Commands.add('deleteQuestion', title => {
 
 Cypress.Commands.add('teacherReviewsSubmission', () => {
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(current_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" '
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(current_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" '
   );
 });
 

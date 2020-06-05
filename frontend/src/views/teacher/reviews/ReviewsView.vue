@@ -52,13 +52,11 @@
             <span>{{ item.questionDto.creationDate }}</span>
           </v-chip>
         </template>
-        <template v-slot:item.questionDto.image="{ item }">
-          <v-file-input
-            show-size
-            dense
-            small-chips
-            @change="handleFileUpload($event, item.questionDto)"
-            accept="image/*"
+        <template v-slot:item.questionDto.topics="{ item }">
+          <edit-question-topics
+            :question="item.questionDto"
+            :topics="topics"
+            v-on:submission-changed-topics="onQuestionChangedTopics"
           />
         </template>
         <template v-slot:item.review="{ item }">
@@ -223,16 +221,21 @@ import EditReview from '@/views/teacher/reviews/EditReview.vue';
 import Review from '@/models/management/Review';
 import ShowQuestionDialog from '@/views/teacher/questions/ShowQuestionDialog.vue';
 import ShowReviewDialog from '@/views/teacher/reviews/ShowJustificationDialog.vue';
+import EditQuestionTopics from '@/views/teacher/questions/EditQuestionTopics.vue';
+
+import Topic from '@/models/management/Topic';
 
 @Component({
   components: {
     'show-question-dialog': ShowQuestionDialog,
     'edit-reviews': EditReview,
-    'show-review-dialog': ShowReviewDialog
+    'show-review-dialog': ShowReviewDialog,
+    'edit-question-topics': EditQuestionTopics
   }
 })
 export default class ReviewsView extends Vue {
   submissions: Submission[] = [];
+  topics: Topic[] = [];
   currentSubmission: Submission | null = null;
   editReview: boolean = false;
   searchSubmissions: string = '';
@@ -258,7 +261,13 @@ export default class ReviewsView extends Vue {
     { text: 'Submitted by', value: 'username', align: 'center' },
     { text: 'Anonymous', value: 'anonymous', align: 'center' },
     { text: 'Status', value: 'questionDto.status', align: 'center' },
-    { text: 'Image', value: 'questionDto.image', align: 'center' },
+    {
+      text: 'Topics',
+      value: 'questionDto.topics',
+      align: 'center',
+      width: '20%',
+      sortable: false
+    },
     { text: 'Review', value: 'review', align: 'center' }
   ];
   searchReviews: string = '';
@@ -285,8 +294,9 @@ export default class ReviewsView extends Vue {
   async created() {
     await this.$store.dispatch('loading');
     try {
-      [this.submissions] = await Promise.all([
-        RemoteServices.getSubsToTeacher()
+      [this.submissions, this.topics] = await Promise.all([
+        RemoteServices.getSubsToTeacher(),
+        RemoteServices.getTopics()
       ]);
       this.submissions.sort((a, b) => this.sortNewestSubmissionFirst(a, b));
       [this.reviews] = await Promise.all([
@@ -299,22 +309,18 @@ export default class ReviewsView extends Vue {
     await this.$store.dispatch('clearLoading');
   }
 
-  async handleFileUpload(event: File, question: Question) {
-    if (question.id) {
-      try {
-        const imageURL = await RemoteServices.uploadImage(event, question.id);
-        question.image = new Image();
-        question.image.url = imageURL;
-        confirm('Image ' + imageURL + ' was uploaded!');
-      } catch (error) {
-        await this.$store.dispatch('error', error);
-      }
-    }
-  }
-
   changeColor(status: string) {
     if (status == 'REJECTED') return 'red';
     if (status == 'APPROVED') return 'green';
+  }
+
+  onQuestionChangedTopics(questionId: Number, changedTopics: Topic[]) {
+    let submission = this.submissions.find(
+      (submission: Submission) => submission.questionDto.id == questionId
+    );
+    if (submission) {
+      submission.questionDto.topics = changedTopics;
+    }
   }
 
   createReview(submission: Submission) {

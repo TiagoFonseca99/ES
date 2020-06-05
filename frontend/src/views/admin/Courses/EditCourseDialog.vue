@@ -41,12 +41,12 @@
       <v-card-actions>
         <v-spacer />
         <v-btn
-          color="blue darken-1"
+          color="primary"
           @click="$emit('close-dialog')"
           data-cy="cancelButton"
           >Cancel</v-btn
         >
-        <v-btn color="blue darken-1" @click="saveCourse" data-cy="saveButton"
+        <v-btn color="primary" @click="saveCourse" data-cy="saveButton"
           >Save</v-btn
         >
       </v-card-actions>

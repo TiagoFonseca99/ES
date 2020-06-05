@@ -3,7 +3,7 @@
     <v-data-table
       :headers="headers"
       :custom-filter="customFilter"
-      :items="submissions"
+      :items="items"
       :search="search"
       multi-sort
       :mobile-breakpoint="0"
@@ -18,8 +18,40 @@
             label="Search"
             class="mx-2"
           />
-
           <v-spacer />
+          <v-btn
+            color="primary"
+            data-cy="Exclude"
+            dark
+            @click="toggleAnswers"
+            >{{ filterLabel }}</v-btn
+          >
+          <v-btn-toggle
+            dense
+            borderless
+            mandatory
+            background-color="primary"
+            color="white"
+          >
+            <v-btn
+              color="primary"
+              data-cy="SeeAll"
+              @click="filterSubmissions('all')"
+              >{{ 'See All' }}</v-btn
+            >
+            <v-btn
+              color="primary"
+              data-cy="SeeApproved"
+              @click="filterSubmissions('accepted')"
+              >{{ 'See Accepted' }}</v-btn
+            >
+            <v-btn
+              color="primary"
+              data-cy="SeeRejected"
+              @click="filterSubmissions('rejected')"
+              >{{ 'See Rejected' }}</v-btn
+            >
+          </v-btn-toggle>
         </v-card-title>
       </template>
 
@@ -39,9 +71,16 @@
       </template>
 
       <template v-slot:item.username="{ item }">
-        <v-chip color="primary" small @click="openStudentDashboardDialog(item)">
-          <span v-if="item.anonymous"> {{ 'ANONYMOUS' }} </span>
-          <span v-else> {{ item.username }} </span>
+        <v-chip color="error" small v-if="item.anonymous">
+          <span> {{ 'Anonymous User' }} </span>
+        </v-chip>
+        <v-chip
+          color="primary"
+          small
+          v-else
+          @click="openStudentDashboardDialog(item)"
+        >
+          <span> {{ item.username }} </span>
         </v-chip>
       </template>
 
@@ -51,14 +90,8 @@
         </v-chip>
       </template>
 
-      <template v-slot:item.questionDto.image="{ item }">
-        <v-file-input
-          show-size
-          dense
-          small-chips
-          @change="handleFileUpload($event, item.questionDto)"
-          accept="image/*"
-        />
+      <template v-slot:item.questionDto.topics="{ item }">
+        <view-submission-topics :submission="item" :topics="topics" />
       </template>
 
       <template v-slot:item.action="{ item }">
@@ -105,21 +138,33 @@ import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
 import Image from '@/models/management/Image';
 import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
-import DashboardDialogView from '@/views/student/dashboard/DashboardDialogView.vue';
+import ShowDashboardDialog from '@/views/student/dashboard/DashboardDialogView.vue';
+import ViewSubmissionTopics from '@/views/student/questions/ViewSubmissionTopics.vue';
+import Topic from '@/models/management/Topic';
+
+enum FilterState {
+  INCLUDE = 'Include my submissions',
+  EXCLUDE = 'Exclude my submissions'
+}
 
 @Component({
   components: {
     'show-question-dialog': ShowQuestionDialog,
-    'show-dashboard-dialog': DashboardDialogView
+    'show-dashboard-dialog': ShowDashboardDialog,
+    'view-submission-topics': ViewSubmissionTopics
   }
 })
 export default class AllSubmissionsView extends Vue {
-  submissions: Submission[] = [];
+  filterLabel: FilterState = FilterState.EXCLUDE;
+  allsubmissions: Submission[] = [];
+  choosensubmissions: Submission[] = [];
+  items: Submission[] = [];
+  topics: Topic[] = [];
   currentQuestion: Question | null = null;
   questionDialog: boolean = false;
   search: string = '';
-  dashboardDialog: boolean = false;
   currentUsername: string | null = null;
+  dashboardDialog: boolean = false;
 
   headers: object = [
     {
@@ -133,25 +178,29 @@ export default class AllSubmissionsView extends Vue {
     { text: 'Submitted by', value: 'username', align: 'center' },
     { text: 'Status', value: 'questionDto.status', align: 'center' },
     {
+      text: 'Topics',
+      value: 'questionDto.topics',
+      align: 'center',
+      width: '20%',
+      sortable: false
+    },
+    {
       text: 'Creation Date',
       value: 'questionDto.creationDate',
       align: 'center'
-    },
-    {
-      text: 'Image',
-      value: 'questionDto.image',
-      align: 'center',
-      sortable: false
     }
   ];
 
   async created() {
     await this.$store.dispatch('loading');
     try {
-      [this.submissions] = await Promise.all([
-        RemoteServices.getStudentsSubmissions()
+      [this.allsubmissions, this.topics] = await Promise.all([
+        RemoteServices.getStudentsSubmissions(),
+        RemoteServices.getTopics()
       ]);
-      this.submissions.sort((a, b) => this.sortNewestFirst(a, b));
+      this.allsubmissions.sort((a, b) => this.sortNewestFirst(a, b));
+      this.items = this.allsubmissions;
+      this.choosensubmissions = this.allsubmissions;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -178,19 +227,6 @@ export default class AllSubmissionsView extends Vue {
     return convertMarkDown(text, image);
   }
 
-  async handleFileUpload(event: File, question: Question) {
-    if (question.id) {
-      try {
-        const imageURL = await RemoteServices.uploadImage(event, question.id);
-        question.image = new Image();
-        question.image.url = imageURL;
-        confirm('Image ' + imageURL + ' was uploaded!');
-      } catch (error) {
-        await this.$store.dispatch('error', error);
-      }
-    }
-  }
-
   showQuestionDialog(question: Question) {
     this.currentQuestion = question;
     this.questionDialog = true;
@@ -215,6 +251,49 @@ export default class AllSubmissionsView extends Vue {
 
   onCloseShowDashboardDialog() {
     this.dashboardDialog = false;
+  }
+
+  filterSubmissions(value: String) {
+    this.choosensubmissions = this.allsubmissions;
+    if (this.filterLabel == FilterState.EXCLUDE) {
+      if (value == 'all') {
+        this.choosensubmissions = this.allsubmissions;
+      } else if (value == 'accepted') {
+        this.choosensubmissions = this.allsubmissions.filter(submission => {
+          return submission.questionDto.status == 'AVAILABLE';
+        });
+      } else {
+        this.choosensubmissions = this.allsubmissions.filter(submission => {
+          return submission.questionDto.status == 'DEPRECATED';
+        });
+      }
+      this.items = this.choosensubmissions;
+    } else {
+      if (value == 'all') {
+      } else if (value == 'accepted') {
+        this.choosensubmissions = this.choosensubmissions.filter(submission => {
+          return submission.questionDto.status == 'AVAILABLE';
+        });
+      } else {
+        this.choosensubmissions = this.choosensubmissions.filter(submission => {
+          return submission.questionDto.status == 'DEPRECATED';
+        });
+      }
+      this.items = this.choosensubmissions.filter(submission => {
+        return submission.studentId !== this.$store.getters.getUser.id;
+      });
+    }
+  }
+  toggleAnswers() {
+    if (this.filterLabel == FilterState.INCLUDE) {
+      this.filterLabel = FilterState.EXCLUDE;
+      this.items = this.choosensubmissions;
+    } else {
+      this.filterLabel = FilterState.INCLUDE;
+      this.items = this.choosensubmissions.filter(submission => {
+        return submission.studentId !== this.$store.getters.getUser.id;
+      });
+    }
   }
 }
 </script>

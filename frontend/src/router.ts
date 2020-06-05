@@ -317,7 +317,7 @@ let router = new Router({
 });
 
 router.beforeEach(async (to, from, next) => {
-  if (!Store.getters.isLoggedIn && session.checkLogged(session.LOGIN_TOKEN)) {
+  if (!Store.getters.isLoggedIn && session.checkLogged()) {
     let valid = await session.testToken();
     if (!valid) {
       next('/');
