@@ -172,10 +172,6 @@ export default class MyTournamentsView extends Vue {
     try {
       this.tournaments = await RemoteServices.getUserTournaments();
       this.tournaments.sort((a, b) => this.sortById(a, b));
-      this.tournaments.map(tournament => {
-        if (tournament.privateTournament === undefined)
-          tournament.privateTournament = true;
-      });
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
