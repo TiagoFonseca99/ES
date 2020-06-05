@@ -67,6 +67,10 @@ public class SubmissionService {
 
         submission.setAnonymous(submissionDto.isAnonymous());
 
+        if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
+            submission.setArgument(submissionDto.getArgument());
+
+
         entityManager.persist(submission);
         return new SubmissionDto(submission);
     }
@@ -77,7 +81,7 @@ public class SubmissionService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public SubmissionDto resubmitQuestion(Integer oldQuestionId, Integer newQuestionId, SubmissionDto submissionDto) {
         checkIfConsistentSubmission(newQuestionId, submissionDto.getStudentId());
-        if(oldQuestionId == null)
+        if(oldQuestionId == null )
             throw new TutorException(SUBMISSION_MISSING_QUESTION);
 
         Question oldQuestion = getQuestion(oldQuestionId);
@@ -95,8 +99,14 @@ public class SubmissionService {
 
         submission.setAnonymous(submissionDto.isAnonymous());
 
+        if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
+            submission.setArgument(submissionDto.getArgument());
+
+
         entityManager.persist(submission);
+
         return new SubmissionDto(submission);
+
     }
 
     @Retryable(

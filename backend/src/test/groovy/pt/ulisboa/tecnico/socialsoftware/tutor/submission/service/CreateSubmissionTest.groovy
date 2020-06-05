@@ -40,6 +40,7 @@ class CreateSubmissionTest extends Specification {
     public static final String STUDENT_USERNAME = "joaosilva"
     public static final String TEACHER_NAME = "Ana Rita"
     public static final String TEACHER_USERNAME = "anarita"
+    public static final String ARGUMENT = "Argumento"
 
     @Autowired
     SubmissionService submissionService
@@ -215,6 +216,21 @@ class CreateSubmissionTest extends Specification {
         then: "question status is SUBMITTED"
         def result = submissionRepository.findAll().get(0)
         result.getQuestion().getStatus() == Question.Status.SUBMITTED
+    }
+
+    def "student submits a question with an argument" () {
+        given: "a submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setCourseId(course.getId())
+        submissionDto.setStudentId(student.getId())
+        submissionDto.setArgument(ARGUMENT)
+
+        when: submissionService.createSubmission(question.getId(), submissionDto)
+
+        then: "question with argument is SUBMITTED"
+
+        def result = submissionRepository.findAll().get(0)
+        result.getArgument() == ARGUMENT
     }
 
     @Unroll

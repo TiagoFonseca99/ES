@@ -21,7 +21,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping(value = "/dashboard")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasRole('ROLE_STUDENT') or hasRole('ROLE_TEACHER')")
     public DashboardDto getDashboardInfo(@Valid @RequestParam String username) {
         User user = userService.findByUsername(username);
         
