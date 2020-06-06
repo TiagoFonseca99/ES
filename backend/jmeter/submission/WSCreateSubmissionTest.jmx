@@ -46,6 +46,11 @@
             <stringProp name="Argument.value">2</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="courseExecutionId" elementType="Argument">
+            <stringProp name="Argument.name">courseExecutionId</stringProp>
+            <stringProp name="Argument.value">11</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
           <elementProp name="studentId" elementType="Argument">
             <stringProp name="Argument.name">studentId</stringProp>
             <stringProp name="Argument.value">676</stringProp>
@@ -106,6 +111,7 @@
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
   &quot;courseId&quot;: &quot;${courseId}&quot;,&#xd;
+  &quot;courseExecutionId&quot;: &quot;${courseExecutionId}&quot;,&#xd;
   &quot;argument&quot;: &quot;${argument}&quot;,&#xd;
   &quot;questionDto&quot;: {&#xd;
   	&quot;title&quot;: &quot;${title}&quot;,&#xd;
@@ -157,6 +163,15 @@
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert submission course id" enabled="true">
             <stringProp name="JSON_PATH">$.courseId</stringProp>
             <stringProp name="EXPECTED_VALUE">${courseId}</stringProp>
+            <boolProp name="JSONVALIDATION">true</boolProp>
+            <boolProp name="EXPECT_NULL">false</boolProp>
+            <boolProp name="INVERT">false</boolProp>
+            <boolProp name="ISREGEX">false</boolProp>
+          </JSONPathAssertion>
+          <hashTree/>
+          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert submission course id" enabled="true">
+            <stringProp name="JSON_PATH">$.courseExecutionId</stringProp>
+            <stringProp name="EXPECTED_VALUE">${courseExecutionId}</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
             <boolProp name="INVERT">false</boolProp>
@@ -287,7 +302,7 @@
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">tomas</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">

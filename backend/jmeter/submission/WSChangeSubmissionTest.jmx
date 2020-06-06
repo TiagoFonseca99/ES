@@ -34,9 +34,19 @@
             <stringProp name="Argument.value">2</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="courseExecutionId" elementType="Argument">
+            <stringProp name="Argument.name">courseExecutionId</stringProp>
+            <stringProp name="Argument.value">11</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
           <elementProp name="studentId" elementType="Argument">
             <stringProp name="Argument.name">studentId</stringProp>
             <stringProp name="Argument.value">676</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="userId" elementType="Argument">
+            <stringProp name="Argument.name">userId</stringProp>
+            <stringProp name="Argument.value">677</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -70,7 +80,7 @@
           <stringProp name="checkQuery"></stringProp>
           <stringProp name="dbUrl">jdbc:postgresql://localhost:5432/tutordb?autoReconnect=true</stringProp>
           <stringProp name="driver">org.postgresql.Driver</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
           <stringProp name="password"></stringProp>
           <stringProp name="connectionProperties"></stringProp>
         </JDBCDataSource>
@@ -78,8 +88,8 @@
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">WITH quest AS (INSERT INTO questions (title, content, status, course_id, key) VALUES (&apos;old&apos;, &apos;old content&apos;, &apos;SUBMITTED&apos;, 2, 1200) RETURNING id)
-INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);
+          <stringProp name="query">WITH quest AS (INSERT INTO questions (title, content, status, course_id) VALUES (&apos;old&apos;, &apos;old content&apos;, &apos;SUBMITTED&apos;, 2) RETURNING id)
+INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id from quest), 676, 11);
 
 WITH quest AS (SELECT * FROM questions WHERE key=1200)
 INSERT INTO options(content, correct, question_id, sequence) VALUES (&apos;teste&apos;, &apos;t&apos;, (SELECT id FROM quest), 0);</stringProp>
@@ -194,7 +204,7 @@ INSERT INTO options(content, correct, question_id, sequence) VALUES (&apos;teste
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request (question Id)" enabled="true">
@@ -236,11 +246,12 @@ INSERT INTO options(content, correct, question_id, sequence) VALUES (&apos;teste
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{	&#xd;
-	&quot;studentId&quot;: 676,&#xd;
-	&quot;courseId&quot;: 2,&#xd;
-	&quot;userId&quot;: 677,&#xd;
+	&quot;studentId&quot;: &quot;${studentId}&quot;,&#xd;
+	&quot;courseId&quot;: &quot;${courseId}&quot;,&#xd;
+	&quot;courseExecutionId&quot;: &quot;${courseExecutionId}&quot;,&#xd;
+	&quot;userId&quot;: &quot;${userId}&quot;,&#xd;
 	&quot;questionDto&quot;: {&#xd;
-		&quot;id&quot;: ${id},&#xd;
+		&quot;id&quot;: &quot;${id}&quot;,&#xd;
 		&quot;title&quot;: &quot;new&quot;,&#xd;
 		&quot;content&quot;: &quot;new content&quot;,&#xd;
 		&quot;options&quot;: [&#xd;

@@ -67,19 +67,19 @@
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
           <stringProp name="query">WITH quest AS (INSERT INTO questions (course_id, key,status) VALUES (2, 1200,&apos;AVAILABLE&apos;) RETURNING id),
-	subs	 AS (INSERT INTO submissions (id,question_id, user_id) VALUES (10000, (SELECT id FROM quest), 676) RETURNING id)
+	subs	 AS (INSERT INTO submissions (id,question_id, user_id, course_execution_id) VALUES (10000, (SELECT id FROM quest), 676, 11) RETURNING id)
 	
 	INSERT INTO reviews (id, justification, status, student_id, submission_id, user_id) VALUES (310, &apos;Porque sim&apos;, &apos;APPROVED&apos;, 676, (SELECT id from subs), 677);
 	
 WITH quest AS (INSERT INTO questions (course_id, key,status) VALUES (2, 1200, &apos;AVAILABLE&apos;) RETURNING id),
-	subs	 AS (INSERT INTO submissions (id,question_id, user_id) VALUES (10001, (SELECT id FROM quest), 676) RETURNING id)
+	subs	 AS (INSERT INTO submissions (id,question_id, user_id, course_execution_id) VALUES (10001, (SELECT id FROM quest), 676, 11) RETURNING id)
 	
 	INSERT INTO reviews (id, justification, status, student_id, submission_id, user_id) VALUES (311, &apos;Porque sim&apos;, &apos;APPROVED&apos;, 676, (SELECT id from subs), 677);</stringProp>
           <stringProp name="queryArguments"></stringProp>
@@ -186,7 +186,7 @@ WITH quest AS (INSERT INTO questions (course_id, key,status) VALUES (2, 1200, &a
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/management/reviews/showReviews</stringProp>
+          <stringProp name="HTTPSampler.path">/management/reviews/showReviews?executionId=11</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -330,7 +330,7 @@ WITH quest AS (INSERT INTO questions (course_id, key,status) VALUES (2, 1200, &a
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">

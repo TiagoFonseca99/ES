@@ -67,13 +67,13 @@
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">daniel</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
-          <stringProp name="query">WITH quest AS (INSERT INTO questions (course_id, key) VALUES (2, 1200) RETURNING id) INSERT INTO submissions (id, question_id, user_id) VALUES (10000, (SELECT id FROM quest), 676);
+          <stringProp name="query">WITH quest AS (INSERT INTO questions (course_id, status, key) VALUES (2, &apos;SUBMITTED&apos;, 1200) RETURNING id) INSERT INTO submissions (id, question_id, user_id, course_execution_id) VALUES (10000, (SELECT id FROM quest), 676, 11);
 </stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
@@ -198,7 +198,7 @@
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/student/reviews</stringProp>
+          <stringProp name="HTTPSampler.path">/student/reviews?executionId=11</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
