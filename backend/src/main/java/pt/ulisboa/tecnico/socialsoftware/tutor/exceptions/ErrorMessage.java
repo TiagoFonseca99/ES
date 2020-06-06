@@ -23,6 +23,7 @@ public enum ErrorMessage {
     INVALID_QUESTION_SEQUENCE_FOR_QUIZ("Invalid question sequence for quiz"),
 
     COURSE_EXECUTION_NOT_FOUND("Course execution not found with id %d"),
+    COURSE_EXECUTION_MISSING("Course execution is missing"),
     OPTION_NOT_FOUND("Option not found with id %d"),
     QUESTION_ANSWER_NOT_FOUND("Question answer not found with id %d"),
     QUESTION_NOT_FOUND("Question not found with id %d"),
@@ -92,6 +93,7 @@ public enum ErrorMessage {
     REVIEW_MISSING_SUBMISSION("Missing submission for review"),
     SUBMISSION_MISSING_QUESTION("Missing question for submission"),
     SUBMISSION_MISSING_STUDENT("Missing student for submission"),
+    SUBMISSION_MISSING_COURSE("Submission is not assigned to a course"),
     SUBMISSION_NOT_FOUND("Submission not found with id %d"),
 
     // Tdp

@@ -5,6 +5,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
@@ -35,6 +37,8 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.US
 class CreateReviewTest extends Specification {
 
     public static final String COURSE_NAME = "Arquitetura de Software"
+    public static final String ACRONYM = "AS1"
+    public static final String ACADEMIC_TERM = "1 SEM"
     public static final String APPROVED = 'APPROVED'
     public static final String REJECTED = 'REJECTED'
     public static final String QUESTION_TITLE = 'question title'
@@ -55,6 +59,9 @@ class CreateReviewTest extends Specification {
     CourseRepository courseRepository
 
     @Autowired
+    CourseExecutionRepository courseExecutionRepository
+
+    @Autowired
     QuestionRepository questionRepository
 
     @Autowired
@@ -70,6 +77,7 @@ class CreateReviewTest extends Specification {
     ImageRepository imageRepository
 
     def course
+    def courseExecution
     def question
     def student
     @Shared
@@ -82,8 +90,10 @@ class CreateReviewTest extends Specification {
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
-
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecutionRepository.save(courseExecution)
         student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
+        student.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
         userRepository.save(student)
 
         teacher = new User(TEACHER_NAME, TEACHER_USERNAME, 2, User.Role.TEACHER)
@@ -105,6 +115,7 @@ class CreateReviewTest extends Specification {
         submission = new Submission()
         submission.setQuestion(question)
         submission.setUser(student)
+        submission.setCourseExecution(courseExecution)
         submissionRepository.save(submission)
 
     }

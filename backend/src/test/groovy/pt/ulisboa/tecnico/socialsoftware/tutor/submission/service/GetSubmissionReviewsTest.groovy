@@ -5,6 +5,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
@@ -17,6 +19,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Specification
 
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.COURSE_EXECUTION_MISSING
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.REVIEW_MISSING_STUDENT
 
 @DataJpaTest
@@ -46,6 +49,9 @@ class GetSubmissionReviewsTest extends Specification {
     CourseRepository courseRepository
 
     @Autowired
+    CourseExecutionRepository courseExecutionRepository
+
+    @Autowired
     SubmissionRepository submissionRepository
 
     @Autowired
@@ -55,6 +61,7 @@ class GetSubmissionReviewsTest extends Specification {
     QuestionRepository questionRepository
 
     def course
+    def courseExecution
     def student
     def acronym
     def question1
@@ -66,6 +73,8 @@ class GetSubmissionReviewsTest extends Specification {
     def setup() {
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecutionRepository.save(courseExecution)
         student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
         userRepository.save(student)
         teacher = new User(TEACHER_NAME, TEACHER_USERNAME, 2, User.Role.TEACHER)
@@ -87,11 +96,13 @@ class GetSubmissionReviewsTest extends Specification {
         submission1 = new Submission()
         submission1.setQuestion(question1)
         submission1.setUser(student)
+        submission1.setCourseExecution(courseExecution)
         student.addSubmission(submission1)
         submissionRepository.save(submission1)
         submission2 = new Submission()
         submission2.setQuestion(question2)
         submission2.setUser(student)
+        submission2.setCourseExecution(courseExecution)
         student.addSubmission(submission2)
         submissionRepository.save(submission2)
     }
@@ -106,7 +117,7 @@ class GetSubmissionReviewsTest extends Specification {
         submissionService.reviewSubmission(teacher.getId(), reviewDto,)
 
         when:
-        def result = submissionService.getSubmissionReviews(student.getId())
+        def result = submissionService.getSubmissionReviews(student.getId(), courseExecution.getId())
 
         then: "the returned data is correct"
         result.size() == 1
@@ -143,7 +154,7 @@ class GetSubmissionReviewsTest extends Specification {
         reviewDto3.setStudentId(submission2.getStudentId())
         submissionService.reviewSubmission(teacher.getId(), reviewDto3)
         when:
-        def result = submissionService.getSubmissionReviews(student.getId())
+        def result = submissionService.getSubmissionReviews(student.getId(), courseExecution.getId())
 
         then: "the returned data is correct"
         result.size() == 3
@@ -172,19 +183,28 @@ class GetSubmissionReviewsTest extends Specification {
 
     def "check review status with no submissions"(){
         when:
-        def result = submissionService.getSubmissionReviews(student.getId())
+        def result = submissionService.getSubmissionReviews(student.getId(), courseExecution.getId())
 
         then: "the returned data is correct"
         result.size() == 0
     }
 
-    def "invalid input"(){
+    def "invalid student input"(){
         when:
-        submissionService.getSubmissionReviews(null)
+        submissionService.getSubmissionReviews(null, courseExecution.getId())
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == REVIEW_MISSING_STUDENT
+    }
+
+    def "invalid course execution input"(){
+        when:
+        submissionService.getSubmissionReviews(student.getId(), null)
+
+        then: "exception is thrown"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == COURSE_EXECUTION_MISSING
     }
 
     @TestConfiguration

@@ -71,6 +71,7 @@ class CreateSubmissionPerformanceTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
 
         when:

@@ -25,6 +25,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.lang.Shared
 
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_COURSE
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_QUESTION
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_STUDENT
 
@@ -67,9 +68,10 @@ class CreateSubmissionTest extends Specification {
     def student
     @Shared
     def question
+    @Shared
     def course
+    @Shared
     def courseExecution
-    def acronym
     def teacher
 
     def setup() {
@@ -95,6 +97,7 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question.getId(), submissionDto)
@@ -106,7 +109,8 @@ class CreateSubmissionTest extends Specification {
         result.getUser() == student
         result.getQuestion() != null
         result.getQuestion() == question
-        result.getQuestion().getCourse().getId() == course.getId()
+        result.getCourseExecution().getId() == courseExecution.getId()
+        result.getCourseExecution().getCourseId() == course.getId()
         !result.isAnonymous()
     }
 
@@ -114,6 +118,7 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
         submissionDto.setAnonymous(true);
 
@@ -126,7 +131,8 @@ class CreateSubmissionTest extends Specification {
         result.getUser() == student
         result.getQuestion() != null
         result.getQuestion() == question
-        result.getQuestion().getCourse().getId() == course.getId()
+        result.getCourseExecution().getId() == courseExecution.getId()
+        result.getCourseExecution().getCourseId() == course.getId()
         result.isAnonymous()
     }
 
@@ -134,6 +140,7 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
         and: "a topic for question"
         def topicDto = new TopicDto()
@@ -154,7 +161,8 @@ class CreateSubmissionTest extends Specification {
         result.getUser() == student
         result.getQuestion() != null
         result.getQuestion() == question
-        result.getQuestion().getCourse().getId() == course.getId()
+        result.getCourseExecution().getId() == courseExecution.getId()
+        result.getCourseExecution().getCourseId() == course.getId()
         !result.isAnonymous()
         result.getQuestion().getTopics().size() == 1
         result.getQuestion().getTopics().getAt(0) == topic
@@ -164,6 +172,7 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto for a teacher"
         def submissionDto = new SubmissionDto()
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(teacher.getId())
 
         when: submissionService.createSubmission(question.getId(), submissionDto)
@@ -177,6 +186,7 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question.getId(), submissionDto)
@@ -189,12 +199,14 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
         and: "a user with a previous submission of the question"
-        student.addSubmission(new Submission(question, student))
+        student.addSubmission(new Submission(courseExecution, question, student))
         and: "another submissionDto"
         def submissionDto2 = new SubmissionDto()
         submissionDto2.setCourseId(course.getId())
+        submissionDto2.setCourseExecutionId(courseExecution.getId())
         submissionDto2.setStudentId(student.getId())
 
         when: "creating a submission with a previously submitted question"
@@ -209,6 +221,7 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.createSubmission(question.getId(), submissionDto)
@@ -222,6 +235,7 @@ class CreateSubmissionTest extends Specification {
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
         submissionDto.setArgument(ARGUMENT)
 
@@ -234,10 +248,11 @@ class CreateSubmissionTest extends Specification {
     }
 
     @Unroll
-    def "invalid arguments: studentId=#studentId | questionId=#questionId || errorMessage"(){
+    def "invalid arguments: studentId=#studentId | questionId=#questionId | courseId=#courseId | courseExecutionId=#courseExecutionId || errorMessage"(){
         given: "a submissionDto"
         def submissionDto = new SubmissionDto()
-        submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseId(courseId)
+        submissionDto.setCourseExecutionId(courseExecutionId)
         submissionDto.setStudentId(studentId)
         when:
         submissionService.createSubmission(questionId, submissionDto)
@@ -247,9 +262,11 @@ class CreateSubmissionTest extends Specification {
         exception.errorMessage == errorMessage
 
         where:
-        studentId       | questionId        | errorMessage
-        null            | question.getId()  | SUBMISSION_MISSING_STUDENT
-        student.getId() | null              | SUBMISSION_MISSING_QUESTION
+        studentId       | questionId        | courseId        | courseExecutionId        || errorMessage
+        null            | question.getId()  | course.getId()  | courseExecution.getId()  || SUBMISSION_MISSING_STUDENT
+        student.getId() | null              | course.getId()  | courseExecution.getId()  || SUBMISSION_MISSING_QUESTION
+        student.getId() | question.getId()  | null            | courseExecution.getId()  || SUBMISSION_MISSING_COURSE
+        student.getId() | question.getId()  | course.getId()  | null                     || SUBMISSION_MISSING_COURSE
     }
 
     @TestConfiguration

@@ -6,6 +6,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto
@@ -41,6 +43,9 @@ class GetAllStudentsSubmissionsTest extends Specification {
     CourseRepository courseRepository
 
     @Autowired
+    CourseExecutionRepository courseExecutionRepository
+
+    @Autowired
     SubmissionRepository submissionRepository
 
     @Autowired
@@ -50,6 +55,7 @@ class GetAllStudentsSubmissionsTest extends Specification {
     QuestionRepository questionRepository
 
     def course
+    def courseExecution
     def student1
     def student2
     def acronym
@@ -61,9 +67,13 @@ class GetAllStudentsSubmissionsTest extends Specification {
     def setup() {
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecutionRepository.save(courseExecution)
         student1 = new User(STUDENT_NAME1, STUDENT_USERNAME1, 1, User.Role.STUDENT)
+        student1.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
         userRepository.save(student1)
         student2 = new User(STUDENT_NAME2, STUDENT_USERNAME2, 2, User.Role.STUDENT)
+        student2.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
         userRepository.save(student2)
 
         question1 = new Question()
@@ -83,11 +93,13 @@ class GetAllStudentsSubmissionsTest extends Specification {
         submission1 = new Submission()
         submission1.setQuestion(question1)
         submission1.setUser(student1)
+        submission1.setCourseExecution(courseExecution)
         submission1.setAnonymous(false)
         student1.addSubmission(submission1)
         submissionRepository.save(submission1)
         submission2 = new Submission()
         submission2.setQuestion(question2)
+        submission2.setCourseExecution(courseExecution)
         submission2.setUser(student2)
         submission2.setAnonymous(true)
         student2.addSubmission(submission2)
@@ -96,7 +108,7 @@ class GetAllStudentsSubmissionsTest extends Specification {
 
     def "get all submissions with one anonymous and one non anonymous"(){
         when:
-        def result = submissionService.getStudentsSubmissions()
+        def result = submissionService.getStudentsSubmissions(courseExecution.getId())
 
         then: "the returned data is correct"
         result.size() == 2
@@ -121,7 +133,7 @@ class GetAllStudentsSubmissionsTest extends Specification {
         submissionRepository.save(submission1)
 
         when:
-        def result = submissionService.getStudentsSubmissions()
+        def result = submissionService.getStudentsSubmissions(courseExecution.getId())
 
         then: "the returned data is correct"
         result.size() == 2
@@ -146,7 +158,7 @@ class GetAllStudentsSubmissionsTest extends Specification {
         submissionRepository.save(submission2)
 
         when:
-        def result = submissionService.getStudentsSubmissions()
+        def result = submissionService.getStudentsSubmissions(courseExecution.getId())
 
         then: "the returned data is correct"
         result.size() == 2
