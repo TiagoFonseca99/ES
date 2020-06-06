@@ -237,7 +237,7 @@ export default class ReplyComponent extends Vue {
     this.setDialog(false);
   }
 
-  editDiscussion(){
+  editDiscussion() {
     this.edit = true;
   }
 

@@ -517,13 +517,6 @@
             </v-list-item-action>
             <v-list-item-content>Search User </v-list-item-content>
           </v-list-item>
-
-          <v-list-item to="/student/stats">
-            <v-list-item-action>
-              <v-icon>fas fa-user</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>Stats</v-list-item-content>
-          </v-list-item>
         </v-list-group>
 
         <v-list-item to="/courses" v-if="isLoggedIn && moreThanOneCourse">
@@ -587,7 +580,7 @@ export default class TopBar extends Vue {
   }
 
   async logout() {
-    await this.$store.dispatch('logout');
+    await this.$store.commit('logout');
     await this.$router.push({ name: 'home' }).catch(() => {});
   }
 }
