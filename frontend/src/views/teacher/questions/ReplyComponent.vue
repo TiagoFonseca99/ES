@@ -65,7 +65,7 @@
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <div
-                    v-for="reply in discussion.replies"
+                    v-for="(reply, replyIndex) in discussion.replies"
                     :key="reply.id"
                     class="text-left reply"
                   >
@@ -78,11 +78,21 @@
                       style="float: right"
                       @click="
                         setDiscussion(discussion, index);
-                        setReply(reply);
+                        setReply(reply, replyIndex);
                         deleteReply();
                       "
                       color="red"
                       >delete</v-icon
+                    >
+                    <v-icon
+                      class="mr-2"
+                      style="float: right"
+                      @click="
+                        setDiscussion(discussion, index);
+                        setReply(reply, replyIndex);
+                        editReply();
+                      "
+                      >edit</v-icon
                     >
                     <span v-html="convertMarkDown(reply.message)" />
                   </div>
@@ -160,10 +170,16 @@
       </div>
     </v-card>
     <edit-discussion-dialog
-      :dialog="edit"
+      :dialog="discussionEdit"
       :discussion="discussion"
-      v-on:dialog="setDialog"
+      v-on:dialog="closeDialog"
       v-on:save-discussion="onSaveDiscussion"
+    />
+    <edit-reply-dialog
+      :dialog="replyEdit"
+      :reply="reply"
+      v-on:dialog="closeDialog"
+      v-on:save-reply="onSaveReply"
     />
   </div>
 </template>
@@ -175,19 +191,23 @@ import Discussion from '@/models/management/Discussion';
 import RemoteServices from '@/services/RemoteServices';
 import Reply from '@/models/management/Reply';
 import EditDiscussionDialog from '@/views/teacher/questions/EditDiscussionDialog.vue';
+import EditReplyDialog from '@/views/teacher/questions/EditReplyDialog.vue';
 
 @Component({
   components: {
-    'edit-discussion-dialog': EditDiscussionDialog
+    'edit-discussion-dialog': EditDiscussionDialog,
+    'edit-reply-dialog': EditReplyDialog
   }
 })
 export default class ReplyComponent extends Vue {
   @Prop() readonly discussions!: Discussion[];
   discussion!: Discussion;
   discussionInd!: number;
-  reply: Reply | undefined;
+  reply!: Reply;
+  replyInd!: number;
   replyMessages: Map<number, string> = new Map();
-  edit: Boolean = false;
+  discussionEdit: Boolean = false;
+  replyEdit: Boolean = false;
 
   @Emit('submit')
   async submitReply() {
@@ -212,7 +232,6 @@ export default class ReplyComponent extends Vue {
 
       return false;
     }
-
     for (let i = 0; i < this.discussions.length; i++) {
       if (this.discussions[i].replies === []) {
         return false;
@@ -249,8 +268,20 @@ export default class ReplyComponent extends Vue {
     textArea.value = '';
   }
 
-  setReply(reply: Reply) {
+  setReply(reply: Reply, index: number) {
     this.reply = reply;
+    this.replyInd = index;
+  }
+
+  editReply() {
+    this.replyEdit = true;
+  }
+
+  onSaveReply(reply: Reply) {
+    this.reply = reply;
+    console.log(this.discussions[this.discussionInd]);
+    this.discussions[this.discussionInd].replies![this.replyInd] = reply;
+    this.closeDialog(false);
   }
 
   async deleteReply() {
@@ -267,18 +298,22 @@ export default class ReplyComponent extends Vue {
     }
   }
 
-  editDiscussion() {
-    this.edit = true;
+  closeDialog(dialog: Boolean) {
+    if (this.discussionEdit) {
+      this.discussionEdit = dialog;
+    } else {
+      this.replyEdit = dialog;
+    }
   }
 
-  setDialog(dialog: Boolean) {
-    this.edit = dialog;
+  editDiscussion() {
+    this.discussionEdit = true;
   }
 
   onSaveDiscussion(discussion: Discussion) {
     this.discussion = discussion;
     this.discussions[this.discussionInd] = discussion;
-    this.setDialog(false);
+    this.closeDialog(false);
   }
 
   async deleteDiscussion() {

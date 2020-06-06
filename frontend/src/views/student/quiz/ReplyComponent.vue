@@ -53,7 +53,7 @@
               <v-expansion-panel-header>View replies </v-expansion-panel-header>
               <v-expansion-panel-content>
                 <div
-                  v-for="reply in discussion.replies"
+                  v-for="(reply, index) in discussion.replies"
                   :key="reply.id"
                   class="text-left reply"
                 >
@@ -67,11 +67,21 @@
                       style="float: right"
                       @click="
                         setDiscussion(discussion, index);
-                        setReply(reply);
+                        setReply(reply, index);
                         deleteReply();
                       "
                       color="red"
                       >delete</v-icon
+                    >
+                    <v-icon
+                      class="mr-2"
+                      style="float: right"
+                      @click="
+                        setDiscussion(discussion, index);
+                        setReply(reply, index);
+                        editReply();
+                      "
+                      >edit</v-icon
                     >
                   </div>
                   <span v-html="convertMarkDown(reply.message)" />
@@ -141,9 +151,15 @@
     </div>
     <edit-discussion-dialog
       :discussion="discussion"
-      :dialog="edit"
+      :dialog="discussionEdit"
       v-on:save-discussion="onSaveDiscussion"
-      v-on:dialog="setDialog"
+      v-on:dialog="closeDialog"
+    />
+    <edit-reply-dialog
+      :reply="reply"
+      :dialog="replyEdit"
+      v-on:save-reply="onSaveReply"
+      v-on:dialog="closeDialog"
     />
   </div>
 </template>
@@ -152,13 +168,15 @@
 import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
-import RemoteServices from '../../../services/RemoteServices';
+import RemoteServices from '@/services/RemoteServices';
 import Reply from '@/models/management/Reply';
-import EditDiscussionDialog from '@/views/student/quiz/EditDiscussionDialog.vue';
+import EditDiscussionDialog from '@/views/student/discussion/EditDiscussionDialog.vue';
+import EditReplyDialog from '@/views/student/discussion/EditReplyDialog.vue';
 
 @Component({
   components: {
-    'edit-discussion-dialog': EditDiscussionDialog
+    'edit-discussion-dialog': EditDiscussionDialog,
+    'edit-reply-dialog': EditReplyDialog
   }
 })
 export default class ReplyComponent extends Vue {
@@ -167,8 +185,10 @@ export default class ReplyComponent extends Vue {
   discussionInd: number = 0;
   replyMessages: Map<number, string> = new Map();
   userId: number = this.$store.getters.getUser.id;
-  reply: Reply | undefined;
-  edit: Boolean = false;
+  reply!: Reply;
+  replyInd!: number;
+  discussionEdit: Boolean = false;
+  replyEdit: Boolean = false;
 
   @Emit('submit')
   async submitReply() {
@@ -212,8 +232,19 @@ export default class ReplyComponent extends Vue {
     this.discussionInd = index;
   }
 
-  setReply(reply: Reply) {
+  setReply(reply: Reply, index: number) {
     this.reply = reply;
+    this.replyInd = index;
+  }
+
+  onSaveReply(reply: Reply) {
+    this.reply = reply;
+    this.discussions[this.discussionInd].replies![this.replyInd] = reply;
+    this.closeDialog(false);
+  }
+
+  editReply() {
+    this.replyEdit = true;
   }
 
   async deleteReply() {
@@ -227,18 +258,22 @@ export default class ReplyComponent extends Vue {
     }
   }
 
-  setDialog(dialog: Boolean) {
-    this.edit = dialog;
+  closeDialog(dialog: Boolean) {
+    if (this.discussionEdit) {
+      this.discussionEdit = dialog;
+    } else {
+      this.replyEdit = dialog;
+    }
   }
 
   onSaveDiscussion(discussion: Discussion) {
     this.discussion = discussion;
     this.discussions[this.discussionInd] = discussion;
-    this.setDialog(false);
+    this.closeDialog(false);
   }
 
   editDiscussion() {
-    this.edit = true;
+    this.discussionEdit = true;
   }
 
   async deleteDiscussion() {

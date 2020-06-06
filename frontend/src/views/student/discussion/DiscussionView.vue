@@ -78,7 +78,11 @@
             <b>On {{ item.date }}:</b>
             <span v-html="convertToMarkdown(item.content)" />
             <div v-if="item.replies !== []">
-              <div class="reply" v-for="reply in item.replies" :key="reply.id">
+              <div
+                class="reply"
+                v-for="(reply, index) in item.replies"
+                :key="reply.id"
+              >
                 <b v-if="$store.getters.getUser.id !== reply.userId"
                   >{{ reply.userName }} on {{ reply.date }}:
                 </b>
@@ -89,11 +93,21 @@
                     style="float: right"
                     @click="
                       setDiscussion(item);
-                      setReply(reply);
+                      setReply(reply, index);
                       deleteReply();
                     "
                     color="red"
                     >delete</v-icon
+                  >
+                  <v-icon
+                    class="mr-2"
+                    style="float: right"
+                    @click="
+                      setDiscussion(item);
+                      setReply(reply, index);
+                      editReply();
+                    "
+                    >edit</v-icon
                   >
                 </div>
                 <span v-html="convertToMarkdown(reply.message)" />
@@ -130,9 +144,15 @@
     </v-data-table>
     <edit-discussion-dialog
       :discussion="currentDiscussion"
-      :dialog="edit"
-      v-on:dialog="setDialog"
+      :dialog="discussionEdit"
+      v-on:dialog="closeDialog"
       v-on:save-discussion="onSaveDiscussion"
+    />
+    <edit-reply-dialog
+      :reply="reply"
+      :dialog="replyEdit"
+      v-on:dialog="closeDialog"
+      v-on:save-reply="onSaveReply"
     />
   </v-card>
 </template>
@@ -144,6 +164,7 @@ import Discussion from '@/models/management/Discussion';
 import RemoteServices from '@/services/RemoteServices';
 import Reply from '@/models/management/Reply';
 import EditDiscussionDialog from '@/views/student/discussion/EditDiscussionDialog.vue';
+import EditReplyDialog from '@/views/student/discussion/EditReplyDialog.vue';
 
 enum FilterState {
   REPLY = 'See all discussions',
@@ -152,7 +173,8 @@ enum FilterState {
 
 @Component({
   components: {
-    'edit-discussion-dialog': EditDiscussionDialog
+    'edit-discussion-dialog': EditDiscussionDialog,
+    'edit-reply-dialog': EditReplyDialog
   }
 })
 export default class DiscussionView extends Vue {
@@ -161,10 +183,12 @@ export default class DiscussionView extends Vue {
   filterLabel: FilterState = FilterState.ALL;
   items: Discussion[] = [];
   expanded = [];
-  currentDiscussion!: Discussion;
+  currentDiscussion?: Discussion;
   replyMessages: Map<number, string> = new Map();
-  reply: Reply | undefined;
-  edit: Boolean = false;
+  reply?: Reply;
+  replyInd!: number;
+  discussionEdit: Boolean = false;
+  replyEdit: Boolean = false;
 
   headers: object = [
     { text: '', value: 'data-table-expand' },
@@ -216,7 +240,7 @@ export default class DiscussionView extends Vue {
   }
 
   setReplyMessage(message: string) {
-    this.replyMessages.set(this.currentDiscussion.questionId!, message);
+    this.replyMessages.set(this.currentDiscussion!.questionId, message);
   }
 
   setDiscussion(discussion: Discussion) {
@@ -226,19 +250,19 @@ export default class DiscussionView extends Vue {
   async submitReply() {
     try {
       if (
-        this.replyMessages.get(this.currentDiscussion.questionId!) === undefined
+        this.replyMessages.get(this.currentDiscussion!.questionId) === undefined
       ) {
-        this.replyMessages.set(this.currentDiscussion.questionId!, '');
+        this.replyMessages.set(this.currentDiscussion!.questionId, '');
       }
       const reply = await RemoteServices.createReply(
-        this.replyMessages.get(this.currentDiscussion.questionId!)!,
+        this.replyMessages.get(this.currentDiscussion!.questionId)!,
         this.currentDiscussion!
       );
-      if (this.currentDiscussion.replies === null) {
-        this.currentDiscussion.replies = [];
+      if (this.currentDiscussion!.replies === null) {
+        this.currentDiscussion!.replies = [];
       }
-      this.currentDiscussion.replies.push(reply);
-      this.replyMessages.set(this.currentDiscussion.questionId!, '');
+      this.currentDiscussion!.replies.push(reply);
+      this.replyMessages.set(this.currentDiscussion!.questionId, '');
     } catch (error) {
       await this.$store.dispatch('error', error);
 
@@ -261,14 +285,33 @@ export default class DiscussionView extends Vue {
     textArea.value = '';
   }
 
-  setReply(reply: Reply) {
+  setReply(reply: Reply, index: number) {
     this.reply = reply;
+    this.replyInd = index;
+  }
+
+  editReply() {
+    this.replyEdit = true;
+  }
+
+  async onSaveReply(edited: Reply) {
+    this.reply = edited;
+    this.closeDialog(false);
+
+    for (let i = 0; i < this.discussions.length; i++) {
+      if (
+        this.discussions[i].questionId == this.currentDiscussion!.questionId
+      ) {
+        this.discussions[i].replies![this.replyInd] = edited;
+        break;
+      }
+    }
   }
 
   async deleteReply() {
     try {
       await RemoteServices.deleteReply(this.reply!.id);
-      this.currentDiscussion.replies = this.currentDiscussion.replies!.filter(
+      this.currentDiscussion!.replies = this.currentDiscussion!.replies!.filter(
         obj => obj !== this.reply
       );
       this.customFilter();
@@ -277,17 +320,21 @@ export default class DiscussionView extends Vue {
     }
   }
 
-  editDiscussion() {
-    this.edit = true;
+  closeDialog(dialog: Boolean) {
+    if (this.discussionEdit) {
+      this.discussionEdit = dialog;
+    } else {
+      this.replyEdit = dialog;
+    }
   }
 
-  setDialog(dialog: boolean) {
-    this.edit = dialog;
+  editDiscussion() {
+    this.discussionEdit = true;
   }
 
   async onSaveDiscussion(edited: Discussion) {
     this.currentDiscussion = edited;
-    this.setDialog(false);
+    this.closeDialog(false);
 
     for (let i = 0; i < this.discussions.length; i++) {
       if (this.discussions[i].questionId == edited.questionId) {
@@ -302,8 +349,8 @@ export default class DiscussionView extends Vue {
   async deleteDiscussion() {
     try {
       await RemoteServices.deleteDiscussion(
-        this.currentDiscussion.userId,
-        this.currentDiscussion.questionId
+        this.currentDiscussion!.userId,
+        this.currentDiscussion!.questionId
       );
       this.discussions = this.discussions.filter(
         obj => obj !== this.currentDiscussion
