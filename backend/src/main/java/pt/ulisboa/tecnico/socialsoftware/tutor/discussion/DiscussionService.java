@@ -147,6 +147,26 @@ public class DiscussionService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public ReplyDto editReply(Integer userId, ReplyDto replyDto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
+
+        checkReplyDto(replyDto);
+
+        Reply reply = replyRepository.findById(replyDto.getId()).orElseThrow(() -> new TutorException(REPLY_NOT_FOUND, replyDto.getId()));
+
+        if (!hasPermission(user, replyDto.getUserId())) {
+            throw new TutorException(REPLY_UNAUTHORIZED_EDITOR);
+        }
+
+        reply.setMessage(replyDto.getMessage());
+
+        this.entityManager.merge(reply);
+
+        return new ReplyDto(reply);
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public boolean removeDiscussion(Integer userId, Integer creatorId, Integer questionId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 

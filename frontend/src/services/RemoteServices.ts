@@ -792,6 +792,17 @@ export default class RemoteServices {
       });
   }
 
+  static async editReply(reply: Reply): Promise<Reply> {
+    return httpClient
+      .put('/discussions/replies/edit', reply)
+      .then(response => {
+        return new Reply(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async deleteReply(reply: number): Promise<Boolean> {
     return httpClient
       .delete(`/discussions/replies/${reply}`)

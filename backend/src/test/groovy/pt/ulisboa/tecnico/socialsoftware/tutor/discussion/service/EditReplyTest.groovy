@@ -27,11 +27,12 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 
 @DataJpaTest
-class EditDiscussionTest extends Specification {
+class EditReplyTest extends Specification {
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
-    public static final String NEW_CONTENT = "new discussion content"
+    public static final String REPLY_CONTENT = "reply content"
+    public static final String NEW_CONTENT = "new reply content"
     public static final String USER_USERNAME = "user username"
     public static final String USER_NAME = "user name"
 
@@ -104,47 +105,57 @@ class EditDiscussionTest extends Specification {
         userRepository.save(student)
     }
 
-    def "student edit discussion"(){
+    def "student edit reply"(){
         given: "a discussion"
         def discussion = new DiscussionDto()
         discussion.setContent(DISCUSSION_CONTENT)
         discussion.setUserId(student.getId())
         discussion.setQuestion(new QuestionDto(question))
         discussionService.createDiscussion(discussion)
-        and: "a changed discussion"
-        discussion.setContent(NEW_CONTENT)
+        and: "a reply"
+        def reply = new ReplyDto()
+        reply.setMessage(REPLY_CONTENT)
+        reply.setUserId(student.getId())
+        def replyDto = discussionService.giveReply(reply, discussion)
+        and: "a changed reply"
+        replyDto.setMessage(NEW_CONTENT)
 
-        when: "editing the discussion"
-        def result = discussionService.editDiscussion(student.getId(), discussion)
+        when: "editing the reply"
+        def result = discussionService.editReply(student.getId(), replyDto)
 
         then:
-        result.getContent() == NEW_CONTENT
-        discussionRepository.count() == 1L
-        discussionRepository.findAll().get(0).getContent() == NEW_CONTENT
+        result.getMessage() == NEW_CONTENT
+        replyRepository.count() == 1L
+        replyRepository.findAll().get(0).getMessage() == NEW_CONTENT
     }
 
-    def "student change to empty discussion"(){
+    def "student change to empty reply"(){
         given: "a discussion"
         def discussion = new DiscussionDto()
         discussion.setContent(DISCUSSION_CONTENT)
         discussion.setUserId(student.getId())
         discussion.setQuestion(new QuestionDto(question))
         discussionService.createDiscussion(discussion)
-        and: "a changed discussion"
-        discussion.setContent("")
+        and: "a reply"
+        def reply = new ReplyDto()
+        reply.setMessage(REPLY_CONTENT)
+        reply.setUserId(student.getId())
+        def replyDto = discussionService.giveReply(reply, discussion)
+        and: "a changed reply"
+        replyDto.setMessage("")
 
-        when: "editing the discussion"
-        discussionService.editDiscussion(student.getId(), discussion)
+        when: "editing the reply"
+        discussionService.editReply(student.getId(), replyDto)
 
         then:
         def exception = thrown(TutorException)
-        exception.errorMessage == ErrorMessage.DISCUSSION_MISSING_DATA
-        discussionRepository.count() == 1L
-        discussionRepository.findAll().get(0).getContent() == DISCUSSION_CONTENT
+        exception.errorMessage == ErrorMessage.REPLY_MISSING_DATA
+        replyRepository.count() == 1L
+        replyRepository.findAll().get(0).getMessage() == REPLY_CONTENT
     }
 
 
-    def "teacher edit student discussion"(){
+    def "teacher edit student's reply"(){
         given: "a discussion"
         def discussion = new DiscussionDto()
         discussion.setContent(DISCUSSION_CONTENT)
@@ -154,19 +165,24 @@ class EditDiscussionTest extends Specification {
         and: "a teacher"
         def teacher = new User(USER_NAME + "1", USER_USERNAME + "1", 3, User.Role.TEACHER);
         userRepository.save(teacher)
-        and: "a changed discussion"
-        discussion.setContent(NEW_CONTENT)
+        and: "a reply"
+        def reply = new ReplyDto()
+        reply.setMessage(REPLY_CONTENT)
+        reply.setUserId(student.getId())
+        def replyDto = discussionService.giveReply(reply, discussion)
+        and: "a changed reply"
+        replyDto.setMessage(NEW_CONTENT)
 
-        when: "editing the discussion"
-        def result = discussionService.editDiscussion(teacher.getId(), discussion)
+        when: "editing the reply"
+        def result = discussionService.editReply(teacher.getId(), replyDto)
 
         then:
-        result.getContent() == NEW_CONTENT
-        discussionRepository.count() == 1L
-        discussionRepository.findAll().get(0).getContent() == NEW_CONTENT
+        result.getMessage() == NEW_CONTENT
+        replyRepository.count() == 1L
+        replyRepository.findAll().get(0).getMessage() == NEW_CONTENT
     }
 
-    def "student edit other student's discussion"(){
+    def "student edit other student's reply"(){
         given: "a discussion"
         def discussion = new DiscussionDto()
         discussion.setContent(DISCUSSION_CONTENT)
@@ -176,32 +192,37 @@ class EditDiscussionTest extends Specification {
         and: "another student"
         def other = new User(USER_NAME + "1", USER_USERNAME + "1", 3, User.Role.STUDENT);
         userRepository.save(other)
-        and: "a changed discussion"
-        discussion.setContent(NEW_CONTENT)
+        and: "a reply"
+        def reply = new ReplyDto()
+        reply.setMessage(REPLY_CONTENT)
+        reply.setUserId(student.getId())
+        def replyDto = discussionService.giveReply(reply, discussion)
+        and: "a changed reply"
+        replyDto.setMessage(NEW_CONTENT)
 
-        when: "editing the discussion"
-        discussionService.editDiscussion(other.getId(), discussion)
+        when: "editing the reply"
+        discussionService.editReply(other.getId(), replyDto)
 
         then:
         def exception = thrown(TutorException)
-        exception.errorMessage == ErrorMessage.DISCUSSION_UNAUTHORIZED_EDITOR
-        discussionRepository.count() == 1L
-        discussionRepository.findAll().get(0).getContent() == DISCUSSION_CONTENT
+        exception.errorMessage == ErrorMessage.REPLY_UNAUTHORIZED_EDITOR
+        replyRepository.count() == 1L
+        replyRepository.findAll().get(0).getMessage() == REPLY_CONTENT
     }
 
-    def "student edit invalid discussion"(){
-        given: "an invalid discussion"
-        def discussion = new DiscussionDto()
-        discussion.setContent(DISCUSSION_CONTENT)
-        discussion.setUserId(-1)
-        discussion.setQuestion(new QuestionDto(question))
+    def "student edit invalid reply"(){
+        given: "an invalid reply"
+        def reply = new ReplyDto()
+        reply.setMessage(REPLY_CONTENT)
+        reply.setUserId(student.getId())
+        reply.setId(-1)
 
-        when: "editing the discussion"
-        discussionService.editDiscussion(student.getId(), discussion)
+        when: "editing the reply"
+        discussionService.editReply(student.getId(), reply)
 
         then:
         def exception = thrown(TutorException)
-        exception.errorMessage == ErrorMessage.DISCUSSION_NOT_FOUND
+        exception.errorMessage == ErrorMessage.REPLY_NOT_FOUND
     }
 
     @TestConfiguration

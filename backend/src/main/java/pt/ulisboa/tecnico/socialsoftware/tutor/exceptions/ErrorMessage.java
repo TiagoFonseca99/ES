@@ -125,6 +125,7 @@ public enum ErrorMessage {
     REPLY_MISSING_DATA("Missing information for reply"),
     REPLY_NOT_FOUND("Reply not found with id %d"),
     REPLY_UNAUTHORIZED_DELETER("User with id %d cannot delete this reply"),
+    REPLY_UNAUTHORIZED_EDITOR("User with id %d cannot edit this reply"),
     REPLY_UNAUTHORIZED_USER("User with id %d cannot create reply for given discussion");
 
     public final String label;
