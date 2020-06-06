@@ -389,11 +389,11 @@ Cypress.Commands.add(
         title +
         '\', \'Question?\', \'' +
         qstatus +
-        '\', 2, current_timestamp) RETURNING id) INSERT INTO submissions (question_id, user_id, anonymous) VALUES ((SELECT id from quest), ' +
+        '\', 2, current_timestamp) RETURNING id) INSERT INTO submissions (question_id, user_id, anonymous, course_execution_id) VALUES ((SELECT id from quest), ' +
         userId +
         ', ' +
         anon +
-        ');" '
+        ', 11);" '
     );
 
     //add options
@@ -495,10 +495,10 @@ Cypress.Commands.add(
     cy.get('[data-cy="Option2"]')
       .clear()
       .type(opt2);
-    cy.get('[data-cy="Switch3"]').click({ force: true });
     cy.get('[data-cy="Option3"]')
       .clear()
       .type(opt3);
+    cy.get('[data-cy="Switch4"]').click({ force: true });
     cy.get('[data-cy="Option4"]')
       .clear()
       .type(opt4);
@@ -526,10 +526,10 @@ Cypress.Commands.add(
     cy.get('[data-cy="Option2"]')
       .clear()
       .type(opt2);
-    cy.get('[data-cy="Switch3"]').click({ force: true });
     cy.get('[data-cy="Option3"]')
       .clear()
       .type(opt3);
+    cy.get('[data-cy="Switch4"]').click({ force: true });
     cy.get('[data-cy="Option4"]')
       .clear()
       .type(opt4);
@@ -744,23 +744,23 @@ Cypress.Commands.add('openDashboard', () => {
 Cypress.Commands.add('addSubmissionInfo', id => {
   cy.log('Add 3 submissions: 1 approved and 2 rejected');
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title1\', \'Question1?\', 2,\'AVAILABLE\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), ' +
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title1\', \'Question1?\', 2,\'AVAILABLE\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id FROM quest), ' +
       id +
-      ') RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque sim\', \'APPROVED\', ' +
-      id +
-      ', (SELECT id from subs), 677, current_timestamp);" '
-  );
-  cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title2\', \'Question2?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), ' +
-      id +
-      ') RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' +
+      ', 11) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque sim\', \'APPROVED\', ' +
       id +
       ', (SELECT id from subs), 677, current_timestamp);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title3\', \'Question3?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id) VALUES ((SELECT id FROM quest), ' +
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title2\', \'Question2?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id FROM quest), ' +
       id +
-      ') RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' +
+      ', 11) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' +
+      id +
+      ', (SELECT id from subs), 677, current_timestamp);" '
+  );
+  cy.exec(
+    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title3\', \'Question3?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id FROM quest), ' +
+      id +
+      ', 11) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' +
       id +
       ', (SELECT id from subs), 677, current_timestamp);" '
   );
