@@ -44,11 +44,11 @@ export default new Vuex.Store({
       storage.createCookie(session.SESSION_TOKEN, String(state.session));
       storage.persist(session.LOGGED_TOKEN, 'true', false);
     },
-    logout(state) {
+    async logout(state) {
       state.user = null;
       state.currentCourse = null;
       state.logged = false;
-      session.logout();
+      await session.logout();
     },
     session(state, session) {
       state.session = session;
@@ -108,8 +108,8 @@ export default new Vuex.Store({
       commit('login', user);
     },
     logout({ commit }) {
-      return new Promise(resolve => {
-        commit('logout');
+      return new Promise(async resolve => {
+        await commit('logout');
         resolve();
       });
     },
