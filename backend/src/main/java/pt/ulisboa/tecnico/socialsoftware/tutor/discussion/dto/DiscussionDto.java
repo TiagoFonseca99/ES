@@ -1,8 +1,8 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
@@ -30,22 +30,19 @@ public class DiscussionDto implements Serializable {
         this.available = discussion.isAvailable();
 
         List<Reply> discussionReplies = discussion.getReplies();
-        if(discussionReplies != null && !discussionReplies.isEmpty()) {
-            this.replies = new ArrayList<>();
-            for (Reply r : discussionReplies) {
-                this.replies.add(new ReplyDto(r));
-            }
+        if (discussionReplies != null && !discussionReplies.isEmpty()) {
+            this.replies = discussionReplies.stream().map(ReplyDto::new).collect(Collectors.toList());
         }
     }
 
-	public String getDate() {
-		return date;
-	}
-
-	public void setDate(String date) {
-		this.date = date;
+    public String getDate() {
+        return date;
     }
-    
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
     public boolean isAvailable() {
         return available;
     }
@@ -55,12 +52,12 @@ public class DiscussionDto implements Serializable {
     }
 
     public String getUserName() {
-		return userName;
-	}
+        return userName;
+    }
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     public Integer getUserId() {
         return this.userId;

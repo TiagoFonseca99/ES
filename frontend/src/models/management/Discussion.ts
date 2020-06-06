@@ -22,9 +22,13 @@ export default class Discussion {
       this.date = ISOtoString(jsonObj.date);
       this.available = jsonObj.available;
       if (jsonObj.replies !== null) {
-        this.replies = jsonObj.replies.map((reply: any) => {
-          return new Reply(reply);
-        });
+        this.replies = jsonObj.replies
+          .map((reply: any) => {
+            return new Reply(reply);
+          })
+          .sort((a, b) => {
+            return a.id - b.id;
+          });
       } else {
         this.replies = null;
       }
