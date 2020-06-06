@@ -134,7 +134,7 @@ public class DiscussionService {
 
         Reply reply = replyRepository.findById(replyId).orElseThrow(() -> new TutorException(REPLY_NOT_FOUND, replyId));
 
-        if (!hasPermission(user, reply.getId())) {
+        if (!hasPermission(user, reply.getUser().getId())) {
             throw new TutorException(REPLY_UNAUTHORIZED_DELETER, userId);
         }
 
