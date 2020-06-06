@@ -59,7 +59,7 @@ export async function testToken() {
       } catch (Error) {}
 
       storage.remove(COURSE_TOKEN, session == 'true');
-      store.commit('logout');
+      await store.commit('logout');
 
       return false;
     } else {
@@ -76,7 +76,7 @@ export async function testToken() {
 }
 
 export async function logout() {
-  await RemoteServices.logout();
   storage.persist(LOGGED_TOKEN, 'false', false);
   storage.removeAll(COURSE_TOKEN);
+  await RemoteServices.logout();
 }
