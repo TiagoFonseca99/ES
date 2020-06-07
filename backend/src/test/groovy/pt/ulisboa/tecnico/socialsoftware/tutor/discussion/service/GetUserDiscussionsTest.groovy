@@ -8,6 +8,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
@@ -25,11 +29,20 @@ import spock.lang.Specification
 
 @DataJpaTest
 class GetUserDiscussionsTest extends Specification {
+    public static final String ACADEMIC_TERM = "academic term"
+    public static final String ACRONYM = "acronym"
+    public static final String COURSE_NAME = "course name"
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
     public static final String USER_USERNAME = "user username"
     public static final String USER_NAME = "user name"
+
+    @Autowired
+    CourseRepository courseRepository
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
 
     @Autowired
     DiscussionService discussionService
@@ -58,6 +71,8 @@ class GetUserDiscussionsTest extends Specification {
     @Autowired
     ReplyRepository replyRepository
 
+    def course
+    def courseExecution
     def question
     def student
 
@@ -96,9 +111,18 @@ class GetUserDiscussionsTest extends Specification {
 
         quizRepository.save(quiz)
 
-
         questionRepository.save(question)
         student.addQuizAnswer(quizanswer)
+        userRepository.save(student)
+
+        course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(student)
+        courseExecutionRepository.save(courseExecution)
+
+        student.addCourse(courseExecution)
         userRepository.save(student)
     }
 
@@ -109,17 +133,19 @@ class GetUserDiscussionsTest extends Specification {
         and: "a student id"
         discussionDto.setUserId(student.getId())
         discussionDto.setQuestion(new QuestionDto(question))
+        discussionDto.setCourseId(course.getId())
         and: "a discussion created"
         discussionService.createDiscussion(discussionDto)
 
         when: "getting user discussions"
-        def discussion = discussionService.findDiscussionsByUserId(student.getId())
+        def discussion = discussionService.findDiscussionsByUserId(student.getId(), course.getId())
 
         then: "the correct discussion is returned"
         discussion.size == 1
         discussion.get(0).getUserId() == discussionDto.getUserId()
         discussion.get(0).getQuestionId() == discussionDto.getQuestionId()
         discussion.get(0).getContent() == discussionDto.getContent()
+        discussion.get(0).getCourseId() == discussionDto.getCourseId()
     }
 
     def "get discussion of invalid student"(){
@@ -127,7 +153,7 @@ class GetUserDiscussionsTest extends Specification {
         def id = -3
 
         when: "getting user discussion"
-        def discussions = discussionService.findDiscussionsByUserId(id)
+        def discussions = discussionService.findDiscussionsByUserId(id, course.getId())
 
         then:
         discussions.size() == 0

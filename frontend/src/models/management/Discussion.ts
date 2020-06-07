@@ -5,6 +5,7 @@ import { ISOtoString } from '@/services/ConvertDateService';
 export default class Discussion {
   userId!: number;
   questionId!: number;
+  courseId!: number;
   userName!: string;
   content!: string;
   question!: Question;
@@ -16,15 +17,20 @@ export default class Discussion {
     if (jsonObj) {
       this.userId = jsonObj.userId;
       this.questionId = jsonObj.questionId;
+      this.courseId = jsonObj.courseId;
       this.userName = jsonObj.userName;
       this.content = jsonObj.content;
       this.question = new Question(jsonObj.question);
       this.date = ISOtoString(jsonObj.date);
       this.available = jsonObj.available;
       if (jsonObj.replies !== null) {
-        this.replies = jsonObj.replies.map((reply: any) => {
-          return new Reply(reply);
-        });
+        this.replies = jsonObj.replies
+          .map((reply: any) => {
+            return new Reply(reply);
+          })
+          .sort((a, b) => {
+            return a.id - b.id;
+          });
       } else {
         this.replies = null;
       }

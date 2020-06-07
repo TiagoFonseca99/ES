@@ -190,7 +190,6 @@ export default class ReplyComponent extends Vue {
   discussionEdit: Boolean = false;
   replyEdit: Boolean = false;
 
-  @Emit('submit')
   async submitReply() {
     try {
       if (this.replyMessages.get(this.discussion.userId!) === undefined) {
@@ -208,10 +207,9 @@ export default class ReplyComponent extends Vue {
       this.discussion.replies.push(reply);
 
       this.replyMessages.set(this.discussion.userId!, '');
+      this.$emit('submit', true);
     } catch (error) {
       await this.$store.dispatch('error', error);
-
-      return false;
     }
 
     for (let i = 0; i < this.discussions.length; i++) {

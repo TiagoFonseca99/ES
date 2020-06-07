@@ -4,6 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.ReplyRepository
 import spock.lang.Specification
 
@@ -31,12 +35,20 @@ import java.time.LocalTime;
 
 @DataJpaTest
 class SetAvailabilityTest extends Specification {
-    public static final String DISCUSSION_REPLY = "discussion reply"
+    public static final String ACADEMIC_TERM = "academic term"
+    public static final String ACRONYM = "acronym"
+    public static final String COURSE_NAME = "course name"
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
     public static final String USER_USERNAME = "user username"
     public static final String USER_NAME = "user name"
+
+    @Autowired
+    CourseRepository courseRepository
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
 
     @Autowired
     DiscussionService discussionService
@@ -66,6 +78,8 @@ class SetAvailabilityTest extends Specification {
     ReplyRepository replyRepository
 
 
+    def course
+    def courseExecution
     def teacher
     def student
     def question
@@ -107,37 +121,73 @@ class SetAvailabilityTest extends Specification {
 
         quizRepository.save(quiz)
 
-
         questionRepository.save(question)
         student.addQuizAnswer(quizanswer)
         userRepository.save(student)
+
+        course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(student)
+        courseExecution.addUser(teacher)
+        courseExecutionRepository.save(courseExecution)
+
+        student.addCourse(courseExecution)
+        teacher.addCourse(courseExecution)
+        userRepository.save(student)
+        userRepository.save(teacher)
 
         discussionDto = new DiscussionDto()
         discussionDto.setContent(DISCUSSION_CONTENT)
         discussionDto.setUserId(student.getId())
         discussionDto.setQuestion(new QuestionDto(question))
+        discussionDto.setCourseId(course.getId())
         discussion = discussionService.createDiscussion(discussionDto)
         userRepository.save(student)
     }
 
-    def "set discussion public"() {
-        when: "Setting the discussion public"
+    def "teacher set discussion public"() {
+        given: "a dto of public discussion"
         discussionDto.setAvailability(true)
-        discussionService.setAvailability(discussionDto)
 
-        then: "check the discussion is public"
-        def result = discussionRepository.findByUserId(student.getId()).get(0)
-        result.isAvailable() == true
+        when:
+        def result = discussionService.setAvailability(teacher.getId(), discussionDto)
+
+        then:
+        result.isAvailable()
     }
 
-    def "set discussion private"() {
-        when: "Setting the discussion private"
+    def "teacher set discussion private"() {
+        given: "a dto of private discussion"
         discussionDto.setAvailability(false)
-        discussionService.setAvailability(discussionDto)
+
+        when:
+        def result = discussionService.setAvailability(teacher.getId(), discussionDto)
 
         then: "check the discussion is private"
-        def result2 = discussionRepository.findByUserId(student.getId()).get(0)
-        result2.isAvailable() == false
+        !result.isAvailable()
+    }
+
+    def "student change availability"() {
+        when:
+        discussionService.setAvailability(student.getId(), discussionDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.errorMessage == ErrorMessage.USER_NOT_TEACHER
+    }
+
+    def "teacher not in course change availability"() {
+        def other = new User(USER_NAME + "2", USER_USERNAME + "2", 4, User.Role.TEACHER)
+        userRepository.save(other)
+
+        when:
+        discussionService.setAvailability(other.getId(), discussionDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.errorMessage == ErrorMessage.USER_NOT_IN_COURSE
     }
 
     @TestConfiguration

@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.course;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
@@ -17,7 +18,9 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.IN
 @Entity
 @Table(name = "courses")
 public class Course implements DomainEntity {
-    public enum Type {TECNICO, EXTERNAL}
+    public enum Type {
+        TECNICO, EXTERNAL
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,16 +32,20 @@ public class Course implements DomainEntity {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", fetch=FetchType.LAZY, orphanRemoval=true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", fetch = FetchType.LAZY, orphanRemoval = true)
     private final Set<CourseExecution> courseExecutions = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", fetch=FetchType.LAZY, orphanRemoval=true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", fetch = FetchType.LAZY, orphanRemoval = true)
     private final Set<Question> questions = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", fetch=FetchType.LAZY, orphanRemoval=true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", fetch = FetchType.LAZY, orphanRemoval = true)
     private final Set<Topic> topics = new HashSet<>();
 
-    public Course() {}
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", fetch = FetchType.LAZY, orphanRemoval = true)
+    private final Set<Discussion> discussions = new HashSet<>();
+
+    public Course() {
+    }
 
     public Course(String name, Course.Type type) {
         setType(type);
@@ -49,7 +56,6 @@ public class Course implements DomainEntity {
     public void accept(Visitor visitor) {
         visitor.visitCourse(this);
     }
-
 
     public Integer getId() {
         return id;
@@ -78,6 +84,10 @@ public class Course implements DomainEntity {
         return topics;
     }
 
+    public Set<Discussion> getDiscussions() {
+        return discussions;
+    }
+
     public void addCourseExecution(CourseExecution courseExecution) {
         courseExecutions.add(courseExecution);
     }
@@ -88,6 +98,10 @@ public class Course implements DomainEntity {
 
     public void addTopic(Topic topic) {
         topics.add(topic);
+    }
+
+    public void addDiscussion(Discussion discussion) {
+        discussions.add(discussion);
     }
 
     public Type getType() {
@@ -103,14 +117,8 @@ public class Course implements DomainEntity {
 
     @Override
     public String toString() {
-        return "Course{" +
-                "id=" + id +
-                ", type=" + type +
-                ", name='" + name + '\'' +
-                ", courseExecutions=" + courseExecutions +
-                ", questions=" + questions +
-                ", topics=" + topics +
-                '}';
+        return "Course{" + "id=" + id + ", type=" + type + ", name='" + name + '\'' + ", courseExecutions="
+                + courseExecutions + ", questions=" + questions + ", topics=" + topics + '}';
     }
 
     public Optional<CourseExecution> getCourseExecution(String acronym, String academicTerm, Course.Type type) {

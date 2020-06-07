@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.discussion.service
 
-import org.spockframework.runtime.extension.builtin.UnrollExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -8,6 +7,10 @@ import org.springframework.context.annotation.Bean
 import spock.lang.Shared
 import spock.lang.Specification
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
@@ -30,11 +33,20 @@ import spock.lang.Unroll
 
 @DataJpaTest
 class CreateDiscussionTest extends Specification {
+    public static final String ACADEMIC_TERM = "academic term"
+    public static final String ACRONYM = "acronym"
+    public static final String COURSE_NAME = "course name"
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
     public static final String USER_USERNAME = "user username"
     public static final String USER_NAME = "user name"
+
+    @Autowired
+    CourseRepository courseRepository
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
 
     @Autowired
     DiscussionService discussionService
@@ -52,10 +64,10 @@ class CreateDiscussionTest extends Specification {
     QuizRepository quizRepository
 
     @Autowired
-    QuizAnswerRepository quizAnswerRepository;
+    QuizAnswerRepository quizAnswerRepository
 
     @Autowired
-    QuizQuestionRepository quizQuestionRepository;
+    QuizQuestionRepository quizQuestionRepository
 
     @Autowired
     UserRepository userRepository
@@ -66,6 +78,8 @@ class CreateDiscussionTest extends Specification {
     def teacher
     @Shared
     def student
+    @Shared
+    def course
 
     def setup(){
         question1 = new Question()
@@ -102,7 +116,6 @@ class CreateDiscussionTest extends Specification {
         quizQuestionRepository.save(quizquestion)
         quizAnswerRepository.save(quizanswer)
 
-
         quiz.addQuizAnswer(quizanswer)
         quiz.addQuizQuestion(quizquestion)
 
@@ -112,12 +125,26 @@ class CreateDiscussionTest extends Specification {
         questionRepository.save(question1)
         student.addQuizAnswer(quizanswer)
         userRepository.save(student)
+
+        course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+
+        def courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(student)
+        courseExecution.addUser(teacher)
+        courseExecutionRepository.save(courseExecution)
+
+        student.addCourse(courseExecution)
+        teacher.addCourse(courseExecution)
+        userRepository.save(student)
+        userRepository.save(teacher)
     }
 
     def "create discussion"(){
         given: "a discussionDto"
         def discussionDto = new DiscussionDto()
         discussionDto.setContent(DISCUSSION_CONTENT)
+        discussionDto.setCourseId(course.getId())
         and: "a student"
         discussionDto.setUserId(student.getId())
         discussionDto.setQuestion(new QuestionDto(question1))
@@ -128,12 +155,12 @@ class CreateDiscussionTest extends Specification {
         then: "the correct discussion is inside the repository"
         discussionRepository.count() == 1L
 
-        def resultRepo = discussionService.findDiscussionByUserIdAndQuestionId(student.getId(), question1.getId())
+        def resultRepo = discussionRepository.findAll().get(0)
         resultRepo.getContent() == DISCUSSION_CONTENT
-        resultRepo.getUserId() == student.getId()
+        resultRepo.getUser().getId() == student.getId()
         resultRepo.getQuestion().getId() == question1.getId()
 
-        def resultUserList = discussionService.findDiscussionsByUserId(student.getId())
+        def resultUserList = discussionService.findDiscussionsByUserId(student.getId(), course.getId())
         resultUserList.size() == 1
         def resultUser = resultUserList.get(0)
         resultUser.getContent() == DISCUSSION_CONTENT
@@ -155,6 +182,7 @@ class CreateDiscussionTest extends Specification {
         discussionDto.setUserId(teacher.getId())
         discussionDto.setContent(DISCUSSION_CONTENT)
         discussionDto.setQuestion(new QuestionDto(question1))
+        discussionDto.setCourseId(course.getId())
 
         when: "creating discussion"
         discussionService.createDiscussion(discussionDto)
@@ -170,6 +198,7 @@ class CreateDiscussionTest extends Specification {
         discussionDto.setContent(DISCUSSION_CONTENT)
         discussionDto.setUserId(student.getId())
         discussionDto.setQuestion(new QuestionDto(question2))
+        discussionDto.setCourseId(course.getId())
 
         when: "creating a discussion on a non answered question"
         discussionService.createDiscussion(discussionDto)
@@ -188,12 +217,14 @@ class CreateDiscussionTest extends Specification {
         discussionDto1.setContent(DISCUSSION_CONTENT)
         discussionDto1.setUserId(studentId)
         discussionDto1.setQuestion(new QuestionDto(question1))
+        discussionDto1.setCourseId(course.getId())
         discussionService.createDiscussion(discussionDto1)
 
         and: "another discussionDto"
         def discussionDto2 = new DiscussionDto()
         discussionDto2.setContent(DISCUSSION_CONTENT)
         discussionDto2.setUserId(studentId)
+        discussionDto2.setCourseId(course.getId())
         discussionDto2.setQuestion(new QuestionDto(question1))
 
         when: "creating the second discussion"
@@ -204,13 +235,33 @@ class CreateDiscussionTest extends Specification {
         exception.getErrorMessage() == ErrorMessage.DUPLICATE_DISCUSSION
     }
 
+    def "student not in course can't create discussion"() {
+        given: "a not enrolled student"
+        def other = new User(USER_NAME + "2", USER_USERNAME + "2", 4, User.Role.STUDENT)
+        userRepository.save(other)
+        and: "a discussionDto"
+        def discussionDto = new DiscussionDto()
+        discussionDto.setContent(DISCUSSION_CONTENT)
+        discussionDto.setUserId(other.getId())
+        discussionDto.setQuestion(new QuestionDto(question2))
+        discussionDto.setCourseId(course.getId())
+
+        when: "creating discussion"
+        discussionService.createDiscussion(discussionDto)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_IN_COURSE
+    }
+
     @Unroll
-    def "invalid arguments: question=#question | userId=#userId | content=#content"(){
+    def "invalid arguments: question=#question | userId=#userId | content=#content | courseId"(){
         given: "a discusssionDto"
         def discussionDto = new DiscussionDto()
         discussionDto.setQuestion(question)
         discussionDto.setUserId(userId)
         discussionDto.setContent(content)
+        discussionDto.setCourseId(courseId)
 
         when: "creating discussion"
         discussionService.createDiscussion(discussionDto)
@@ -220,11 +271,12 @@ class CreateDiscussionTest extends Specification {
         exception.getErrorMessage() == errorMessage
 
         where:
-        question                   | userId          | content            || errorMessage
-        null                       | student.getId() | DISCUSSION_CONTENT || ErrorMessage.DISCUSSION_MISSING_DATA
-        new QuestionDto(question1) | null            | DISCUSSION_CONTENT || ErrorMessage.DISCUSSION_MISSING_DATA
-        new QuestionDto(question1) | student.getId() | null               || ErrorMessage.DISCUSSION_MISSING_DATA
-        new QuestionDto(question1) | student.getId() | "          "       || ErrorMessage.DISCUSSION_MISSING_DATA
+        question                   | userId          | content            | courseId       || errorMessage
+        null                       | student.getId() | DISCUSSION_CONTENT | course.getId() || ErrorMessage.DISCUSSION_MISSING_DATA
+        new QuestionDto(question1) | null            | DISCUSSION_CONTENT | course.getId() || ErrorMessage.DISCUSSION_MISSING_DATA
+        new QuestionDto(question1) | student.getId() | null               | course.getId() || ErrorMessage.DISCUSSION_MISSING_DATA
+        new QuestionDto(question1) | student.getId() | "          "       | course.getId() || ErrorMessage.DISCUSSION_MISSING_DATA
+        new QuestionDto(question1) | student.getId() | DISCUSSION_CONTENT | null           || ErrorMessage.DISCUSSION_MISSING_DATA
     }
 
     @TestConfiguration

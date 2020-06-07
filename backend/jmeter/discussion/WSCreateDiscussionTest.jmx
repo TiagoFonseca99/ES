@@ -175,7 +175,8 @@ INSERT INTO question_answers (time_taken, option_id,  quiz_answer_id, quiz_quest
 	&quot;content&quot;: &quot;DISCUSSION CONTENT&quot;,&#xd;
 	&quot;question&quot;: {&#xd;
 		&quot;id&quot;: 1504		&#xd;
-	}&#xd;
+	},&#xd;
+	&quot;courseId&quot;: 2&#xd;
 }&#xd;
 </stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
