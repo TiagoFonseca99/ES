@@ -72,6 +72,7 @@ export default class ShowReviewDialog extends Vue {
   resubmitQuestion() {
     this.currentQuestion = this.question;
     this.currentSubmission = this.submission;
+    this.currentSubmission.courseExecutionId = this.$store.getters.getCurrentCourse.courseExecutionId;
     this.editSubmissionDialog = true;
   }
 

@@ -5,6 +5,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Assessment;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
@@ -37,6 +38,9 @@ public class CourseExecution implements DomainEntity {
 
     @ManyToMany(mappedBy = "courseExecutions")
     private final Set<User> users = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", fetch=FetchType.LAZY, orphanRemoval=true)
+    private final Set<Submission> submissions = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", fetch=FetchType.LAZY, orphanRemoval=true)
     private final Set<Quiz> quizzes = new HashSet<>();
@@ -112,6 +116,8 @@ public class CourseExecution implements DomainEntity {
         return course;
     }
 
+    public Integer getCourseId() { return course.getId(); }
+
     public void setCourse(Course course) {
         this.course = course;
         course.addCourseExecution(this);
@@ -140,6 +146,13 @@ public class CourseExecution implements DomainEntity {
     public void addAssessment(Assessment assessment) {
         assessments.add(assessment);
     }
+
+    public Set<Submission> getSubmissions() { return submissions; }
+
+    public void addSubmission(Submission submission) {
+        submissions.add(submission);
+    }
+
 
     @Override
     public String toString() {

@@ -234,6 +234,7 @@ export default class SubmissionView extends Vue {
     this.currentQuestion = new Question();
     this.currentQuestion.status = 'SUBMITTED';
     this.currentSubmission = new Submission();
+    this.currentSubmission.courseExecutionId = this.$store.getters.getCurrentCourse.courseExecutionId;
     this.editSubmissionDialog = true;
   }
 

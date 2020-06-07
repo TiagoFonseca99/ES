@@ -5,6 +5,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.ImageRepository
@@ -26,6 +28,8 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SU
 class GetReviewsToTeacherTest extends Specification {
 
     public static final String COURSE_NAME = "Arquitetura de Software"
+    public static final String ACRONYM = "AS1"
+    public static final String ACADEMIC_TERM = "1 SEM"
     public static final String APPROVED = 'APPROVED'
     public static final String REJECTED = 'REJECTED'
     public static final String QUESTION_TITLE = 'question title'
@@ -48,6 +52,9 @@ class GetReviewsToTeacherTest extends Specification {
     CourseRepository courseRepository
 
     @Autowired
+    CourseExecutionRepository courseExecutionRepository
+
+    @Autowired
     SubmissionRepository submissionRepository
 
     @Autowired
@@ -60,17 +67,19 @@ class GetReviewsToTeacherTest extends Specification {
     ImageRepository imageRepository
 
     def course
+    def courseExecution
     def question
     def student
     def teacher
-    def image
     def submission
 
     def setup() {
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
-
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecutionRepository.save(courseExecution)
         student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
+        student.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
         userRepository.save(student)
 
         teacher = new User(TEACHER_NAME, TEACHER_USERNAME, 2, User.Role.TEACHER)
@@ -84,12 +93,8 @@ class GetReviewsToTeacherTest extends Specification {
         question.setStatus(Question.Status.SUBMITTED)
         questionRepository.save(question)
 
-        image = new Image()
-        image.setWidth(IMAGE_WIDTH)
-        image.setUrl(IMAGE_URL)
-        imageRepository.save(image)
-
         submission = new Submission()
+        submission.setCourseExecution(courseExecution)
         submission.setQuestion(question)
         submission.setUser(student)
         submissionRepository.save(submission)
@@ -106,7 +111,7 @@ class GetReviewsToTeacherTest extends Specification {
         submissionService.reviewSubmission(teacher.getId(), reviewDto)
 
         when:
-        def result = submissionService.getReviewsToTeacher()
+        def result = submissionService.getReviewsToTeacher(courseExecution.getId())
 
         then: "the returned data is correct"
         result.size() == 1
@@ -139,7 +144,7 @@ class GetReviewsToTeacherTest extends Specification {
         submissionService.reviewSubmission(teacher.getId(), reviewDto2)
 
         when:
-        def result = submissionService.getReviewsToTeacher()
+        def result = submissionService.getReviewsToTeacher(courseExecution.getId())
 
         then: "the returned data is correct"
         result.size() == 2
@@ -161,7 +166,7 @@ class GetReviewsToTeacherTest extends Specification {
 
     def "get submitted questions with no submissions"(){
         when:
-        def result = submissionService.getReviewsToTeacher()
+        def result = submissionService.getReviewsToTeacher(courseExecution.getId())
 
         then: "the returned data is correct"
         result.size() == 0

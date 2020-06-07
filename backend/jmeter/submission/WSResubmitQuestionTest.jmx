@@ -44,6 +44,11 @@
             <stringProp name="Argument.value">argument</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="courseExecutionId" elementType="Argument">
+            <stringProp name="Argument.name">courseExecutionId</stringProp>
+            <stringProp name="Argument.value">11</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </Arguments>
       <hashTree/>
@@ -75,7 +80,7 @@
           <stringProp name="checkQuery"></stringProp>
           <stringProp name="dbUrl">jdbc:postgresql://localhost:5432/tutordb?autoReconnect=true</stringProp>
           <stringProp name="driver">org.postgresql.Driver</stringProp>
-          <stringProp name="username">tomas</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
           <stringProp name="password"></stringProp>
           <stringProp name="connectionProperties"></stringProp>
         </JDBCDataSource>
@@ -199,7 +204,7 @@ INSERT INTO options(content, correct, question_id, sequence) VALUES (&apos;teste
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">tomas</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request (question Id)" enabled="true">
@@ -241,8 +246,9 @@ INSERT INTO options(content, correct, question_id, sequence) VALUES (&apos;teste
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
-	&quot;courseId&quot;: 2,&#xd;
-	&quot;userId&quot;: 676,&#xd;
+	&quot;courseId&quot;: &quot;${courseId}&quot;,&#xd;
+	&quot;courseExecutionId&quot;: ${courseExecutionId},&#xd;
+	&quot;userId&quot;: &quot;${studentId}&quot;,&#xd;
 	&quot;argument&quot;: &quot;${argument}&quot;,&#xd;
 	&quot;questionDto&quot;: {&#xd;
 		&quot;title&quot;: &quot;new&quot;,&#xd;
@@ -510,7 +516,7 @@ SELECT * FROM options o JOIN quest q ON o.question_id = q.question_id;
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">tomas</stringProp>
+          <stringProp name="username">dserafim1999</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
