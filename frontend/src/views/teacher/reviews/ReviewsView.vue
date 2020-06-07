@@ -37,7 +37,11 @@
           </v-chip>
         </template>
         <template v-slot:item.username="{ item }">
-          <v-chip color="primary" small>
+          <v-chip
+            color="primary"
+            small
+            @click="openStudentDashboardDialog(item.username)"
+          >
             {{ item.username }}
           </v-chip>
         </template>
@@ -151,7 +155,11 @@
           </v-chip>
         </template>
         <template v-slot:item.studentUsername="{ item }">
-          <v-chip color="primary" small>
+          <v-chip
+            color="primary"
+            small
+            @click="openStudentDashboardDialog(item.studentUsername)"
+          >
             {{ item.studentUsername }}
           </v-chip>
         </template>
@@ -207,6 +215,12 @@
       :review="currentReview"
       v-on:close-show-review-dialog="onCloseShowReviewDialog"
     />
+    <show-dashboard-dialog
+      v-if="currentUsername"
+      v-model="dashboardDialog"
+      :username="currentUsername"
+      v-on:close-show-dashboard-dialog="onCloseShowDashboardDialog"
+    />
   </div>
 </template>
 
@@ -222,15 +236,17 @@ import Review from '@/models/management/Review';
 import ShowQuestionDialog from '@/views/teacher/questions/ShowQuestionDialog.vue';
 import ShowReviewDialog from '@/views/teacher/reviews/ShowJustificationDialog.vue';
 import EditQuestionTopics from '@/views/teacher/questions/EditQuestionTopics.vue';
-
 import Topic from '@/models/management/Topic';
+import ShowDashboardDialog from '@/views/teacher/students/DashboardDialogView.vue';
+import { Student } from '@/models/management/Student';
 
 @Component({
   components: {
     'show-question-dialog': ShowQuestionDialog,
     'edit-reviews': EditReview,
     'show-review-dialog': ShowReviewDialog,
-    'edit-question-topics': EditQuestionTopics
+    'edit-question-topics': EditQuestionTopics,
+    'show-dashboard-dialog': ShowDashboardDialog
   }
 })
 export default class ReviewsView extends Vue {
@@ -243,6 +259,8 @@ export default class ReviewsView extends Vue {
   questionDialog: boolean = false;
   currentReview: Review | null = null;
   reviewDialog: boolean = false;
+  currentUsername: string | null = null;
+  dashboardDialog: boolean = false;
 
   headers: object = [
     {
@@ -404,6 +422,15 @@ export default class ReviewsView extends Vue {
 
   onCloseShowReviewDialog() {
     this.reviewDialog = false;
+  }
+
+  openStudentDashboardDialog(username: string) {
+    this.dashboardDialog = true;
+    this.currentUsername = username;
+  }
+
+  onCloseShowDashboardDialog() {
+    this.dashboardDialog = false;
   }
 }
 </script>
