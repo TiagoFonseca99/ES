@@ -6,8 +6,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
@@ -16,7 +17,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
@@ -46,6 +46,9 @@ public class SubmissionService {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private CourseExecutionRepository courseExecutionRepository;
+
     @PersistenceContext
     EntityManager entityManager;
 
@@ -55,7 +58,9 @@ public class SubmissionService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public SubmissionDto createSubmission(Integer questionId, SubmissionDto submissionDto){
 
-        checkIfConsistentSubmission(questionId, submissionDto.getStudentId());
+        checkIfConsistentSubmission(questionId, submissionDto.getStudentId(), submissionDto.getCourseExecutionId(), submissionDto.getCourseId());
+
+        CourseExecution courseExecution = getCourseExecution(submissionDto.getCourseExecutionId());
 
         Question question = getQuestion(questionId);
 
@@ -63,7 +68,7 @@ public class SubmissionService {
 
         checkIfQuestionAlreadySubmitted(question, user);
 
-        Submission submission = new Submission(question, user);
+        Submission submission = new Submission(courseExecution, question, user);
 
         submission.setAnonymous(submissionDto.isAnonymous());
 
@@ -80,9 +85,11 @@ public class SubmissionService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public SubmissionDto resubmitQuestion(Integer oldQuestionId, Integer newQuestionId, SubmissionDto submissionDto) {
-        checkIfConsistentSubmission(newQuestionId, submissionDto.getStudentId());
+        checkIfConsistentSubmission(newQuestionId, submissionDto.getStudentId(), submissionDto.getCourseExecutionId(), submissionDto.getCourseId());
         if(oldQuestionId == null )
             throw new TutorException(SUBMISSION_MISSING_QUESTION);
+
+        CourseExecution courseExecution = getCourseExecution(submissionDto.getCourseExecutionId());
 
         Question oldQuestion = getQuestion(oldQuestionId);
         oldQuestion.setStatus("DEPRECATED");
@@ -95,7 +102,7 @@ public class SubmissionService {
 
         User user = getStudent(submissionDto.getStudentId());
 
-        Submission submission = new Submission(newQuestion, user);
+        Submission submission = new Submission(courseExecution, newQuestion, user);
 
         submission.setAnonymous(submissionDto.isAnonymous());
 
@@ -136,40 +143,48 @@ public class SubmissionService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ReviewDto> getSubmissionReviews(Integer studentId) {
+    public List<ReviewDto> getSubmissionReviews(Integer studentId, Integer courseExecutionId) {
         if(studentId == null)
             throw new TutorException(REVIEW_MISSING_STUDENT);
+        else if(courseExecutionId == null)
+            throw new TutorException(COURSE_EXECUTION_MISSING);
 
-        return reviewRepository.getSubmissionReviews(studentId).stream().map(ReviewDto::new).collect(Collectors.toList());
+        List<Integer> courseExecutionSubmissions = getSubmissions(studentId, courseExecutionId).stream().map(SubmissionDto::getId).collect(Collectors.toList());
+        return reviewRepository.getSubmissionReviews(studentId).stream().map(ReviewDto::new).filter(r -> courseExecutionSubmissions.contains(r.getSubmissionId())).collect(Collectors.toList());
     }
 
     @Retryable(
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<SubmissionDto> getSubsToTeacher() {
-
-        return submissionRepository.findAll().stream().map(SubmissionDto::new).collect(Collectors.toList());
+    public List<SubmissionDto> getSubsToTeacher(Integer courseExecutionId) {
+        if(courseExecutionId == null)
+            throw new TutorException(COURSE_EXECUTION_MISSING);
+        return submissionRepository.getCourseExecutionSubmissions(courseExecutionId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
 
     @Retryable(
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ReviewDto> getReviewsToTeacher() {
+    public List<ReviewDto> getReviewsToTeacher(Integer courseExecutionId) {
+        if(courseExecutionId == null)
+            throw new TutorException(COURSE_EXECUTION_MISSING);
 
-        return reviewRepository.findAll().stream().map(ReviewDto::new).collect(Collectors.toList());
+        List<Integer> courseExecutionSubmissions = getSubsToTeacher(courseExecutionId).stream().map(SubmissionDto::getId).collect(Collectors.toList());
+        return reviewRepository.findAll().stream().map(ReviewDto::new).filter(r -> courseExecutionSubmissions.contains(r.getSubmissionId())).collect(Collectors.toList());
     }
 
     @Retryable(
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<SubmissionDto> getSubmissions(Integer studentId) {
+    public List<SubmissionDto> getSubmissions(Integer studentId, Integer courseExecutionId) {
         if(studentId == null)
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
-
-        return submissionRepository.getSubmissions(studentId).stream().map(SubmissionDto::new).collect(Collectors.toList());
+        else if(courseExecutionId == null)
+            throw new TutorException(COURSE_EXECUTION_MISSING);
+        return submissionRepository.getSubmissions(studentId, courseExecutionId).stream().map(SubmissionDto::new).collect(Collectors.toList());
     }
 
     @Retryable(
@@ -177,7 +192,6 @@ public class SubmissionService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void changeSubmission(SubmissionDto submission) {
-
         if (submission.getStudentId() == null) {
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
         }
@@ -186,22 +200,19 @@ public class SubmissionService {
             throw new TutorException(SUBMISSION_MISSING_QUESTION);
         }
 
-
         Question question = questionRepository.getOne(submission.getQuestionDto().getId());
 
         question.update(submission.getQuestionDto());
 
-
         entityManager.persist(question);
-
     }
 
     @Retryable(
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<SubmissionDto> getStudentsSubmissions() {
-        List<SubmissionDto> submissions = submissionRepository.findAll().stream().map(SubmissionDto::new).collect(Collectors.toList());
+    public List<SubmissionDto> getStudentsSubmissions(Integer courseExecutionId) {
+        List<SubmissionDto> submissions = submissionRepository.getCourseExecutionSubmissions(courseExecutionId).stream().map(SubmissionDto::new).collect(Collectors.toList());
 
         for(SubmissionDto submission : submissions) {
             if (submission.isAnonymous()) submission.setUsername(null);
@@ -228,16 +239,22 @@ public class SubmissionService {
         }
     }
 
-    private void checkIfConsistentSubmission(Integer questionId, Integer studentId) {
+    private void checkIfConsistentSubmission(Integer questionId, Integer studentId, Integer executionId, Integer courseId) {
         if(questionId == null)
             throw new TutorException(SUBMISSION_MISSING_QUESTION);
-        if(studentId == null)
+        else if(studentId == null)
             throw new TutorException(SUBMISSION_MISSING_STUDENT);
+        else if(executionId == null || courseId == null)
+            throw new TutorException(SUBMISSION_MISSING_COURSE);
     }
 
     private void checkIfQuestionAlreadySubmitted(Question question, User user) {
         if(user.getSubmittedQuestions().contains(question))
             throw new TutorException(QUESTION_ALREADY_SUBMITTED, user.getUsername());
+    }
+
+    private CourseExecution getCourseExecution(Integer executionId) {
+        return courseExecutionRepository.findById(executionId).orElseThrow(() -> new TutorException(COURSE_EXECUTION_NOT_FOUND, executionId));
     }
 
     private Question getQuestion(Integer questionId) {
@@ -283,12 +300,6 @@ public class SubmissionService {
         String justification = reviewDto.getJustification();
         if (justification == null || justification.isBlank()) {
             throw new TutorException(REVIEW_MISSING_JUSTIFICATION);
-        }
-    }
-
-    private void removeUsernameFromAnonymous(SubmissionDto submission) {
-        if(submission.isAnonymous()) {
-            submission.setUsername(null);
         }
     }
 }

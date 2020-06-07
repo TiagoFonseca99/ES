@@ -46,6 +46,11 @@
             <stringProp name="Argument.value">2</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="courseExecutionId" elementType="Argument">
+            <stringProp name="Argument.name">courseExecutionId</stringProp>
+            <stringProp name="Argument.value">11</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </Arguments>
       <hashTree/>
@@ -110,6 +115,7 @@
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
   &quot;courseId&quot;: &quot;${courseId}&quot;,&#xd;
+  &quot;courseExecutionId&quot;: &quot;${courseExecutionId}&quot;,&#xd;
   &quot;questionDto&quot;: {&#xd;
   	&quot;title&quot;: &quot;${title}&quot;,&#xd;
 	&quot;content&quot;: &quot;${content}&quot;,&#xd;

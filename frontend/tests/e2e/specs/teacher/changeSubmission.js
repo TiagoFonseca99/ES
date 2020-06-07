@@ -3,7 +3,7 @@ describe('Teacher walkthrough', () => {
     cy.demoTeacherLogin();
     cy.log('student submits a question');
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, key) VALUES (\'old\', \'old content\', \'SUBMITTED\', 2, 1200) RETURNING id)\nINSERT INTO submissions (question_id, user_id) VALUES ((SELECT id from quest), 676);" '
+      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, key) VALUES (\'old\', \'old content\', \'SUBMITTED\', 2, 1200) RETURNING id)\nINSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id from quest), 676, 11);" '
     );
     cy.exec(
       'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE key=1200)\nINSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste\', \'t\', (SELECT id FROM quest), 0);" '

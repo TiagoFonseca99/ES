@@ -4,6 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
@@ -17,6 +21,8 @@ import spock.lang.Specification
 
 @DataJpaTest
 class CreateReviewPerformanceTest extends Specification {
+    public static final String ACRONYM = "AS1"
+    public static final String ACADEMIC_TERM = "1 SEM"
     public static final String REVIEW_JUSTIFICATION = 'Porque me apeteceu'
     public static final String REJECTED = 'REJECTED'
     public static final String QUESTION_TITLE = "question title"
@@ -30,6 +36,12 @@ class CreateReviewPerformanceTest extends Specification {
 
     @Autowired
     SubmissionService submissionService
+
+    @Autowired
+    CourseRepository courseRepository
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
 
     @Autowired
     QuestionRepository questionRepository
@@ -58,6 +70,12 @@ class CreateReviewPerformanceTest extends Specification {
         quiz.setType("TEST")
         quizRepository.save(quiz)
 
+        and: "a course"
+        def course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+        def courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecutionRepository.save(courseExecution)
+
         and: "a question"
         def question = new Question()
         question.setKey(1)
@@ -67,6 +85,7 @@ class CreateReviewPerformanceTest extends Specification {
 
         and: "a submission"
         def submission = new Submission()
+        submission.setCourseExecution(courseExecution)
         submission.setQuestion(question)
         submission.setUser(student)
         submissionRepository.save(submission)

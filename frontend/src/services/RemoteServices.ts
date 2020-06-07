@@ -610,7 +610,10 @@ export default class RemoteServices {
 
   static async getSubmissions(): Promise<Submission[]> {
     return httpClient
-      .get('/student/submissions')
+      .get(
+        '/student/submissions?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
       .then(response => {
         return response.data.map((submission: any) => {
           return new Submission(submission);
@@ -623,7 +626,10 @@ export default class RemoteServices {
 
   static async getStudentsSubmissions(): Promise<Submission[]> {
     return httpClient
-      .get('/student/submissions/all')
+      .get(
+        '/student/submissions/all?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
       .then(response => {
         return response.data.map((submission: any) => {
           return new Submission(submission);
@@ -655,7 +661,10 @@ export default class RemoteServices {
 
   static async getSubsToTeacher(): Promise<Submission[]> {
     return httpClient
-      .get('/management/reviews')
+      .get(
+        '/management/reviews?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
       .then(response => {
         return response.data.map((submission: any) => {
           return new Submission(submission);
@@ -668,7 +677,10 @@ export default class RemoteServices {
 
   static async getReviewsToTeacher(): Promise<Review[]> {
     return httpClient
-      .get('/management/reviews/showReviews')
+      .get(
+        '/management/reviews/showReviews?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
       .then(response => {
         return response.data.map((review: any) => {
           return new Review(review);
@@ -681,7 +693,10 @@ export default class RemoteServices {
 
   static async getSubmissionReviews(): Promise<Review[]> {
     return httpClient
-      .get('/student/reviews')
+      .get(
+        '/student/reviews?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
       .then(response => {
         return response.data.map((review: any) => {
           return new Review(review);

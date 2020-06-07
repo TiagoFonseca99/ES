@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 
@@ -8,6 +9,7 @@ import java.io.Serializable;
 public class SubmissionDto implements Serializable {
     private Integer id;
     private Integer courseId;
+    private Integer courseExecutionId;
     private QuestionDto questionDto;
     private Integer studentId;
     private String username;
@@ -18,7 +20,8 @@ public class SubmissionDto implements Serializable {
 
     public SubmissionDto(Submission submission){
         this.id = submission.getId();
-        this.courseId = submission.getQuestion().getCourse().getId();
+        this.courseId = submission.getCourseId();
+        this.courseExecutionId = submission.getCourseExecutionId();
         if(submission.getQuestion() != null)
             this.questionDto = new QuestionDto(submission.getQuestion());
         this.studentId = submission.getUser().getId();
@@ -36,9 +39,13 @@ public class SubmissionDto implements Serializable {
 
     public void setQuestionDto(QuestionDto questionDto) { this.questionDto = questionDto; }
 
-    public Integer getCourseId() { return courseId; }
+    public Integer getCourseId() {return courseId;}
 
     public void setCourseId(Integer courseId) { this.courseId = courseId; }
+
+    public Integer getCourseExecutionId() {return courseExecutionId;}
+
+    public void setCourseExecutionId(Integer courseExecutionId) { this.courseExecutionId = courseExecutionId; }
 
     public Integer getStudentId() { return studentId; }
 
