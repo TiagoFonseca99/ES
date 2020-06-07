@@ -229,7 +229,8 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (${question}, 676
 	&quot;question&quot;: {&#xd;
 		&quot;id&quot;: ${question}	&#xd;
 	},&#xd;
-	&quot;userId&quot;: 676&#xd;
+	&quot;userId&quot;: 676,&#xd;
+	&quot;courseId&quot;: 2&#xd;
 }&#xd;
 </stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
@@ -384,7 +385,7 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (${question}, 676
           <stringProp name="query">WITH qa AS(DELETE FROM quiz_answers WHERE user_id = 676 RETURNING id)
 DELETE FROM question_answers WHERE quiz_answer_id IN (SELECT * FROM qa);
 
-DELETE FROM replies WHERE user_id = 677;
+DELETE FROM replies WHERE 1=1;
 DELETE FROM discussions WHERE user_id = 676;
 </stringProp>
           <stringProp name="queryArguments"></stringProp>

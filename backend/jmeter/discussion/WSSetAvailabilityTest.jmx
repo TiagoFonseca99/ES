@@ -68,7 +68,7 @@
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;DISCUSSION CONTENT&apos;);</stringProp>
+          <stringProp name="query">INSERT INTO discussions (question_id, user_id, content, course_id) VALUES (1504, 676,&apos;DISCUSSION CONTENT&apos;, 2);</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
@@ -167,7 +167,8 @@
 	&quot;question&quot;: {&#xd;
 		&quot;id&quot;: 1504		&#xd;
 	},&#xd;
-	&quot;userId&quot;: 676&#xd;
+	&quot;userId&quot;: 676,&#xd;
+	&quot;courseId&quot;: 2&#xd;
 }&#xd;
 </stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>

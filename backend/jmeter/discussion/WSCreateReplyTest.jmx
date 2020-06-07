@@ -174,7 +174,8 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;
 	&quot;question&quot;: {&#xd;
 		&quot;id&quot;: 1504		&#xd;
 	},&#xd;
-	&quot;userId&quot;: 676&#xd;
+	&quot;userId&quot;: 676,&#xd;
+	&quot;courseId&quot;: 2&#xd;
 }&#xd;
 </stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
@@ -255,7 +256,8 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;
 	&quot;question&quot;: {&#xd;
 		&quot;id&quot;: 1504		&#xd;
 	},&#xd;
-	&quot;userId&quot;: 676&#xd;
+	&quot;userId&quot;: 676,&#xd;
+	&quot;courseId&quot;: 2&#xd;
 }&#xd;
 </stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
