@@ -12,6 +12,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 public class DiscussionDto implements Serializable {
     private Integer userId;
     private String userName;
+    private Integer courseId;
     private QuestionDto question;
     private String content;
     private List<ReplyDto> replies;
@@ -21,11 +22,12 @@ public class DiscussionDto implements Serializable {
     public DiscussionDto() {
     }
 
-    public DiscussionDto(Discussion discussion) {
+	public DiscussionDto(Discussion discussion) {
         this.userId = discussion.getId().getUserId();
         this.userName = discussion.getUser().getName();
-        this.content = discussion.getContent();
+        this.courseId = discussion.getCourse().getId();
         this.question = new QuestionDto(discussion.getQuestion());
+        this.content = discussion.getContent();
         this.date = DateHandler.toISOString(discussion.getDate());
         this.available = discussion.isAvailable();
 
@@ -34,6 +36,14 @@ public class DiscussionDto implements Serializable {
             this.replies = discussionReplies.stream().map(ReplyDto::new).collect(Collectors.toList());
         }
     }
+
+    public Integer getCourseId() {
+		return courseId;
+	}
+
+	public void setCourseId(Integer courseId) {
+		this.courseId = courseId;
+	}
 
     public String getDate() {
         return date;

@@ -4,6 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import spock.lang.Specification
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
@@ -27,11 +31,20 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 
 @DataJpaTest
 class GetQuestionDiscussionsTest extends Specification {
+    public static final String ACADEMIC_TERM = "academic term"
+    public static final String ACRONYM = "acronym"
+    public static final String COURSE_NAME = "course name"
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
     public static final String USER_USERNAME = "user username"
     public static final String USER_NAME = "user name"
+
+    @Autowired
+    CourseRepository courseRepository
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
 
     @Autowired
     DiscussionService discussionService
@@ -60,6 +73,8 @@ class GetQuestionDiscussionsTest extends Specification {
     @Autowired
     ReplyRepository replyRepository;
 
+    def course
+    def courseExecution
     def question
     def student
 
@@ -102,6 +117,16 @@ class GetQuestionDiscussionsTest extends Specification {
         questionRepository.save(question)
         student.addQuizAnswer(quizanswer)
         userRepository.save(student)
+
+        course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(student)
+        courseExecutionRepository.save(courseExecution)
+
+        student.addCourse(courseExecution)
+        userRepository.save(student)
     }
 
     def "get created discussion"(){
@@ -111,6 +136,7 @@ class GetQuestionDiscussionsTest extends Specification {
         and: "a question"
         discussionDto.setUserId(student.getId())
         discussionDto.setQuestion(new QuestionDto(question))
+        discussionDto.setCourseId(course.getId())
         and: "a discussion created"
         discussionService.createDiscussion(discussionDto)
 
@@ -122,6 +148,7 @@ class GetQuestionDiscussionsTest extends Specification {
         discussion.get(0).getUserId() == discussionDto.getUserId()
         discussion.get(0).getQuestionId() == discussionDto.getQuestionId()
         discussion.get(0).getContent() == discussionDto.getContent()
+        discussion.get(0).getCourseId() == discussionDto.getCourseId()
     }
 
     def "get discussion of invalid question"(){

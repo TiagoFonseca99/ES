@@ -5,6 +5,7 @@ import javax.persistence.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 
@@ -20,6 +21,10 @@ import java.util.Objects;
 public class Discussion {
     @EmbeddedId
     private DiscussionId discussionId = new DiscussionId();
+
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -43,17 +48,26 @@ public class Discussion {
     public Discussion() {
     }
 
-    public Discussion(User user, Question question, DiscussionDto discussionDto) {
+    public Discussion(User user, Question question, Course course, DiscussionDto discussionDto) {
         checkConsistentDiscussion(discussionDto);
         this.content = discussionDto.getContent();
         this.question = question;
         this.user = user;
+        this.course = course;
         this.discussionId.setQuestionId(question.getId());
         this.discussionId.setUserId(user.getId());
         this.question.addDiscussion(this);
         this.user.addDiscussion(this);
         this.setDate(DateHandler.toLocalDateTime(discussionDto.getDate()));
         this.available = discussionDto.isAvailable();
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
     }
 
     public LocalDateTime getDate() {

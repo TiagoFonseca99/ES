@@ -4,7 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import spock.lang.Specification
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
@@ -28,12 +31,21 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 
 @DataJpaTest
 class EditDiscussionTest extends Specification {
+    public static final String ACADEMIC_TERM = "academic term"
+    public static final String ACRONYM = "acronym"
+    public static final String COURSE_NAME = "course name"
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
     public static final String NEW_CONTENT = "new discussion content"
     public static final String USER_USERNAME = "user username"
     public static final String USER_NAME = "user name"
+
+    @Autowired
+    CourseRepository courseRepository
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
 
     @Autowired
     DiscussionService discussionService
@@ -62,6 +74,8 @@ class EditDiscussionTest extends Specification {
     @Autowired
     ReplyRepository replyRepository;
 
+    def course
+    def courseExecution
     def question
     def student
 
@@ -102,6 +116,16 @@ class EditDiscussionTest extends Specification {
         questionRepository.save(question)
         student.addQuizAnswer(quizanswer)
         userRepository.save(student)
+
+        course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(student)
+        courseExecutionRepository.save(courseExecution)
+
+        student.addCourse(courseExecution)
+        userRepository.save(student)
     }
 
     def "student edit discussion"(){
@@ -110,6 +134,7 @@ class EditDiscussionTest extends Specification {
         discussion.setContent(DISCUSSION_CONTENT)
         discussion.setUserId(student.getId())
         discussion.setQuestion(new QuestionDto(question))
+        discussion.setCourseId(course.getId())
         discussionService.createDiscussion(discussion)
         and: "a changed discussion"
         discussion.setContent(NEW_CONTENT)
@@ -129,6 +154,7 @@ class EditDiscussionTest extends Specification {
         discussion.setContent(DISCUSSION_CONTENT)
         discussion.setUserId(student.getId())
         discussion.setQuestion(new QuestionDto(question))
+        discussion.setCourseId(course.getId())
         discussionService.createDiscussion(discussion)
         and: "a changed discussion"
         discussion.setContent("")
@@ -150,9 +176,14 @@ class EditDiscussionTest extends Specification {
         discussion.setContent(DISCUSSION_CONTENT)
         discussion.setUserId(student.getId())
         discussion.setQuestion(new QuestionDto(question))
+        discussion.setCourseId(course.getId())
         discussionService.createDiscussion(discussion)
         and: "a teacher"
         def teacher = new User(USER_NAME + "1", USER_USERNAME + "1", 3, User.Role.TEACHER);
+        userRepository.save(teacher)
+        courseExecution.addUser(teacher)
+        courseExecutionRepository.save(courseExecution)
+        teacher.addCourse(courseExecution)
         userRepository.save(teacher)
         and: "a changed discussion"
         discussion.setContent(NEW_CONTENT)
@@ -172,10 +203,16 @@ class EditDiscussionTest extends Specification {
         discussion.setContent(DISCUSSION_CONTENT)
         discussion.setUserId(student.getId())
         discussion.setQuestion(new QuestionDto(question))
+        discussion.setCourseId(course.getId())
         discussionService.createDiscussion(discussion)
         and: "another student"
         def other = new User(USER_NAME + "1", USER_USERNAME + "1", 3, User.Role.STUDENT);
         userRepository.save(other)
+        courseExecution.addUser(other)
+        courseExecutionRepository.save(courseExecution)
+        other.addCourse(courseExecution)
+        userRepository.save(other)
+
         and: "a changed discussion"
         discussion.setContent(NEW_CONTENT)
 
@@ -195,6 +232,7 @@ class EditDiscussionTest extends Specification {
         discussion.setContent(DISCUSSION_CONTENT)
         discussion.setUserId(-1)
         discussion.setQuestion(new QuestionDto(question))
+        discussion.setCourseId(course.getId())
 
         when: "editing the discussion"
         discussionService.editDiscussion(student.getId(), discussion)
@@ -202,6 +240,30 @@ class EditDiscussionTest extends Specification {
         then:
         def exception = thrown(TutorException)
         exception.errorMessage == ErrorMessage.DISCUSSION_NOT_FOUND
+    }
+
+    def "student not in course edit discussion"() {
+        given: "a discussion"
+        def discussion = new DiscussionDto()
+        discussion.setContent(DISCUSSION_CONTENT)
+        discussion.setUserId(student.getId())
+        discussion.setQuestion(new QuestionDto(question))
+        discussion.setCourseId(course.getId())
+        discussionService.createDiscussion(discussion)
+        and: "another student not in discussion course"
+        def other = new User(USER_NAME + "1", USER_USERNAME + "1", 3, User.Role.STUDENT);
+        userRepository.save(other)
+        and: "a changed discussion"
+        discussion.setContent(NEW_CONTENT)
+
+        when: "editing the discussion"
+        discussionService.editDiscussion(other.getId(), discussion)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.errorMessage == ErrorMessage.USER_NOT_IN_COURSE
+        discussionRepository.count() == 1L
+        discussionRepository.findAll().get(0).getContent() == DISCUSSION_CONTENT
     }
 
     @TestConfiguration

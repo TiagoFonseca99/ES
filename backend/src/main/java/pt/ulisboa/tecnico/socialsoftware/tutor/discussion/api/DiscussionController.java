@@ -56,7 +56,7 @@ public class DiscussionController {
 
         discussion.setAvailability(available);
 
-        return discussionService.setAvailability(discussion);
+        return discussionService.setAvailability(user.getId(), discussion);
     }
 
     @PostMapping(value = "/discussions/replies")
@@ -75,7 +75,7 @@ public class DiscussionController {
         reply.setUserId(user.getId());
         reply.setDate(DateHandler.toISOString(DateHandler.now()));
 
-        return discussionService.giveReply(reply, discussion);
+        return discussionService.createReply(reply, discussion);
 
     }
 
@@ -129,7 +129,7 @@ public class DiscussionController {
 
     @GetMapping(value = "/discussions")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public List<DiscussionDto> getDiscussions(Principal principal, @Valid @RequestParam Integer userId) {
+    public List<DiscussionDto> getDiscussionsByUser(Principal principal, @Valid @RequestParam Integer userId, @Valid @RequestParam Integer courseId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
@@ -138,7 +138,7 @@ public class DiscussionController {
             throw new TutorException(ErrorMessage.DISCUSSION_NOT_SUBMITTED_BY_REQUESTER, user.getId());
         }
 
-        return discussionService.findDiscussionsByUserId(userId);
+        return discussionService.findDiscussionsByUserId(userId, courseId);
     }
 
     @GetMapping(value = "/discussions/question")

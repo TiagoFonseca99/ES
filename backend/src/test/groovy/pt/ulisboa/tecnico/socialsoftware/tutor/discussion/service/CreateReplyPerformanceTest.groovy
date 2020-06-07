@@ -4,6 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.ReplyRepository
 import spock.lang.Specification
 
@@ -31,7 +35,10 @@ import java.time.LocalDateTime
 
 
 @DataJpaTest
-class GiveExplanationPerformanceTest extends Specification {
+class CreateReplyPerformanceTest extends Specification {
+    public static final String ACADEMIC_TERM = "academic term"
+    public static final String ACRONYM = "acronym"
+    public static final String COURSE_NAME = "course name"
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
@@ -40,6 +47,12 @@ class GiveExplanationPerformanceTest extends Specification {
     public static final String TEACHER_USERNAME = "teacher username"
     public static final String TEACHER_NAME = "teacher name"
     public static final String REPLY_MESSAGE = "reply message"
+
+    @Autowired
+    CourseRepository courseRepository
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
 
     @Autowired
     DiscussionService discussionService
@@ -71,6 +84,19 @@ class GiveExplanationPerformanceTest extends Specification {
         def student = new User(USER_NAME, USER_USERNAME, 1, User.Role.STUDENT)
         userRepository.save(student)
         def teacher = new User(TEACHER_NAME, TEACHER_USERNAME, 2, User.Role.TEACHER)
+        userRepository.save(teacher)
+        and: "a course"
+        def course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+
+        def courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(student)
+        courseExecution.addUser(teacher)
+        courseExecutionRepository.save(courseExecution)
+
+        student.addCourse(courseExecution)
+        teacher.addCourse(courseExecution)
+        userRepository.save(student)
         userRepository.save(teacher)
 
         and: "a quiz"
@@ -115,6 +141,7 @@ class GiveExplanationPerformanceTest extends Specification {
             discussion.setUserId(student.getId())
             discussion.setQuestion(new QuestionDto(question))
             discussion.setContent(DISCUSSION_CONTENT)
+            discussion.setCourseId(course.getId())
 
             discussionService.createDiscussion(discussion)
 
@@ -123,7 +150,7 @@ class GiveExplanationPerformanceTest extends Specification {
             reply.setUserId(teacher.getId())
             reply.setDate(LocalDateTime.now())
 
-            discussionService.giveReply(reply, discussion)
+            discussionService.createReply(reply, discussion)
         }
         )
 
