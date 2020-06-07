@@ -5,6 +5,7 @@ import { ISOtoString } from '@/services/ConvertDateService';
 export default class Discussion {
   userId!: number;
   questionId!: number;
+  courseId!: number;
   userName!: string;
   content!: string;
   question!: Question;
@@ -16,6 +17,7 @@ export default class Discussion {
     if (jsonObj) {
       this.userId = jsonObj.userId;
       this.questionId = jsonObj.questionId;
+      this.courseId = jsonObj.courseId;
       this.userName = jsonObj.userName;
       this.content = jsonObj.content;
       this.question = new Question(jsonObj.question);

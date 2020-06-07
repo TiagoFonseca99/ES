@@ -736,9 +736,12 @@ export default class RemoteServices {
       });
   }
 
-  static async getDiscussions(userId: number): Promise<Discussion[]> {
+  static async getDiscussions(
+    userId: number,
+    courseId: number
+  ): Promise<Discussion[]> {
     return httpClient
-      .get('/discussions?userId=' + userId)
+      .get('/discussions?userId=' + userId + '&courseId=' + courseId)
       .then(response => {
         return response.data.map((discussion: any) => {
           return new Discussion(discussion);
