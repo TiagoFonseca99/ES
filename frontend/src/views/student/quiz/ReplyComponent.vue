@@ -15,7 +15,15 @@
               style="flex: 1; position: relative; max-width: 100%;"
             >
               <b v-if="$store.getters.getUser.id !== discussion.userId"
-                >{{ discussion.userName }} on {{ discussion.date }}:</b
+                ><span
+                  class="primary--text"
+                  @click="
+                    setUsername(discussion.userUsername);
+                    openDashboard();
+                  "
+                  >{{ discussion.userName }}</span
+                >
+                on {{ discussion.date }}:</b
               >
               <div v-else>
                 <b>You on {{ discussion.date }}:</b>
@@ -60,7 +68,17 @@
                   class="text-left reply"
                 >
                   <b v-if="$store.getters.getUser.id !== reply.userId"
-                    >{{ reply.userName }} on {{ reply.date }}:
+                    ><span
+                      v-if="reply.userRole === 'STUDENT'"
+                      class="primary--text"
+                      @click="
+                        setUsername(reply.userUsername);
+                        openDashboard();
+                      "
+                      >{{ reply.userName }}</span
+                    >
+                    <span v-else>{{ reply.userName }}</span>
+                    on {{ reply.date }}:
                   </b>
                   <div v-else>
                     <b>You on {{ reply.date }}:</b>
@@ -163,22 +181,30 @@
       v-on:save-reply="onSaveReply"
       v-on:dialog="closeDialog"
     />
+    <show-dashboard-dialog
+      v-if="currentUsername"
+      v-model="dashboard"
+      :username="currentUsername"
+      v-on:close-show-dashboard-dialog="onCloseDashboard"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
+import { Component, Vue, Prop } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
 import RemoteServices from '@/services/RemoteServices';
 import Reply from '@/models/management/Reply';
 import EditDiscussionDialog from '@/views/student/discussion/EditDiscussionDialog.vue';
 import EditReplyDialog from '@/views/student/discussion/EditReplyDialog.vue';
+import ShowDashboardDialog from '@/views/student/dashboard/DashboardDialogView.vue';
 
 @Component({
   components: {
     'edit-discussion-dialog': EditDiscussionDialog,
-    'edit-reply-dialog': EditReplyDialog
+    'edit-reply-dialog': EditReplyDialog,
+    'show-dashboard-dialog': ShowDashboardDialog
   }
 })
 export default class ReplyComponent extends Vue {
@@ -191,6 +217,8 @@ export default class ReplyComponent extends Vue {
   replyInd!: number;
   discussionEdit: Boolean = false;
   replyEdit: Boolean = false;
+  currentUsername: string | null = null;
+  dashboard: Boolean = false;
 
   async submitReply() {
     try {
@@ -289,6 +317,18 @@ export default class ReplyComponent extends Vue {
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
+  }
+
+  setUsername(username: string) {
+    this.currentUsername = username;
+  }
+
+  openDashboard() {
+    this.dashboard = true;
+  }
+
+  onCloseDashboard() {
+    this.dashboard = false;
   }
 
   convertMarkDown(text: string) {

@@ -6,11 +6,14 @@ import java.time.LocalDateTime;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 public class ReplyDto implements Serializable {
     private Integer id;
     private Integer userId;
     private String userName;
+    private String userUsername;
+    private User.Role userRole;
     private String message;
     private String date;
 
@@ -21,9 +24,27 @@ public class ReplyDto implements Serializable {
         this.setId(reply.getId());
         this.setUserId(reply.getUser().getId());
         this.setUserName(reply.getUser().getName());
+        this.setUserUsername(reply.getUser().getUsername());
+        this.setUserRole(reply.getUser().getRole());
         this.setMessage(reply.getMessage());
         this.setDate(DateHandler.toISOString(reply.getDate()));
     }
+
+	public User.Role getUserRole() {
+		return userRole;
+	}
+
+	public void setUserRole(User.Role userRole) {
+		this.userRole = userRole;
+	}
+
+	public String getUserUsername() {
+		return userUsername;
+	}
+
+	public void setUserUsername(String userUsername) {
+		this.userUsername = userUsername;
+	}
 
     public String getUserName() {
 		return userName;

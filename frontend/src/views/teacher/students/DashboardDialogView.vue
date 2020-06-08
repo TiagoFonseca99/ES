@@ -10,12 +10,12 @@
     <v-card>
       <v-card-title class="justify-center">
         <v-spacer />
-        <b style="color: #1976d2">Username: </b>
+        <b class="primary--text">Username: </b>
         <span data-cy="username">{{
           info !== null ? info.username : 'Unknown user'
         }}</span>
         <v-spacer />
-        <b style="color: #1976d2">Name: </b>
+        <b class="primary--text">Name: </b>
         <span data-cy="name">{{
           info !== null ? info.name : 'Unknown user'
         }}</span>
@@ -145,7 +145,7 @@ import { Student } from '@/models/management/Student';
 @Component({
   components: { AnimatedNumber }
 })
-export default class EditSubmissionDialog extends Vue {
+export default class ShowDashboardDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
   @Prop({ type: String, required: true }) readonly username!: string;
 
