@@ -8,10 +8,22 @@ describe('Student walkthrough', () => {
 
   afterEach(() => {
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH q AS (SELECT id FROM questions WHERE id IN (SELECT max(id) FROM questions)), opt AS (DELETE FROM options WHERE question_id IN (SELECT * FROM q)), sub AS (DELETE FROM submissions WHERE question_id IN (SELECT * FROM q)) DELETE FROM questions WHERE id IN (SELECT * FROM q);" '
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql -d ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c "WITH q AS (SELECT id FROM questions WHERE id IN (SELECT max(id) FROM questions)), opt AS (DELETE FROM options WHERE question_id IN (SELECT * FROM q)), sub AS (DELETE FROM submissions WHERE question_id IN (SELECT * FROM q)) DELETE FROM questions WHERE id IN (SELECT * FROM q);" '
     );
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH q AS (SELECT id FROM questions WHERE id IN (SELECT max(id) FROM questions)), opt AS (DELETE FROM options WHERE question_id IN (SELECT * FROM q)), sub AS (DELETE FROM submissions WHERE question_id IN (SELECT * FROM q)) DELETE FROM questions WHERE id IN (SELECT * FROM q);" '
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql -d ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c "WITH q AS (SELECT id FROM questions WHERE id IN (SELECT max(id) FROM questions)), opt AS (DELETE FROM options WHERE question_id IN (SELECT * FROM q)), sub AS (DELETE FROM submissions WHERE question_id IN (SELECT * FROM q)) DELETE FROM questions WHERE id IN (SELECT * FROM q);" '
     );
     cy.contains('Logout').click();
   });
@@ -40,7 +52,13 @@ describe('Student walkthrough', () => {
     cy.seesExcludingSubmissions('Test Question2', 'Test Question3');
 
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH q AS (SELECT id FROM questions WHERE id IN (SELECT max(id) FROM questions)), opt AS (DELETE FROM options WHERE question_id IN (SELECT * FROM q)), sub AS (DELETE FROM submissions WHERE question_id IN (SELECT * FROM q)) DELETE FROM questions WHERE id IN (SELECT * FROM q);" '
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql -d ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c "WITH q AS (SELECT id FROM questions WHERE id IN (SELECT max(id) FROM questions)), opt AS (DELETE FROM options WHERE question_id IN (SELECT * FROM q)), sub AS (DELETE FROM submissions WHERE question_id IN (SELECT * FROM q)) DELETE FROM questions WHERE id IN (SELECT * FROM q);" '
     );
   });
 });
