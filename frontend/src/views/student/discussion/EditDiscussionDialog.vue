@@ -14,12 +14,15 @@
           rows="10"
           v-model="editDiscussion.content"
           label="Content"
+          data-cy="editContent"
         ></v-textarea>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <v-btn color="primary" @click="$emit('dialog', false)">Cancel</v-btn>
-        <v-btn color="primary" @click="saveDiscussion">Save</v-btn>
+        <v-btn color="primary" @click="saveDiscussion" data-cy="submitEdit"
+          >Save</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-dialog>

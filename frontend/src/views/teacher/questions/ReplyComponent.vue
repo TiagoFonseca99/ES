@@ -26,6 +26,7 @@
                     setDiscussion(discussion, index);
                     editDiscussion();
                   "
+                  data-cy="editDiscussion"
                   >edit</v-icon
                 >
                 <v-icon
@@ -35,6 +36,7 @@
                     setDiscussion(discussion, index);
                     deleteDiscussion();
                   "
+                  data-cy="removeDiscussion"
                   color="red"
                   >delete</v-icon
                 >
@@ -59,7 +61,7 @@
                 "
                 style="flex: 1; position: relative"
               />
-              <v-expansion-panel>
+              <v-expansion-panel data-cy="replies">
                 <v-expansion-panel-header
                   >View replies
                 </v-expansion-panel-header>
@@ -81,6 +83,7 @@
                         setReply(reply, replyIndex);
                         deleteReply();
                       "
+                      data-cy="removeReply"
                       color="red"
                       >delete</v-icon
                     >
@@ -92,6 +95,7 @@
                         setReply(reply, replyIndex);
                         editReply();
                       "
+                      data-cy="editReply"
                       >edit</v-icon
                     >
                     <span v-html="convertMarkDown(reply.message)" />

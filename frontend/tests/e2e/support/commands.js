@@ -276,6 +276,18 @@ Cypress.Commands.add('answerQuiz', n => {
   cy.get('[data-cy="confirmEndQuiz"]').click();
 });
 
+Cypress.Commands.add('removeAnswers', () => {
+  cy.exec(
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "WITH q AS (DELETE FROM quiz_answers WHERE user_id = 676 RETURNING id) DELETE FROM question_answers WHERE quiz_answer_id IN (SELECT * FROM q)"'
+  );
+});
+
 Cypress.Commands.add('writeDiscussion', content => {
   cy.get('[data-cy="discussionText"]').type(content);
   cy.get('[data-cy="createDiscussion"]').click();
@@ -283,7 +295,13 @@ Cypress.Commands.add('writeDiscussion', content => {
 
 Cypress.Commands.add('replyTeacherDiscussion', content => {
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "INSERT INTO replies (discussion_user_id, user_id, message, date) VALUES (676, 677, \'' +
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "INSERT INTO replies (discussion_user_id, user_id, message, date) VALUES (676, 677, \'' +
       content +
       '\', \'2020-01-01 00:00:01\')"'
   );
@@ -303,34 +321,46 @@ Cypress.Commands.add('viewMyDiscussions', n => {
   cy.get('[data-cy="discussions"]').click();
 });
 
-Cypress.Commands.add('submitReply', message => {
+Cypress.Commands.add('filterDiscussions', () => {
   cy.get('[data-cy="filterDiscussions"]').click();
-  cy.get('[data-cy="filterDiscussions"]').click();
+});
+
+Cypress.Commands.add('selectFirstDiscussion', index => {
   cy.get('[data-cy="showQuestionDialog"]')
     .first()
     .click();
+});
+
+Cypress.Commands.add('submitReply', message => {
   cy.get('[data-cy="ReplyMessage"]').type(message);
   cy.get('[data-cy="submitReply"]').click();
 });
 
 Cypress.Commands.add('submitEmptyReply', () => {
-  cy.get('[data-cy="filterDiscussions"]').click();
-  cy.get('[data-cy="filterDiscussions"]').click();
-  cy.get('[data-cy="showQuestionDialog"]')
-    .first()
-    .click();
   cy.get('[data-cy="submitReply"]').click();
 });
 
 Cypress.Commands.add('removeAllDiscussions', () => {
   cy.exec(
-    'PGPASSWORD= psql tutordb -U dserafim1999 -h localhost -c "DELETE FROM discussions WHERE 1 = 1;"'
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "DELETE FROM discussions WHERE course_id = 2;"'
   );
 });
 
 Cypress.Commands.add('removeAllReplies', () => {
   cy.exec(
-    'PGPASSWORD= psql tutordb -U dserafim1999 -h localhost -c "DELETE FROM replies WHERE 1 = 1;"'
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "DELETE FROM replies;"'
   );
 });
 
@@ -338,9 +368,15 @@ Cypress.Commands.add(
   'addDiscussionSameQuestion',
   (available, content, user) => {
     cy.exec(
-      'PGPASSWORD= psql tutordb -U dserafim1999 -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, available, content) VALUES (' +
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c " WITH q AS (SELECT question_id AS id FROM discussions WHERE user_id = 676) INSERT INTO discussions (user_id, question_id, course_id, available, content) VALUES (' +
         user +
-        ', (SELECT id FROM q), ' +
+        ', (SELECT id FROM q), 2,' +
         available +
         ', \'' +
         content +
@@ -349,6 +385,10 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add('openReplies', () => {
+  cy.get('[data-cy="replies"]').click();
+});
+
 Cypress.Commands.add('openSolvedQuiz', number => {
   cy.get('[data-cy="quizzes"]').click();
   cy.get('[data-cy="solvedQuizzes"]').click();
@@ -356,12 +396,29 @@ Cypress.Commands.add('openSolvedQuiz', number => {
 });
 
 Cypress.Commands.add('clickAvailability', () => {
-  cy.get('[data-cy="filterDiscussions"]').click();
-  cy.get('[data-cy="filterDiscussions"]').click();
-  cy.get('[data-cy="showQuestionDialog"]')
-    .first()
-    .click();
   cy.get('[data-cy="changeAvailability"]').click({ force: true });
+});
+
+Cypress.Commands.add('removeDiscussion', () => {
+  cy.get('[data-cy="removeDiscussion"]').click();
+});
+
+Cypress.Commands.add('editDiscussion', content => {
+  cy.get('[data-cy="editDiscussion"]').click();
+  cy.get('[data-cy="editContent"]').clear();
+  cy.get('[data-cy="editContent"]').type(content);
+  cy.get('[data-cy="submitEdit"]').click();
+});
+
+Cypress.Commands.add('removeReply', () => {
+  cy.get('[data-cy="removeReply"]').click();
+});
+
+Cypress.Commands.add('editReply', content => {
+  cy.get('[data-cy="editReply"]').click();
+  cy.get('[data-cy="editContent"]').clear();
+  cy.get('[data-cy="editContent"]').type(content);
+  cy.get('[data-cy="submitEdit"]').click();
 });
 
 // PPA
@@ -374,7 +431,13 @@ Cypress.Commands.add('openSubmissions', () => {
 Cypress.Commands.add('reviewSubmission', (title, status) => {
   //add review for submission
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH sub AS (SELECT s.id FROM submissions s JOIN questions q ON s.question_id=q.id WHERE q.title=\'' +
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "WITH sub AS (SELECT s.id FROM submissions s JOIN questions q ON s.question_id=q.id WHERE q.title=\'' +
       title +
       '\') INSERT INTO reviews(creation_date,justification,status,student_id,submission_id,user_id) VALUES (current_timestamp,\'As opções estão incorretas, e a pergunta pouco clara\', \'REJECTED\', 676, (SELECT * FROM sub), 677);" '
   );
@@ -385,7 +448,13 @@ Cypress.Commands.add(
   (title, qstatus, userId = 676, anon = false) => {
     //add question and submission
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql -d ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, status, course_id, creation_date) VALUES (\'' +
         title +
         '\', \'Question?\', \'' +
         qstatus +
@@ -398,22 +467,46 @@ Cypress.Commands.add(
 
     //add options
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql -d ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
         title +
         '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste a\', \'t\', (SELECT id FROM quest), 0);" '
     );
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql -d ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
         title +
         '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste b\', \'f\', (SELECT id FROM quest), 0);" '
     );
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql -d ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
         title +
         '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste c\', \'f\', (SELECT id FROM quest), 0);" '
     );
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql -d ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c "WITH quest AS (SELECT * FROM questions WHERE title=\'' +
         title +
         '\') INSERT INTO options(content, correct, question_id, sequence) VALUES (\'teste d\', \'f\', (SELECT id FROM quest), 0);" '
     );
@@ -644,7 +737,13 @@ Cypress.Commands.add('deleteQuestion', title => {
 
 Cypress.Commands.add('teacherReviewsSubmission', () => {
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(current_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" '
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(current_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" '
   );
 });
 
@@ -744,21 +843,39 @@ Cypress.Commands.add('openDashboard', () => {
 Cypress.Commands.add('addSubmissionInfo', id => {
   cy.log('Add 3 submissions: 1 approved and 2 rejected');
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title1\', \'Question1?\', 2,\'AVAILABLE\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id FROM quest), ' +
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title1\', \'Question1?\', 2,\'AVAILABLE\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id FROM quest), ' +
       id +
       ', 11) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque sim\', \'APPROVED\', ' +
       id +
       ', (SELECT id from subs), 677, current_timestamp);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title2\', \'Question2?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id FROM quest), ' +
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title2\', \'Question2?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id FROM quest), ' +
       id +
       ', 11) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' +
       id +
       ', (SELECT id from subs), 677, current_timestamp);" '
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title3\', \'Question3?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id FROM quest), ' +
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "WITH quest AS (INSERT INTO questions (title, content, course_id, status, creation_date) VALUES (\'Title3\', \'Question3?\', 2,\'DEPRECATED\', current_timestamp) RETURNING id), subs AS (INSERT INTO submissions (question_id, user_id, course_execution_id) VALUES ((SELECT id FROM quest), ' +
       id +
       ', 11) RETURNING id) INSERT INTO reviews (justification, status, student_id, submission_id, user_id, creation_date) VALUES (\'Porque nao\', \'REJECTED\', ' +
       id +
@@ -769,21 +886,39 @@ Cypress.Commands.add('addSubmissionInfo', id => {
 Cypress.Commands.add('addTournamentsInfo', () => {
   cy.log('Add 1 open tournament');
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH tournament AS (INSERT INTO tournaments (start_time, end_time, number_of_questions, state, course_execution_id, user_id) VALUES (current_timestamp, CURRENT_DATE + INTERVAL \'1 day\', 2, \'NOT_CANCELED\', 11, 676) RETURNING id), topics AS (INSERT INTO tournaments_topics (tournaments_id, topics_id) VALUES ((SELECT id FROM tournament), 84) RETURNING tournaments_id) INSERT INTO tournaments_participants (tournaments_id, participants_id) VALUES ((SELECT tournaments_id FROM topics), 676);" '
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "WITH tournament AS (INSERT INTO tournaments (start_time, end_time, number_of_questions, state, course_execution_id, user_id, private_tournament) VALUES (current_timestamp, CURRENT_DATE + INTERVAL \'1 day\', 2, \'NOT_CANCELED\', 11, 676, false) RETURNING id), topics AS (INSERT INTO tournaments_topics (tournaments_id, topics_id) VALUES ((SELECT id FROM tournament), 84) RETURNING tournaments_id) INSERT INTO tournaments_participants (tournaments_id, participants_id) VALUES ((SELECT tournaments_id FROM topics), 676);" '
   );
 });
 
 Cypress.Commands.add('addDiscussionsInfo', id => {
   cy.log('Add 1 public discussions and 1 private discussion');
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1504, ' +
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "INSERT INTO discussions (question_id, user_id, available, course_id, content) VALUES (1504, ' +
       id +
-      ', true, \'Nothing here\');"'
+      ', true, 2, \'Nothing here\');"'
   );
   cy.exec(
-    'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "INSERT INTO discussions (question_id, user_id, available, content) VALUES (1339, ' +
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "INSERT INTO discussions (question_id, user_id, available, course_id, content) VALUES (1339, ' +
       id +
-      ', false, \'Nothing here\');"'
+      ', false, 2, \'Nothing here\');"'
   );
 });
 
@@ -793,19 +928,43 @@ Cypress.Commands.add('openCourseDashboard', () => {
 
 Cypress.Commands.add('removeSubmissionInfo', () => {
   cy.exec(
-    'PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
   );
   cy.exec(
-    'PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
   );
   cy.exec(
-    'PASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
   );
 });
 
 Cypress.Commands.add('removeDiscussionInfo', id => {
   cy.exec(
-    'PGPASSWORD= psql tutordb -U dserafim1999 -h localhost -c "DELETE FROM discussions WHERE user_id = ' +
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "DELETE FROM discussions WHERE user_id = ' +
       id +
       ';"'
   );

@@ -76,7 +76,13 @@ describe('Student walkthrough', () => {
 
     cy.log('teacher reviews submission');
     cy.exec(
-      'PGPASSWORD= psql -d tutordb -U dserafim1999 -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(creation_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" '
+      'PGPASSWORD=' +
+        Cypress.env('PASS') +
+        ' psql -d ' +
+        Cypress.env('DBNAME') +
+        ' -U ' +
+        Cypress.env('USER') +
+        ' -h localhost -c "with sub as (select s.id from submissions s join questions q on s.question_id=q.id where q.title=\'Test Question\') insert into reviews(creation_date,justification,status,student_id,submission_id,user_id) values (current_timestamp,\'Excelente pergunta\', \'APPROVED\', 676, (select * from sub), 677);" '
     );
 
     cy.getSubmissionStatus('Test Question', 'APPROVED');

@@ -38,6 +38,7 @@
                 setDiscussion(item);
                 editDiscussion();
               "
+              data-cy="editDiscussion"
               >edit</v-icon
             >
             <v-icon
@@ -48,6 +49,7 @@
                 setDiscussion(item);
                 deleteDiscussion();
               "
+              data-cy="removeDiscussion"
               color="red"
               >delete</v-icon
             >
