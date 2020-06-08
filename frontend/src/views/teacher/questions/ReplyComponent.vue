@@ -18,7 +18,17 @@
                 class="text-left"
                 style="flex: 1; position: relative; max-width: 100%"
               >
-                <b>{{ discussion.userName }} on {{ discussion.date }}:</b>
+                <b
+                  ><span
+                    class="primary--text"
+                    @click="
+                      setUsername(discussion.userUsername);
+                      openDashboard();
+                    "
+                    >{{ discussion.userName }}</span
+                  >
+                  on {{ discussion.date }}:</b
+                >
                 <v-icon
                   class="mr-2"
                   style="float: right"
@@ -72,7 +82,17 @@
                     class="text-left reply"
                   >
                     <b v-if="$store.getters.getUser.id !== reply.userId"
-                      >{{ reply.userName }} on {{ reply.date }}:
+                      ><span
+                        class="primary--text"
+                        v-if="reply.userRole === 'STUDENT'"
+                        @click="
+                          setUsername(reply.userUsername);
+                          openDashboard();
+                        "
+                        >{{ reply.userName }}</span
+                      >
+                      <span v-else>{{ reply.userName }}</span>
+                      on {{ reply.date }}:
                     </b>
                     <b v-else>You on {{ reply.date }}:</b>
                     <v-icon
@@ -185,6 +205,12 @@
       v-on:dialog="closeDialog"
       v-on:save-reply="onSaveReply"
     />
+    <show-dashboard-dialog
+      v-if="currentUsername"
+      v-model="dashboard"
+      :username="currentUsername"
+      v-on:close-show-dashboard-dialog="onCloseDashboard"
+    />
   </div>
 </template>
 
@@ -196,11 +222,13 @@ import RemoteServices from '@/services/RemoteServices';
 import Reply from '@/models/management/Reply';
 import EditDiscussionDialog from '@/views/teacher/questions/EditDiscussionDialog.vue';
 import EditReplyDialog from '@/views/teacher/questions/EditReplyDialog.vue';
+import ShowDashboardDialog from '@/views/teacher/students/DashboardDialogView.vue';
 
 @Component({
   components: {
     'edit-discussion-dialog': EditDiscussionDialog,
-    'edit-reply-dialog': EditReplyDialog
+    'edit-reply-dialog': EditReplyDialog,
+    'show-dashboard-dialog': ShowDashboardDialog
   }
 })
 export default class ReplyComponent extends Vue {
@@ -212,6 +240,8 @@ export default class ReplyComponent extends Vue {
   replyMessages: Map<number, string> = new Map();
   discussionEdit: Boolean = false;
   replyEdit: Boolean = false;
+  currentUsername: String | null = null;
+  dashboard: Boolean = false;
 
   @Emit('submit')
   async submitReply() {
@@ -333,6 +363,18 @@ export default class ReplyComponent extends Vue {
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
+  }
+
+  setUsername(username: string) {
+    this.currentUsername = username;
+  }
+
+  openDashboard() {
+    this.dashboard = true;
+  }
+
+  onCloseDashboard() {
+    this.dashboard = false;
   }
 
   convertMarkDown(text: string) {
