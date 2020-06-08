@@ -239,8 +239,8 @@ export default class AllTournamentView extends Vue {
   }
 
   getStateName(state: string) {
-    if (state === 'NOT_CANCELED') return 'NOT CANCELED';
-    else return 'CANCELED';
+    if (state === 'NOT_CANCELED') return 'Available';
+    else return 'Cancelled';
   }
 
   getEnrolledColor(enrolled: string) {
