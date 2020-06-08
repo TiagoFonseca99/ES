@@ -22,7 +22,7 @@
       </template>
 
       <template v-slot:item.username="{ item }">
-        <v-chip color="primary" small @click="openStudentDashboardDialog(item)">
+        <v-chip color="primary" small :to="openStudentDashboard(item)">
           <span> {{ item.username }} </span>
         </v-chip>
       </template>
@@ -47,12 +47,6 @@
       <v-icon class="mr-2">mouse</v-icon>Left-click on user's username to view
       dashboard preview.
     </footer>
-    <show-dashboard-dialog
-      v-if="currentUsername"
-      v-model="dashboardDialog"
-      :username="currentUsername"
-      v-on:close-show-dashboard-dialog="onCloseShowDashboardDialog"
-    />
   </v-card>
 </template>
 
@@ -61,14 +55,11 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
 import Course from '@/models/user/Course';
 import { Student } from '@/models/management/Student';
-import ShowDashboardDialog from '@/views/teacher/students/DashboardDialogView.vue';
 
-@Component({ components: { 'show-dashboard-dialog': ShowDashboardDialog } })
+@Component
 export default class StudentsView extends Vue {
   course: Course | null = null;
   students: Student[] = [];
-  currentUsername: string | null = null;
-  dashboardDialog: boolean = false;
   search: string = '';
   headers: object = [
     { text: 'Name', value: 'name', align: 'left', width: '40%' },
@@ -141,13 +132,8 @@ export default class StudentsView extends Vue {
     else return 'green';
   }
 
-  openStudentDashboardDialog(student: Student) {
-    this.dashboardDialog = true;
-    this.currentUsername = student.username;
-  }
-
-  onCloseShowDashboardDialog() {
-    this.dashboardDialog = false;
+  openStudentDashboard(student: Student) {
+    return '/management/user?username=' + student.username;
   }
 }
 </script>
