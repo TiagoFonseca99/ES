@@ -22,16 +22,6 @@
           <v-spacer />
         </v-card-title>
       </template>
-      <template v-slot:item.state="{ item }">
-        <v-chip :color="getStateColor(item.state)">
-          {{ getStateName(item.state) }}
-        </v-chip>
-      </template>
-      <template v-slot:item.privateTournament="{ item }">
-        <v-chip :color="getPrivateColor(item.privateTournament)">
-          {{ getPrivateName(item.privateTournament) }}
-        </v-chip>
-      </template>
       <template v-slot:item.id="{ item }">
         <v-chip
           color="primary"
@@ -85,26 +75,6 @@ export default class TournamentsView extends Vue {
   sortById(a: Tournament, b: Tournament) {
     if (a.id && b.id) return a.id > b.id ? 1 : -1;
     else return 0;
-  }
-
-  getStateColor(state: string) {
-    if (state === 'NOT_CANCELED') return 'green';
-    else return 'red';
-  }
-
-  getStateName(state: string) {
-    if (state === 'NOT_CANCELED') return 'NOT CANCELED';
-    else return 'CANCELED';
-  }
-
-  getPrivateColor(privateTournament: boolean) {
-    if (privateTournament) return 'red';
-    else return 'green';
-  }
-
-  getPrivateName(privateTournament: boolean) {
-    if (privateTournament) return 'Private';
-    else return 'Public';
   }
 
   openTournamentDashboard(tournament: Tournament) {

@@ -152,7 +152,7 @@ export default class SelectedTournamentView extends Vue {
 
   getStateName(state: string) {
     if (state === 'NOT_CANCELED') return 'Available';
-    else return 'Canceled';
+    else return 'Cancelled';
   }
 
   getPrivateName(privateTournament: boolean) {
