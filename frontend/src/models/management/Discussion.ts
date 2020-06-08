@@ -7,6 +7,8 @@ export default class Discussion {
   questionId!: number;
   courseId!: number;
   userName!: string;
+  userUsername!: string;
+  userRole!: string;
   content!: string;
   question!: Question;
   replies!: Reply[] | null;
@@ -19,6 +21,8 @@ export default class Discussion {
       this.questionId = jsonObj.questionId;
       this.courseId = jsonObj.courseId;
       this.userName = jsonObj.userName;
+      this.userUsername = jsonObj.userUsername;
+      this.userRole = jsonObj.userRole;
       this.content = jsonObj.content;
       this.question = new Question(jsonObj.question);
       this.date = ISOtoString(jsonObj.date);
