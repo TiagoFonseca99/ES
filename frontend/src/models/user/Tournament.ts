@@ -40,6 +40,7 @@ export default class Tournament {
       }
 
       const p: User[] = jsonObj.participants;
+      this.participants = p;
       this.enrolled = false;
       this.quizId = jsonObj.quizId;
       this.privateTournament = jsonObj.privateTournament;

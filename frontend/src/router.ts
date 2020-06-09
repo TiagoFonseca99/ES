@@ -9,6 +9,7 @@ import HomeView from '@/views/HomeView.vue';
 import ManagementView from '@/views/teacher/ManagementView.vue';
 import QuestionsView from '@/views/teacher/questions/QuestionsView.vue';
 import TopicsView from '@/views/teacher/TopicsView.vue';
+import TournamentsView from '@/views/teacher/tournaments/TournamentsView.vue';
 import QuizzesView from '@/views/teacher/quizzes/QuizzesView.vue';
 import StudentsView from '@/views/teacher/students/StudentsView.vue';
 import CourseDashboardView from '@/views/teacher/CourseDashboardView.vue';
@@ -39,6 +40,7 @@ import StudentReviews from './views/student/questions/StudentReviewsView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
 import { Student } from '@/models/management/Student';
 import * as session from '@/session';
+import SelectedTournamentView from '@/views/teacher/tournaments/SelectedTournamentView.vue';
 
 Vue.use(Router);
 
@@ -108,6 +110,15 @@ let router = new Router({
           component: TopicsView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Topics',
+            requiredAuth: 'Teacher'
+          }
+        },
+        {
+          path: 'tournaments',
+          name: 'tournaments-management',
+          component: TournamentsView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Tournaments',
             requiredAuth: 'Teacher'
           }
         },
@@ -301,6 +312,16 @@ let router = new Router({
           }
         }
       ]
+    },
+    {
+      path: '/teacher/tournament',
+      name: 'tournament dashboard',
+      component: SelectedTournamentView,
+      props: route => ({ id: route.query.id }),
+      meta: {
+        title: process.env.VUE_APP_NAME + ' - Tournament Dashboard',
+        requiredAuth: 'Teacher'
+      }
     },
     {
       path: '/admin',
