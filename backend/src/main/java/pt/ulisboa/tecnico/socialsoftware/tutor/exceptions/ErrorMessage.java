@@ -129,7 +129,13 @@ public enum ErrorMessage {
     REPLY_UNAUTHORIZED_DELETER("User cannot delete this reply"),
     REPLY_UNAUTHORIZED_EDITOR("User cannot edit this reply"),
     REPLY_UNAUTHORIZED_USER("User cannot create reply for given discussion"),
-    USER_NOT_IN_COURSE("User is not enrolled in course %s");
+    USER_NOT_IN_COURSE("User is not enrolled in course %s"),
+
+    // Adp
+    INVALID_TITLE_FOR_ANNOUNCEMENT("Invalid title for announcement"),
+    INVALID_CONTENT_FOR_ANNOUNCEMENT("Invalid content for announcement"),
+    TEACHER_MISSING("Teacher is missing"),
+    ANNOUNCEMENT_NOT_FOUND("Announcement not found with id %d");
 
     public final String label;
 

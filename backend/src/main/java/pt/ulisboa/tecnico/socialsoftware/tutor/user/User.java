@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.user;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.domain.Announcement;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
@@ -82,6 +83,9 @@ public class User implements UserDetails, DomainEntity {
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "participants")
     private List<Tournament> tournaments = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Announcement> announcements = new HashSet<>();
 
     @Column(columnDefinition = "boolean default true")
     private boolean discussionStatsPublic = true;
@@ -194,6 +198,8 @@ public class User implements UserDetails, DomainEntity {
     public Set<Submission> getSubmissions() {
         return submissions;
     }
+
+    public Set<Announcement> getAnnouncements() { return announcements; }
 
     public Set<Question> getSubmittedQuestions() {
         Set<Question> questions = new HashSet<>();
@@ -431,6 +437,7 @@ public class User implements UserDetails, DomainEntity {
         this.tournaments.add(tournament);
     }
 
+    public void addAnnouncement(Announcement announcement) { this.announcements.add(announcement); }
 
     public boolean isStudent() {
         return this.role == User.Role.STUDENT;
