@@ -21,6 +21,7 @@
                     setUsername(discussion.userUsername);
                     openDashboard();
                   "
+                  style="cursor: pointer"
                   >{{ discussion.userName }}</span
                 >
                 on {{ discussion.date }}:</b
@@ -75,6 +76,7 @@
                         setUsername(reply.userUsername);
                         openDashboard();
                       "
+                      style="cursor: pointer"
                       >{{ reply.userName }}</span
                     >
                     <span v-else>{{ reply.userName }}</span>

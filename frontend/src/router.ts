@@ -69,7 +69,7 @@ let router = new Router({
       component: CourseSelectionView,
       meta: {
         title: process.env.VUE_APP_NAME + ' - Course Selection',
-        requiredAuth: 'None'
+        requiredAuth: 'Login'
       }
     },
     {
@@ -364,6 +364,8 @@ router.beforeEach(async (to, from, next) => {
   } else if (to.meta.requiredAuth == 'Teacher' && Store.getters.isTeacher) {
     next();
   } else if (to.meta.requiredAuth == 'Student' && Store.getters.isStudent) {
+    next();
+  } else if (to.meta.requiredAuth == 'Login' && Store.getters.isLoggedIn) {
     next();
   } else {
     next('/');
