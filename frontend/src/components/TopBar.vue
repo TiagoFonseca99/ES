@@ -78,6 +78,14 @@
                 <v-list-item-title>Reviews</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item to="/management/announcements" data-cy="Announcements">
+              <v-list-item-action>
+                <v-icon>fas fa-bullhorn</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Announcements</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item to="/management/topics">
               <v-list-item-action>
                 <v-icon>category</v-icon>
@@ -366,6 +374,14 @@
             </v-list-item-action>
             <v-list-item-content>
               <v-list-item-title>Reviews</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item to="/management/announcements">
+            <v-list-item-action>
+              <v-icon>fas fa-bullhorn</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Announcements</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
           <v-list-item to="/management/topics">
