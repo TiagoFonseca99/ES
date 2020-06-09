@@ -118,7 +118,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics2, tournamentDto2)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "the returned data is correct"
         result.size() == 2
@@ -169,7 +169,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
 
         then: "the returned data is correct"
@@ -219,7 +219,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "the returned data is correct"
         result.size() == 2
@@ -246,7 +246,7 @@ class GetOpenedTournamentsTest extends Specification {
         given:
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "there is no returned data"
         result.size() == 0
@@ -262,7 +262,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "there is no returned data"
         result.size() == 0
@@ -279,7 +279,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "there is no returned data"
         result.size() == 0
