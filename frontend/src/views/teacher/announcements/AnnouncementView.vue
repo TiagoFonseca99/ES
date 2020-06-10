@@ -69,6 +69,20 @@
           </template>
           <span>Edit Announcement</span>
         </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              large
+              class="mr-2"
+              v-on="on"
+              @click="deleteAnnouncement(item)"
+              color="red"
+              data-cy="deleteAnnouncement"
+              >delete</v-icon
+            >
+          </template>
+          <span>Delete Question</span>
+        </v-tooltip>
       </template>
     </v-data-table>
     <footer>
@@ -98,6 +112,7 @@ import EditAnnouncementDialog from '@/views/teacher/announcements/EditAnnounceme
 import ShowAnnouncementDialog from '@/views/teacher/announcements/ShowAnnouncementDialog.vue';
 import Image from '@/models/management/Image';
 import Submission from '@/models/management/Submission';
+import Question from '@/models/management/Question';
 
 @Component({
   components: {
@@ -117,7 +132,7 @@ export default class AnnouncementView extends Vue {
       text: 'Actions',
       value: 'action',
       align: 'left',
-      width: '15%',
+      width: '20%',
       sortable: false
     },
     { text: 'Title', value: 'title', align: 'center' },
@@ -192,6 +207,22 @@ export default class AnnouncementView extends Vue {
     await this.$store.dispatch('clearLoading');
     this.editAnnouncementDialog = false;
     this.currentAnnouncement = null;
+  }
+
+  async deleteAnnouncement(toDeleteAnnouncement: Announcement) {
+    if (
+      toDeleteAnnouncement.id &&
+      confirm('Are you sure you want to delete this announcement?')
+    ) {
+      try {
+        await RemoteServices.deleteAnnouncement(toDeleteAnnouncement);
+        this.announcements = this.announcements.filter(
+          a => a.id != toDeleteAnnouncement.id
+        );
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+      }
+    }
   }
 }
 </script>

@@ -617,6 +617,19 @@ export default class RemoteServices {
       });
   }
 
+  static async deleteAnnouncement(
+    announcement: Announcement
+  ): Promise<Boolean> {
+    return httpClient
+      .delete(`/management/announcements/${announcement.id}`)
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async submitQuestion(submission: Submission): Promise<Submission> {
     return httpClient
       .post('/student/submissions', submission)

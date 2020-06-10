@@ -466,17 +466,14 @@ Cypress.Commands.add('createInvalidAnnouncement', title => {
 });
 
 Cypress.Commands.add('deleteAnnouncement', title => {
-  cy.exec(
-    'PGPASSWORD=' +
-      Cypress.env('PASS') +
-      ' psql -d ' +
-      Cypress.env('DBNAME') +
-      ' -U ' +
-      Cypress.env('USER') +
-      ' -h localhost -c "DELETE FROM announcements WHERE title=\'' +
-      title +
-      '\';"'
-  );
+  cy.contains(title)
+    .parent()
+    .parent()
+    .parent()
+    .should('have.length', 1)
+    .children()
+    .find('[data-cy="deleteAnnouncement"]')
+    .click();
 });
 
 // PPA
