@@ -21,15 +21,13 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.AN
 
 
 @DataJpaTest
-class EditAnnouncementTest extends Specification {
+class RemoveAnnouncementTest extends Specification {
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String STUDENT_NAME = "João Silva"
-    public static final String ANNOUNCEMENT_TITLE1 = "Announcement 1"
-    public static final String ANNOUNCEMENT_TITLE2 = "Announcement 2"
-    public static final String ANNOUNCEMENT_CONTENT1 = "Here is an announcement 1"
-    public static final String ANNOUNCEMENT_CONTENT2 = "Here is an announcement 2"
+    public static final String ANNOUNCEMENT_TITLE = "Announcement"
+    public static final String ANNOUNCEMENT_CONTENT = "Here is an announcement"
     public static final String STUDENT_USERNAME = "joaosilva"
     public static final String TEACHER_NAME = "Ana Rita"
     public static final String TEACHER_USERNAME = "anarita"
@@ -65,8 +63,8 @@ class EditAnnouncementTest extends Specification {
         userRepository.save(student)
         teacher = new User(TEACHER_NAME, TEACHER_USERNAME, 2, User.Role.TEACHER)
         announcement = new Announcement()
-        announcement.setTitle(ANNOUNCEMENT_TITLE1)
-        announcement.setContent(ANNOUNCEMENT_CONTENT1)
+        announcement.setTitle(ANNOUNCEMENT_TITLE)
+        announcement.setContent(ANNOUNCEMENT_CONTENT)
         announcement.setCourseExecution(courseExecution)
         announcement.setUser(teacher)
         announcementRepository.save(announcement)
@@ -74,36 +72,30 @@ class EditAnnouncementTest extends Specification {
         userRepository.save(teacher)
     }
 
-    def "edit an announcement"() {
-        given: "an announcementDto"
-        def announcementDto = new AnnouncementDto()
-        announcementDto.setTitle(ANNOUNCEMENT_TITLE2)
-        announcementDto.setContent(ANNOUNCEMENT_CONTENT2)
-        announcementDto.setCourseExecutionId(courseExecution.getId())
-        announcementDto.setUserId(teacher.getId())
+    def "remove an announcement"() {
+        when: announcementService.removeAnnouncement(announcement.getId())
 
-        when: announcementService.updateAnnouncement(announcement.getId(), announcementDto)
-
-        then: "the correct announcement is in the repository"
-        announcementRepository.count() == 1L
-        def result = announcementRepository.findAll().get(0)
-        result.getId() != null
-        result.getTitle() == ANNOUNCEMENT_TITLE2
-        result.getContent() == ANNOUNCEMENT_CONTENT2
-        result.getUser() == teacher
-        result.getCourseExecution() == courseExecution
-        result.isEdited()
+        then: "there are no announcements in the repository"
+        announcementRepository.count() == 0L
     }
 
-    def "edit an announcement that doesn't exist"(){
+    def "create an announcement and delete another"(){
         given: "an announcementDto"
         def announcementDto = new AnnouncementDto()
-        announcementDto.setTitle(ANNOUNCEMENT_TITLE2)
-        announcementDto.setContent(ANNOUNCEMENT_CONTENT2)
+        announcementDto.setTitle(ANNOUNCEMENT_TITLE)
+        announcementDto.setContent(ANNOUNCEMENT_CONTENT)
         announcementDto.setCourseExecutionId(courseExecution.getId())
         announcementDto.setUserId(teacher.getId())
+        announcementService.createAnnouncement(announcementDto)
 
-        when: announcementService.updateAnnouncement(announcement.getId() + 1, announcementDto)
+        when: announcementService.removeAnnouncement(announcement.getId())
+
+        then: "there is only one announcement in the repository"
+        announcementRepository.count() == 1L
+    }
+
+    def "remove an announcement that doesn't exist"(){
+        when: announcementService.removeAnnouncement(announcement.getId() + 1)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
@@ -119,3 +111,4 @@ class EditAnnouncementTest extends Specification {
         }
     }
 }
+

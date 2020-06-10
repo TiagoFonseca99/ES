@@ -1,10 +1,8 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.announcement.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
@@ -61,6 +59,14 @@ public class Announcement {
         setContent(announcementDto.getContent());
 
         setEdited(true);
+    }
+
+    public void remove() {
+        getCourseExecution().getAnnouncements().remove(this);
+        courseExecution = null;
+
+        getUser().getAnnouncements().remove(this);
+        user = null;
     }
 
     public Integer getId() { return id; }

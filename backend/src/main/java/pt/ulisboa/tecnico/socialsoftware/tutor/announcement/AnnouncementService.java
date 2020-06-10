@@ -12,8 +12,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.repository.Announcem
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
@@ -87,6 +85,16 @@ public class AnnouncementService {
         Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new TutorException(ANNOUNCEMENT_NOT_FOUND, announcementId));
         announcement.update(announcementDto);
         return new AnnouncementDto(announcement);
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void removeAnnouncement(Integer announcementId) {
+        Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new TutorException(ANNOUNCEMENT_NOT_FOUND, announcementId));
+        announcement.remove();
+        announcementRepository.delete(announcement);
     }
 
     private void checkIfConsistentAnnouncement(AnnouncementDto announcementDto) {
