@@ -1,20 +1,23 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.announcement;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.sql.SQLException;
 import java.util.List;
 
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.AUTHENTICATION_ERROR;
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.COURSE_EXECUTION_MISSING;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @RestController
 public class AnnouncementController {
@@ -53,5 +56,14 @@ public class AnnouncementController {
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public AnnouncementDto updateAnnouncement(@PathVariable Integer announcementId, @Valid @RequestBody AnnouncementDto announcementDto) {
         return announcementService.updateAnnouncement(announcementId, announcementDto);
+    }
+
+    @DeleteMapping("/management/announcements/{announcementId}")
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public boolean removeAnnouncement(@Valid @PathVariable Integer announcementId) {
+        return announcementService.removeAnnouncement(announcementId);
     }
 }

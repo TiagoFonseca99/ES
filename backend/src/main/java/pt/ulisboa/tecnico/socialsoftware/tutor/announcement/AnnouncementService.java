@@ -91,10 +91,11 @@ public class AnnouncementService {
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void removeAnnouncement(Integer announcementId) {
+    public boolean removeAnnouncement(Integer announcementId) {
         Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new TutorException(ANNOUNCEMENT_NOT_FOUND, announcementId));
         announcement.remove();
         announcementRepository.delete(announcement);
+        return true;
     }
 
     private void checkIfConsistentAnnouncement(AnnouncementDto announcementDto) {
