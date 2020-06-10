@@ -421,6 +421,38 @@ Cypress.Commands.add('editReply', content => {
   cy.get('[data-cy="submitEdit"]').click();
 });
 
+// ADP
+
+Cypress.Commands.add('openAnnouncements', () => {
+  cy.get('[data-cy="Management"]').click();
+  cy.get('[data-cy="Announcements"]').click();
+  cy.get('[data-cy="Search"]').click();
+});
+
+Cypress.Commands.add('createAnnouncement', (title, content) => {
+  cy.openAnnouncements();
+  cy.get('[data-cy="newAnnouncement"]').click();
+  cy.get('[data-cy="AnnouncementTitle"]').type(title);
+  cy.get('[data-cy="AnnouncementContent"]').type(content);
+  cy.get('[data-cy="Save"]').click();
+  cy.wait(500);
+  cy.contains(title)
+    .parent()
+    .parent()
+    .parent()
+    .should('have.length', 1)
+    .children()
+    .should('have.length', 3);
+  cy.wait(500);
+});
+
+Cypress.Commands.add('createInvalidAnnouncement', title => {
+  cy.openAnnouncements();
+  cy.get('[data-cy="newAnnouncement"]').click();
+  cy.get('[data-cy="AnnouncementTitle"]').type(title);
+  cy.get('[data-cy="Save"]').click();
+});
+
 // PPA
 
 Cypress.Commands.add('openSubmissions', () => {

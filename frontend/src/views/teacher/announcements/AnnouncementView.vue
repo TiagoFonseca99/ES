@@ -16,6 +16,7 @@
             v-model="search"
             append-icon="search"
             label="Search"
+            data-cy="Search"
             class="mx-2"
           />
 
@@ -29,16 +30,15 @@
           >
         </v-card-title>
       </template>
-
-      <template v-slot:item.questionDto.title="{ item }">
+      <template v-slot:item.title="{ item }">
         <p
-          v-html="convertMarkDown(item)"
-          @click="showAnnouncementDialog(item.questionDto)"
+          v-html="convertMarkDown(item.title)"
+          @click="showAnnouncementDialog(item)"
       /></template>
 
-      <template v-slot:item.questionDto.creationDate="{ item }">
+      <template v-slot:item.creationDate="{ item }">
         <v-chip small>
-          <span> {{ item.questionDto.creationDate }}</span>
+          <span> {{ item.creationDate }}</span>
         </v-chip>
       </template>
 
@@ -62,6 +62,12 @@
       <v-icon class="mr-2">mouse</v-icon>Left-click on announcement's title to
       view it.
     </footer>
+    <show-announcement-dialog
+      v-if="currentAnnouncement"
+      v-model="announcementDialog"
+      :announcement="currentAnnouncement"
+      v-on:close-show-announcement-dialog="onCloseShowAnnouncementDialog"
+    />
     <edit-announcement-dialog
       v-if="currentAnnouncement"
       v-model="editAnnouncementDialog"
@@ -77,16 +83,21 @@ import RemoteServices from '@/services/RemoteServices';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Announcement from '@/models/management/Announcement';
 import EditAnnouncementDialog from '@/views/teacher/announcements/EditAnnouncementDialog.vue';
+import ShowAnnouncementDialog from '@/views/teacher/announcements/ShowAnnouncementDialog.vue';
+import Image from '@/models/management/Image';
+import Review from '@/models/management/Review';
 
 @Component({
   components: {
-    'edit-announcement-dialog': EditAnnouncementDialog
+    'edit-announcement-dialog': EditAnnouncementDialog,
+    'show-announcement-dialog': ShowAnnouncementDialog
   }
 })
 export default class AnnouncementView extends Vue {
   announcements: Announcement[] = [];
   currentAnnouncement: Announcement | null = null;
   editAnnouncementDialog: boolean = false;
+  announcementDialog: boolean = false;
   search: string = '';
 
   headers: object = [
@@ -97,44 +108,15 @@ export default class AnnouncementView extends Vue {
       width: '15%',
       sortable: false
     },
-    { text: 'Title', value: 'questionDto.title', align: 'center' },
+    { text: 'Title', value: 'title', align: 'center' },
     {
       text: 'Creation Date',
-      value: 'questionDto.creationDate',
-      align: 'center'
+      value: 'creationDate',
+      align: 'right',
+      width: '15%'
     }
   ];
   async created() {
-    await this.$store.dispatch('loading');
-    try {
-      /*
-      [this.announcements] = await Promise.all([
-        RemoteServices.getAnnouncements()
-      ]);*/
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-    }
-    await this.$store.dispatch('clearLoading');
-  }
-
-  customFilter(value: string, search: string, question: Question) {
-    // noinspection SuspiciousTypeOfGuard,SuspiciousTypeOfGuard
-    return (
-      search != null &&
-      JSON.stringify(question)
-        .toLowerCase()
-        .indexOf(search.toLowerCase()) !== -1
-    );
-  }
-
-  newAnnouncement(announcement: Announcement) {
-    this.currentAnnouncement = new Announcement();
-    this.currentAnnouncement.courseExecutionId = this.$store.getters.getCurrentCourse.courseExecutionId;
-    this.editAnnouncementDialog = true;
-  }
-
-  async onSaveAnnouncement() {
-    /*
     await this.$store.dispatch('loading');
     try {
       [this.announcements] = await Promise.all([
@@ -144,7 +126,47 @@ export default class AnnouncementView extends Vue {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
-    */
+  }
+
+  customFilter(value: string, search: string, announcement: Announcement) {
+    // noinspection SuspiciousTypeOfGuard,SuspiciousTypeOfGuard
+    return (
+      search != null &&
+      JSON.stringify(announcement)
+        .toLowerCase()
+        .indexOf(search.toLowerCase()) !== -1
+    );
+  }
+
+  convertMarkDown(text: string, image: Image | null = null): string {
+    return convertMarkDown(text, image);
+  }
+
+  showAnnouncementDialog(announcement: Announcement) {
+    this.currentAnnouncement = announcement;
+    this.announcementDialog = true;
+  }
+
+  onCloseShowAnnouncementDialog() {
+    this.announcementDialog = false;
+  }
+
+  newAnnouncement() {
+    this.currentAnnouncement = new Announcement();
+    this.currentAnnouncement.courseExecutionId = this.$store.getters.getCurrentCourse.courseExecutionId;
+    this.editAnnouncementDialog = true;
+  }
+
+  async onSaveAnnouncement() {
+    await this.$store.dispatch('loading');
+    try {
+      [this.announcements] = await Promise.all([
+        RemoteServices.getAnnouncements()
+      ]);
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+    await this.$store.dispatch('clearLoading');
     this.editAnnouncementDialog = false;
     this.currentAnnouncement = null;
   }

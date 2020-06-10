@@ -1,3 +1,5 @@
+import { ISOtoString } from '@/services/ConvertDateService';
+
 export default class Announcement {
   id: number | null = null;
   courseExecutionId!: number;
@@ -13,7 +15,7 @@ export default class Announcement {
       this.userId = jsonObj.userId;
       this.title = jsonObj.title;
       this.content = jsonObj.content;
-      this.creationDate = jsonObj.creationDate;
+      this.creationDate = ISOtoString(jsonObj.creationDate);
     }
   }
 }

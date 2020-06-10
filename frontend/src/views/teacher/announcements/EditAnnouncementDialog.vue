@@ -9,9 +9,11 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          {{ editAnnouncement && editAnnouncement.id === null
+          {{
+            editAnnouncement && editAnnouncement.id === null
               ? 'New Announcement'
-              : 'Edit Announcement' }}
+              : 'Edit Announcement'
+          }}
         </span>
       </v-card-title>
 
@@ -23,7 +25,7 @@
                 auto-grow
                 row-height="1"
                 v-model="editAnnouncement.title"
-                data-cy="Title"
+                data-cy="AnnouncementTitle"
                 label="Title"
               ></v-textarea>
             </v-flex>
@@ -31,7 +33,7 @@
               <v-textarea
                 rows="5"
                 v-model="editAnnouncement.content"
-                data-cy="Content"
+                data-cy="AnnouncementContent"
                 label="Content"
               ></v-textarea>
             </v-flex>
@@ -41,16 +43,10 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="primary"
-          data-cy="cancelButton"
-          @click="$emit('dialog', false)"
+        <v-btn color="primary" data-cy="Cancel" @click="$emit('dialog', false)"
           >Cancel</v-btn
         >
-        <v-btn
-          color="primary"
-          data-cy="Reject"
-          @click="createAnnouncement()"
+        <v-btn color="primary" data-cy="Save" @click="createAnnouncement()"
           >Save</v-btn
         >
       </v-card-actions>
