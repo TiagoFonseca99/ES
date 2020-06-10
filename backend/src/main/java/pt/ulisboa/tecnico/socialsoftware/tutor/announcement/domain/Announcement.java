@@ -4,6 +4,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
@@ -38,7 +39,8 @@ public class Announcement {
     @JoinColumn(name = "course_execution_id")
     private CourseExecution courseExecution;
 
-
+    @Column(columnDefinition = "boolean default false", nullable = false)
+    private boolean edited;
 
     public Announcement() {}
 
@@ -48,8 +50,17 @@ public class Announcement {
         setCreationDate(LocalDateTime.parse(announcementDto.getCreationDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         setUser(user);
         setCourseExecution(courseExecution);
+        setEdited(announcementDto.isEdited());
         user.addAnnouncement(this);
         courseExecution.addAnnouncement(this);
+    }
+
+    public void update(AnnouncementDto announcementDto) {
+        setTitle(announcementDto.getTitle());
+
+        setContent(announcementDto.getContent());
+
+        setEdited(true);
     }
 
     public Integer getId() { return id; }
@@ -82,4 +93,7 @@ public class Announcement {
 
     public void setCourseExecution(CourseExecution courseExecution) { this.courseExecution = courseExecution; }
 
+    public boolean isEdited() { return edited; }
+
+    public void setEdited(boolean edited) { this.edited = edited; }
 }

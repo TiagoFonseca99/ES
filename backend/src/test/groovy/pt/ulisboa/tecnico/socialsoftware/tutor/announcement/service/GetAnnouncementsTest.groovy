@@ -85,6 +85,7 @@ class GetAnnouncementsTest extends Specification {
         announcementDto2.setContent(ANNOUNCEMENT_CONTENT2)
         announcementDto2.setCourseExecutionId(courseExecution.getId())
         announcementDto2.setUserId(teacher.getId())
+        announcementDto2.setEdited(true)
         announcementService.createAnnouncement(announcementDto2)
 
         when:
@@ -106,6 +107,8 @@ class GetAnnouncementsTest extends Specification {
         a2.getCourseExecutionId() == courseExecution.getId()
         a1.getCreationDate() != null
         a2.getCreationDate() != null
+        !a1.isEdited()
+        a2.isEdited()
     }
 
     def "get announcements with no created announcements"(){

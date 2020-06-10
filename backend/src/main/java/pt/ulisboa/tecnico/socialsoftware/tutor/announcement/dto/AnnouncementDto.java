@@ -10,6 +10,7 @@ public class AnnouncementDto {
     private String title;
     private String content;
     private String creationDate;
+    private boolean edited;
 
     public AnnouncementDto(){}
 
@@ -20,6 +21,7 @@ public class AnnouncementDto {
         this.title = announcement.getTitle();
         this.content = announcement.getContent();
         this.creationDate = DateHandler.toISOString(announcement.getCreationDate());
+        this.edited = announcement.isEdited();
     }
 
     public Integer getId() { return id; }
@@ -40,10 +42,13 @@ public class AnnouncementDto {
 
     public String getContent() { return content; }
 
-    public void setContent(String content) {
-        this.content = content; }
+    public void setContent(String content) { this.content = content; }
 
     public String getCreationDate() { return creationDate; }
 
     public void setCreationDate(String creationDate) { this.creationDate = creationDate; }
+
+    public boolean isEdited() { return edited; }
+
+    public void setEdited(boolean edited) { this.edited = edited; }
 }

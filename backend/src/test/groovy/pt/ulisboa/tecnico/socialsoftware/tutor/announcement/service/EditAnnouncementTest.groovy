@@ -1,34 +1,36 @@
-package pt.ulisboa.tecnico.socialsoftware.tutor.announcement
+package pt.ulisboa.tecnico.socialsoftware.tutor.announcement.service
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.repository.AnnouncementRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.AnnouncementService
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.domain.Announcement
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.repository.AnnouncementRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
-import spock.lang.Specification
 import spock.lang.Shared
-import spock.lang.Unroll
+import spock.lang.Specification
 
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.COURSE_EXECUTION_MISSING
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.TEACHER_MISSING
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.ANNOUNCEMENT_NOT_FOUND
+
 
 @DataJpaTest
-class CreateAnnouncementTest extends Specification {
+class EditAnnouncementTest extends Specification {
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String STUDENT_NAME = "João Silva"
-    public static final String ANNOUNCEMENT_TITLE = "Announcement"
-    public static final String ANNOUNCEMENT_CONTENT = "Here is an announcement"
+    public static final String ANNOUNCEMENT_TITLE1 = "Announcement 1"
+    public static final String ANNOUNCEMENT_TITLE2 = "Announcement 2"
+    public static final String ANNOUNCEMENT_CONTENT1 = "Here is an announcement 1"
+    public static final String ANNOUNCEMENT_CONTENT2 = "Here is an announcement 2"
     public static final String STUDENT_USERNAME = "joaosilva"
     public static final String TEACHER_NAME = "Ana Rita"
     public static final String TEACHER_USERNAME = "anarita"
@@ -48,12 +50,11 @@ class CreateAnnouncementTest extends Specification {
     @Autowired
     UserRepository userRepository
 
-    @Shared
     def teacher
-    @Shared
     def courseExecution
     def student
     def course
+    def announcement
 
     def setup() {
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -64,67 +65,50 @@ class CreateAnnouncementTest extends Specification {
         student.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
         userRepository.save(student)
         teacher = new User(TEACHER_NAME, TEACHER_USERNAME, 2, User.Role.TEACHER)
+        announcement = new Announcement()
+        announcement.setTitle(ANNOUNCEMENT_TITLE1)
+        announcement.setContent(ANNOUNCEMENT_CONTENT1)
+        announcement.setCourseExecution(courseExecution)
+        announcement.setUser(teacher)
+        announcementRepository.save(announcement)
+        teacher.addAnnouncement(announcement)
         userRepository.save(teacher)
     }
 
-    def "create announcement"() {
+    def "edit an announcement"() {
         given: "an announcementDto"
         def announcementDto = new AnnouncementDto()
-        announcementDto.setTitle(ANNOUNCEMENT_TITLE)
-        announcementDto.setContent(ANNOUNCEMENT_CONTENT)
+        announcementDto.setTitle(ANNOUNCEMENT_TITLE2)
+        announcementDto.setContent(ANNOUNCEMENT_CONTENT2)
         announcementDto.setCourseExecutionId(courseExecution.getId())
         announcementDto.setUserId(teacher.getId())
 
-        when:
-        announcementService.createAnnouncement(announcementDto)
+        when: announcementService.updateAnnouncement(announcement.getId(), announcementDto)
 
         then: "the correct announcement is in the repository"
         announcementRepository.count() == 1L
         def result = announcementRepository.findAll().get(0)
         result.getId() != null
-        result.getTitle() == ANNOUNCEMENT_TITLE
-        result.getContent() == ANNOUNCEMENT_CONTENT
+        result.getTitle() == ANNOUNCEMENT_TITLE2
+        result.getContent() == ANNOUNCEMENT_CONTENT2
         result.getUser() == teacher
         result.getCourseExecution() == courseExecution
-        result.getCreationDate() != null
-        !result.isEdited()
+        result.isEdited()
     }
 
-    def "user is not a teacher"(){
-        given: "a announcementDto for a student"
-        def announcementDto = new AnnouncementDto()
-        announcementDto.setTitle(ANNOUNCEMENT_TITLE)
-        announcementDto.setContent(ANNOUNCEMENT_CONTENT)
-        announcementDto.setCourseExecutionId(courseExecution.getId())
-        announcementDto.setUserId(student.getId())
-
-        when: announcementService.createAnnouncement(announcementDto)
-
-        then: "exception is thrown"
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.USER_NOT_TEACHER
-    }
-
-    @Unroll
-    def "invalid arguments: courseExecutionId=#courseExecutionId | userId=#userId || errorMessage"() {
+    def "edit an announcement that doesn't exist"(){
         given: "an announcementDto"
         def announcementDto = new AnnouncementDto()
-        announcementDto.setTitle(ANNOUNCEMENT_TITLE)
-        announcementDto.setContent(ANNOUNCEMENT_CONTENT)
-        announcementDto.setCourseExecutionId(courseExecutionId)
-        announcementDto.setUserId(userId)
+        announcementDto.setTitle(ANNOUNCEMENT_TITLE2)
+        announcementDto.setContent(ANNOUNCEMENT_CONTENT2)
+        announcementDto.setCourseExecutionId(courseExecution.getId())
+        announcementDto.setUserId(teacher.getId())
 
-        when:
-        announcementService.createAnnouncement(announcementDto)
+        when: announcementService.updateAnnouncement(announcement.getId() + 1, announcementDto)
 
         then: "exception is thrown"
         def exception = thrown(TutorException)
-        exception.errorMessage == errorMessage
-
-        where:
-        courseExecutionId       | userId          || errorMessage
-        null                    | teacher.getId() || COURSE_EXECUTION_MISSING
-        courseExecution.getId() | null            || TEACHER_MISSING
+        exception.errorMessage == ANNOUNCEMENT_NOT_FOUND
     }
 
     @TestConfiguration
