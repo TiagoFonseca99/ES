@@ -6,6 +6,14 @@
       <loading />
       <router-view />
     </div>
+    <cookie-consent
+      :show="cookies === null"
+      :message="message"
+      :link-label="linkLabel"
+      :button-label="buttonLabel"
+      :target-link="link"
+      v-on:hide="acceptCookies"
+    />
   </v-app>
 </template>
 
@@ -15,15 +23,25 @@ import axios from 'axios';
 import TopBar from '@/components/TopBar.vue';
 import ErrorMessage from '@/components/ErrorMessage.vue';
 import Loading from '@/components/Loading.vue';
+import CookieConsent from '@/components/CookieConsent.vue';
+import * as storage from '@/storage';
 import '@/assets/css/_global.scss';
 import '@/assets/css/_scrollbar.scss';
 import '@/assets/css/_question.scss';
 require('typeface-roboto');
 
 @Component({
-  components: { TopBar, ErrorMessage, Loading }
+  components: { TopBar, ErrorMessage, Loading, CookieConsent }
 })
 export default class App extends Vue {
+  readonly COOKIES = 'cookies';
+  readonly message =
+    'This website uses cookies for authentication. By continuing, you agree with their usage.';
+  readonly link = 'https://cookiesandyou.com';
+  readonly linkLabel = 'Learn More';
+  readonly buttonLabel = 'Got it!';
+  cookies: String | null = storage.get(this.COOKIES);
+
   created() {
     axios.interceptors.response.use(undefined, err => {
       return new Promise(() => {
@@ -33,6 +51,11 @@ export default class App extends Vue {
         throw err;
       });
     });
+  }
+
+  acceptCookies() {
+    storage.persist(this.COOKIES, 'true');
+    this.cookies = 'true';
   }
 }
 </script>
