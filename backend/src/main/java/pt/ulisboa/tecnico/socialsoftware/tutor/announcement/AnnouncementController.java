@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.validation.Valid;
@@ -23,7 +24,7 @@ public class AnnouncementController {
 
     @PostMapping(value = "/management/announcements")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public AnnouncementDto createSubmission(Principal principal, @Valid @RequestBody AnnouncementDto announcementDto) {
+    public AnnouncementDto createAnnouncement(Principal principal, @Valid @RequestBody AnnouncementDto announcementDto) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if (user == null) {
@@ -36,7 +37,7 @@ public class AnnouncementController {
 
     @GetMapping(value = "/management/announcements")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public List<AnnouncementDto> createSubmission(Principal principal, @Valid @RequestParam Integer executionId) {
+    public List<AnnouncementDto> getAnnouncements(Principal principal, @Valid @RequestParam Integer executionId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if (user == null) {
@@ -46,5 +47,11 @@ public class AnnouncementController {
         }
 
         return announcementService.getAnnouncements(user.getId(), executionId);
+    }
+
+    @PutMapping("/management/announcements/{announcementId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public AnnouncementDto updateAnnouncement(@PathVariable Integer announcementId, @Valid @RequestBody AnnouncementDto announcementDto) {
+        return announcementService.updateAnnouncement(announcementId, announcementDto);
     }
 }
