@@ -10,8 +10,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.AUTHENTICATION_ERROR;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.COURSE_EXECUTION_MISSING;
 
 @RestController
 public class AnnouncementController {
@@ -30,5 +32,19 @@ public class AnnouncementController {
 
         announcementDto.setUserId(user.getId());
         return announcementService.createAnnouncement(announcementDto);
+    }
+
+    @GetMapping(value = "/management/announcements")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public List<AnnouncementDto> createSubmission(Principal principal, @Valid @RequestParam Integer executionId) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        } else if (executionId == null) {
+            throw new TutorException(COURSE_EXECUTION_MISSING);
+        }
+
+        return announcementService.getAnnouncements(user.getId(), executionId);
     }
 }
