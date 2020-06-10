@@ -10,12 +10,12 @@
           <v-card class="dashCard">
             <v-card-title class="justify-center">User Info</v-card-title>
             <div class="text-left" style="padding-left: 25px;">
-              <b style="color: #1976d2">Name: </b>
+              <b class="primary--text">Name: </b>
               <span data-cy="name">{{
                 info !== null ? info.name : 'Unknown user'
               }}</span
               ><br />
-              <b style="color: #1976d2">Username: </b>
+              <b class="primary--text">Username: </b>
               <span data-cy="username">{{
                 info !== null ? info.username : 'Unknown user'
               }}</span>

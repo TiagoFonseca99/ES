@@ -8,10 +8,13 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 public class DiscussionDto implements Serializable {
     private Integer userId;
     private String userName;
+    private String userUsername;
+    private User.Role userRole;
     private Integer courseId;
     private QuestionDto question;
     private String content;
@@ -25,6 +28,8 @@ public class DiscussionDto implements Serializable {
 	public DiscussionDto(Discussion discussion) {
         this.userId = discussion.getId().getUserId();
         this.userName = discussion.getUser().getName();
+        this.userUsername = discussion.getUser().getUsername();
+        this.userRole = discussion.getUser().getRole();
         this.courseId = discussion.getCourse().getId();
         this.question = new QuestionDto(discussion.getQuestion());
         this.content = discussion.getContent();
@@ -36,6 +41,23 @@ public class DiscussionDto implements Serializable {
             this.replies = discussionReplies.stream().map(ReplyDto::new).collect(Collectors.toList());
         }
     }
+
+    public User.Role getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(User.Role role) {
+        this.userRole = role;
+    }
+
+	public String getUserUsername() {
+		return userUsername;
+	}
+
+	public void setUserUsername(String userUsername) {
+		this.userUsername = userUsername;
+	}
+
 
     public Integer getCourseId() {
 		return courseId;
