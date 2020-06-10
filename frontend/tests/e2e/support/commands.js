@@ -446,11 +446,37 @@ Cypress.Commands.add('createAnnouncement', (title, content) => {
   cy.wait(500);
 });
 
+Cypress.Commands.add('editAnnouncement', (title, content) => {
+  cy.get('[data-cy="editAnnouncement"]').click();
+  cy.get('[data-cy="AnnouncementTitle"]')
+    .clear()
+    .type(title);
+  cy.get('[data-cy="AnnouncementContent"]')
+    .clear()
+    .type(content);
+  cy.get('[data-cy="Save"]').click();
+  cy.wait(500);
+});
+
 Cypress.Commands.add('createInvalidAnnouncement', title => {
   cy.openAnnouncements();
   cy.get('[data-cy="newAnnouncement"]').click();
   cy.get('[data-cy="AnnouncementTitle"]').type(title);
   cy.get('[data-cy="Save"]').click();
+});
+
+Cypress.Commands.add('deleteAnnouncement', title => {
+  cy.exec(
+    'PGPASSWORD=' +
+      Cypress.env('PASS') +
+      ' psql -d ' +
+      Cypress.env('DBNAME') +
+      ' -U ' +
+      Cypress.env('USER') +
+      ' -h localhost -c "DELETE FROM announcements WHERE title=\'' +
+      title +
+      '\';"'
+  );
 });
 
 // PPA

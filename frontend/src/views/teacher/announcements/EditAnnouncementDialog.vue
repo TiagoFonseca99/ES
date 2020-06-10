@@ -87,14 +87,10 @@ export default class EditAnnouncementDialog extends Vue {
     }
 
     try {
-      const result = await RemoteServices.createAnnouncement(
-        this.editAnnouncement
-      );
-      /*
-        const result = this.editAnnouncement.id != null
-            ? await RemoteServices.updateAnnouncement(this.editAnnouncement)
-            : await RemoteServices.createAnnouncement(this.editAnnouncement);
-        */
+      const result =
+        this.editAnnouncement.id != null
+          ? await RemoteServices.updateAnnouncement(this.editAnnouncement)
+          : await RemoteServices.createAnnouncement(this.editAnnouncement);
       this.$emit('save-announcement', result);
     } catch (error) {
       await this.$store.dispatch('error', error);

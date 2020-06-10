@@ -56,6 +56,19 @@
           </template>
           <span>Show Announcement</span>
         </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              large
+              class="mr-2"
+              v-on="on"
+              @click="editAnnouncement(item)"
+              data-cy="editAnnouncement"
+              >edit</v-icon
+            >
+          </template>
+          <span>Edit Announcement</span>
+        </v-tooltip>
       </template>
     </v-data-table>
     <footer>
@@ -66,7 +79,6 @@
       v-if="currentAnnouncement"
       v-model="announcementDialog"
       :announcement="currentAnnouncement"
-      v-on:close-show-announcement-dialog="onCloseShowAnnouncementDialog"
     />
     <edit-announcement-dialog
       v-if="currentAnnouncement"
@@ -85,7 +97,7 @@ import Announcement from '@/models/management/Announcement';
 import EditAnnouncementDialog from '@/views/teacher/announcements/EditAnnouncementDialog.vue';
 import ShowAnnouncementDialog from '@/views/teacher/announcements/ShowAnnouncementDialog.vue';
 import Image from '@/models/management/Image';
-import Review from '@/models/management/Review';
+import Submission from '@/models/management/Submission';
 
 @Component({
   components: {
@@ -122,6 +134,7 @@ export default class AnnouncementView extends Vue {
       [this.announcements] = await Promise.all([
         RemoteServices.getAnnouncements()
       ]);
+      this.announcements.sort((a, b) => this.sortNewestFirst(a, b));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -142,18 +155,27 @@ export default class AnnouncementView extends Vue {
     return convertMarkDown(text, image);
   }
 
-  showAnnouncementDialog(announcement: Announcement) {
-    this.currentAnnouncement = announcement;
-    this.announcementDialog = true;
+  sortNewestFirst(a: Announcement, b: Announcement) {
+    if (a.creationDate && b.creationDate)
+      return a.creationDate < b.creationDate ? 1 : -1;
+    else return 0;
   }
 
-  onCloseShowAnnouncementDialog() {
+  showAnnouncementDialog(announcement: Announcement) {
+    this.currentAnnouncement = announcement;
     this.announcementDialog = false;
+    this.announcementDialog = true;
   }
 
   newAnnouncement() {
     this.currentAnnouncement = new Announcement();
     this.currentAnnouncement.courseExecutionId = this.$store.getters.getCurrentCourse.courseExecutionId;
+    this.editAnnouncementDialog = true;
+  }
+
+  editAnnouncement(announcement: Announcement, e?: Event) {
+    if (e) e.preventDefault();
+    this.currentAnnouncement = announcement;
     this.editAnnouncementDialog = true;
   }
 
@@ -163,6 +185,7 @@ export default class AnnouncementView extends Vue {
       [this.announcements] = await Promise.all([
         RemoteServices.getAnnouncements()
       ]);
+      this.announcements.sort((a, b) => this.sortNewestFirst(a, b));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

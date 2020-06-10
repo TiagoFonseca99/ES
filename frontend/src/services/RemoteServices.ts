@@ -604,6 +604,19 @@ export default class RemoteServices {
       });
   }
 
+  static async updateAnnouncement(
+    announcement: Announcement
+  ): Promise<Announcement> {
+    return httpClient
+      .put(`/management/announcements/${announcement.id}`, announcement)
+      .then(response => {
+        return new Announcement(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async submitQuestion(submission: Submission): Promise<Submission> {
     return httpClient
       .post('/student/submissions', submission)

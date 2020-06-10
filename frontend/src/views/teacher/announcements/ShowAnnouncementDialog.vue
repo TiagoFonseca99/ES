@@ -1,7 +1,8 @@
 <template>
   <v-dialog
     v-model="dialog"
-    @keydown.esc="closeAnnouncementDialog"
+    @input="$emit('dialog', false)"
+    @keydown.esc="$emit('dialog', false)"
     max-width="75%"
   >
     <v-card>
@@ -17,11 +18,7 @@
           <span>{{ announcement.creationDate }}</span>
         </v-chip>
         <v-spacer />
-        <v-btn
-          data-cy="close"
-          dark
-          color="primary"
-          @click="closeAnnouncementDialog"
+        <v-btn data-cy="close" dark color="primary" @click="$emit('dialog')"
           >close</v-btn
         >
       </v-card-actions>
@@ -43,9 +40,5 @@ export default class ShowAnnouncementDialog extends Vue {
   @Prop({ type: Announcement, required: true })
   readonly announcement!: Announcement;
   @Model('dialog', Boolean) dialog!: boolean;
-
-  closeAnnouncementDialog() {
-    this.$emit('close-show-announcement-dialog');
-  }
 }
 </script>
