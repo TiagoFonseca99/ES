@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.domain.Announcement;
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.repository.AnnouncementRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
@@ -19,6 +20,8 @@ import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -31,6 +34,9 @@ public class AnnouncementService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AnnouncementRepository announcementRepository;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -56,6 +62,19 @@ public class AnnouncementService {
 
         entityManager.persist(announcement);
         return new AnnouncementDto(announcement);
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<AnnouncementDto> getAnnouncements(Integer teacherId, Integer courseExecutionId) {
+        if(teacherId == null)
+            throw new TutorException(TEACHER_MISSING);
+        else if(courseExecutionId == null)
+            throw new TutorException(COURSE_EXECUTION_MISSING);
+
+        return announcementRepository.getAnnouncements(teacherId, courseExecutionId).stream().map(AnnouncementDto::new).collect(Collectors.toList());
     }
 
     private void checkIfConsistentAnnouncement(AnnouncementDto announcementDto) {
