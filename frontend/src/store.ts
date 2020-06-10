@@ -32,7 +32,7 @@ Vue.config.devtools = true;
 export default new Vuex.Store({
   state: state,
   mutations: {
-    login(state, user: User) {
+    async login(state, user: User) {
       state.user = user;
       state.logged = true;
 
@@ -42,7 +42,8 @@ export default new Vuex.Store({
       }
 
       storage.createCookie(session.SESSION_TOKEN, String(state.session));
-      storage.persist(session.LOGGED_TOKEN, 'true', false);
+      storage.persist(session.LOGGED_TOKEN, 'true');
+      await session.checkCourse(state.user);
     },
     async logout(state) {
       state.user = null;
@@ -68,11 +69,7 @@ export default new Vuex.Store({
       state.loading = false;
     },
     currentCourse(state, currentCourse: Course) {
-      storage.persist(
-        session.COURSE_TOKEN,
-        JSON.stringify(currentCourse),
-        state.session
-      );
+      storage.persist(session.COURSE_TOKEN, JSON.stringify(currentCourse));
       state.currentCourse = currentCourse;
     }
   },
@@ -91,21 +88,21 @@ export default new Vuex.Store({
     },
     async fenixLogin({ commit }, code) {
       const authResponse = await RemoteServices.fenixLogin(code);
-      commit('login', authResponse);
+      await commit('login', authResponse);
     },
     async demoStudentLogin({ commit }) {
       const user = await RemoteServices.demoStudentLogin();
-      commit('login', user);
+      await commit('login', user);
       commit('currentCourse', (Object.values(user.courses)[0] as Course[])[0]);
     },
     async demoTeacherLogin({ commit }) {
       const user = await RemoteServices.demoTeacherLogin();
-      commit('login', user);
+      await commit('login', user);
       commit('currentCourse', (Object.values(user.courses)[0] as Course[])[0]);
     },
     async demoAdminLogin({ commit }) {
       const user = await RemoteServices.demoAdminLogin();
-      commit('login', user);
+      await commit('login', user);
     },
     logout({ commit }) {
       return new Promise(async resolve => {
