@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.announcement.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -45,7 +46,7 @@ public class Announcement {
     public Announcement(User user, CourseExecution courseExecution, AnnouncementDto announcementDto){
         setTitle(announcementDto.getTitle());
         setContent(announcementDto.getContent());
-        setCreationDate(LocalDateTime.parse(announcementDto.getCreationDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        setCreationDate(DateHandler.toLocalDateTime(announcementDto.getCreationDate()));
         setUser(user);
         setCourseExecution(courseExecution);
         setEdited(announcementDto.isEdited());
@@ -89,7 +90,13 @@ public class Announcement {
 
     public LocalDateTime getCreationDate() { return creationDate; }
 
-    public void setCreationDate(LocalDateTime creationDate) { this.creationDate = creationDate; }
+    public void setCreationDate(LocalDateTime creationDate) {
+        if (this.creationDate == null) {
+            this.creationDate = DateHandler.now();
+        } else {
+            this.creationDate = creationDate;
+        }
+    }
 
     public User getUser() { return user; }
 
