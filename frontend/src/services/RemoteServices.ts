@@ -19,6 +19,7 @@ import Review from '@/models/management/Review';
 import Discussion from '@/models/management/Discussion';
 import Reply from '@/models/management/Reply';
 import Dashboard from '@/models/management/Dashboard';
+import Notification from '@/models/user/Notification';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 10000;
@@ -1130,6 +1131,19 @@ export default class RemoteServices {
   static removeTournament(tournamentId: number) {
     return httpClient
       .delete(`/tournaments/removeTournament/${tournamentId}`)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static getNotifications(username: String): Promise<Notification[]> {
+    return httpClient
+      .get('/notifications?username=' + username)
+      .then(response => {
+        return response.data.map((notification: any) => {
+          return new Notification(notification);
+        });
+      })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
