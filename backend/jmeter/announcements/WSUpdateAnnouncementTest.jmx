@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.2.1">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Web Service getAnnouncements" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Web Service updateAnnouncement" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
@@ -98,8 +98,7 @@
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
-          <stringProp name="query">INSERT INTO announcements(title,content,creation_date,course_execution_id, user_id) values (&apos;Title 1&apos;, &apos;Content 1&apos;,current_timestamp, 11, 677);
-INSERT INTO announcements(title,content,creation_date,course_execution_id, user_id) values (&apos;Title 2&apos;, &apos;Content 2&apos;,current_timestamp, 11, 677);
+          <stringProp name="query">INSERT INTO announcements(id,title,content,creation_date,course_execution_id, user_id) values (5000,&apos;Title 1&apos;, &apos;Content 1&apos;,current_timestamp, 11, 677);
 </stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
@@ -187,14 +186,15 @@ INSERT INTO announcements(title,content,creation_date,course_execution_id, user_
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request to get announcements" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request to update announcement" enabled="true">
           <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
-&#xd;
+	&quot;title&quot;: &quot;${title2}&quot;,&#xd;
+	&quot;content&quot;: &quot;${content2}&quot;&#xd;
 }&#xd;
 </stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
@@ -205,8 +205,8 @@ INSERT INTO announcements(title,content,creation_date,course_execution_id, user_
           <stringProp name="HTTPSampler.port">${port}</stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/management/announcements?executionId=${courseExecutionId}</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <stringProp name="HTTPSampler.path">/management/announcements/5000</stringProp>
+          <stringProp name="HTTPSampler.method">PUT</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
@@ -226,7 +226,7 @@ INSERT INTO announcements(title,content,creation_date,course_execution_id, user_
           </HeaderManager>
           <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement course execution id" enabled="true">
-            <stringProp name="JSON_PATH">$[0].courseExecutionId</stringProp>
+            <stringProp name="JSON_PATH">$.courseExecutionId</stringProp>
             <stringProp name="EXPECTED_VALUE">${courseExecutionId}</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
@@ -235,7 +235,7 @@ INSERT INTO announcements(title,content,creation_date,course_execution_id, user_
           </JSONPathAssertion>
           <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement user id" enabled="true">
-            <stringProp name="JSON_PATH">$[0].userId</stringProp>
+            <stringProp name="JSON_PATH">$.userId</stringProp>
             <stringProp name="EXPECTED_VALUE">${userId}</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
@@ -244,52 +244,7 @@ INSERT INTO announcements(title,content,creation_date,course_execution_id, user_
           </JSONPathAssertion>
           <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement title" enabled="true">
-            <stringProp name="JSON_PATH">$[0].title</stringProp>
-            <stringProp name="EXPECTED_VALUE">${title1}</stringProp>
-            <boolProp name="JSONVALIDATION">true</boolProp>
-            <boolProp name="EXPECT_NULL">false</boolProp>
-            <boolProp name="INVERT">false</boolProp>
-            <boolProp name="ISREGEX">false</boolProp>
-          </JSONPathAssertion>
-          <hashTree/>
-          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement content" enabled="true">
-            <stringProp name="JSON_PATH">$[0].content</stringProp>
-            <stringProp name="EXPECTED_VALUE">${content1}</stringProp>
-            <boolProp name="JSONVALIDATION">true</boolProp>
-            <boolProp name="EXPECT_NULL">false</boolProp>
-            <boolProp name="INVERT">false</boolProp>
-            <boolProp name="ISREGEX">false</boolProp>
-          </JSONPathAssertion>
-          <hashTree/>
-          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement creation date" enabled="true">
-            <stringProp name="JSON_PATH">$[0].creationDate</stringProp>
-            <stringProp name="EXPECTED_VALUE"></stringProp>
-            <boolProp name="JSONVALIDATION">true</boolProp>
-            <boolProp name="EXPECT_NULL">true</boolProp>
-            <boolProp name="INVERT">true</boolProp>
-            <boolProp name="ISREGEX">false</boolProp>
-          </JSONPathAssertion>
-          <hashTree/>
-          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement course execution id" enabled="true">
-            <stringProp name="JSON_PATH">$[1].courseExecutionId</stringProp>
-            <stringProp name="EXPECTED_VALUE">${courseExecutionId}</stringProp>
-            <boolProp name="JSONVALIDATION">true</boolProp>
-            <boolProp name="EXPECT_NULL">false</boolProp>
-            <boolProp name="INVERT">false</boolProp>
-            <boolProp name="ISREGEX">false</boolProp>
-          </JSONPathAssertion>
-          <hashTree/>
-          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement user id" enabled="true">
-            <stringProp name="JSON_PATH">$[1].userId</stringProp>
-            <stringProp name="EXPECTED_VALUE">${userId}</stringProp>
-            <boolProp name="JSONVALIDATION">true</boolProp>
-            <boolProp name="EXPECT_NULL">false</boolProp>
-            <boolProp name="INVERT">false</boolProp>
-            <boolProp name="ISREGEX">false</boolProp>
-          </JSONPathAssertion>
-          <hashTree/>
-          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement title" enabled="true">
-            <stringProp name="JSON_PATH">$[1].title</stringProp>
+            <stringProp name="JSON_PATH">$.title</stringProp>
             <stringProp name="EXPECTED_VALUE">${title2}</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
@@ -298,7 +253,7 @@ INSERT INTO announcements(title,content,creation_date,course_execution_id, user_
           </JSONPathAssertion>
           <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement content" enabled="true">
-            <stringProp name="JSON_PATH">$[1].content</stringProp>
+            <stringProp name="JSON_PATH">$.content</stringProp>
             <stringProp name="EXPECTED_VALUE">${content2}</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
@@ -307,11 +262,20 @@ INSERT INTO announcements(title,content,creation_date,course_execution_id, user_
           </JSONPathAssertion>
           <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement creation date" enabled="true">
-            <stringProp name="JSON_PATH">$.[0]creationDate</stringProp>
+            <stringProp name="JSON_PATH">$.creationDate</stringProp>
             <stringProp name="EXPECTED_VALUE"></stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">true</boolProp>
             <boolProp name="INVERT">true</boolProp>
+            <boolProp name="ISREGEX">false</boolProp>
+          </JSONPathAssertion>
+          <hashTree/>
+          <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert announcement content" enabled="true">
+            <stringProp name="JSON_PATH">$.edited</stringProp>
+            <stringProp name="EXPECTED_VALUE">true</stringProp>
+            <boolProp name="JSONVALIDATION">true</boolProp>
+            <boolProp name="EXPECT_NULL">false</boolProp>
+            <boolProp name="INVERT">false</boolProp>
             <boolProp name="ISREGEX">false</boolProp>
           </JSONPathAssertion>
           <hashTree/>
@@ -428,7 +392,6 @@ INSERT INTO announcements(title,content,creation_date,course_execution_id, user_
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
           <stringProp name="query">DELETE FROM announcements WHERE id in (SELECT max(id) FROM announcements);
-DELETE FROM announcements WHERE id in (SELECT max(id) FROM announcements);
 
 </stringProp>
           <stringProp name="queryArguments"></stringProp>
