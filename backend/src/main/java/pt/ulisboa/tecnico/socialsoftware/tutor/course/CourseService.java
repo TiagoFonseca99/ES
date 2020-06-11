@@ -6,6 +6,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.domain.Announcement;
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.Demo;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
@@ -106,6 +108,21 @@ public class CourseService {
                 .filter(user -> user.getRole().equals(User.Role.STUDENT))
                 .sorted(Comparator.comparing(User::getKey))
                 .map(StudentDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<AnnouncementDto> getCourseExecutionAnnouncements(int executionId) {
+        CourseExecution courseExecution = courseExecutionRepository.findById(executionId).orElse(null);
+        if (courseExecution == null) {
+            return new ArrayList<>();
+        }
+        return courseExecution.getAnnouncements().stream()
+                .sorted(Comparator.comparing(Announcement::getCreationDate))
+                .map(AnnouncementDto::new)
                 .collect(Collectors.toList());
     }
 
