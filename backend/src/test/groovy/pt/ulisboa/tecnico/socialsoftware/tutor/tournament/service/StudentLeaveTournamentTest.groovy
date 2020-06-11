@@ -11,6 +11,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
@@ -198,6 +199,11 @@ class StudentLeaveTournamentTest extends Specification {
         @Bean
         QuestionService questionService() {
             return new QuestionService()
+        }
+
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
         }
     }
 }
