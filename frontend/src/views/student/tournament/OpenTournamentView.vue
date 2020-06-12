@@ -306,21 +306,25 @@ export default class OpenTournamentView extends Vue {
     tournamentToJoin.topics = topics;
   }
 
-  async leaveTournament(tournamentToJoin: Tournament) {
-    const enrolled = tournamentToJoin.enrolled;
-    const topics = tournamentToJoin.topics;
-    tournamentToJoin.enrolled = true;
-    tournamentToJoin.topics = [];
+  async leaveTournament(tournamentToLeave: Tournament) {
+    const enrolled = tournamentToLeave.enrolled;
+    const topics = tournamentToLeave.topics;
+    const participants = tournamentToLeave.participants;
+    tournamentToLeave.enrolled = true;
+    tournamentToLeave.topics = [];
+    tournamentToLeave.participants = [];
     try {
-      await RemoteServices.leaveTournament(tournamentToJoin);
+      await RemoteServices.leaveTournament(tournamentToLeave);
     } catch (error) {
       await this.$store.dispatch('error', error);
-      tournamentToJoin.enrolled = enrolled;
-      tournamentToJoin.topics = topics;
+      tournamentToLeave.enrolled = enrolled;
+      tournamentToLeave.topics = topics;
+      tournamentToLeave.participants = participants;
       return;
     }
-    tournamentToJoin.enrolled = false;
-    tournamentToJoin.topics = topics;
+    tournamentToLeave.enrolled = false;
+    tournamentToLeave.topics = topics;
+    tournamentToLeave.participants = participants;
   }
 
   async solveQuiz(tournament: Tournament) {

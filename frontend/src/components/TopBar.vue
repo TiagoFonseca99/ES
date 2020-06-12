@@ -285,6 +285,23 @@
           </v-list>
         </v-menu>
 
+        <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :to="
+                '/student/notifications?username=' +
+                  $store.getters.getUser.username
+              "
+              v-on="on"
+              text
+              dark
+            >
+              Notifications
+              <v-icon>notifications</v-icon>
+            </v-btn>
+          </template>
+        </v-menu>
+
         <v-btn
           v-if="isLoggedIn && moreThanOneCourse"
           to="/courses"
@@ -531,6 +548,22 @@
               <v-icon>fas fa-calendar</v-icon>
             </v-list-item-action>
             <v-list-item-content>All Tournaments</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
+
+          <!-- ----SDN---- -->
+
+          <v-list-item
+            :to="
+              '/student/notifications?username=' +
+                $store.getters.getUser.username
+            "
+          >
+            <v-list-item-action>
+              <v-icon>notifications</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Notifications</v-list-item-content>
           </v-list-item>
 
           <!-- ----------- -->

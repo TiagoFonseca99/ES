@@ -135,7 +135,12 @@ public enum ErrorMessage {
     INVALID_TITLE_FOR_ANNOUNCEMENT("Invalid title for announcement"),
     INVALID_CONTENT_FOR_ANNOUNCEMENT("Invalid content for announcement"),
     TEACHER_MISSING("Teacher is missing"),
-    ANNOUNCEMENT_NOT_FOUND("Announcement not found with id %d");
+    ANNOUNCEMENT_NOT_FOUND("Announcement not found with id %d"),
+
+    // Sdn
+    INVALID_TITLE_FOR_NOTIFICATION("Invalid title for notification"),
+    INVALID_CONTENT_FOR_NOTIFICATION("Invalid content for notification"),
+    NOTIFICATION_NOT_FOUND("Notification %s not found");
 
     public final String label;
 

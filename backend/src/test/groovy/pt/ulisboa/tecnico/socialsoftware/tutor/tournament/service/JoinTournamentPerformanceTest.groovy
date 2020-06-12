@@ -9,6 +9,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
@@ -152,11 +153,7 @@ class JoinTournamentPerformanceTest extends Specification {
         resTournamentParticipant1.getUsername() == USERNAME1
         resTournamentParticipant1.getName() == USER_NAME1
         resTournamentParticipant1.getRole() == User.Role.STUDENT
-
     }
-
-
-
 
     @TestConfiguration
     static class TournamentServiceImplTestContextConfiguration {
@@ -194,7 +191,9 @@ class JoinTournamentPerformanceTest extends Specification {
             return new QuestionService()
         }
 
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
+        }
     }
-
-
 }
