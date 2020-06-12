@@ -604,6 +604,23 @@ export default class RemoteServices {
       });
   }
 
+  static async getCourseExecutionAnnouncements(): Promise<Announcement[]> {
+    return httpClient
+      .get(
+        '/executions/' +
+          Store.getters.getCurrentCourse.courseExecutionId +
+          '/announcements'
+      )
+      .then(response => {
+        return response.data.map((announcement: any) => {
+          return new Announcement(announcement);
+        });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async updateAnnouncement(
     announcement: Announcement
   ): Promise<Announcement> {

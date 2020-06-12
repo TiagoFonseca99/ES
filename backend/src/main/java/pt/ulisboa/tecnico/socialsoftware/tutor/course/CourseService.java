@@ -121,7 +121,6 @@ public class CourseService {
             return new ArrayList<>();
         }
         return courseExecution.getAnnouncements().stream()
-                .sorted(Comparator.comparing(Announcement::getCreationDate))
                 .map(AnnouncementDto::new)
                 .collect(Collectors.toList());
     }

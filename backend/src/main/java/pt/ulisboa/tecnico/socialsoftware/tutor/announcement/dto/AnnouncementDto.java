@@ -6,6 +6,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 public class AnnouncementDto {
     private Integer id;
     private Integer userId;
+    private String username;
     private Integer courseExecutionId;
     private String title;
     private String content;
@@ -17,6 +18,7 @@ public class AnnouncementDto {
     public AnnouncementDto(Announcement announcement) {
         this.id = announcement.getId();
         this.userId = announcement.getUser().getId();
+        this.username = announcement.getUser().getUsername();
         this.courseExecutionId = announcement.getCourseExecution().getId();
         this.title = announcement.getTitle();
         this.content = announcement.getContent();
@@ -51,4 +53,8 @@ public class AnnouncementDto {
     public boolean isEdited() { return edited; }
 
     public void setEdited(boolean edited) { this.edited = edited; }
+
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) { this.username = username; }
 }
