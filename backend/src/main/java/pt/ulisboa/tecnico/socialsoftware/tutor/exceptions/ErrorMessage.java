@@ -129,7 +129,12 @@ public enum ErrorMessage {
     REPLY_UNAUTHORIZED_DELETER("User cannot delete this reply"),
     REPLY_UNAUTHORIZED_EDITOR("User cannot edit this reply"),
     REPLY_UNAUTHORIZED_USER("User cannot create reply for given discussion"),
-    USER_NOT_IN_COURSE("User is not enrolled in course %s");
+    USER_NOT_IN_COURSE("User is not enrolled in course %s"),
+
+    // Sdn
+    INVALID_TITLE_FOR_NOTIFICATION("Invalid title for notification"),
+    INVALID_CONTENT_FOR_NOTIFICATION("Invalid content for notification"),
+    NOTIFICATION_NOT_FOUND("Notification %s not found");
 
     public final String label;
 

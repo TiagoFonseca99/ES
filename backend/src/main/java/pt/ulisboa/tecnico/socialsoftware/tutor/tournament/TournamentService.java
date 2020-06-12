@@ -11,6 +11,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Assessment;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
@@ -52,6 +56,9 @@ public class TournamentService {
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private TopicRepository topicRepository;
@@ -97,6 +104,7 @@ public class TournamentService {
 
         Tournament tournament = new Tournament(user, topics, tournamentDto);
         this.entityManager.persist(tournament);
+
         return new TournamentDto(tournament);
     }
 
@@ -267,15 +275,14 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                 .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
 
-
         if (!tournament.getParticipants().contains(user)) {
             throw new TutorException(USER_NOT_JOINED, user.getUsername());
         }
 
-
         tournament.removeParticipant(user);
-
-
+        for (Notification notification: tournament.getNotifications()) {
+            notificationService.removeNotification(user.getId(), notification.getId());
+        }
     }
 
     @Retryable(
@@ -316,6 +323,7 @@ public class TournamentService {
         }
 
         tournament.setState(Tournament.Status.CANCELED);
+        tournament.Notify(createNotification(tournament));
     }
 
     @Retryable(
@@ -401,4 +409,16 @@ public class TournamentService {
         }
     }
 
+    public Notification createNotification(Tournament tournament) {
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setTitle("title teste");
+        notificationDto.setContent("content teste");
+        notificationDto.setCreationDate(DateHandler.toISOString(DateHandler.now()));
+        NotificationDto response = notificationService.createNotification(notificationDto);
+
+        Notification notification = notificationService.getNotificationById(response.getId());
+        tournament.addNotification(notification);
+
+        return notification;
+    }
 }

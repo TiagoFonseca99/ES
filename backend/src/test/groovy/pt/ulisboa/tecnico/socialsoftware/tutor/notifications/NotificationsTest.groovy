@@ -1,4 +1,4 @@
-package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.service
+package pt.ulisboa.tecnico.socialsoftware.tutor.notifications.service
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -6,54 +6,40 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.repository.NotificationRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
 
 @DataJpaTest
-class StudentLeaveTournamentTest extends Specification {
-
-    public static final String USER_NAME1 = "Dinis"
-    public static final String USERNAME1 = "JDinis99"
-    public static final String USER_NAME2 = "Tiago"
-    public static final String USERNAME2 = "TiagoFonseca99"
-    public static final String USER_NAME3 = "Tomas"
-    public static final String USERNAME3 = "TomasInacio99"
-    public static final String USER_NAME4 = "Daniel"
-    public static final String USERNAME4 = "DanielMatos99"
+class NotificationsTest extends Specification {
+    public static final String USER_NAME1 = "Tiago"
+    public static final String USERNAME1 = "TiagoFonseca99"
     public static final Integer KEY1 = 1
-    public static final Integer KEY2 = 2
-    public static final Integer KEY3 = 3
-    public static final Integer KEY4 = 4
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
-    public static final int NUMBER_OF_QUESTIONS1 = 1
-
-    @Autowired
-    UserService userService
+    public static final int NUMBER_OF_QUESTIONS = 1
 
     @Autowired
     TournamentService tournamentService
@@ -76,6 +62,9 @@ class StudentLeaveTournamentTest extends Specification {
     @Autowired
     QuestionRepository questionRepository
 
+    @Autowired
+    NotificationRepository notificationRepository
+
     def user
     def course
     def courseExecution
@@ -84,8 +73,7 @@ class StudentLeaveTournamentTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def endTime_Now = DateHandler.now().plusHours(2)
-    def tournamentDtoInit = new TournamentDto()
+    def endTime = DateHandler.now().plusHours(2)
     def tournamentDto = new TournamentDto()
     def questionOne
 
@@ -119,11 +107,12 @@ class StudentLeaveTournamentTest extends Specification {
         topics.add(topic1.getId())
         topics.add(topic2.getId())
 
-        tournamentDtoInit.setStartTime(DateHandler.toISOString(DateHandler.now()))
-        tournamentDtoInit.setEndTime(DateHandler.toISOString(endTime_Now))
-        tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
-        tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
+        tournamentDto.setStartTime(DateHandler.toISOString(DateHandler.now()))
+        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
+        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
+        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         questionOne = new Question()
         questionOne.setKey(1)
@@ -133,47 +122,27 @@ class StudentLeaveTournamentTest extends Specification {
         questionOne.setCourse(course)
         questionOne.addTopic(topic1)
         questionRepository.save(questionOne)
-
     }
 
-    def "Student joins and leaves the tournament" () {
-        given:
-        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
-        user2.addCourse(courseExecution)
-        userRepository.save(user2)
-        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
+    def "user joins tournament, cancels it and receives a notification"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        expect:
+        notificationRepository.count() == 0L
 
         when:
-        tournamentService.leaveTournament(user2.getId(), tournamentDto)
+        tournamentService.cancelTournament(user.getId(), tournamentDto)
 
-        then: "the tournament has no participants"
-        def result = tournamentService.getTournamentParticipants(tournamentDto)
-        result.size() == 0
-    }
-
-    def "Student leaves the tournament without joining first " () {
-        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
-        user2.addCourse(courseExecution)
-        userRepository.save(user2)
-
-        when:
-        tournamentService.leaveTournament(user2.getId(), tournamentDto)
-
-        then: "exeption is thrown"
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.USER_NOT_JOINED
+        then:
+        notificationRepository.count() == 1L
     }
 
     @TestConfiguration
-    static class UserServiceImplTestContextConfiguration {
+    static class TournamentServiceImplTestContextConfiguration {
         @Bean
         TournamentService tournamentService() {
             return new TournamentService()
-        }
-
-        @Bean
-        UserService userService() {
-            return new UserService()
         }
 
         @Bean
@@ -198,6 +167,11 @@ class StudentLeaveTournamentTest extends Specification {
         @Bean
         QuestionService questionService() {
             return new QuestionService()
+        }
+
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
         }
     }
 }

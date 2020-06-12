@@ -6,42 +6,55 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import spock.lang.Specification
 
 @DataJpaTest
-class RemoveTournamentTest extends Specification {
-    public static final String USER_NAME1 = "Tiago"
-    public static final String USERNAME1 = "TiagoFonseca99"
+class StudentLeaveTournamentTest extends Specification {
+
+    public static final String USER_NAME1 = "Dinis"
+    public static final String USERNAME1 = "JDinis99"
+    public static final String USER_NAME2 = "Tiago"
+    public static final String USERNAME2 = "TiagoFonseca99"
+    public static final String USER_NAME3 = "Tomas"
+    public static final String USERNAME3 = "TomasInacio99"
+    public static final String USER_NAME4 = "Daniel"
+    public static final String USERNAME4 = "DanielMatos99"
     public static final Integer KEY1 = 1
-    public static final String USER_NAME2 = "João"
-    public static final String USERNAME2 = "JoãoDinis99"
     public static final Integer KEY2 = 2
+    public static final Integer KEY3 = 3
+    public static final Integer KEY4 = 4
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String TOPIC_NAME1 = "Informática"
     public static final String TOPIC_NAME2 = "Engenharia de Software"
-    public static final int NUMBER_OF_QUESTIONS = 5
+    public static final int NUMBER_OF_QUESTIONS1 = 1
+
+    @Autowired
+    UserService userService
 
     @Autowired
     TournamentService tournamentService
@@ -61,6 +74,9 @@ class RemoveTournamentTest extends Specification {
     @Autowired
     TopicRepository topicRepository
 
+    @Autowired
+    QuestionRepository questionRepository
+
     def user
     def course
     def courseExecution
@@ -69,17 +85,22 @@ class RemoveTournamentTest extends Specification {
     def topicDto1
     def topicDto2
     def topics = new ArrayList<Integer>()
-    def startTime = DateHandler.now().plusHours(1)
-    def endTime = DateHandler.now().plusHours(2)
-    def tournamentDto
+    def endTime_Now = DateHandler.now().plusHours(2)
+    def tournamentDtoInit = new TournamentDto()
+    def tournamentDto = new TournamentDto()
+    def questionOne
 
     def setup() {
         user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+
+        course.addCourseExecution(courseExecution)
+        courseExecution.setCourse(course)
+
         courseRepository.save(course)
 
-        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
         courseExecution.addUser(user)
         courseExecutionRepository.save(courseExecution)
 
@@ -99,73 +120,61 @@ class RemoveTournamentTest extends Specification {
         topics.add(topic1.getId())
         topics.add(topic2.getId())
 
-        tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
-        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
+        tournamentDtoInit.setStartTime(DateHandler.toISOString(DateHandler.now()))
+        tournamentDtoInit.setEndTime(DateHandler.toISOString(endTime_Now))
+        tournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
+        tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
 
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
+        questionOne = new Question()
+        questionOne.setKey(1)
+        questionOne.setContent("Question Content")
+        questionOne.setTitle("Question Title")
+        questionOne.setStatus(Question.Status.AVAILABLE)
+        questionOne.setCourse(course)
+        questionOne.addTopic(topic1)
+        questionRepository.save(questionOne)
+
     }
 
-    def "user that created tournament removes it"() {
+    def "Student joins and leaves the tournament" () {
         given:
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         when:
-        tournamentService.removeTournament(user.getId(), tournamentDto.getId())
+        tournamentService.leaveTournament(user2.getId(), tournamentDto)
 
-        then:
-        tournamentRepository.count() == 0L
+        then: "the tournament has no participants"
+        def result = tournamentService.getTournamentParticipants(tournamentDto)
+        result.size() == 0
     }
 
-    def "user that did not created tournament removes it"() {
-        given: "a new user"
+    def "Student leaves the tournament without joining first " () {
         def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
-        courseExecution.addUser(user2)
-        courseExecutionRepository.save(courseExecution)
-
         user2.addCourse(courseExecution)
         userRepository.save(user2)
 
         when:
-        tournamentService.removeTournament(user2.getId(), tournamentDto.getId())
+        tournamentService.leaveTournament(user2.getId(), tournamentDto)
 
-        then:
+        then: "exeption is thrown"
         def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_CREATOR
-
-        and:
-        tournamentRepository.count() == 1L
-    }
-
-    def "user that created tournament removes one tournament when 2 exist"() {
-        given: "a new user"
-        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
-        courseExecution.addUser(user2)
-        courseExecutionRepository.save(courseExecution)
-        user2.addCourse(courseExecution)
-        userRepository.save(user2)
-
-        and: "a new tournament"
-        def tournamentDto2 = new TournamentDto()
-        tournamentDto2.setStartTime(DateHandler.toISOString(startTime))
-        tournamentDto2.setEndTime(DateHandler.toISOString(endTime))
-        tournamentDto2.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto2.setState(Tournament.Status.NOT_CANCELED)
-        tournamentDto2 = tournamentService.createTournament(user2.getId(), topics, tournamentDto2)
-
-        when:
-        tournamentService.removeTournament(user.getId(), tournamentDto.getId())
-
-        then:
-        tournamentRepository.count() == 1L
+        exception.getErrorMessage() == ErrorMessage.USER_NOT_JOINED
     }
 
     @TestConfiguration
-    static class TournamentServiceImplTestContextConfiguration {
+    static class UserServiceImplTestContextConfiguration {
         @Bean
         TournamentService tournamentService() {
             return new TournamentService()
+        }
+
+        @Bean
+        UserService userService() {
+            return new UserService()
         }
 
         @Bean
