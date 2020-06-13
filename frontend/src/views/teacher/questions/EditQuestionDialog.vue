@@ -42,10 +42,8 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn color="blue darken-1" @click="$emit('dialog', false)"
-          >Cancel</v-btn
-        >
-        <v-btn color="blue darken-1" @click="saveQuestion">Save</v-btn>
+        <v-btn color="primary" @click="$emit('dialog', false)">Cancel</v-btn>
+        <v-btn color="primary" @click="saveQuestion">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -71,15 +69,6 @@ export default class EditQuestionDialog extends Vue {
   updateQuestion() {
     this.editQuestion = new Question(this.question);
   }
-
-  // TODO use EasyMDE with these configs
-  // markdownConfigs: object = {
-  //   status: false,
-  //   spellChecker: false,
-  //   insertTexts: {
-  //     image: ['![image][image]', '']
-  //   }
-  // };
 
   async saveQuestion() {
     if (

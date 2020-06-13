@@ -11,6 +11,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
@@ -142,7 +143,7 @@ class GetQuizIdTest extends Specification {
         user2.addCourse(courseExecution)
         userRepository.save(user2)
 
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         when:
         def result = tournamentService.solveQuiz(user2.getId(), tournamentDto);
@@ -163,8 +164,8 @@ class GetQuizIdTest extends Specification {
         user3.addCourse(courseExecution)
         userRepository.save(user3)
 
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
-        tournamentService.joinTournament(user3.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
+        tournamentService.joinTournament(user3.getId(), tournamentDto, "")
 
         when:
         def result = tournamentService.solveQuiz(user2.getId(), tournamentDto);
@@ -215,6 +216,7 @@ class GetQuizIdTest extends Specification {
         AnswerService answerService() {
             return new AnswerService()
         }
+
         @Bean
         AnswersXmlImport answersXmlImport() {
             return new AnswersXmlImport()
@@ -223,6 +225,11 @@ class GetQuizIdTest extends Specification {
         @Bean
         QuestionService questionService() {
             return new QuestionService()
+        }
+
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
         }
     }
 

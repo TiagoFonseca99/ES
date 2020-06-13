@@ -21,11 +21,7 @@ describe('Student walkthrough', () => {
   it('login sees open tournaments', () => {
     cy.get('[data-cy="changeButton"]')
       .should('be.visible')
-      .click();
-  });
-
-  it('login joins tournament', () => {
-    cy.joinTournament('-1');
+      .click({ force: true });
   });
 
   it('login creates a tournament and joins', () => {
@@ -56,27 +52,47 @@ describe('Student walkthrough', () => {
     cy.cancelTournament('-1');
   });
 
-  it('login creates, joins and leaves tournament', () => {
-    cy.createTournament('3');
-    cy.wait(100);
-    cy.joinTournament('-1');
-    cy.leaveTournament('-1');
-  });
-
-  it('login leaves tournament', () => {
-    cy.get('[data-cy="changeButton"]')
+  it('login removes tournament', () => {
+    cy.contains('Tournaments')
+      .should('be.visible')
+      .click();
+    cy.contains('My Tournaments')
       .should('be.visible')
       .click();
     cy.wait(100);
+    cy.removeTournament('-1');
+  });
+
+  it('login creates, joins and leaves tournament', () => {
+    cy.createTournament('3');
+    cy.wait(100);
+    cy.joinTournament('0');
+    cy.leaveTournament('0');
+  });
+
+  it('login joins tournament', () => {
+    cy.joinTournament('-1');
+  });
+
+  it('login leaves tournament', () => {
     cy.leaveTournament('-1');
   });
 
-  it('login joins and solves tournament', () => {
+  it('login creates private tournament', () => {
+    cy.createPrivateTournament('3');
+  });
+
+  it('login joins private tournament', () => {
+    cy.joinPrivateTournament('-1');
+  });
+
+  /*it('login joins and solves tournament', () => {
+    cy.addTournamentsInfo();
     cy.get('[data-cy="changeButton"]')
       .should('be.visible')
       .click();
     cy.wait(100);
     cy.joinTournament('0');
     cy.solveTournament('0');
-  });
+  });*/
 });

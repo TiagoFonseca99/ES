@@ -10,7 +10,7 @@ import SolvedQuiz from '@/models/statement/SolvedQuiz';
 import Topic from '@/models/management/Topic';
 import { Student } from '@/models/management/Student';
 import Assessment from '@/models/management/Assessment';
-import AuthDto from '@/models/user/AuthDto';
+import User from '@/models/user/User';
 import StatementAnswer from '@/models/statement/StatementAnswer';
 import { QuizAnswers } from '@/models/management/QuizAnswers';
 import Tournament from '@/models/user/Tournament';
@@ -19,75 +19,85 @@ import Review from '@/models/management/Review';
 import Discussion from '@/models/management/Discussion';
 import Reply from '@/models/management/Reply';
 import Dashboard from '@/models/management/Dashboard';
+import Notification from '@/models/user/Notification';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 10000;
 httpClient.defaults.baseURL = process.env.VUE_APP_ROOT_API;
+httpClient.defaults.withCredentials = true;
 httpClient.defaults.headers.post['Content-Type'] = 'application/json';
-httpClient.interceptors.request.use(
-  config => {
-    if (!config.headers.Authorization) {
-      const token = Store.getters.getToken;
-
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-
-    return config;
-  },
-  error => Promise.reject(error)
-);
 
 export default class RemoteServices {
-  static async fenixLogin(code: string): Promise<AuthDto> {
+  static async checkToken(): Promise<User> {
+    return httpClient
+      .get('/auth/check')
+      .then(response => {
+        return new User(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async fenixLogin(code: string): Promise<User> {
     return httpClient
       .get(`/auth/fenix?code=${code}`)
       .then(response => {
-        return new AuthDto(response.data);
+        return new User(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
   }
 
-  static async demoStudentLogin(): Promise<AuthDto> {
+  static async demoStudentLogin(): Promise<User> {
     return httpClient
       .get('/auth/demo/student')
       .then(response => {
-        return new AuthDto(response.data);
+        return new User(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
   }
 
-  static async demoTeacherLogin(): Promise<AuthDto> {
+  static async demoTeacherLogin(): Promise<User> {
     return httpClient
       .get('/auth/demo/teacher')
       .then(response => {
-        return new AuthDto(response.data);
+        return new User(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
   }
 
-  static async demoAdminLogin(): Promise<AuthDto> {
+  static async demoAdminLogin(): Promise<User> {
     return httpClient
       .get('/auth/demo/admin')
       .then(response => {
-        return new AuthDto(response.data);
+        return new User(response.data);
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });
   }
 
-  static async getUserStats(): Promise<StudentStats> {
+  static async logout(): Promise<Boolean> {
+    return httpClient
+      .post('/auth/logout')
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getUserStats(username: string): Promise<StudentStats> {
     return httpClient
       .get(
-        `/executions/${Store.getters.getCurrentCourse.courseExecutionId}/stats`
+        `/executions/${Store.getters.getCurrentCourse.courseExecutionId}/stats/${username}`
       )
       .then(response => {
         return new StudentStats(response.data);
@@ -251,10 +261,13 @@ export default class RemoteServices {
       });
   }
 
-  static async getSolvedQuizzes(): Promise<SolvedQuiz[]> {
+  static async getSolvedQuizzes(username: string): Promise<SolvedQuiz[]> {
     return httpClient
       .get(
-        `/executions/${Store.getters.getCurrentCourse.courseExecutionId}/quizzes/solved`
+        '/executions/' +
+          Store.getters.getCurrentCourse.courseExecutionId +
+          '/quizzes/solved?username=' +
+          username
       )
       .then(response => {
         return response.data.map((solvedQuiz: any) => {
@@ -437,7 +450,7 @@ export default class RemoteServices {
 
   static async getCourseDashboardInfo(executionId: number): Promise<Dashboard> {
     return httpClient
-      .get(`/dashboard/${executionId}`)
+      .get('/dashboard/execution?executionId=' + executionId)
       .then(response => {
         return new Dashboard(response.data);
       })
@@ -598,7 +611,26 @@ export default class RemoteServices {
 
   static async getSubmissions(): Promise<Submission[]> {
     return httpClient
-      .get('/student/submissions')
+      .get(
+        '/student/submissions?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
+      .then(response => {
+        return response.data.map((submission: any) => {
+          return new Submission(submission);
+        });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getStudentsSubmissions(): Promise<Submission[]> {
+    return httpClient
+      .get(
+        '/student/submissions/all?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
       .then(response => {
         return response.data.map((submission: any) => {
           return new Submission(submission);
@@ -630,7 +662,10 @@ export default class RemoteServices {
 
   static async getSubsToTeacher(): Promise<Submission[]> {
     return httpClient
-      .get('/management/reviews')
+      .get(
+        '/management/reviews?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
       .then(response => {
         return response.data.map((submission: any) => {
           return new Submission(submission);
@@ -643,7 +678,10 @@ export default class RemoteServices {
 
   static async getReviewsToTeacher(): Promise<Review[]> {
     return httpClient
-      .get('/management/reviews/showReviews')
+      .get(
+        '/management/reviews/showReviews?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
       .then(response => {
         return response.data.map((review: any) => {
           return new Review(review);
@@ -656,7 +694,10 @@ export default class RemoteServices {
 
   static async getSubmissionReviews(): Promise<Review[]> {
     return httpClient
-      .get('/student/reviews')
+      .get(
+        '/student/reviews?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
       .then(response => {
         return response.data.map((review: any) => {
           return new Review(review);
@@ -686,9 +727,37 @@ export default class RemoteServices {
       });
   }
 
-  static async getDiscussions(userId: number): Promise<Discussion[]> {
+  static async editDiscussion(discussion: Discussion): Promise<Discussion> {
     return httpClient
-      .get('/discussions?userId=' + userId)
+      .put('/discussions/edit', discussion)
+      .then(response => {
+        return new Discussion(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async deleteDiscussion(
+    userId: number,
+    questionId: number
+  ): Promise<Boolean> {
+    return httpClient
+      .delete(`/discussions/${userId}/${questionId}`)
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getDiscussions(
+    userId: number,
+    courseId: number
+  ): Promise<Discussion[]> {
+    return httpClient
+      .get('/discussions?userId=' + userId + '&courseId=' + courseId)
       .then(response => {
         return response.data.map((discussion: any) => {
           return new Discussion(discussion);
@@ -742,6 +811,28 @@ export default class RemoteServices {
       });
   }
 
+  static async editReply(reply: Reply): Promise<Reply> {
+    return httpClient
+      .put('/discussions/replies/edit', reply)
+      .then(response => {
+        return new Reply(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async deleteReply(reply: number): Promise<Boolean> {
+    return httpClient
+      .delete(`/discussions/replies/${reply}`)
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async toggleDiscussionStats(): Promise<Dashboard> {
     return httpClient
       .put('/dashboard/discussions')
@@ -775,6 +866,17 @@ export default class RemoteServices {
       });
   }
 
+  static async toggleUserStats(): Promise<Dashboard> {
+    return httpClient
+      .put('/dashboard/stats')
+      .then(response => {
+        return new Dashboard(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async exportAll() {
     return httpClient
       .get('/admin/export', {
@@ -797,9 +899,9 @@ export default class RemoteServices {
       });
   }
 
-  static async getDashboardInfo(): Promise<Dashboard> {
+  static async getDashboardInfo(username: string): Promise<Dashboard> {
     return httpClient
-      .get('/dashboard')
+      .get('/dashboard?username=' + username)
       .then(response => {
         return new Dashboard(response.data);
       })
@@ -1003,28 +1105,11 @@ export default class RemoteServices {
       });
   }
 
-  static joinTournament(tournament: Tournament) {
-    return httpClient
-      .put('tournaments/joinTournament', tournament)
-      .catch(async error => {
-        throw Error(await this.errorMessage(error));
-      });
-  }
-
-  static switchTournamentNamePermission() {
-    return httpClient
-      .put('/switchTournamentNamePermission')
-      .catch(async error => {
-        throw Error(await this.errorMessage(error));
-      });
-  }
-
-  static switchTournamentScorePermission() {
-    return httpClient
-      .put('/switchTournamentScorePermission')
-      .catch(async error => {
-        throw Error(await this.errorMessage(error));
-      });
+  static joinTournament(tournament: Tournament, password: String) {
+    let path: string = 'tournaments/joinTournament?password=' + password;
+    return httpClient.put(path, tournament).catch(async error => {
+      throw Error(await this.errorMessage(error));
+    });
   }
 
   static leaveTournament(tournament: Tournament) {
@@ -1038,6 +1123,27 @@ export default class RemoteServices {
   static cancelTournament(tournament: Tournament) {
     return httpClient
       .put('tournaments/cancelTournament', tournament)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static removeTournament(tournamentId: number) {
+    return httpClient
+      .delete(`/tournaments/removeTournament/${tournamentId}`)
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static getNotifications(username: String): Promise<Notification[]> {
+    return httpClient
+      .get('/notifications?username=' + username)
+      .then(response => {
+        return response.data.map((notification: any) => {
+          return new Notification(notification);
+        });
+      })
       .catch(async error => {
         throw Error(await this.errorMessage(error));
       });

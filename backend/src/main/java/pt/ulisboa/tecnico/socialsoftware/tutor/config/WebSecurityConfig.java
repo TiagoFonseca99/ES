@@ -30,7 +30,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/resources/**");
+        web.ignoring()
+            .antMatchers("/resources/**")
+            .antMatchers("/auth/check")
+            .antMatchers("/auth/logout");
     }
 
     @Override
@@ -44,6 +47,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
                 .antMatchers( "/auth/**").permitAll()
+                .antMatchers( "/logout").permitAll()
                 .antMatchers( "/images/**").permitAll()
                 .antMatchers( "/swagger-ui.html").permitAll()
                 .antMatchers( "/favicon.ico").permitAll()

@@ -10,6 +10,11 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
@@ -24,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
-public class User implements UserDetails, DomainEntity {
+public class User implements UserDetails, DomainEntity, Observer {
     public enum Role {
         STUDENT, TEACHER, ADMIN, DEMO_ADMIN
     }
@@ -55,9 +60,6 @@ public class User implements UserDetails, DomainEntity {
     private Integer numberOfCorrectStudentAnswers;
     private Integer numberOfApprovedSubmissions;
     private Integer numberOfRejectedSubmissions;
-    private Boolean tournamentNamePermission;
-    private Boolean tournamentScorePermission;
-    private Boolean submissionPermission;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
@@ -95,6 +97,15 @@ public class User implements UserDetails, DomainEntity {
     @Column(columnDefinition = "boolean default true")
     private boolean tournamentStatsPublic = true;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean userStatsPublic = true;
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
+    private List<Tournament> tournaments_observers = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "users")
+    private List<Notification> notifications = new ArrayList<>();
+
     public User() {
     }
 
@@ -115,8 +126,6 @@ public class User implements UserDetails, DomainEntity {
         this.numberOfCorrectStudentAnswers = 0;
         this.numberOfApprovedSubmissions = 0;
         this.numberOfRejectedSubmissions = 0;
-        this.tournamentNamePermission = false;
-        this.tournamentScorePermission = false;
     }
 
     @Override
@@ -345,38 +354,6 @@ public class User implements UserDetails, DomainEntity {
     public Integer getNumberOfRejectedSubmissions() { return numberOfRejectedSubmissions; }
 
     public void setNumberOfRejectedSubmissions(Integer numberOfRejectedSubmissions) { this.numberOfRejectedSubmissions = numberOfRejectedSubmissions; }
-    
-    public boolean getTournamentNamePermission() {
-        if (tournamentNamePermission == null)
-            this.tournamentNamePermission = false;
-        return tournamentNamePermission;
-    }
-
-    public Boolean getTournamentNamePermissionB() {
-        if (tournamentNamePermission == null)
-            this.tournamentNamePermission = Boolean.FALSE;
-        return tournamentNamePermission;
-    }
-
-    public void setTournamentNamePermission(boolean tournamentNamePermission) {
-        this.tournamentNamePermission = tournamentNamePermission;
-    }
-
-    public boolean getTournamentScorePermission() {
-        if (tournamentScorePermission == null)
-            this.tournamentScorePermission = false;
-        return tournamentScorePermission;
-    }
-
-    public Boolean getTournamentScorePermissionB() {
-        if (tournamentScorePermission == null)
-            this.tournamentScorePermission = Boolean.FALSE;
-        return tournamentScorePermission;
-    }
-
-    public void setTournamentScorePermission(boolean tournamentScorePermission) {
-        this.tournamentScorePermission = tournamentScorePermission;
-    }
 
     @Override
     public String toString() {
@@ -465,14 +442,19 @@ public class User implements UserDetails, DomainEntity {
         this.tournaments.add(tournament);
     }
 
+    public void addObserver(Tournament tournament) {
+        this.tournaments_observers.add(tournament);
+    }
 
-    public Boolean isStudent() {
+    public boolean isStudent() {
         return this.role == User.Role.STUDENT;
     }
 
     public void removeTournament(Tournament tournament) { this.tournaments.remove(tournament); }
 
-    public Boolean isTeacher() {
+    public void removeObserver(Tournament tournament) { this.tournaments_observers.remove(tournament); }
+
+    public boolean isTeacher() {
         return this.role == User.Role.TEACHER;
     }
 
@@ -578,6 +560,10 @@ public class User implements UserDetails, DomainEntity {
         replies.add(reply);
     }
 
+    public Set<Reply> getReplies() {
+        return this.replies;
+    }
+
     public DashboardDto getDashboardInfo() {
         return new DashboardDto(this);
     }
@@ -604,5 +590,18 @@ public class User implements UserDetails, DomainEntity {
 
     public void toggleTournamentStatsVisibility() {
         this.tournamentStatsPublic = !this.tournamentStatsPublic;
+    }
+
+    public boolean isUserStatsPublic() { return userStatsPublic; }
+
+    public void toggleUserStatsVisibility() {
+        this.userStatsPublic = !this.userStatsPublic;
+    }
+
+    @Override
+    public void update(Object o, Notification notification) {
+        if (o instanceof Tournament) {
+            notification.addUser(this);
+        }
     }
 }

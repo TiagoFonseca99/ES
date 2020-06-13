@@ -3,6 +3,9 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementQuizDto;
@@ -19,7 +22,7 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Entity
 @Table(name = "tournaments")
-public class Tournament {
+public class Tournament implements Observable {
     @SuppressWarnings("unused")
     public enum Status {
         NOT_CANCELED, CANCELED
@@ -58,6 +61,18 @@ public class Tournament {
     @Column(name = "quizID")
     private Integer quizId;
 
+    @Column(name = "privateTournament")
+    private boolean privateTournament;
+
+    @Column(name = "password")
+    private String password;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<User> observers = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<Notification> notifications = new ArrayList<>();
+
     public Tournament() {
     }
 
@@ -70,6 +85,8 @@ public class Tournament {
         setCourseExecution(user);
         setTopics(topics);
         topicsAddTournament(topics, this);
+        setPassword(tournamentDto.getPassword());
+        setPrivateTournament(tournamentDto.isPrivateTournament());
     }
 
     public Integer getId() {
@@ -195,12 +212,16 @@ public class Tournament {
 
     public void addParticipant(User user) {
         this.participants.add(user);
+        this.Attach(user);
         user.addTournament(this);
+        user.addObserver(this);
     }
 
     public void removeParticipant(User user) {
         this.participants.remove(user);
+        this.Dettach(user);
         user.removeTournament(this);
+        user.removeObserver(this);
     }
 
     public boolean hasQuiz() {
@@ -209,7 +230,6 @@ public class Tournament {
         }
         return false;
     }
-
 
     public void remove() {
         creator = null;
@@ -222,4 +242,40 @@ public class Tournament {
         getParticipants().clear();
     }
 
+    public boolean isPrivateTournament() { return privateTournament; }
+
+    public void setPrivateTournament(boolean privateTournament) {
+        this.privateTournament = privateTournament;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public List<Notification> getNotifications() { return notifications; }
+
+    public void addNotification(Notification notification) { this.notifications.add(notification); }
+
+    public void removeNotification(Notification notification) { this.notifications.remove(notification); }
+
+    @Override
+    public void Attach(Observer o) {
+        this.observers.add((User) o);
+    }
+
+    @Override
+    public void Dettach(Observer o) {
+        this.observers.remove(o);
+    }
+
+    @Override
+    public void Notify(Notification notification) {
+        for (Observer observer : observers) {
+            observer.update(this, notification);
+        }
+    }
 }

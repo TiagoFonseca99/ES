@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
@@ -19,19 +20,31 @@ public class Submission {
     @OneToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval=true)
     private Question question;
 
+    @Column(columnDefinition = "TEXT")
+    private String argument;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "course_execution_id")
+    private CourseExecution courseExecution;
+
+    @Column(columnDefinition = "boolean default false", nullable = false)
+    private boolean anonymous;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "submission", fetch=FetchType.LAZY, orphanRemoval=true)
     private Set<Review> reviews = new HashSet<>();
 
     public Submission() {}
 
-    public Submission(Question question, User user){
+    public Submission(CourseExecution courseExecution, Question question, User user){
+        this.courseExecution = courseExecution;
         this.question = question;
         this.user = user;
         user.addSubmission(this);
+        courseExecution.addSubmission(this);
     }
 
     public Integer getId() { return id; }
@@ -47,6 +60,22 @@ public class Submission {
     public void setUser(User user) { this.user = user; }
 
     public int getStudentId() { return this.user.getId(); }
+
+    public boolean isAnonymous() { return anonymous; }
+
+    public void setAnonymous(boolean anonymous) { this.anonymous = anonymous; }
+
+    public String getArgument() { return argument; }
+
+    public void setArgument(String argument) { this.argument = argument; }
+
+    public CourseExecution getCourseExecution() { return courseExecution; }
+
+    public Integer getCourseExecutionId() { return courseExecution.getId(); }
+
+    public Integer getCourseId() { return courseExecution.getCourseId(); }
+
+    public void setCourseExecution(CourseExecution courseExecution) { this.courseExecution = courseExecution; }
 
     @Override
     public String toString() {

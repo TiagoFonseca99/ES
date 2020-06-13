@@ -16,11 +16,7 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          data-cy="close"
-          dark
-          color="blue darken-1"
-          @click="$emit('dialog')"
+        <v-btn data-cy="close" dark color="primary" @click="$emit('dialog')"
           >close</v-btn
         >
       </v-card-actions>
@@ -28,6 +24,8 @@
         v-if="this.$store.getters.isTeacher && discussion"
         :discussions="discussions"
         v-on:submit="submittedDiscussion"
+        v-on:discussions="updateDiscussions"
+        v-on:replies="updateReplies"
       />
     </v-card>
   </v-dialog>
@@ -82,6 +80,26 @@ export default class ShowQuestionDialog extends Vue {
   @Emit('submittedDiscussion')
   submittedDiscussion(all: boolean) {
     return all;
+  }
+
+  @Emit('updateDiscussions')
+  updateDiscussions(discussions: Discussion[]) {
+    this.discussions = discussions;
+    return this.discussions.length != 0;
+  }
+
+  @Emit('updateReplies')
+  updateReplies() {
+    for (let i = 0; i < this.discussions.length; i++) {
+      if (
+        !this.discussions[i].replies! ||
+        this.discussions[i].replies!.length == 0
+      ) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
 </script>

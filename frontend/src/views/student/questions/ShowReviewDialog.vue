@@ -14,16 +14,12 @@
         <v-btn
           data-cy="resubmit"
           dark
-          color="blue darken-1"
+          color="primary"
           v-if="review.status === 'REJECTED'"
           @click="resubmitQuestion"
           >edit & resubmit</v-btn
         >
-        <v-btn
-          data-cy="close"
-          dark
-          color="blue darken-1"
-          @click="closeReviewDialog"
+        <v-btn data-cy="close" dark color="primary" @click="closeReviewDialog"
           >close</v-btn
         >
       </v-card-actions>
@@ -76,6 +72,7 @@ export default class ShowReviewDialog extends Vue {
   resubmitQuestion() {
     this.currentQuestion = this.question;
     this.currentSubmission = this.submission;
+    this.currentSubmission.courseExecutionId = this.$store.getters.getCurrentCourse.courseExecutionId;
     this.editSubmissionDialog = true;
   }
 

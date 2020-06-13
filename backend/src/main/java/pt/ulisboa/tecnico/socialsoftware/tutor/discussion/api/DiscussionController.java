@@ -8,7 +8,9 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,7 +56,7 @@ public class DiscussionController {
 
         discussion.setAvailability(available);
 
-        return discussionService.setAvailability(discussion);
+        return discussionService.setAvailability(user.getId(), discussion);
     }
 
     @PostMapping(value = "/discussions/replies")
@@ -73,13 +75,61 @@ public class DiscussionController {
         reply.setUserId(user.getId());
         reply.setDate(DateHandler.toISOString(DateHandler.now()));
 
-        return discussionService.giveReply(reply, discussion);
+        return discussionService.createReply(reply, discussion);
 
+    }
+
+    @DeleteMapping(value = "/discussions/replies/{reply}")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT')")
+    public boolean removeReply(Principal principal, @Valid @PathVariable Integer reply) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        return discussionService.removeReply(user.getId(), reply);
+    }
+
+    @PutMapping(value = "/discussions/replies/edit")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT')")
+    public ReplyDto editReply(Principal principal, @Valid @RequestBody ReplyDto reply) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        return discussionService.editReply(user.getId(), reply);
+    }
+
+    @DeleteMapping(value = "/discussions/{userId}/{questionId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT')")
+    public boolean removeDiscussion(Principal principal, @Valid @PathVariable("userId") Integer userId, @Valid @PathVariable("questionId") Integer questionId) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        return discussionService.removeDiscussion(user.getId(), userId, questionId);
+    }
+
+    @PutMapping(value = "/discussions/edit")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_STUDENT')")
+    public DiscussionDto editDiscussion(Principal principal, @Valid @RequestBody DiscussionDto discussion) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(ErrorMessage.AUTHENTICATION_ERROR);
+        }
+
+        return discussionService.editDiscussion(user.getId(), discussion);
     }
 
     @GetMapping(value = "/discussions")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public List<DiscussionDto> getDiscussions(Principal principal, @Valid @RequestParam Integer userId) {
+    public List<DiscussionDto> getDiscussionsByUser(Principal principal, @Valid @RequestParam Integer userId, @Valid @RequestParam Integer courseId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
@@ -88,7 +138,7 @@ public class DiscussionController {
             throw new TutorException(ErrorMessage.DISCUSSION_NOT_SUBMITTED_BY_REQUESTER, user.getId());
         }
 
-        return discussionService.findDiscussionsByUserId(userId);
+        return discussionService.findDiscussionsByUserId(userId, courseId);
     }
 
     @GetMapping(value = "/discussions/question")

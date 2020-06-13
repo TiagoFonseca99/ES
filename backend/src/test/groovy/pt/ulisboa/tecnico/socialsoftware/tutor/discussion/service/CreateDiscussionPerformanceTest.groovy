@@ -9,11 +9,13 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
@@ -23,17 +25,24 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
-import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 @DataJpaTest
 class CreateDiscussionPerformanceTest extends Specification {
+    public static final String ACADEMIC_TERM = "academic term"
+    public static final String ACRONYM = "acronym"
+    public static final String COURSE_NAME = "course name"
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
     public static final String USER_USERNAME = "user username"
     public static final String USER_NAME = "user name"
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
+
+    @Autowired
+    CourseRepository courseRepository
 
     @Autowired
     DiscussionService discussionService
@@ -63,6 +72,16 @@ class CreateDiscussionPerformanceTest extends Specification {
     def "performance test to create 5000 discussions"(){
         given: "a student"
         def student = new User(USER_NAME, USER_USERNAME, 1, User.Role.STUDENT)
+        userRepository.save(student)
+        and: "a course"
+        def course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+
+        def courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(student)
+        courseExecutionRepository.save(courseExecution)
+
+        student.addCourse(courseExecution)
         userRepository.save(student)
 
         and: "a quiz"
@@ -107,6 +126,7 @@ class CreateDiscussionPerformanceTest extends Specification {
             discussion.setUserId(student.getId())
             discussion.setQuestion(new QuestionDto(question))
             discussion.setContent(DISCUSSION_CONTENT)
+            discussion.setCourseId(course.getId())
 
             discussionService.createDiscussion(discussion)
         }

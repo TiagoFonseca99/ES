@@ -7,9 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -20,7 +17,6 @@ import javax.validation.Valid;
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -95,48 +91,71 @@ public class SubmissionController {
 
     @GetMapping(value = "/management/reviews")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public List<SubmissionDto> getSubsToTeacher(Principal principal) {
+    public List<SubmissionDto> getSubsToTeacher(Principal principal, @Valid @RequestParam Integer executionId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
+        } else if (executionId == null) {
+            throw new TutorException(COURSE_EXECUTION_MISSING);
         }
 
-        return submissionService.getSubsToTeacher();
+        return submissionService.getSubsToTeacher(executionId);
     }
 
     @GetMapping(value = "/management/reviews/showReviews")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public List<ReviewDto> getReviewsToTeacher(Principal principal) {
+    public List<ReviewDto> getReviewsToTeacher(Principal principal, @Valid @RequestParam Integer executionId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
+        } else if (executionId == null) {
+            throw new TutorException(COURSE_EXECUTION_MISSING);
         }
 
-        return submissionService.getReviewsToTeacher();
+        return submissionService.getReviewsToTeacher(executionId);
     }
 
     @GetMapping(value = "/student/reviews")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public List<ReviewDto> getSubmissionReviews(Principal principal) {
+    public List<ReviewDto> getSubmissionReviews(Principal principal, @Valid @RequestParam Integer executionId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
+        } else if (executionId == null) {
+            throw new TutorException(COURSE_EXECUTION_MISSING);
         }
-        return submissionService.getSubmissionReviews(user.getId());
+
+        return submissionService.getSubmissionReviews(user.getId(), executionId);
     }
 
     @GetMapping(value = "/student/submissions")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public List<SubmissionDto> getSubmissions(Principal principal) {
+    public List<SubmissionDto> getSubmissions(Principal principal, @Valid @RequestParam Integer executionId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
+        } else if (executionId == null) {
+            throw new TutorException(COURSE_EXECUTION_MISSING);
         }
-        return submissionService.getSubmissions(user.getId());
+
+        return submissionService.getSubmissions(user.getId(), executionId);
     }
 
+    @GetMapping(value = "/student/submissions/all")
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public List<SubmissionDto> getStudentsSubmissions(Principal principal, @Valid @RequestParam Integer executionId) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        } else if (executionId == null) {
+            throw new TutorException(COURSE_EXECUTION_MISSING);
+        }
+
+        return submissionService.getStudentsSubmissions(executionId);
+    }
 }

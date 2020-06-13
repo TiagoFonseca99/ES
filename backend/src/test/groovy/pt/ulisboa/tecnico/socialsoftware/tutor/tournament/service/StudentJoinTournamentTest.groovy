@@ -11,6 +11,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
@@ -87,6 +88,8 @@ class StudentJoinTournamentTest extends Specification {
     def endTime_Now = DateHandler.now().plusHours(2)
     def tournamentDtoInit = new TournamentDto()
     def tournamentDto = new TournamentDto()
+    def privateTournamentDtoInit = new TournamentDto()
+    def privateTournamentDto = new TournamentDto()
     def questionOne
 
     def setup() {
@@ -125,6 +128,14 @@ class StudentJoinTournamentTest extends Specification {
         tournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
         tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDtoInit)
 
+        privateTournamentDtoInit.setStartTime(DateHandler.toISOString(DateHandler.now()))
+        privateTournamentDtoInit.setEndTime(DateHandler.toISOString(endTime_Now))
+        privateTournamentDtoInit.setNumberOfQuestions(NUMBER_OF_QUESTIONS1)
+        privateTournamentDtoInit.setState(Tournament.Status.NOT_CANCELED)
+        privateTournamentDtoInit.setPrivateTournament(true)
+        privateTournamentDtoInit.setPassword("Novabase")
+        privateTournamentDto = tournamentService.createTournament(user.getId(), topics, privateTournamentDtoInit)
+
         questionOne = new Question()
         questionOne.setKey(1)
         questionOne.setContent("Question Content")
@@ -147,8 +158,8 @@ class StudentJoinTournamentTest extends Specification {
         user3.addCourse(courseExecution)
         userRepository.save(user3)
 
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
-        tournamentService.joinTournament(user3.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
+        tournamentService.joinTournament(user3.getId(), tournamentDto, "")
 
         when:
         def result = tournamentService.getTournamentParticipants(tournamentDto)
@@ -186,11 +197,11 @@ class StudentJoinTournamentTest extends Specification {
         user4.addCourse(courseExecution)
         userRepository.save(user4)
 
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
-        tournamentService.joinTournament(user3.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
+        tournamentService.joinTournament(user3.getId(), tournamentDto, "")
 
         when:
-        tournamentService.joinTournament(user4.getId(), tournamentDto)
+        tournamentService.joinTournament(user4.getId(), tournamentDto, "")
 
         then: "the teacher cannot join the tournament"
         def exception = thrown(TutorException)
@@ -229,12 +240,12 @@ class StudentJoinTournamentTest extends Specification {
         user4.addCourse(courseExecution)
         userRepository.save(user4)
 
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
-        tournamentService.joinTournament(user3.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
+        tournamentService.joinTournament(user3.getId(), tournamentDto, "")
 
 
         when:
-        tournamentService.joinTournament(user4.getId(), tournamentDto)
+        tournamentService.joinTournament(user4.getId(), tournamentDto, "")
 
         then: "the admin cannot join the tournament"
         def exception = thrown(TutorException)
@@ -265,7 +276,7 @@ class StudentJoinTournamentTest extends Specification {
         userRepository.save(user4)
 
         when:
-        tournamentService.joinTournament(user4.getId(), tournamentDto)
+        tournamentService.joinTournament(user4.getId(), tournamentDto, "")
 
         then: "the teacher cannot join the tournament"
         def exception = thrown(TutorException)
@@ -283,7 +294,7 @@ class StudentJoinTournamentTest extends Specification {
         userRepository.save(user4)
 
         when:
-        tournamentService.joinTournament(user4.getId(), tournamentDto)
+        tournamentService.joinTournament(user4.getId(), tournamentDto, "")
 
         then: "the admin cannot join the tournament"
         def exception = thrown(TutorException)
@@ -310,7 +321,7 @@ class StudentJoinTournamentTest extends Specification {
         canceledTournamentDto = tournamentService.createTournament(user.getId(), topics, canceledTournamentDtoInit)
 
         when:
-        tournamentService.joinTournament(user2.getId(), canceledTournamentDto)
+        tournamentService.joinTournament(user2.getId(), canceledTournamentDto, "")
 
         then: "student cannot join"
         def exception = thrown(TutorException)
@@ -338,7 +349,7 @@ class StudentJoinTournamentTest extends Specification {
         sleep(2000)
 
         when:
-        tournamentService.joinTournament(user2.getId(), notOpenTournamentDto)
+        tournamentService.joinTournament(user2.getId(), notOpenTournamentDto, "")
 
         then: "student cannot join"
         def exception = thrown(TutorException)
@@ -354,10 +365,10 @@ class StudentJoinTournamentTest extends Specification {
         def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
         user2.addCourse(courseExecution)
         userRepository.save(user2)
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         when:
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         then: "student cannot join"
         def exception = thrown(TutorException)
@@ -381,7 +392,7 @@ class StudentJoinTournamentTest extends Specification {
         def fakeUserId = 99
 
         when:
-        tournamentService.joinTournament(fakeUserId, tournamentDto)
+        tournamentService.joinTournament(fakeUserId, tournamentDto, "")
 
         then: "student cannot join"
         def exception = thrown(TutorException)
@@ -409,7 +420,7 @@ class StudentJoinTournamentTest extends Specification {
 
 
         when:
-        tournamentService.joinTournament(user2.getId(), tournamentDto)
+        tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         then: "student cannot join"
         def exception = thrown(TutorException)
@@ -420,6 +431,50 @@ class StudentJoinTournamentTest extends Specification {
         result.size() == 0
 
     }
+
+    def "student joins an open private tournament with correct password" () {
+        given:
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
+
+
+        tournamentService.joinTournament(user2.getId(), privateTournamentDto, "Novabase")
+
+        when:
+        def result = tournamentService.getTournamentParticipants(privateTournamentDto)
+
+        then: "the students have joined the tournament"
+        result.size() == 1
+        def resTournamentParticipant1 = result.get(0)
+
+        resTournamentParticipant1.getId() == user2.getId()
+        resTournamentParticipant1.getUsername() == USERNAME2
+        resTournamentParticipant1.getName() == USER_NAME2
+        resTournamentParticipant1.getRole() == User.Role.STUDENT
+
+    }
+
+    def "student joins an open private tournament with wrong password" () {
+        given:
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
+
+        when:
+        tournamentService.joinTournament(user2.getId(), privateTournamentDto, "Not Novabase")
+
+        then: "receives exeption"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.WRONG_TOURNAMENT_PASSWORD
+
+        and: "tournament has not participants"
+        def result = tournamentService.getTournamentParticipants(privateTournamentDto)
+        result.size() == 0
+
+    }
+
+
 
 
     @TestConfiguration
@@ -457,6 +512,10 @@ class StudentJoinTournamentTest extends Specification {
         QuestionService questionService() {
             return new QuestionService()
         }
-    }
 
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
+        }
+    }
 }

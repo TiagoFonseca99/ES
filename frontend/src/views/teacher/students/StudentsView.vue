@@ -4,9 +4,9 @@
       :headers="headers"
       :items="students"
       :search="search"
-      disable-pagination
-      :hide-default-footer="true"
+      multi-sort
       :mobile-breakpoint="0"
+      :footer-props="{ itemsPerPageOptions: [15, 30, 50, 100] }"
     >
       <template v-slot:top>
         <v-card-title>
@@ -19,6 +19,12 @@
 
           <v-spacer />
         </v-card-title>
+      </template>
+
+      <template v-slot:item.username="{ item }">
+        <v-chip color="primary" small :to="openStudentDashboard(item)">
+          <span> {{ item.username }} </span>
+        </v-chip>
       </template>
 
       <template v-slot:item.percentageOfCorrectAnswers="{ item }">
@@ -37,6 +43,10 @@
         >
       </template>
     </v-data-table>
+    <footer>
+      <v-icon class="mr-2">mouse</v-icon>Left-click on user's username to view
+      dashboard preview.
+    </footer>
   </v-card>
 </template>
 
@@ -53,6 +63,7 @@ export default class StudentsView extends Vue {
   search: string = '';
   headers: object = [
     { text: 'Name', value: 'name', align: 'left', width: '40%' },
+    { text: 'Username', value: 'username', align: 'center' },
     {
       text: 'Teacher Quizzes',
       value: 'numberOfTeacherQuizzes',
@@ -119,6 +130,10 @@ export default class StudentsView extends Vue {
     else if (percentage < 50) return 'orange';
     else if (percentage < 75) return 'lime';
     else return 'green';
+  }
+
+  openStudentDashboard(student: Student) {
+    return '/management/user?username=' + student.username;
   }
 }
 </script>

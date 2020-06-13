@@ -56,14 +56,14 @@
           <span> {{ item.questionDto.creationDate }}</span>
         </v-chip>
       </template>
-      <template v-slot:item.questionDto.image="{ item }">
-        <v-file-input
-          show-size
-          dense
-          small-chips
-          @change="handleFileUpload($event, item.questionDto)"
-          accept="image/*"
+      <template v-slot:item.topics="{ item }">
+        <edit-submission-topics
+          v-if="item.questionDto.status === 'SUBMITTED'"
+          :submission="item"
+          :topics="topics"
+          v-on:submission-changed-topics="onSubmissionChangedTopics"
         />
+        <view-submission-topics v-else :submission="item" :topics="topics" />
       </template>
 
       <template v-slot:item.action="{ item }">
@@ -83,6 +83,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-icon
+              v-if="item.questionDto.status !== 'AVAILABLE'"
               large
               class="mr-2"
               v-on="on"
@@ -122,17 +123,24 @@ import RemoteServices from '@/services/RemoteServices';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Question from '@/models/management/Question';
 import Submission from '@/models/management/Submission';
+import Topic from '@/models/management/Topic';
 import Image from '@/models/management/Image';
+import EditSubmissionTopics from '@/views/student/questions/EditSubmissionTopics.vue';
 import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
 import EditSubmissionDialog from '@/views/student/questions/EditSubmissionDialog.vue';
+import ViewSubmissionTopics from '@/views/student/questions/ViewSubmissionTopics.vue';
+
 @Component({
   components: {
     'show-question-dialog': ShowQuestionDialog,
+    'edit-submission-topics': EditSubmissionTopics,
+    'view-submission-topics': ViewSubmissionTopics,
     'edit-submission-dialog': EditSubmissionDialog
   }
 })
 export default class SubmissionView extends Vue {
   submissions: Submission[] = [];
+  topics: Topic[] = [];
   currentQuestion: Question | null = null;
   currentSubmission: Submission | null = null;
   editSubmissionDialog: boolean = false;
@@ -150,15 +158,16 @@ export default class SubmissionView extends Vue {
     { text: 'Title', value: 'questionDto.title', align: 'center' },
     { text: 'Status', value: 'questionDto.status', align: 'center' },
     {
+      text: 'Topics',
+      value: 'topics',
+      align: 'center',
+      sortable: false,
+      width: '20%'
+    },
+    {
       text: 'Creation Date',
       value: 'questionDto.creationDate',
       align: 'center'
-    },
-    {
-      text: 'Image',
-      value: 'questionDto.image',
-      align: 'center',
-      sortable: false
     }
   ];
 
@@ -172,12 +181,24 @@ export default class SubmissionView extends Vue {
   async created() {
     await this.$store.dispatch('loading');
     try {
-      [this.submissions] = await Promise.all([RemoteServices.getSubmissions()]);
+      [this.submissions, this.topics] = await Promise.all([
+        RemoteServices.getSubmissions(),
+        RemoteServices.getTopics()
+      ]);
       this.submissions.sort((a, b) => this.sortNewestFirst(a, b));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
+  }
+
+  onSubmissionChangedTopics(questionId: Number, changedTopics: Topic[]) {
+    let submission = this.submissions.find(
+      (submission: Submission) => submission.questionDto.id == questionId
+    );
+    if (submission) {
+      submission.questionDto.topics = changedTopics;
+    }
   }
 
   sortNewestFirst(a: Submission, b: Submission) {
@@ -200,19 +221,6 @@ export default class SubmissionView extends Vue {
     return convertMarkDown(text, image);
   }
 
-  async handleFileUpload(event: File, question: Question) {
-    if (question.id) {
-      try {
-        const imageURL = await RemoteServices.uploadImage(event, question.id);
-        question.image = new Image();
-        question.image.url = imageURL;
-        confirm('Image ' + imageURL + ' was uploaded!');
-      } catch (error) {
-        await this.$store.dispatch('error', error);
-      }
-    }
-  }
-
   showQuestionDialog(question: Question) {
     this.currentQuestion = question;
     this.questionDialog = true;
@@ -226,6 +234,7 @@ export default class SubmissionView extends Vue {
     this.currentQuestion = new Question();
     this.currentQuestion.status = 'SUBMITTED';
     this.currentSubmission = new Submission();
+    this.currentSubmission.courseExecutionId = this.$store.getters.getCurrentCourse.courseExecutionId;
     this.editSubmissionDialog = true;
   }
 
@@ -235,9 +244,18 @@ export default class SubmissionView extends Vue {
     else return 'pink';
   }
 
-  async onSaveQuestion(submission: Submission) {
-    this.submissions = this.submissions.filter(s => s.id !== submission.id);
-    this.submissions.unshift(submission);
+  async onSaveQuestion() {
+    await this.$store.dispatch('loading');
+    try {
+      [this.submissions, this.topics] = await Promise.all([
+        RemoteServices.getSubmissions(),
+        RemoteServices.getTopics()
+      ]);
+      this.submissions.sort((a, b) => this.sortNewestFirst(a, b));
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+    await this.$store.dispatch('clearLoading');
     this.editSubmissionDialog = false;
     this.currentQuestion = null;
     this.currentSubmission = null;

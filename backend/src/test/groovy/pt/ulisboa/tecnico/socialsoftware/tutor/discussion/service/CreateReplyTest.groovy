@@ -4,6 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.ReplyRepository
 import spock.lang.Specification
 
@@ -30,13 +34,22 @@ import java.time.LocalDateTime
 
 
 @DataJpaTest
-class GiveExplanationTest extends Specification {
+class CreateReplyTest extends Specification {
+    public static final String ACADEMIC_TERM = "academic term"
+    public static final String ACRONYM = "acronym"
+    public static final String COURSE_NAME = "course name"
     public static final String DISCUSSION_REPLY = "discussion reply"
     public static final String QUESTION_TITLE = "question title"
     public static final String QUESTION_CONTENT = "question content"
     public static final String DISCUSSION_CONTENT = "discussion content"
     public static final String USER_USERNAME = "user username"
     public static final String USER_NAME = "user name"
+
+    @Autowired
+    CourseRepository courseRepository
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
 
     @Autowired
     DiscussionService discussionService
@@ -65,7 +78,8 @@ class GiveExplanationTest extends Specification {
     @Autowired
     ReplyRepository replyRepository
 
-
+    def course
+    def courseExecution
     def teacher
     def student
     def question
@@ -100,21 +114,33 @@ class GiveExplanationTest extends Specification {
         quizQuestionRepository.save(quizquestion)
         quizAnswerRepository.save(quizanswer)
 
-
         quiz.addQuizAnswer(quizanswer)
         quiz.addQuizQuestion(quizquestion)
 
         quizRepository.save(quiz)
 
-
         questionRepository.save(question)
         student.addQuizAnswer(quizanswer)
         userRepository.save(student)
+
+        course = new Course(COURSE_NAME, Course.Type.TECNICO)
+        courseRepository.save(course)
+
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecution.addUser(student)
+        courseExecution.addUser(teacher)
+        courseExecutionRepository.save(courseExecution)
+
+        student.addCourse(courseExecution)
+        teacher.addCourse(courseExecution)
+        userRepository.save(student)
+        userRepository.save(teacher)
 
         discussion = new Discussion()
         discussion.setContent(DISCUSSION_CONTENT)
         discussion.setUser(student)
         discussion.setQuestion(question)
+        discussion.setCourse(course)
         discussionRepository.save(discussion)
         userRepository.save(student)
     }
@@ -128,7 +154,7 @@ class GiveExplanationTest extends Specification {
 
 
         when: "a reply is given"
-        discussionService.giveReply(replyDto, new DiscussionDto(discussion))
+        discussionService.createReply(replyDto, new DiscussionDto(discussion))
 
         then: "the correct reply was given"
         replyRepository.count() == 1L
@@ -145,7 +171,7 @@ class GiveExplanationTest extends Specification {
         replyDto.setDate(LocalDateTime.now())
 
         when: "the student creates a reply"
-        discussionService.giveReply(replyDto, new DiscussionDto(discussion))
+        discussionService.createReply(replyDto, new DiscussionDto(discussion))
 
         then: "the correct reply was given"
         replyRepository.count() == 1L
@@ -156,16 +182,20 @@ class GiveExplanationTest extends Specification {
 
     def "student not creator give reply to discussion"(){
         given: "a different student"
-        def otherStudent = new User(USER_NAME + "2", USER_USERNAME + "2", 3, User.Role.STUDENT)
-        userRepository.save(otherStudent)
+        def other = new User(USER_NAME + "2", USER_USERNAME + "2", 3, User.Role.STUDENT)
+        userRepository.save(other)
+        courseExecution.addUser(other)
+        courseExecutionRepository.save(courseExecution)
+        other.addCourse(courseExecution)
+        userRepository.save(other)
         and: "a reply created by the student"
         def replyDto = new ReplyDto()
         replyDto.setMessage(DISCUSSION_REPLY)
-        replyDto.setUserId(otherStudent.getId())
+        replyDto.setUserId(other.getId())
         replyDto.setDate(LocalDateTime.now())
 
         when: "the student creates a reply"
-        discussionService.giveReply(replyDto, new DiscussionDto(discussion))
+        discussionService.createReply(replyDto, new DiscussionDto(discussion))
 
         then: "an exception is thrown"
         def exception = thrown(TutorException)
@@ -182,10 +212,10 @@ class GiveExplanationTest extends Specification {
         replyDto2.setMessage(DISCUSSION_REPLY + "2")
         replyDto2.setUserId(teacher.getId())
         replyDto2.setDate(LocalDateTime.now())
-        discussionService.giveReply(replyDto, new DiscussionDto(discussion))
+        discussionService.createReply(replyDto, new DiscussionDto(discussion))
 
         when: "another reply is given"
-        discussionService.giveReply(replyDto2, new DiscussionDto(discussion))
+        discussionService.createReply(replyDto2, new DiscussionDto(discussion))
 
         then: "the two replies are present in the repository"
         replyRepository.count() == 2L

@@ -23,13 +23,13 @@ public enum ErrorMessage {
     INVALID_QUESTION_SEQUENCE_FOR_QUIZ("Invalid question sequence for quiz"),
 
     COURSE_EXECUTION_NOT_FOUND("Course execution not found with id %d"),
+    COURSE_EXECUTION_MISSING("Course execution is missing"),
     OPTION_NOT_FOUND("Option not found with id %d"),
     QUESTION_ANSWER_NOT_FOUND("Question answer not found with id %d"),
     QUESTION_NOT_FOUND("Question not found with id %d"),
     USER_NOT_FOUND("User not found with id %d"),
     ASSESSMENT_NOT_FOUND("Assessment not found with id %d"),
     TOPIC_CONJUNCTION_NOT_FOUND("Topic Conjunction not found with id %d"),
-    USER_TOURNAMENT_PERMISSIONS_NOT_CONSISTENT("Tournament permissions not consistent for user %s"),
 
     QUIZ_ANSWER_NOT_FOUND("Quiz answer not found with id %d"),
     QUIZ_NOT_FOUND("Quiz not found with id %d"),
@@ -41,7 +41,7 @@ public enum ErrorMessage {
     COURSE_NOT_FOUND("Course not found with name %s"),
 
     CANNOT_DELETE_COURSE_EXECUTION("The course execution cannot be deleted %s"),
-    USERNAME_NOT_FOUND("Username %d not found"),
+    USERNAME_NOT_FOUND("Username %s not found"),
 
     QUIZ_USER_MISMATCH("Quiz %s is not assigned to student %s"),
     QUIZ_MISMATCH("Quiz Answer Quiz %d does not match Quiz Question Quiz %d"),
@@ -92,6 +92,7 @@ public enum ErrorMessage {
     REVIEW_MISSING_SUBMISSION("Missing submission for review"),
     SUBMISSION_MISSING_QUESTION("Missing question for submission"),
     SUBMISSION_MISSING_STUDENT("Missing student for submission"),
+    SUBMISSION_MISSING_COURSE("Submission is not assigned to a course"),
     SUBMISSION_NOT_FOUND("Submission not found with id %d"),
 
     // Tdp
@@ -110,17 +111,30 @@ public enum ErrorMessage {
     TOURNAMENT_TOPIC_MISMATCH("Tournament %s does not have topic %d"),
     TOURNAMENT_CREATOR("User %s can not cancel this tournament"),
     USER_NOT_JOINED("User has not joined tournament: %s"),
+    USER_TOURNAMENT_PERMISSIONS_NOT_CONSISTENT("Tournament permissions not consistent for user %s"),
+    WRONG_TOURNAMENT_PASSWORD("Wrong tournament password for private tournament %d"),
 
     // Ddp
     DISCUSSION_MISSING_DATA("Missing information for discussion"),
-    DISCUSSION_NOT_FOUND("Discussion not found with user id %d and question id %d"),
-    DISCUSSION_NOT_STUDENT_CREATOR("Teacher cannot create discussion"),
-    DISCUSSION_NOT_SUBMITTED_BY_REQUESTER("Discussion was not created by user with id %d"),
-    DUPLICATE_DISCUSSION("Duplicate discussion for user id %d and question id %d"),
-    DUPLICATE_REPLY("Duplicate Reply for teacher: %d"),
-    QUESTION_NOT_ANSWERED("Question not answered with id %d"),
+    DISCUSSION_NOT_FOUND("Discussion not found"),
+    DISCUSSION_NOT_STUDENT_CREATOR("Only students can create discussions"),
+    DISCUSSION_NOT_SUBMITTED_BY_REQUESTER("Discussion was not created by user"),
+    DISCUSSION_UNAUTHORIZED_DELETER("User cannot delete this discussion"),
+    DISCUSSION_UNAUTHORIZED_EDITOR("User cannot edit this discussion"),
+    DUPLICATE_DISCUSSION("Duplicate discussion"),
+    DUPLICATE_REPLY("Duplicate reply"),
+    QUESTION_NOT_ANSWERED("Question not answered"),
     REPLY_MISSING_DATA("Missing information for reply"),
-    REPLY_UNAUTHORIZED_USER("User with id %d cannot create reply for given discussion");
+    REPLY_NOT_FOUND("Reply not found"),
+    REPLY_UNAUTHORIZED_DELETER("User cannot delete this reply"),
+    REPLY_UNAUTHORIZED_EDITOR("User cannot edit this reply"),
+    REPLY_UNAUTHORIZED_USER("User cannot create reply for given discussion"),
+    USER_NOT_IN_COURSE("User is not enrolled in course %s"),
+
+    // Sdn
+    INVALID_TITLE_FOR_NOTIFICATION("Invalid title for notification"),
+    INVALID_CONTENT_FOR_NOTIFICATION("Invalid content for notification"),
+    NOTIFICATION_NOT_FOUND("Notification %s not found");
 
     public final String label;
 

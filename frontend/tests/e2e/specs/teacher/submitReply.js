@@ -1,32 +1,45 @@
 describe('Teacher walkthrough', () => {
-
-    beforeEach(() => {
-      cy.demoTeacherLogin()
-      cy.openTeacherQuestions()
+  beforeEach(() => {
+    cy.demoTeacherLogin();
+    cy.addDiscussionsInfo(676);
+    cy.openTeacherQuestions();
   });
 
-    afterEach(() => {
-        cy.contains('Logout').click()
-    })
+  afterEach(() => {
+    cy.contains('Logout').click();
+    cy.removeAllReplies();
+    cy.removeDiscussionInfo(676);
+  });
 
-    it('login submits a reply', () => {
-        cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO discussions (question_id, user_id, content) VALUES ((SELECT id FROM questions WHERE id NOT IN (SELECT question_id FROM discussions WHERE user_id = 676) LIMIT 1), 676, \'content\');"');
-        cy.submitReply('Reply Message');
+  it('login submits a reply and deletes', () => {
+    cy.filterDiscussions();
+    cy.filterDiscussions();
+    cy.selectFirstDiscussion();
+    cy.wait(1000);
+    cy.submitReply('Reply Message');
+    cy.openReplies();
+    cy.wait(1000);
+    cy.removeReply();
+  });
 
-    });
+  it('login submits an empty reply, good reply and edit', () => {
+    cy.filterDiscussions();
+    cy.filterDiscussions();
+    cy.selectFirstDiscussion();
+    cy.log('missing reply message');
+    cy.submitEmptyReply();
+    cy.closeErrorMessage();
+    cy.submitReply('Reply Message');
+    cy.openReplies();
+    cy.wait(1000);
+    cy.editReply('Not relevant');
+    cy.wait(1000);
+  });
 
-    it('login submits an empty reply', () => {
-        cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO discussions (question_id, user_id, content) VALUES ((SELECT id FROM questions WHERE id NOT IN (SELECT question_id FROM discussions WHERE user_id = 676) LIMIT 1), 676, \'content\');"' );
-        cy.log('missing reply message')
-        cy.submitEmptyReply();
-
-        cy.closeErrorMessage();
-
-    });
-
-    it('login changes discussion availability', () => {
-        cy.exec('PGPASSWORD= psql -d tutordb -U daniel -h localhost -c "INSERT INTO discussions (question_id, user_id, content) VALUES ((SELECT id FROM questions WHERE id NOT IN (SELECT question_id FROM discussions WHERE user_id = 676) LIMIT 1), 676, \'content\');"' );
-        cy.clickAvailability();
-    });
-
-})
+  it('login changes discussion availability', () => {
+    cy.filterDiscussions();
+    cy.selectFirstDiscussion();
+    cy.clickAvailability();
+    cy.wait(1000);
+  });
+});

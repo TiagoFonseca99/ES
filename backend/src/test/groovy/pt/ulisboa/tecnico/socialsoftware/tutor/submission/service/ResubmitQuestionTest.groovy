@@ -42,6 +42,8 @@ class ResubmitQuestionTest extends Specification {
     public static final String NEW_OPTION_CONTENT = "new optionId content"
     public static final String STUDENT_NAME = "João Silva"
     public static final String STUDENT_USERNAME = "joaosilva"
+    public static final String ARGUMENT = "Argumento"
+
 
     @Autowired
     SubmissionService submissionService
@@ -74,7 +76,9 @@ class ResubmitQuestionTest extends Specification {
     def optionKO
     def option1
     def option2
+    @Shared
     def course
+    @Shared
     def courseExecution
     def acronym
     def submission
@@ -111,6 +115,7 @@ class ResubmitQuestionTest extends Specification {
         submission = new Submission()
         submission.setQuestion(question)
         submission.setUser(student)
+        submission.setCourseExecution(courseExecution)
         submissionRepository.save(submission)
         newQuestion = new Question()
         newQuestion.setTitle(QUESTION_TITLE)
@@ -156,7 +161,9 @@ class ResubmitQuestionTest extends Specification {
         def submissionDto = new SubmissionDto()
         submissionDto.setQuestionDto(questionDto)
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
+
 
         when: submissionService.resubmitQuestion(question.getId(), newQuestion.getId(), submissionDto)
 
@@ -185,6 +192,38 @@ class ResubmitQuestionTest extends Specification {
         resOptionTwo.getCorrect()
     }
 
+    def "edit question with argument and resubmit"() {
+        given: "a changed question"
+        def questionDto = new QuestionDto()
+        questionDto.setTitle(NEW_QUESTION_TITLE)
+        questionDto.setContent(NEW_QUESTION_CONTENT)
+        and: '2 changed options'
+        def optionsList= new ArrayList<OptionDto>()
+        def optionDto = new OptionDto()
+        optionDto.setContent(NEW_OPTION_CONTENT)
+        optionDto.setCorrect(false)
+        optionDto.setSequence(0)
+        optionsList.add(optionDto)
+        optionDto = new OptionDto()
+        optionDto.setContent(OPTION_CONTENT)
+        optionDto.setCorrect(true)
+        optionDto.setSequence(1)
+        optionsList.add(optionDto)
+        questionDto.setOptions(optionsList)
+        and: "the new submissionDto"
+        def submissionDto = new SubmissionDto()
+        submissionDto.setQuestionDto(questionDto)
+        submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
+        submissionDto.setStudentId(student.getId())
+        submissionDto.setArgument(ARGUMENT)
+
+        when: submissionService.resubmitQuestion(question.getId(), newQuestion.getId(), submissionDto)
+
+        then: "a new submission is created with the question changed and argument"
+        def result = submissionRepository.findAll().get(1)
+        result.getArgument() == ARGUMENT
+    }
 
     def "edit question with missing data"(){
         given: "a changed question"
@@ -195,6 +234,7 @@ class ResubmitQuestionTest extends Specification {
         def submissionDto = new SubmissionDto()
         submissionDto.setQuestionDto(questionDto)
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
 
         when: submissionService.resubmitQuestion(question.getId(), newQuestion.getId(), submissionDto)
@@ -226,6 +266,7 @@ class ResubmitQuestionTest extends Specification {
         def submissionDto = new SubmissionDto()
         submissionDto.setQuestionDto(questionDto)
         submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseExecutionId(courseExecution.getId())
         submissionDto.setStudentId(student.getId())
 
         when:
@@ -237,7 +278,7 @@ class ResubmitQuestionTest extends Specification {
     }
 
     @Unroll
-    def "invalid arguments: studentId=#studentId | oldQuestionId=#oldQuestionId | newQuestionId=#newQuestionId  || errorMessage"(){
+    def "invalid arguments: studentId=#studentId | oldQuestionId=#oldQuestionId | newQuestionId=#newQuestionId | courseId=#courseId | courseExecutionId=#courseExecutionId || errorMessage"(){
         given: "a changed question"
         def questionDto = new QuestionDto()
         questionDto.setTitle(NEW_QUESTION_TITLE)
@@ -258,7 +299,8 @@ class ResubmitQuestionTest extends Specification {
         and: "the new submissionDto"
         def submissionDto = new SubmissionDto()
         submissionDto.setQuestionDto(questionDto)
-        submissionDto.setCourseId(course.getId())
+        submissionDto.setCourseId(courseId)
+        submissionDto.setCourseExecutionId(courseExecutionId)
         submissionDto.setStudentId(studentId)
 
         when: submissionService.resubmitQuestion(oldQuestionId, newQuestionId, submissionDto)
@@ -268,10 +310,12 @@ class ResubmitQuestionTest extends Specification {
         exception.errorMessage == errorMessage
 
         where:
-        studentId       | oldQuestionId     | newQuestionId       | errorMessage
-        null            | question.getId()  | newQuestion.getId() | SUBMISSION_MISSING_STUDENT
-        student.getId() | null              | newQuestion.getId() | SUBMISSION_MISSING_QUESTION
-        student.getId() | question.getId()  | null                | SUBMISSION_MISSING_QUESTION
+        studentId       | oldQuestionId     | newQuestionId       | courseId       | courseExecutionId       || errorMessage
+        null            | question.getId()  | newQuestion.getId() | course.getId() | courseExecution.getId() || SUBMISSION_MISSING_STUDENT
+        student.getId() | null              | newQuestion.getId() | course.getId() | courseExecution.getId() || SUBMISSION_MISSING_QUESTION
+        student.getId() | question.getId()  | null                | course.getId() | courseExecution.getId() || SUBMISSION_MISSING_QUESTION
+        student.getId() | question.getId()  | newQuestion.getId() | null           | courseExecution.getId() || SUBMISSION_MISSING_COURSE
+        student.getId() | question.getId()  | newQuestion.getId() | course.getId() | null                    || SUBMISSION_MISSING_COURSE
     }
 
     @TestConfiguration

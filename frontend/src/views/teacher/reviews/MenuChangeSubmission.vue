@@ -9,20 +9,17 @@
     <v-card>
       <v-card-title>
         <span class="headline">{{
-          'Do you want to change the submission?'
+          'Do you want to edit the submission?'
         }}</span>
       </v-card-title>
 
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="blue darken-1"
-          data-cy="YesButton"
-          @click="changeSubmission"
+        <v-btn color="primary" data-cy="YesButton" @click="changeSubmission"
           >Yes</v-btn
         >
         <v-spacer />
-        <v-btn color="blue darken-1" data-cy="NoButton" @click="acceptReview"
+        <v-btn color="primary" data-cy="NoButton" @click="acceptReview"
           >No</v-btn
         >
         <v-spacer />
@@ -69,7 +66,6 @@ export default class MenuChangeSubmission extends Vue {
 
   async acceptReview() {
     try {
-      console.log(this.currentReview);
       const result = await RemoteServices.createReview(this.currentReview);
       this.$emit('no-changes', result);
       this.ChangeSubmissions = false;

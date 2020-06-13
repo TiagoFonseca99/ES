@@ -12,6 +12,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseService
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
@@ -216,8 +217,8 @@ class GetCourseDashboardInfoTest extends Specification {
 
         tournamentDto1 = tournamentService.createTournament(student1.getId(), topics, tournamentDto1)
         tournamentDto2 = tournamentService.createTournament(student1.getId(), topics, tournamentDto2)
-        tournamentService.joinTournament(student2.getId(), tournamentDto1)
-        tournamentService.joinTournament(student2.getId(), tournamentDto2)
+        tournamentService.joinTournament(student2.getId(), tournamentDto1, "")
+        tournamentService.joinTournament(student2.getId(), tournamentDto2, "")
 
         submission1 = new Submission()
         submission1.setQuestion(submittedQuestion1)
@@ -399,6 +400,11 @@ class GetCourseDashboardInfoTest extends Specification {
         @Bean
         SubmissionService submissionService() {
             return new SubmissionService()
+        }
+
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
         }
     }
 }

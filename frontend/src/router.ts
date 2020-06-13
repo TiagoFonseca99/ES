@@ -9,6 +9,8 @@ import HomeView from '@/views/HomeView.vue';
 import ManagementView from '@/views/teacher/ManagementView.vue';
 import QuestionsView from '@/views/teacher/questions/QuestionsView.vue';
 import TopicsView from '@/views/teacher/TopicsView.vue';
+import TournamentsView from '@/views/teacher/tournaments/TournamentsView.vue';
+import SelectedTournamentView from '@/views/teacher/tournaments/SelectedTournamentView.vue';
 import QuizzesView from '@/views/teacher/quizzes/QuizzesView.vue';
 import StudentsView from '@/views/teacher/students/StudentsView.vue';
 import CourseDashboardView from '@/views/teacher/CourseDashboardView.vue';
@@ -21,10 +23,12 @@ import AvailableQuizzesView from '@/views/student/AvailableQuizzesView.vue';
 import SolvedQuizzesView from '@/views/student/SolvedQuizzesView.vue';
 import QuizView from '@/views/student/quiz/QuizView.vue';
 import ResultsView from '@/views/student/quiz/ResultsView.vue';
-import StatsView from '@/views/student/StatsView.vue';
 import ScanView from '@/views/student/ScanView.vue';
 import DiscussionView from '@/views/student/discussion/DiscussionView.vue';
-import DashboardView from '@/views/student/DashboardView.vue';
+import DashboardView from '@/views/student/dashboard/DashboardView.vue';
+import StudentDashboardView from '@/views/teacher/students/DashboardView.vue';
+import SearchStudentView from '@/views/student/dashboard/SearchStudentView.vue';
+import NotificationsView from '@/views/student/notifications/NotificationsView.vue';
 
 import AdminManagementView from '@/views/admin/AdminManagementView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
@@ -32,9 +36,12 @@ import ImpExpView from '@/views/teacher/impexp/ImpExpView.vue';
 import AssessmentsView from '@/views/teacher/assessments/AssessmentsView.vue';
 import CreateQuizzesView from '@/views/student/CreateQuizzesView.vue';
 import SubmissionView from './views/student/questions/SubmissionView.vue';
+import AllSubmissionsView from './views/student/questions/AllSubmissionsView.vue';
 import ReviewsView from './views/teacher/reviews/ReviewsView.vue';
 import StudentReviews from './views/student/questions/StudentReviewsView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
+import { Student } from '@/models/management/Student';
+import * as session from '@/session';
 
 Vue.use(Router);
 
@@ -63,7 +70,7 @@ let router = new Router({
       component: CourseSelectionView,
       meta: {
         title: process.env.VUE_APP_NAME + ' - Course Selection',
-        requiredAuth: 'None'
+        requiredAuth: 'Login'
       }
     },
     {
@@ -108,6 +115,15 @@ let router = new Router({
           }
         },
         {
+          path: 'tournaments',
+          name: 'tournaments-management',
+          component: TournamentsView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Tournaments',
+            requiredAuth: 'Teacher'
+          }
+        },
+        {
           path: 'quizzes',
           name: 'quizzes-management',
           component: QuizzesView,
@@ -131,6 +147,16 @@ let router = new Router({
           component: StudentsView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Students',
+            requiredAuth: 'Teacher'
+          }
+        },
+        {
+          path: 'user',
+          name: 'student-dashboard',
+          component: StudentDashboardView,
+          props: route => ({ username: route.query.username }),
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - User Dashboard',
             requiredAuth: 'Teacher'
           }
         },
@@ -241,6 +267,15 @@ let router = new Router({
           }
         },
         {
+          path: 'all-submissions',
+          name: 'all-submissions',
+          component: AllSubmissionsView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - All Submissions',
+            requiredAuth: 'Student'
+          }
+        },
+        {
           path: 'reviews',
           name: 'reviews',
           component: StudentReviews,
@@ -259,15 +294,45 @@ let router = new Router({
           }
         },
         {
-          path: 'dashboard',
+          path: 'user',
           name: 'dashboard',
           component: DashboardView,
+          props: route => ({ username: route.query.username }),
           meta: {
-            title: process.env.VUE_APP_NAME + ' - Dashboard',
+            title: process.env.VUE_APP_NAME + ' - User Dashboard',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'search',
+          name: 'search',
+          component: SearchStudentView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Search Student',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'notifications',
+          name: 'notifications',
+          component: NotificationsView,
+          props: route => ({ username: route.query.username }),
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Notifications',
             requiredAuth: 'Student'
           }
         }
       ]
+    },
+    {
+      path: '/teacher/tournament',
+      name: 'tournament dashboard',
+      component: SelectedTournamentView,
+      props: route => ({ id: route.query.id }),
+      meta: {
+        title: process.env.VUE_APP_NAME + ' - Tournament Dashboard',
+        requiredAuth: 'Teacher'
+      }
     },
     {
       path: '/admin',
@@ -295,6 +360,14 @@ let router = new Router({
 });
 
 router.beforeEach(async (to, from, next) => {
+  if (!Store.getters.isLoggedIn && session.checkLogged()) {
+    let valid = await session.testToken();
+    if (!valid) {
+      next('/');
+      return;
+    }
+  }
+
   if (to.meta.requiredAuth == 'None') {
     next();
   } else if (to.meta.requiredAuth == 'Admin' && Store.getters.isAdmin) {
@@ -302,6 +375,8 @@ router.beforeEach(async (to, from, next) => {
   } else if (to.meta.requiredAuth == 'Teacher' && Store.getters.isTeacher) {
     next();
   } else if (to.meta.requiredAuth == 'Student' && Store.getters.isStudent) {
+    next();
+  } else if (to.meta.requiredAuth == 'Login' && Store.getters.isLoggedIn) {
     next();
   } else {
     next('/');

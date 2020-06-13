@@ -3,9 +3,9 @@
     <div class="discussion">
       <ul>
         <li
-          v-for="discussion in discussions"
+          v-for="(discussion, index) in discussions"
           :key="discussion.content"
-          @focus="setDiscussion(discussion)"
+          @focus="setDiscussion(discussion, index)"
         >
           <div
             style="display: flex; justify-content: space-between; position: relative"
@@ -14,7 +14,44 @@
               class="text-left"
               style="flex: 1; position: relative; max-width: 100%;"
             >
-              <b>{{ discussion.userName }} on {{ discussion.date }}:</b>
+              <b v-if="$store.getters.getUser.id !== discussion.userId"
+                ><span
+                  class="primary--text"
+                  @click="
+                    setUsername(discussion.userUsername);
+                    openDashboard();
+                  "
+                  style="cursor: pointer"
+                  >{{ discussion.userName }}</span
+                >
+                on {{ discussion.date }}:</b
+              >
+              <div v-else>
+                <b>You on {{ discussion.date }}:</b>
+                <v-icon
+                  large
+                  class="mr-2"
+                  style="float: right"
+                  @click="
+                    setDiscussion(discussion, index);
+                    deleteDiscussion();
+                  "
+                  data-cy="removeDiscussion"
+                  color="red"
+                  >delete</v-icon
+                >
+                <v-icon
+                  large
+                  class="mr-2"
+                  style="float: right"
+                  @click="
+                    setDiscussion(discussion, index);
+                    editDiscussion();
+                  "
+                  data-cy="editDiscussion"
+                  >edit</v-icon
+                >
+              </div>
               <span v-html="convertMarkDown(discussion.content)" />
             </div>
           </div>
@@ -27,14 +64,48 @@
               <v-expansion-panel-header>View replies </v-expansion-panel-header>
               <v-expansion-panel-content>
                 <div
-                  v-for="reply in discussion.replies"
+                  v-for="(reply, index) in discussion.replies"
                   :key="reply.id"
                   class="text-left reply"
                 >
                   <b v-if="$store.getters.getUser.id !== reply.userId"
-                    >{{ reply.userName }} on {{ reply.date }}:
+                    ><span
+                      v-if="reply.userRole === 'STUDENT'"
+                      class="primary--text"
+                      @click="
+                        setUsername(reply.userUsername);
+                        openDashboard();
+                      "
+                      style="cursor: pointer"
+                      >{{ reply.userName }}</span
+                    >
+                    <span v-else>{{ reply.userName }}</span>
+                    on {{ reply.date }}:
                   </b>
-                  <b v-else>You on {{ reply.date }}:</b>
+                  <div v-else>
+                    <b>You on {{ reply.date }}:</b>
+                    <v-icon
+                      class="mr-2"
+                      style="float: right"
+                      @click="
+                        setDiscussion(discussion, index);
+                        setReply(reply, index);
+                        deleteReply();
+                      "
+                      color="red"
+                      >delete</v-icon
+                    >
+                    <v-icon
+                      class="mr-2"
+                      style="float: right"
+                      @click="
+                        setDiscussion(discussion, index);
+                        setReply(reply, index);
+                        editReply();
+                      "
+                      >edit</v-icon
+                    >
+                  </div>
                   <span v-html="convertMarkDown(reply.message)" />
                 </div>
                 <div class="reply-message" v-if="discussion.userId === userId">
@@ -42,7 +113,7 @@
                     clearable
                     outlined
                     auto-grow
-                    v-on:focus="setDiscussion(discussion)"
+                    v-on:focus="setDiscussion(discussion, index)"
                     @input="setReplyMessage"
                     rows="2"
                     label="Message"
@@ -54,10 +125,10 @@
                   <v-card-actions>
                     <v-spacer />
                     <v-btn
-                      color="blue darken-1"
+                      color="primary"
                       data-cy="submitReply"
                       @click="
-                        setDiscussion(discussion);
+                        setDiscussion(discussion, index);
                         submitReply();
                         clearTextarea('#reply' + discussion.userId);
                       "
@@ -74,7 +145,7 @@
               outlined
               auto-grow
               v-if="discussion.userId === userId"
-              v-on:focus="setDiscussion(discussion)"
+              v-on:focus="setDiscussion(discussion, index)"
               @input="setReplyMessage"
               rows="2"
               label="Message"
@@ -85,10 +156,10 @@
             <v-card-actions>
               <v-spacer />
               <v-btn
-                color="blue darken-1"
+                color="primary"
                 data-cy="submitReply"
                 @click="
-                  setDiscussion(discussion);
+                  setDiscussion(discussion, index);
                   submitReply();
                   clearTextarea('#reply' + discussion.userId);
                 "
@@ -100,23 +171,57 @@
         </li>
       </ul>
     </div>
+    <edit-discussion-dialog
+      :discussion="discussion"
+      :dialog="discussionEdit"
+      v-on:save-discussion="onSaveDiscussion"
+      v-on:dialog="closeDialog"
+    />
+    <edit-reply-dialog
+      :reply="reply"
+      :dialog="replyEdit"
+      v-on:save-reply="onSaveReply"
+      v-on:dialog="closeDialog"
+    />
+    <show-dashboard-dialog
+      v-if="currentUsername"
+      v-model="dashboard"
+      :username="currentUsername"
+      v-on:close-show-dashboard-dialog="onCloseDashboard"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit } from 'vue-property-decorator';
+import { Component, Vue, Prop } from 'vue-property-decorator';
 import { convertMarkDown } from '@/services/ConvertMarkdownService';
 import Discussion from '@/models/management/Discussion';
-import RemoteServices from '../../../services/RemoteServices';
+import RemoteServices from '@/services/RemoteServices';
+import Reply from '@/models/management/Reply';
+import EditDiscussionDialog from '@/views/student/discussion/EditDiscussionDialog.vue';
+import EditReplyDialog from '@/views/student/discussion/EditReplyDialog.vue';
+import ShowDashboardDialog from '@/views/student/dashboard/DashboardDialogView.vue';
 
-@Component
+@Component({
+  components: {
+    'edit-discussion-dialog': EditDiscussionDialog,
+    'edit-reply-dialog': EditReplyDialog,
+    'show-dashboard-dialog': ShowDashboardDialog
+  }
+})
 export default class ReplyComponent extends Vue {
   @Prop() readonly discussions!: Discussion[];
   discussion: Discussion = this.discussions[0];
+  discussionInd: number = 0;
   replyMessages: Map<number, string> = new Map();
   userId: number = this.$store.getters.getUser.id;
+  reply!: Reply;
+  replyInd!: number;
+  discussionEdit: Boolean = false;
+  replyEdit: Boolean = false;
+  currentUsername: string | null = null;
+  dashboard: Boolean = false;
 
-  @Emit('submit')
   async submitReply() {
     try {
       if (this.replyMessages.get(this.discussion.userId!) === undefined) {
@@ -134,10 +239,9 @@ export default class ReplyComponent extends Vue {
       this.discussion.replies.push(reply);
 
       this.replyMessages.set(this.discussion.userId!, '');
+      this.$emit('submit', true);
     } catch (error) {
       await this.$store.dispatch('error', error);
-
-      return false;
     }
 
     for (let i = 0; i < this.discussions.length; i++) {
@@ -153,8 +257,80 @@ export default class ReplyComponent extends Vue {
     this.replyMessages.set(this.discussion.userId!, message);
   }
 
-  setDiscussion(discussion: Discussion) {
+  setDiscussion(discussion: Discussion, index: number) {
     this.discussion = discussion;
+    this.discussionInd = index;
+  }
+
+  setReply(reply: Reply, index: number) {
+    this.reply = reply;
+    this.replyInd = index;
+  }
+
+  onSaveReply(reply: Reply) {
+    this.reply = reply;
+    this.discussions[this.discussionInd].replies![this.replyInd] = reply;
+    this.closeDialog(false);
+  }
+
+  editReply() {
+    this.replyEdit = true;
+  }
+
+  async deleteReply() {
+    try {
+      await RemoteServices.deleteReply(this.reply!.id);
+      this.discussion.replies = this.discussion.replies!.filter(
+        obj => obj !== this.reply
+      );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  closeDialog(dialog: Boolean) {
+    if (this.discussionEdit) {
+      this.discussionEdit = dialog;
+    } else {
+      this.replyEdit = dialog;
+    }
+  }
+
+  onSaveDiscussion(discussion: Discussion) {
+    this.discussion = discussion;
+    this.discussions[this.discussionInd] = discussion;
+    this.closeDialog(false);
+  }
+
+  editDiscussion() {
+    this.discussionEdit = true;
+  }
+
+  async deleteDiscussion() {
+    try {
+      await RemoteServices.deleteDiscussion(
+        this.discussion.userId,
+        this.discussion.questionId
+      );
+      this.$emit(
+        'discussions',
+        this.discussions.filter(obj => obj !== this.discussion)
+      );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  setUsername(username: string) {
+    this.currentUsername = username;
+  }
+
+  openDashboard() {
+    this.dashboard = true;
+  }
+
+  onCloseDashboard() {
+    this.dashboard = false;
   }
 
   convertMarkDown(text: string) {

@@ -4,10 +4,10 @@
       :headers="headers"
       :items="tournaments"
       :search="search"
-      :sort-by="['id']"
       disable-pagination
       :hide-default-footer="true"
       :mobile-breakpoint="0"
+      :items-per-page="15"
       multi-sort
       data-cy="allTournaments"
     >
@@ -30,6 +30,11 @@
       <template v-slot:item.enrolled="{ item }">
         <v-chip :color="getEnrolledColor(item.enrolled)">
           {{ getEnrolledName(item.enrolled) }}
+        </v-chip>
+      </template>
+      <template v-slot:item.privateTournament="{ item }">
+        <v-chip :color="getPrivateColor(item.privateTournament)">
+          {{ getPrivateName(item.privateTournament) }}
         </v-chip>
       </template>
       <template v-slot:item.action="{ item }">
@@ -58,6 +63,20 @@
             >
           </template>
           <span>Cancel Tournament</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              small
+              class="mr-2"
+              v-on="on"
+              @click="removeTournament(item)"
+              color="red"
+              data-cy="RemoveTournament"
+              >delete</v-icon
+            >
+          </template>
+          <span>Remove Tournament</span>
         </v-tooltip>
       </template>
     </v-data-table>
@@ -109,6 +128,12 @@ export default class MyTournamentsView extends Vue {
       width: '10%'
     },
     {
+      text: 'Privacy',
+      value: 'privateTournament',
+      align: 'center',
+      width: '10%'
+    },
+    {
       text: 'Start Time',
       value: 'startTime',
       align: 'center',
@@ -146,10 +171,16 @@ export default class MyTournamentsView extends Vue {
     await this.$store.dispatch('loading');
     try {
       this.tournaments = await RemoteServices.getUserTournaments();
+      this.tournaments.sort((a, b) => this.sortById(a, b));
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
+  }
+
+  sortById(a: Tournament, b: Tournament) {
+    if (a.id && b.id) return a.id > b.id ? 1 : -1;
+    else return 0;
   }
 
   editTournament(tournamentToEdit: Tournament) {
@@ -179,8 +210,8 @@ export default class MyTournamentsView extends Vue {
   }
 
   getStateName(state: string) {
-    if (state === 'NOT_CANCELED') return 'NOT CANCELED';
-    else return 'CANCELED';
+    if (state === 'NOT_CANCELED') return 'Available';
+    else return 'Cancelled';
   }
 
   getEnrolledColor(enrolled: string) {
@@ -193,26 +224,64 @@ export default class MyTournamentsView extends Vue {
     else return 'YOU NEED TO JOIN';
   }
 
+  getPrivateColor(privateTournament: boolean) {
+    if (privateTournament) return 'red';
+    else return 'green';
+  }
+
+  getPrivateName(privateTournament: boolean) {
+    if (privateTournament) return 'Private';
+    else return 'Public';
+  }
+
   isNotCanceled(tournamentToCancel: Tournament) {
     return tournamentToCancel.state === 'NOT_CANCELED';
   }
 
   async cancelTournament(tournamentToCancel: Tournament) {
-    const enrolled = tournamentToCancel.enrolled;
-    const topics = tournamentToCancel.topics;
-    tournamentToCancel.enrolled = false;
-    tournamentToCancel.topics = [];
-    try {
-      await RemoteServices.cancelTournament(tournamentToCancel);
-    } catch (error) {
-      await this.$store.dispatch('error', error);
+    if (confirm('Are you sure you want to cancel this tournament?')) {
+      const enrolled = tournamentToCancel.enrolled;
+      const topics = tournamentToCancel.topics;
+      const participants = tournamentToCancel.participants;
+      tournamentToCancel.enrolled = false;
+      tournamentToCancel.topics = [];
+      tournamentToCancel.participants = [];
+      try {
+        await RemoteServices.cancelTournament(tournamentToCancel);
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+        tournamentToCancel.enrolled = enrolled;
+        tournamentToCancel.topics = topics;
+        tournamentToCancel.participants = participants;
+        return;
+      }
       tournamentToCancel.enrolled = enrolled;
       tournamentToCancel.topics = topics;
-      return;
+      tournamentToCancel.state = 'CANCELED';
+      tournamentToCancel.participants = participants;
     }
-    tournamentToCancel.enrolled = enrolled;
-    tournamentToCancel.topics = topics;
-    tournamentToCancel.state = 'CANCELED';
+  }
+
+  async removeTournament(tournamentToRemove: Tournament) {
+    if (confirm('Are you sure you want to delete this tournament?')) {
+      const enrolled = tournamentToRemove.enrolled;
+      const topics = tournamentToRemove.topics;
+      const participants = tournamentToRemove.participants;
+      tournamentToRemove.enrolled = false;
+      tournamentToRemove.topics = [];
+      tournamentToRemove.participants = [];
+      try {
+        if (tournamentToRemove.id)
+          await RemoteServices.removeTournament(tournamentToRemove.id);
+        this.tournaments = await RemoteServices.getUserTournaments();
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+        tournamentToRemove.enrolled = enrolled;
+        tournamentToRemove.topics = topics;
+        tournamentToRemove.participants = participants;
+        return;
+      }
+    }
   }
 }
 </script>

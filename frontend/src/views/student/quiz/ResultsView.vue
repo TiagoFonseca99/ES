@@ -62,6 +62,7 @@
         statementManager.statementQuiz.answers[questionOrder].optionId != null
       "
       v-on:message="updateMessage"
+      v-on:discussions="updateDiscussions"
       @submit-discussion="submitDiscussion"
     />
   </div>
@@ -140,6 +141,7 @@ export default class ResultsView extends Vue {
       ].question;
       this.discussion!.question = question;
       this.discussion!.questionId = question.id!;
+      this.discussion!.courseId = this.$store.getters.getCurrentCourse.courseId;
 
       const result = await RemoteServices.createDiscussion(this.discussion!);
       this.statementManager.statementQuiz!.questions[
@@ -160,6 +162,15 @@ export default class ResultsView extends Vue {
     ) {
       this.discussion = new Discussion();
     }
+  }
+
+  updateDiscussions(discussions: Discussion[]) {
+    this.statementManager.statementQuiz!.questions[
+      this.questionOrder
+    ].discussions = discussions;
+    this.statementManager.statementQuiz!.questions[
+      this.questionOrder
+    ].hasUserDiscussion = false;
   }
 
   updateMessage(message: string) {

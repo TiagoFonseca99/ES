@@ -6,6 +6,7 @@
         <div class="col">Question Title</div>
         <div class="col">Creation Date</div>
         <div class="col">Review Date</div>
+        <div class="col">Reviewed by</div>
         <div class="col">Status</div>
         <div class="col">Justification</div>
       </li>
@@ -22,6 +23,9 @@
           <v-chip small>
             <span>{{ review.creationDate }}</span>
           </v-chip>
+        </div>
+        <div class="col">
+          {{ review.teacherUsername }}
         </div>
         <div class="col">
           <v-chip :color="getStatusColor(review.status)" small>
@@ -133,7 +137,6 @@ export default class ReviewView extends Vue {
 
   showReviewDialog(review: Review) {
     this.currentReview = review;
-    this.reviewDialog = false;
     this.reviewDialog = true;
   }
 

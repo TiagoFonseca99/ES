@@ -45,7 +45,11 @@ export default class AvailableQuizzesView extends Vue {
   async created() {
     await this.$store.dispatch('loading');
     try {
-      this.quizzes = (await RemoteServices.getSolvedQuizzes()).reverse();
+      this.quizzes = (
+        await RemoteServices.getSolvedQuizzes(
+          this.$store.getters.getUser.username
+        )
+      ).reverse();
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

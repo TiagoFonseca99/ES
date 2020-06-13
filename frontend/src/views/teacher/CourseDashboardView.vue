@@ -12,15 +12,21 @@
             <div class="dashInfo" v-if="course">
               <div class="square taller">
                 <b class="infoName">Course Name</b>
-                <span data-cy="courseName" style="color: black">{{ course.name }}</span>
+                <span data-cy="courseName" style="color: black">{{
+                  course.name
+                }}</span>
               </div>
               <div class="square taller">
                 <b class="infoName">Course Acronym</b>
-                <span data-cy="courseAcronym" style="color: black">{{ course.acronym }}</span>
+                <span data-cy="courseAcronym" style="color: black">{{
+                  course.acronym
+                }}</span>
               </div>
               <div class="square taller">
                 <b class="infoName">Academic Term</b>
-                <span data-cy="courseTerm" style="color: black">{{ course.academicTerm }}</span>
+                <span data-cy="courseTerm" style="color: black">{{
+                  course.academicTerm
+                }}</span>
               </div>
               <div class="square taller">
                 <b class="infoName">Course Type</b>
@@ -30,7 +36,9 @@
               </div>
               <div class="square taller">
                 <b class="infoName">Status</b>
-                <span  data-cy="courseStatus" style="color: black"> {{ course.status }}</span>
+                <span data-cy="courseStatus" style="color: black">
+                  {{ course.status }}</span
+                >
               </div>
             </div>
             <div v-else>
@@ -102,7 +110,11 @@
             >
             <div class="dashInfo" v-if="info !== null">
               <div class="square">
-                <animated-number class="num" :number="info.numDiscussions" data-cy="numDiscussions" />
+                <animated-number
+                  class="num"
+                  :number="info.numDiscussions"
+                  data-cy="numDiscussions"
+                />
                 <p class="statName">Total Discussions</p>
               </div>
               <div class="square">
@@ -154,7 +166,7 @@ export default class DashboardView extends Vue {
       this.info = await RemoteServices.getCourseDashboardInfo(
         this.$store.getters.getCurrentCourse.courseExecutionId
       );
-      if (this.info.joinedTournaments){
+      if (this.info.joinedTournaments) {
         this.tournaments = this.info.joinedTournaments.sort();
       }
       this.course = this.$store.getters.getCurrentCourse;

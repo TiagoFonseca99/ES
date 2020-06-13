@@ -36,18 +36,31 @@
             <span>{{ item.questionDto.status }}</span>
           </v-chip>
         </template>
+        <template v-slot:item.username="{ item }">
+          <v-chip
+            color="primary"
+            small
+            @click="openStudentDashboardDialog(item.username)"
+          >
+            {{ item.username }}
+          </v-chip>
+        </template>
+        <template v-slot:item.anonymous="{ item }">
+          <span v-if="item.anonymous">
+            <v-icon color="green">fa-check</v-icon>
+          </span>
+          <span v-else> <v-icon color="red">fa-times</v-icon> </span>
+        </template>
         <template v-slot:item.questionDto.creationDate="{ item }">
           <v-chip small>
             <span>{{ item.questionDto.creationDate }}</span>
           </v-chip>
         </template>
-        <template v-slot:item.questionDto.image="{ item }">
-          <v-file-input
-            show-size
-            dense
-            small-chips
-            @change="handleFileUpload($event, item.questionDto)"
-            accept="image/*"
+        <template v-slot:item.questionDto.topics="{ item }">
+          <edit-question-topics
+            :question="item.questionDto"
+            :topics="topics"
+            v-on:submission-changed-topics="onQuestionChangedTopics"
           />
         </template>
         <template v-slot:item.review="{ item }">
@@ -141,15 +154,32 @@
             <span> {{ getSubmission(item).creationDate }}</span>
           </v-chip>
         </template>
+        <template v-slot:item.studentUsername="{ item }">
+          <v-chip
+            color="primary"
+            small
+            @click="openStudentDashboardDialog(item.studentUsername)"
+          >
+            {{ item.studentUsername }}
+          </v-chip>
+        </template>
         <template v-slot:item.status="{ item }">
           <v-chip :color="changeColor(item.status)" small>
             <span>{{ item.status }}</span>
           </v-chip>
         </template>
-        <template v-slot:item.justication="{ item }">
-          <v-chip small>
-            <span>{{ item.justification }}</span>
-          </v-chip>
+        <template v-slot:item.justification="{ item }">
+          <span>
+            <v-btn
+              small
+              color="primary"
+              data-cy="view"
+              dark
+              @click="showReviewDialog(item)"
+            >
+              View
+            </v-btn>
+          </span>
         </template>
         <template v-slot:item.action="{ item }">
           <v-tooltip bottom>
@@ -179,6 +209,18 @@
       :discussion="false"
       v-on:close-show-question-dialog="onCloseShowQuestionDialog"
     />
+    <show-review-dialog
+      v-if="currentReview"
+      v-model="reviewDialog"
+      :review="currentReview"
+      v-on:close-show-review-dialog="onCloseShowReviewDialog"
+    />
+    <show-dashboard-dialog
+      v-if="currentUsername"
+      v-model="dashboardDialog"
+      :username="currentUsername"
+      v-on:close-show-dashboard-dialog="onCloseShowDashboardDialog"
+    />
   </div>
 </template>
 
@@ -192,20 +234,33 @@ import Image from '@/models/management/Image';
 import EditReview from '@/views/teacher/reviews/EditReview.vue';
 import Review from '@/models/management/Review';
 import ShowQuestionDialog from '@/views/teacher/questions/ShowQuestionDialog.vue';
+import ShowReviewDialog from '@/views/teacher/reviews/ShowJustificationDialog.vue';
+import EditQuestionTopics from '@/views/teacher/questions/EditQuestionTopics.vue';
+import Topic from '@/models/management/Topic';
+import ShowDashboardDialog from '@/views/teacher/students/DashboardDialogView.vue';
+import { Student } from '@/models/management/Student';
 
 @Component({
   components: {
     'show-question-dialog': ShowQuestionDialog,
-    'edit-reviews': EditReview
+    'edit-reviews': EditReview,
+    'show-review-dialog': ShowReviewDialog,
+    'edit-question-topics': EditQuestionTopics,
+    'show-dashboard-dialog': ShowDashboardDialog
   }
 })
 export default class ReviewsView extends Vue {
   submissions: Submission[] = [];
+  topics: Topic[] = [];
   currentSubmission: Submission | null = null;
   editReview: boolean = false;
   searchSubmissions: string = '';
   currentQuestion: Question | null = null;
   questionDialog: boolean = false;
+  currentReview: Review | null = null;
+  reviewDialog: boolean = false;
+  currentUsername: string | null = null;
+  dashboardDialog: boolean = false;
 
   headers: object = [
     {
@@ -221,8 +276,16 @@ export default class ReviewsView extends Vue {
       value: 'questionDto.creationDate',
       align: 'center'
     },
+    { text: 'Submitted by', value: 'username', align: 'center' },
+    { text: 'Anonymous', value: 'anonymous', align: 'center' },
     { text: 'Status', value: 'questionDto.status', align: 'center' },
-    { text: 'Image', value: 'questionDto.image', align: 'center' },
+    {
+      text: 'Topics',
+      value: 'questionDto.topics',
+      align: 'center',
+      width: '20%',
+      sortable: false
+    },
     { text: 'Review', value: 'review', align: 'center' }
   ];
   searchReviews: string = '';
@@ -241,6 +304,7 @@ export default class ReviewsView extends Vue {
       value: 'questionDto.creationDate',
       align: 'center'
     },
+    { text: 'Submitted by', value: 'studentUsername', align: 'center' },
     { text: 'Status', value: 'status', align: 'center' },
     { text: 'Justification', value: 'justification', align: 'center' }
   ];
@@ -248,8 +312,9 @@ export default class ReviewsView extends Vue {
   async created() {
     await this.$store.dispatch('loading');
     try {
-      [this.submissions] = await Promise.all([
-        RemoteServices.getSubsToTeacher()
+      [this.submissions, this.topics] = await Promise.all([
+        RemoteServices.getSubsToTeacher(),
+        RemoteServices.getTopics()
       ]);
       this.submissions.sort((a, b) => this.sortNewestSubmissionFirst(a, b));
       [this.reviews] = await Promise.all([
@@ -262,22 +327,18 @@ export default class ReviewsView extends Vue {
     await this.$store.dispatch('clearLoading');
   }
 
-  async handleFileUpload(event: File, question: Question) {
-    if (question.id) {
-      try {
-        const imageURL = await RemoteServices.uploadImage(event, question.id);
-        question.image = new Image();
-        question.image.url = imageURL;
-        confirm('Image ' + imageURL + ' was uploaded!');
-      } catch (error) {
-        await this.$store.dispatch('error', error);
-      }
-    }
-  }
-
   changeColor(status: string) {
     if (status == 'REJECTED') return 'red';
     if (status == 'APPROVED') return 'green';
+  }
+
+  onQuestionChangedTopics(questionId: Number, changedTopics: Topic[]) {
+    let submission = this.submissions.find(
+      (submission: Submission) => submission.questionDto.id == questionId
+    );
+    if (submission) {
+      submission.questionDto.topics = changedTopics;
+    }
   }
 
   createReview(submission: Submission) {
@@ -351,6 +412,25 @@ export default class ReviewsView extends Vue {
         await this.$store.dispatch('error', error);
       }
     }
+  }
+
+  showReviewDialog(review: Review) {
+    this.currentReview = review;
+    this.reviewDialog = false;
+    this.reviewDialog = true;
+  }
+
+  onCloseShowReviewDialog() {
+    this.reviewDialog = false;
+  }
+
+  openStudentDashboardDialog(username: string) {
+    this.dashboardDialog = true;
+    this.currentUsername = username;
+  }
+
+  onCloseShowDashboardDialog() {
+    this.dashboardDialog = false;
   }
 }
 </script>

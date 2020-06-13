@@ -9,7 +9,9 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          {{ oldQuestionId === null ? 'New Submission' : 'Edit Submission' }}
+          {{
+            oldQuestionId === undefined ? 'New Submission' : 'Edit Submission'
+          }}
         </span>
       </v-card-title>
 
@@ -58,21 +60,29 @@
       </v-card-text>
 
       <v-card-actions>
+        <v-switch
+          v-model="currentSubmission.anonymous"
+          class="ma-4"
+          label="Anonymous"
+        />
         <v-spacer />
         <v-btn
-          color="blue darken-1"
+          color="primary"
           @click="$emit('dialog', false)"
           data-cy="cancelButton"
           >Cancel</v-btn
         >
-        <v-btn
-          color="blue darken-1"
-          @click="submitQuestion"
-          data-cy="submitButton"
-        >
-          {{ oldQuestionId === null ? 'Submit' : 'Resubmit' }}
+        <v-btn color="primary" @click="menuArgument" data-cy="submitButton">
+          {{ oldQuestionId === undefined ? 'Submit' : 'Resubmit' }}
         </v-btn>
       </v-card-actions>
+      <menu-argument
+        v-if="currentSubmission"
+        v-model="MenuArgument"
+        :submission="currentSubmission"
+        :old-question-id="oldQuestionId"
+        v-on:no-changes="onSaveSubmission"
+      />
     </v-card>
   </v-dialog>
 </template>
@@ -80,18 +90,24 @@
 <script lang="ts">
 import { Component, Model, Prop, Vue, Watch } from 'vue-property-decorator';
 import Question from '@/models/management/Question';
-import RemoteServices from '@/services/RemoteServices';
 import Submission from '@/models/management/Submission';
+import MenuArgument from '@/views/student/questions/MenuArgument.vue';
+import Option from '@/models/management/Option';
 
-@Component
+@Component({
+  components: {
+    'menu-argument': MenuArgument
+  }
+})
 export default class EditSubmissionDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
   @Prop({ type: Question, required: true }) readonly question!: Question;
   @Prop({ type: Submission, required: true }) readonly submission!: Submission;
 
   editQuestion!: Question;
-  oldQuestionId: number | null = null;
+  oldQuestionId: number | undefined | null = null;
   currentSubmission!: Submission;
+  MenuArgument: boolean = false;
 
   created() {
     this.updateSubmission();
@@ -103,11 +119,24 @@ export default class EditSubmissionDialog extends Vue {
     if (this.editQuestion.id != null) {
       this.oldQuestionId = this.editQuestion.id;
       this.editQuestion.id = null;
+    } else {
+      this.oldQuestionId = undefined;
     }
     this.currentSubmission = new Submission(this.submission);
   }
 
-  async submitQuestion() {
+  async menuArgument() {
+    if (!this.checkCorrectOptions(this.editQuestion.options)) {
+      await this.$store.dispatch(
+        'error',
+        'Question must have 1 and only 1 correct option'
+      );
+      return;
+    }
+    if (!this.checkInvalidOptions(this.editQuestion.options)) {
+      await this.$store.dispatch('error', 'Question with invalid option');
+      return;
+    }
     if (
       this.editQuestion &&
       (!this.editQuestion.title || !this.editQuestion.content)
@@ -118,22 +147,39 @@ export default class EditSubmissionDialog extends Vue {
       );
       return;
     }
+    this.currentSubmission.questionDto = this.editQuestion;
+    this.currentSubmission.courseId = this.$store.getters.getCurrentCourse.courseId;
+    this.MenuArgument = true;
+  }
 
-    try {
-      this.currentSubmission.questionDto = this.editQuestion;
-      this.currentSubmission.courseId = this.$store.getters.getCurrentCourse.courseId;
-      const result =
-        this.oldQuestionId != null
-          ? await RemoteServices.resubmitQuestion(
-              this.currentSubmission,
-              this.oldQuestionId
-            )
-          : await RemoteServices.submitQuestion(this.currentSubmission);
+  async onSaveSubmission() {
+    this.MenuArgument = false;
+    this.$emit('submit-question');
+    await this.$store.dispatch('clearLoading');
+  }
 
-      this.$emit('submit-question', result);
-    } catch (error) {
-      await this.$store.dispatch('error', error);
+  checkCorrectOptions(options: Option[]) {
+    let count = 0;
+    let i = 0;
+    for (i = 0; i < options.length; i++) {
+      if (options[i].correct == true) {
+        count++;
+      }
     }
+    if (count == 1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  checkInvalidOptions(options: Option[]) {
+    let i = 0;
+    for (i = 0; i < options.length; i++) {
+      if (options[i].content.length === 0 || !options[i].content.trim()) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 </script>

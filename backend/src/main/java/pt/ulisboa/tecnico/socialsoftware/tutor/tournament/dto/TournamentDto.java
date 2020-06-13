@@ -21,6 +21,8 @@ public class TournamentDto implements Serializable {
     private List<UserDto> participants = new ArrayList<>();
     private String courseAcronym = null;
     private Integer quizId = null;
+    private boolean privateTournament = false;
+    private String password = "";
 
     public TournamentDto() {
     }
@@ -37,6 +39,8 @@ public class TournamentDto implements Serializable {
         if (tournament.hasQuiz()) {
             this.quizId = tournament.getQuizId();
         }
+        this.privateTournament = tournament.isPrivateTournament();
+        this.password = tournament.getPassword();
     }
 
     public Integer getId() {
@@ -94,4 +98,20 @@ public class TournamentDto implements Serializable {
     public Integer getQuizId() { return quizId; }
 
     public void setQuizId(Integer quizId) { this.quizId = quizId; }
+
+    public boolean isPrivateTournament() {
+        return privateTournament;
+    }
+
+    public void setPrivateTournament(boolean privateTournament) {
+        this.privateTournament = privateTournament;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

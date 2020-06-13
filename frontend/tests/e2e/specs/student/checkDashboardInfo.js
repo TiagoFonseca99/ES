@@ -13,6 +13,7 @@ describe('Student walkthrough', () => {
 
     it('login checks dashboard info', () => {
         cy.openDashboard();
+        cy.wait(500);
         cy.checkUserInfo('Demo Student', 'Demo-Student');
 
         cy.checkTournamentsInfo();

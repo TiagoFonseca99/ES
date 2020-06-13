@@ -15,6 +15,8 @@ public class ReviewDto implements Serializable {
     private ImageDto imageDto;
     private String status;
     private String creationDate;
+    private String studentUsername;
+    private String teacherUsername;
 
 
     public ReviewDto(){}
@@ -22,7 +24,9 @@ public class ReviewDto implements Serializable {
     public ReviewDto(Review review){
         this.id = review.getId();
         this.studentId = review.getStudentId();
+        this.studentUsername = review.getSubmission().getUser().getUsername();
         this.teacherId = review.getTeacherId();
+        this.teacherUsername = review.getUser().getUsername();
         this.submissionId = review.getSubmission().getId();
         this.justification = review.getJustification();
         this.status = review.getStatus().name();
@@ -64,4 +68,12 @@ public class ReviewDto implements Serializable {
     public String getCreationDate() { return creationDate; }
 
     public void setCreationDate(String creationDate) { this.creationDate = creationDate; }
+
+    public String getStudentUsername() { return studentUsername; }
+
+    public void setStudentUsername(String studentUsername) { this.studentUsername = studentUsername; }
+
+    public String getTeacherUsername() { return teacherUsername; }
+
+    public void setTeacherUsername(String teacherUsername) { this.teacherUsername = teacherUsername; }
 }

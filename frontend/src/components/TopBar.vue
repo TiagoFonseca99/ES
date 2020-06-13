@@ -86,6 +86,14 @@
                 <v-list-item-title>Topics</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item to="/management/tournaments">
+              <v-list-item-action>
+                <v-icon>fas fa-calendar</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Tournaments</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item to="/management/quizzes">
               <v-list-item-action>
                 <v-icon>ballot</v-icon>
@@ -164,17 +172,23 @@
           </v-list>
         </v-menu>
 
-        <!-- ---- PPA ---- -->
-
         <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" text dark>
+            <v-btn v-on="on" text dark data-cy="questions">
               Questions
               <v-icon>fas fa-question-circle</v-icon>
             </v-btn>
           </template>
           <v-list dense>
-            <v-list-item to="/student/submissions">
+            <v-list-item to="/student/discussions" data-cy="discussions">
+              <v-list-item-action>
+                <v-icon>fas fa-comment-alt</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Discussions</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item to="/student/submissions" data-cy="submissions">
               <v-list-item-action>
                 <v-icon>fas fa-user-edit</v-icon>
               </v-list-item-action>
@@ -190,35 +204,43 @@
                 <v-list-item-title>Reviews</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item
+              to="/student/all-submissions"
+              data-cy="all-submissions"
+            >
+              <v-list-item-action>
+                <v-icon>fas fa-users</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>All Submissions</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list>
         </v-menu>
 
-        <!-- ------------- -->
-
-        <!-- ---- DDP ---- -->
-
-        <v-btn
-          to="/student/discussions"
-          v-if="isStudent && currentCourse"
-          text
-          dark
-          data-cy="discussions"
-        >
-          Discussions
-          <v-icon>fas fa-comment-alt</v-icon>
-        </v-btn>
-
-        <!-- ------------- -->
-
-        <v-btn
-          to="/student/dashboard"
-          v-if="isStudent && currentCourse"
-          text
-          dark
-        >
-          Dashboard
-          <v-icon>fa fa-user</v-icon>
-        </v-btn>
+        <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :to="'/student/user?username=' + $store.getters.getUser.username"
+              v-on="on"
+              text
+              dark
+            >
+              Dashboard
+              <v-icon>fa fa-id-card-alt</v-icon>
+            </v-btn>
+          </template>
+          <v-list dense>
+            <v-list-item to="/student/search">
+              <v-list-item-action>
+                <v-icon>fas fa-search</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Search User</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-menu>
 
         <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
           <template v-slot:activator="{ on }">
@@ -253,6 +275,23 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
+        </v-menu>
+
+        <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :to="
+                '/student/notifications?username=' +
+                  $store.getters.getUser.username
+              "
+              v-on="on"
+              text
+              dark
+            >
+              Notifications
+              <v-icon>notifications</v-icon>
+            </v-btn>
+          </template>
         </v-menu>
 
         <v-btn
@@ -354,6 +393,14 @@
               <v-list-item-title>Topics</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+          <v-list-item to="/management/tournaments">
+            <v-list-item-action>
+              <v-icon>fas fa-calendar</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Tournaments</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
           <v-list-item to="/management/quizzes">
             <v-list-item-action>
               <v-icon>ballot</v-icon>
@@ -429,6 +476,16 @@
             <v-list-item-content>Solved Quizzes</v-list-item-content>
           </v-list-item>
 
+          <!-- ----DDP---- -->
+
+          <v-list-item to="/student/discussions">
+            <v-list-item-action>
+              <v-icon>fas fa-comment-alt</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Discussions</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
           <!-- ----PPA---- -->
 
           <v-list-item to="/student/submissions">
@@ -445,15 +502,11 @@
             <v-list-item-content>Reviews</v-list-item-content>
           </v-list-item>
 
-          <!-- ----------- -->
-
-          <!-- ----DDP---- -->
-
-          <v-list-item to="/student/discussions">
+          <v-list-item to="/student/submissions/all">
             <v-list-item-action>
-              <v-icon>fas fa-comment-alt</v-icon>
+              <v-icon>fas fa-users</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Discussions</v-list-item-content>
+            <v-list-item-content>All Submissions</v-list-item-content>
           </v-list-item>
 
           <!-- ----------- -->
@@ -483,18 +536,35 @@
 
           <!-- ----------- -->
 
-          <v-list-item to="/student/dashboard">
+          <!-- ----SDN---- -->
+
+          <v-list-item
+            :to="
+              '/student/notifications?username=' +
+                $store.getters.getUser.username
+            "
+          >
+            <v-list-item-action>
+              <v-icon>notifications</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Notifications</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
+
+          <v-list-item
+            :to="'/student/user?username=' + $store.getters.getUser.username"
+          >
             <v-list-item-action>
               <v-icon>fas fa-user</v-icon>
             </v-list-item-action>
             <v-list-item-content>Dashboard</v-list-item-content>
           </v-list-item>
-
-          <v-list-item to="/student/stats">
+          <v-list-item to="/student/search">
             <v-list-item-action>
-              <v-icon>fas fa-user</v-icon>
+              <v-icon>fas fa-search</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Stats</v-list-item-content>
+            <v-list-item-content>Search User </v-list-item-content>
           </v-list-item>
         </v-list-group>
 
@@ -559,7 +629,7 @@ export default class TopBar extends Vue {
   }
 
   async logout() {
-    await this.$store.dispatch('logout');
+    await this.$store.commit('logout');
     await this.$router.push({ name: 'home' }).catch(() => {});
   }
 }

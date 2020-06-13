@@ -5,6 +5,7 @@ import javax.persistence.*;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 
@@ -21,17 +22,21 @@ public class Discussion {
     @EmbeddedId
     private DiscussionId discussionId = new DiscussionId();
 
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "discussion", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Reply> replies = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "question_id", insertable = false, updatable = false)
     private Question question;
 
@@ -43,17 +48,26 @@ public class Discussion {
     public Discussion() {
     }
 
-    public Discussion(User user, Question question, DiscussionDto discussionDto) {
+    public Discussion(User user, Question question, Course course, DiscussionDto discussionDto) {
         checkConsistentDiscussion(discussionDto);
         this.content = discussionDto.getContent();
         this.question = question;
         this.user = user;
+        this.course = course;
         this.discussionId.setQuestionId(question.getId());
         this.discussionId.setUserId(user.getId());
         this.question.addDiscussion(this);
         this.user.addDiscussion(this);
         this.setDate(DateHandler.toLocalDateTime(discussionDto.getDate()));
         this.available = discussionDto.isAvailable();
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
     }
 
     public LocalDateTime getDate() {
@@ -114,6 +128,17 @@ public class Discussion {
         discussionId = id;
     }
 
+    public void remove() {
+        this.user.getDiscussions().remove(this);
+        this.question.getDiscussions().remove(this);
+
+        for (Reply reply: replies) {
+           reply.discussionRemove();
+        }
+
+        this.replies.clear();
+    }
+
     private void checkConsistentDiscussion(DiscussionDto discussionDto) {
         if (discussionDto.getContent().trim().length() == 0 && discussionDto.getDate() != null) {
             throw new TutorException(DISCUSSION_MISSING_DATA);
@@ -122,13 +147,13 @@ public class Discussion {
 
     public boolean equals(Object o) {
         if (o instanceof Discussion) {
-            return this.discussionId.equals(((Discussion) o).getId()) && this.content == ((Discussion) o).getContent();
+            return this.discussionId.equals(((Discussion) o).getId()) && this.content.equals(((Discussion) o).getContent());
         }
 
         return false;
     }
 
     public int hashCode() {
-        return Objects.hash(discussionId, getContent(), getReplies(), getUser(), getQuestion());
+        return Objects.hash(discussionId, getContent());
     }
 }

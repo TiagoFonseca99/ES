@@ -10,7 +10,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
@@ -26,7 +29,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
 
 @DataJpaTest
-class GetUserTournamentsTest extends Specification {
+class RemoveTournamentTest extends Specification {
     public static final String USER_NAME1 = "Tiago"
     public static final String USERNAME1 = "TiagoFonseca99"
     public static final Integer KEY1 = 1
@@ -58,8 +61,7 @@ class GetUserTournamentsTest extends Specification {
     @Autowired
     TopicRepository topicRepository
 
-    def user1
-    def user2
+    def user
     def course
     def courseExecution
     def topic1
@@ -69,24 +71,20 @@ class GetUserTournamentsTest extends Specification {
     def topics = new ArrayList<Integer>()
     def startTime = DateHandler.now().plusHours(1)
     def endTime = DateHandler.now().plusHours(2)
+    def tournamentDto
 
     def setup() {
-        user1 = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
-        user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
 
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
         courseRepository.save(course)
 
         courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
-        courseExecution.addUser(user1)
-        courseExecution.addUser(user2)
+        courseExecution.addUser(user)
         courseExecutionRepository.save(courseExecution)
 
-        user1.addCourse(courseExecution)
-        userRepository.save(user1)
-
-        user2.addCourse(courseExecution)
-        userRepository.save(user2)
+        user.addCourse(courseExecution)
+        userRepository.save(user)
 
         topicDto1 = new TopicDto()
         topicDto1.setName(TOPIC_NAME1)
@@ -100,64 +98,67 @@ class GetUserTournamentsTest extends Specification {
 
         topics.add(topic1.getId())
         topics.add(topic2.getId())
-    }
 
-    def "user creates two tournaments"() {
-        given: "a tournament"
-        def tournamentDto = new TournamentDto()
+        tournamentDto = new TournamentDto()
         tournamentDto.setStartTime(DateHandler.toISOString(startTime))
         tournamentDto.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentService.createTournament(user1.getId(), topics, tournamentDto)
 
-        and: "another tournament"
+        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
+    }
+
+    def "user that created tournament removes it"() {
+        given:
+
+        when:
+        tournamentService.removeTournament(user.getId(), tournamentDto.getId())
+
+        then:
+        tournamentRepository.count() == 0L
+    }
+
+    def "user that did not created tournament removes it"() {
+        given: "a new user"
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        courseExecution.addUser(user2)
+        courseExecutionRepository.save(courseExecution)
+
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
+
+        when:
+        tournamentService.removeTournament(user2.getId(), tournamentDto.getId())
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_CREATOR
+
+        and:
+        tournamentRepository.count() == 1L
+    }
+
+    def "user that created tournament removes one tournament when 2 exist"() {
+        given: "a new user"
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        courseExecution.addUser(user2)
+        courseExecutionRepository.save(courseExecution)
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
+
+        and: "a new tournament"
         def tournamentDto2 = new TournamentDto()
         tournamentDto2.setStartTime(DateHandler.toISOString(startTime))
         tournamentDto2.setEndTime(DateHandler.toISOString(endTime))
         tournamentDto2.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
         tournamentDto2.setState(Tournament.Status.NOT_CANCELED)
-        tournamentService.createTournament(user1.getId(), topics, tournamentDto2)
+        tournamentDto2 = tournamentService.createTournament(user2.getId(), topics, tournamentDto2)
 
         when:
-        def result = tournamentService.getUserTournaments(user1)
+        tournamentService.removeTournament(user.getId(), tournamentDto.getId())
 
         then:
-        tournamentRepository.count() == 2L
-        result.size() == 2
-    }
-
-    def "user creates two tournaments and other user creates one tournament"() {
-        given: "a tournament"
-        def tournamentDto = new TournamentDto()
-        tournamentDto.setStartTime(DateHandler.toISOString(startTime))
-        tournamentDto.setEndTime(DateHandler.toISOString(endTime))
-        tournamentDto.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto.setState(Tournament.Status.NOT_CANCELED)
-        tournamentService.createTournament(user1.getId(), topics, tournamentDto)
-
-        and: "another tournament"
-        def tournamentDto2 = new TournamentDto()
-        tournamentDto2.setStartTime(DateHandler.toISOString(startTime))
-        tournamentDto2.setEndTime(DateHandler.toISOString(endTime))
-        tournamentDto2.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto2.setState(Tournament.Status.NOT_CANCELED)
-        tournamentService.createTournament(user1.getId(), topics, tournamentDto2)
-
-        and: "new user creates another tournament"
-        def tournamentDto3 = new TournamentDto()
-        tournamentDto3.setStartTime(DateHandler.toISOString(startTime))
-        tournamentDto3.setEndTime(DateHandler.toISOString(endTime))
-        tournamentDto3.setNumberOfQuestions(NUMBER_OF_QUESTIONS)
-        tournamentDto3.setState(Tournament.Status.NOT_CANCELED)
-        tournamentService.createTournament(user2.getId(), topics, tournamentDto3)
-
-        when:
-        def result = tournamentService.getUserTournaments(user1)
-
-        then:
-        tournamentRepository.count() == 3L
-        result.size() == 2
+        tournamentRepository.count() == 1L
     }
 
     @TestConfiguration
@@ -189,6 +190,11 @@ class GetUserTournamentsTest extends Specification {
         @Bean
         QuestionService questionService() {
             return new QuestionService()
+        }
+
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
         }
     }
 }
