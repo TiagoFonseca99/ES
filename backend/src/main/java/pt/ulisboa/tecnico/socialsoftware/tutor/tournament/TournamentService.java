@@ -366,8 +366,14 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
         }
 
-        if (DateHandler.isValidDateFormat(tournamentDto.getEndTime()))
+        if (DateHandler.isValidDateFormat(tournamentDto.getEndTime())) {
+            String oldTime = DateHandler.toString(tournament.getEndTime());
             tournament.setEndTime(DateHandler.toLocalDateTime(tournamentDto.getEndTime()));
+
+            String title = NotificationsCreation.createTitle(EDIT_END_TIME_TITLE, tournament.getId());
+            String content = NotificationsCreation.createContent(EDIT_END_TIME_CONTENT, tournament.getId(), oldTime, DateHandler.toString(tournament.getEndTime()));
+            tournament.Notify(createNotification(tournament, title, content));
+        }
     }
 
     @Retryable(

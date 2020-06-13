@@ -183,6 +183,48 @@ class NotificationsTest extends Specification {
         notificationRepository.getUserNotifications(user.getId()).isEmpty()
     }
 
+    def "user joins tournament, edits end time and receives a notification"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "new endTime"
+        def newEndTime = endTime.plusMinutes(10)
+        tournamentDto.setEndTime(DateHandler.toISOString(newEndTime));
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.editEndTime(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+    }
+
+    def "user joins tournament, edits end time, leaves tournament and doesnt have notifications"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "new endTime"
+        def newEndTime = endTime.plusMinutes(10)
+        tournamentDto.setEndTime(DateHandler.toISOString(newEndTime));
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.editEndTime(user.getId(), tournamentDto)
+
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+
+        when:
+        tournamentService.leaveTournament(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+    }
+
     def "two users have both one notification"() {
         given: "a new user"
         def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
