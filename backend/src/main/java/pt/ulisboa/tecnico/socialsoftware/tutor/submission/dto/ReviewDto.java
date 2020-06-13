@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto;
 
@@ -35,7 +36,7 @@ public class ReviewDto implements Serializable {
             this.imageDto = new ImageDto(review.getImage());
 
         if (review.getCreationDate() != null)
-            this.creationDate = review.getCreationDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            this.creationDate = DateHandler.toISOString(review.getCreationDate());
     }
     public Integer getId() { return id; }
 

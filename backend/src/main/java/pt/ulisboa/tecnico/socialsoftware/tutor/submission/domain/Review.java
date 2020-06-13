@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -54,7 +55,7 @@ public class Review {
         this.user = user;
         this.submission = submission;
         this.studentId = submission.getStudentId();
-        this.creationDate = LocalDateTime.parse(reviewDto.getCreationDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        setCreationDate(DateHandler.toLocalDateTime(reviewDto.getCreationDate()));
 
         if (reviewDto.getImageDto() != null) {
             Image img = new Image(reviewDto.getImageDto());
@@ -116,7 +117,13 @@ public class Review {
 
     public LocalDateTime getCreationDate() { return creationDate; }
 
-    public void setCreationDate(LocalDateTime creationDate) { this.creationDate = creationDate; }
+    public void setCreationDate(LocalDateTime creationDate) {
+        if (this.creationDate == null) {
+            this.creationDate = DateHandler.now();
+        } else {
+            this.creationDate = creationDate;
+        }
+    }
 
     @Override
     public String toString() {

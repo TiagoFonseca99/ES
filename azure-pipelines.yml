@@ -1,9 +1,5 @@
 trigger:
-  branches:
-    include:
-      - master
-    exclude:
-      - "*"
+- master
 
 pr: none
 
