@@ -13,7 +13,6 @@
     <v-btn v-if="!isLoggedIn" :href="fenixUrl" depressed color="primary">
       Log in with Fenix <v-icon>fas fa-sign-in-alt</v-icon>
     </v-btn>
-
     <div class="demo-buttons" v-if="!isLoggedIn">
       <v-btn
         depressed
@@ -42,6 +41,14 @@
       >
         <i class="fa fa-user-cog" />Demo as administrator
       </v-btn>
+    </div>
+    <div v-if="!isLoggedIn" class="white remember" style="cursor: pointer">
+      <v-switch
+        inset
+        class="primary--text"
+        v-model="remember"
+        label="Remember me"
+      />
     </div>
     <v-footer class="footer" v-if="!isStudentLoggedIn">
       <img
@@ -81,14 +88,22 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import Store from '@/store';
 import ShowAnnouncementsView from '@/views/ShowAnnouncementsView.vue';
+import * as storage from '@/storage';
+import * as session from '@/session';
 
 @Component({ components: { 'show-announcements': ShowAnnouncementsView } })
 export default class HomeView extends Vue {
   appName: string = process.env.VUE_APP_NAME;
   fenixUrl: string = process.env.VUE_APP_FENIX_URL;
+  remember: boolean = false;
+  readonly EXPIRY = 1; // 1 day
+
+  created() {
+    this.remember = !(storage.getCookie(session.SESSION_TOKEN) === 'true');
+  }
 
   get isLoggedIn() {
     return Store.getters.isLoggedIn;
@@ -127,6 +142,11 @@ export default class HomeView extends Vue {
     }
     await this.$store.dispatch('clearLoading');
   }
+
+  @Watch('remember')
+  changeSession() {
+    console.log('SESSION: ' + (this.remember ? '1 DAY' : 'CLOSE'));
+  }
 }
 </script>
 
@@ -160,10 +180,16 @@ export default class HomeView extends Vue {
     outline: rgb(255, 255, 255) none 0;
     padding: 10px 20px;
   }
-
+  
   #announcements {
     height: 90%;
     width: 125%;
+    
+  .remember {
+    height: auto;
+    width: auto;
+    padding: 0 15px;
+    border-radius: 8px;
   }
 
   .demo-buttons {
