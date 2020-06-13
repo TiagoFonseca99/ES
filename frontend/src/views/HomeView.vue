@@ -1,6 +1,12 @@
 <template>
   <div class="container">
-    <h1 id="home-title" class="display-2 font-weight-thin mb-3">
+    <show-announcements id="announcements" v-if="isStudentLoggedIn">
+    </show-announcements>
+    <h1
+      v-if="!isLoggedIn || !isStudentLoggedIn"
+      id="home-title"
+      class="display-2 font-weight-thin mb-3"
+    >
       {{ appName }}
     </h1>
 
@@ -36,7 +42,6 @@
         <i class="fa fa-user-cog" />Demo as administrator
       </v-btn>
     </div>
-
     <div v-if="!isLoggedIn" class="white remember" style="cursor: pointer">
       <v-switch
         inset
@@ -45,8 +50,7 @@
         label="Remember me"
       />
     </div>
-
-    <v-footer class="footer">
+    <v-footer class="footer" v-if="!isStudentLoggedIn">
       <img
         :src="require('../assets/img/ist_optimized.png')"
         class="logo"
@@ -86,10 +90,11 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import Store from '@/store';
+import ShowAnnouncementsView from '@/views/ShowAnnouncementsView.vue';
 import * as storage from '@/storage';
 import * as session from '@/session';
 
-@Component
+@Component({ components: { 'show-announcements': ShowAnnouncementsView } })
 export default class HomeView extends Vue {
   appName: string = process.env.VUE_APP_NAME;
   fenixUrl: string = process.env.VUE_APP_FENIX_URL;
@@ -102,6 +107,10 @@ export default class HomeView extends Vue {
 
   get isLoggedIn() {
     return Store.getters.isLoggedIn;
+  }
+
+  get isStudentLoggedIn() {
+    return this.isLoggedIn && Store.getters.isStudent;
   }
 
   async demoStudent() {
@@ -170,6 +179,11 @@ export default class HomeView extends Vue {
     margin-bottom: 70px !important;
     outline: rgb(255, 255, 255) none 0;
     padding: 10px 20px;
+  }
+  
+  #announcements {
+    height: 90%;
+    width: 125%;
   }
 
   .remember {

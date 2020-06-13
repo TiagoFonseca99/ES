@@ -1,4 +1,5 @@
 import Image from '@/models/management/Image';
+import { ISOtoString } from '@/services/ConvertDateService';
 
 export default class Review {
   id!: number;
@@ -21,7 +22,7 @@ export default class Review {
       this.justification = jsonObj.justification;
       this.imageDto = jsonObj.imageDto;
       this.status = jsonObj.status;
-      this.creationDate = jsonObj.creationDate;
+      this.creationDate = ISOtoString(jsonObj.creationDate);
       this.studentUsername = jsonObj.studentUsername;
       this.teacherUsername = jsonObj.teacherUsername;
     }
