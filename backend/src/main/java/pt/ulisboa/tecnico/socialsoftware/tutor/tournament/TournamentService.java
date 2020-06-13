@@ -391,7 +391,12 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
         }
 
+        Integer oldNumberOfQuestions = tournament.getNumberOfQuestions();
         tournament.setNumberOfQuestions(numberOfQuestions);
+
+        String title = NotificationsCreation.createTitle(EDIT_NUMBER_OF_QUESTIONS_TITLE, tournament.getId());
+        String content = NotificationsCreation.createContent(EDIT_NUMBER_OF_QUESTIONS_CONTENT, tournament.getId(), oldNumberOfQuestions, tournament.getNumberOfQuestions());
+        tournament.Notify(createNotification(tournament, title, content));
     }
 
     @Retryable(

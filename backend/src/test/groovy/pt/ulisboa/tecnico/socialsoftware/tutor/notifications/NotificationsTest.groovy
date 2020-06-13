@@ -225,6 +225,40 @@ class NotificationsTest extends Specification {
         notificationRepository.getUserNotifications(user.getId()).isEmpty()
     }
 
+    def "user joins tournament, edits number of questions and receives a notification"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.editNumberOfQuestions(user.getId(), tournamentDto, NUMBER_OF_QUESTIONS + 1)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+    }
+
+    def "user joins tournament, edits number of questions, leaves tournament and doesnt have notifications"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.editNumberOfQuestions(user.getId(), tournamentDto, NUMBER_OF_QUESTIONS + 1)
+
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+
+        when:
+        tournamentService.leaveTournament(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+    }
+
     def "two users have both one notification"() {
         given: "a new user"
         def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
