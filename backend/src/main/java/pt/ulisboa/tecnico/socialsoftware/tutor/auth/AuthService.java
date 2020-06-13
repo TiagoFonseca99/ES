@@ -104,7 +104,7 @@ public class AuthService {
             }
 
             setCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, JwtTokenProvider.generateToken(user), response, true,
-                    session != null ? null : COOKIE_EXP_TIME);
+                    session != null && session ? null : COOKIE_EXP_TIME);
             return new AuthUserDto(user, allCoursesInDb);
         }
 
@@ -116,7 +116,7 @@ public class AuthService {
                     .forEach(user::addCourse);
 
             setCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, JwtTokenProvider.generateToken(user), response, true,
-                    session != null ? null : COOKIE_EXP_TIME);
+                    session != null && session ? null : COOKIE_EXP_TIME);
             return new AuthUserDto(user);
         }
 
@@ -134,14 +134,14 @@ public class AuthService {
             user.setEnrolledCoursesAcronyms(ids);
 
             setCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, JwtTokenProvider.generateToken(user), response, true,
-                    session != null ? null : COOKIE_EXP_TIME);
+                    session != null && session ? null : COOKIE_EXP_TIME);
             return new AuthUserDto(user, fenixTeachingCourses);
         }
 
         // Previous teacher without active courses
         if (user.getRole() == User.Role.TEACHER) {
             setCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, JwtTokenProvider.generateToken(user), response, true,
-                    session != null ? null : COOKIE_EXP_TIME);
+                    session != null && session ? null : COOKIE_EXP_TIME);
             return new AuthUserDto(user);
         }
 
@@ -171,7 +171,7 @@ public class AuthService {
         // }
 
         setCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, JwtTokenProvider.generateToken(user), response, true,
-                session != null ? null : COOKIE_EXP_TIME);
+                session != null && session ? null : COOKIE_EXP_TIME);
         return new AuthUserDto(user);
     }
 
@@ -181,7 +181,7 @@ public class AuthService {
         User user = this.userService.getDemoTeacher();
 
         setCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, JwtTokenProvider.generateToken(user), response, true,
-                session != null ? null : COOKIE_EXP_TIME);
+                session != null && session ? null : COOKIE_EXP_TIME);
         return new AuthUserDto(user);
     }
 
@@ -191,7 +191,7 @@ public class AuthService {
         User user = this.userService.getDemoAdmin();
 
         setCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, JwtTokenProvider.generateToken(user), response, true,
-                session != null ? null : COOKIE_EXP_TIME);
+                session != null && session ? null : COOKIE_EXP_TIME);
         return new AuthUserDto(user);
     }
 
