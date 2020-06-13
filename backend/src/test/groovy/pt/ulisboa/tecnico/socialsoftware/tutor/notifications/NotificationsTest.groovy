@@ -259,6 +259,86 @@ class NotificationsTest extends Specification {
         notificationRepository.getUserNotifications(user.getId()).isEmpty()
     }
 
+    def "user joins tournament, adds a topic and receives a notification"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "a new topic"
+        def topicDto3 = new TopicDto()
+        topicDto3.setName("new topic")
+        def topic3 = new Topic(course, topicDto3)
+        topicRepository.save(topic3)
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+    }
+
+    def "user joins tournament, adds a topic, leaves tournament and doesnt have notifications"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "a new topic"
+        def topicDto3 = new TopicDto()
+        topicDto3.setName("new topic")
+        def topic3 = new Topic(course, topicDto3)
+        topicRepository.save(topic3)
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
+
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+
+        when:
+        tournamentService.leaveTournament(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+    }
+
+    def "user joins tournament, removes a topic and receives a notification"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+    }
+
+    def "user joins tournament, removes a topic, leaves tournament and doesnt have notifications"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
+
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+
+        when:
+        tournamentService.leaveTournament(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+    }
+
     def "two users have both one notification"() {
         given: "a new user"
         def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)

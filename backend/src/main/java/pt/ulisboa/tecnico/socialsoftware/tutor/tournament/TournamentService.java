@@ -124,6 +124,10 @@ public class TournamentService {
         }
 
         tournament.addTopic(topic);
+
+        String title = NotificationsCreation.createTitle(ADD_TOPIC_TITLE, tournament.getId());
+        String content = NotificationsCreation.createContent(ADD_TOPIC_CONTENT, "'" + topic.getName() + "'", tournament.getId());
+        tournament.Notify(createNotification(tournament, title, content));
     }
 
     @Retryable(
@@ -145,6 +149,10 @@ public class TournamentService {
         }
 
         tournament.removeTopic(topic);
+
+        String title = NotificationsCreation.createTitle(REMOVE_TOPIC_TITLE, tournament.getId());
+        String content = NotificationsCreation.createContent(REMOVE_TOPIC_CONTENT, "'" + topic.getName() + "'", tournament.getId());
+        tournament.Notify(createNotification(tournament, title, content));
     }
 
     @Retryable(

@@ -26,7 +26,7 @@ public class NotificationsCreation {
         return String.format(message.getMessage(), value);
     }
 
-    public static String createContent(NotificationsMessage message, Integer value1, Integer value2) {
+    public static String createContent(NotificationsMessage message, String value1, Integer value2) {
         return String.format(message.getMessage(), value1, value2);
     }
 
