@@ -19,6 +19,7 @@ import Review from '@/models/management/Review';
 import Discussion from '@/models/management/Discussion';
 import Reply from '@/models/management/Reply';
 import Dashboard from '@/models/management/Dashboard';
+import Announcement from '@/models/management/Announcement';
 import Notification from '@/models/user/Notification';
 
 const httpClient = axios.create();
@@ -569,6 +570,78 @@ export default class RemoteServices {
       .post('/courses/external', course)
       .then(response => {
         return new Course(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async createAnnouncement(
+    announcement: Announcement
+  ): Promise<Announcement> {
+    return httpClient
+      .post('/management/announcements', announcement)
+      .then(response => {
+        return new Announcement(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getAnnouncements(): Promise<Announcement[]> {
+    return httpClient
+      .get(
+        '/management/announcements?executionId=' +
+          Store.getters.getCurrentCourse.courseExecutionId
+      )
+      .then(response => {
+        return response.data.map((announcement: any) => {
+          return new Announcement(announcement);
+        });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getCourseExecutionAnnouncements(): Promise<Announcement[]> {
+    return httpClient
+      .get(
+        '/executions/' +
+          Store.getters.getCurrentCourse.courseExecutionId +
+          '/announcements'
+      )
+      .then(response => {
+        return response.data.map((announcement: any) => {
+          return new Announcement(announcement);
+        });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async updateAnnouncement(
+    announcement: Announcement
+  ): Promise<Announcement> {
+    return httpClient
+      .put(`/management/announcements/${announcement.id}`, announcement)
+      .then(response => {
+        return new Announcement(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async deleteAnnouncement(
+    announcement: Announcement
+  ): Promise<Boolean> {
+    return httpClient
+      .delete(`/management/announcements/${announcement.id}`)
+      .then(response => {
+        return response.data;
       })
       .catch(async error => {
         throw Error(await this.errorMessage(error));

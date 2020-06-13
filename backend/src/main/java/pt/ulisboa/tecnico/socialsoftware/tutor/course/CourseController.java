@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
@@ -57,6 +58,12 @@ public class CourseController {
     @PreAuthorize("hasRole('ROLE_STUDENT') or (hasRole('ROLE_TEACHER') and hasPermission(#executionId, 'EXECUTION.ACCESS'))")
     public List<StudentDto> getCourseStudents(@PathVariable int executionId) {
         return courseService.courseStudents(executionId);
+    }
+
+    @GetMapping("/executions/{executionId}/announcements")
+    @PreAuthorize("hasRole('ROLE_STUDENT') or (hasRole('ROLE_TEACHER') and hasPermission(#executionId, 'EXECUTION.ACCESS'))")
+    public List<AnnouncementDto> getCourseExecutionAnnouncements(@PathVariable int executionId) {
+        return courseService.getCourseExecutionAnnouncements(executionId);
     }
 
     @GetMapping("/dashboard/execution")

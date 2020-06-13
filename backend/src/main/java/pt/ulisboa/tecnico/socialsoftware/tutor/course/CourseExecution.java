@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.course;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.domain.Announcement;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
@@ -41,6 +42,9 @@ public class CourseExecution implements DomainEntity {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", fetch=FetchType.LAZY, orphanRemoval=true)
     private final Set<Submission> submissions = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", fetch=FetchType.LAZY, orphanRemoval=true)
+    private final Set<Announcement> announcements = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", fetch=FetchType.LAZY, orphanRemoval=true)
     private final Set<Quiz> quizzes = new HashSet<>();
@@ -153,6 +157,9 @@ public class CourseExecution implements DomainEntity {
         submissions.add(submission);
     }
 
+    public void addAnnouncement(Announcement announcement) { announcements.add(announcement); }
+
+    public Set<Announcement> getAnnouncements() { return announcements; }
 
     @Override
     public String toString() {
@@ -165,6 +172,8 @@ public class CourseExecution implements DomainEntity {
                 ", users=" + users +
                 ", quizzes=" + quizzes +
                 ", assessments=" + assessments +
+                ", submissions=" + submissions +
+                ", announcements" + announcements +
                 '}';
     }
 

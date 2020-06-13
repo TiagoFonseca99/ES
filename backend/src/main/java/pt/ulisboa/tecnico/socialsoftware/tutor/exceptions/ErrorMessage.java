@@ -131,6 +131,12 @@ public enum ErrorMessage {
     REPLY_UNAUTHORIZED_USER("User cannot create reply for given discussion"),
     USER_NOT_IN_COURSE("User is not enrolled in course %s"),
 
+    // Adp
+    INVALID_TITLE_FOR_ANNOUNCEMENT("Invalid title for announcement"),
+    INVALID_CONTENT_FOR_ANNOUNCEMENT("Invalid content for announcement"),
+    TEACHER_MISSING("Teacher is missing"),
+    ANNOUNCEMENT_NOT_FOUND("Announcement not found with id %d"),
+
     // Sdn
     INVALID_TITLE_FOR_NOTIFICATION("Invalid title for notification"),
     INVALID_CONTENT_FOR_NOTIFICATION("Invalid content for notification"),

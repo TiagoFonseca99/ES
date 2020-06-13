@@ -28,6 +28,7 @@ import DiscussionView from '@/views/student/discussion/DiscussionView.vue';
 import DashboardView from '@/views/student/dashboard/DashboardView.vue';
 import StudentDashboardView from '@/views/teacher/students/DashboardView.vue';
 import SearchStudentView from '@/views/student/dashboard/SearchStudentView.vue';
+import AnnouncementView from '@/views/teacher/announcements/AnnouncementView.vue';
 import NotificationsView from '@/views/student/notifications/NotificationsView.vue';
 
 import AdminManagementView from '@/views/admin/AdminManagementView.vue';
@@ -102,6 +103,15 @@ let router = new Router({
           component: ReviewsView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Reviews',
+            requiredAuth: 'Teacher'
+          }
+        },
+        {
+          path: 'announcements',
+          name: 'announcements',
+          component: AnnouncementView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Announcements',
             requiredAuth: 'Teacher'
           }
         },
