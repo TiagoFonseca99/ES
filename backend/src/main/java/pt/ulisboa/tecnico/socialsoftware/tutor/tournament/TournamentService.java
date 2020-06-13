@@ -7,24 +7,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
-import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsCreation;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Assessment;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.TopicConjunction;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicConjunctionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementCreationDto;
@@ -43,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsMessage.*;
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Service
@@ -323,7 +319,10 @@ public class TournamentService {
         }
 
         tournament.setState(Tournament.Status.CANCELED);
-        tournament.Notify(createNotification(tournament));
+
+        String title = NotificationsCreation.createTitle(CANCEL_TITLE, tournament.getId());
+        String content = NotificationsCreation.createContent(CANCEL_CONTENT, tournament.getId());
+        tournament.Notify(createNotification(tournament, title, content));
     }
 
     @Retryable(
@@ -341,8 +340,9 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
         }
 
-        if (DateHandler.isValidDateFormat(tournamentDto.getStartTime()))
+        if (DateHandler.isValidDateFormat(tournamentDto.getStartTime())) {
             tournament.setStartTime(DateHandler.toLocalDateTime(tournamentDto.getStartTime()));
+        }
     }
 
     @Retryable(
@@ -409,12 +409,9 @@ public class TournamentService {
         }
     }
 
-    public Notification createNotification(Tournament tournament) {
-        NotificationDto notificationDto = new NotificationDto();
-        notificationDto.setTitle("title teste");
-        notificationDto.setContent("content teste");
-        notificationDto.setCreationDate(DateHandler.toISOString(DateHandler.now()));
-        NotificationDto response = notificationService.createNotification(notificationDto);
+    public Notification createNotification(Tournament tournament, String title, String content) {
+        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content);
+        NotificationDto response = notificationService.createNotification(notificationsCreation.getNotificationDto());
 
         Notification notification = notificationService.getNotificationById(response.getId());
         tournament.addNotification(notification);
