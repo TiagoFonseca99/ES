@@ -120,7 +120,7 @@ public class CourseService {
         if (courseExecution == null) {
             return new ArrayList<>();
         }
-        return courseExecution.getAnnouncements().stream()
+        return courseExecution.getAnnouncements().stream().sorted(Comparator.comparing(Announcement::getCreationDate))
                 .map(AnnouncementDto::new)
                 .collect(Collectors.toList());
     }
