@@ -34,6 +34,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -341,7 +342,12 @@ public class TournamentService {
         }
 
         if (DateHandler.isValidDateFormat(tournamentDto.getStartTime())) {
+            String oldTime = DateHandler.toString(tournament.getStartTime());
             tournament.setStartTime(DateHandler.toLocalDateTime(tournamentDto.getStartTime()));
+
+            String title = NotificationsCreation.createTitle(EDIT_START_TIME_TITLE, tournament.getId());
+            String content = NotificationsCreation.createContent(EDIT_START_TIME_CONTENT, tournament.getId(), oldTime, DateHandler.toString(tournament.getStartTime()));
+            tournament.Notify(createNotification(tournament, title, content));
         }
     }
 
