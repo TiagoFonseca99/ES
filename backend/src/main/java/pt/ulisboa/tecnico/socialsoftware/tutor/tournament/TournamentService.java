@@ -19,7 +19,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.TopicConjunction;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicConjunctionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementCreationDto;
@@ -34,7 +36,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.UserDto;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,6 +60,9 @@ public class TournamentService {
 
     @Autowired
     private TopicRepository topicRepository;
+
+    @Autowired
+    private QuizService quizService;
 
     @Autowired
     private QuizRepository quizRepository;
@@ -400,6 +404,16 @@ public class TournamentService {
         }
 
         Integer oldNumberOfQuestions = tournament.getNumberOfQuestions();
+
+        if (tournament.hasQuiz()) {    // update current Quiz
+            Quiz quiz = quizRepository.findById(tournamentDto.getQuizId())
+                    .orElseThrow(() -> new TutorException(QUIZ_NOT_FOUND, tournamentDto.getQuizId()));
+
+            QuizDto quizDto = quizService.findById(tournamentDto.getQuizId());
+            quizDto.setNumberOfQuestions(numberOfQuestions);
+
+            quizService.updateQuiz(quiz.getId(), quizDto);
+        }
         tournament.setNumberOfQuestions(numberOfQuestions);
 
         String title = NotificationsCreation.createTitle(EDIT_NUMBER_OF_QUESTIONS_TITLE, tournament.getId());

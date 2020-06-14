@@ -1,25 +1,28 @@
-package pt.ulisboa.tecnico.socialsoftware.tutor.notifications.service
+package pt.ulisboa.tecnico.socialsoftware.tutor.notifications
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.repository.NotificationRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicConjunctionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
@@ -63,7 +66,19 @@ class NotificationsTest extends Specification {
     TopicRepository topicRepository
 
     @Autowired
+    TopicConjunctionRepository topicConjunctionRepository
+
+    @Autowired
     QuestionRepository questionRepository
+
+    @Autowired
+    QuizRepository quizRepository
+
+    @Autowired
+    QuizQuestionRepository quizQuestionRepository
+
+    @Autowired
+    QuizAnswerRepository quizAnswerRepository
 
     @Autowired
     NotificationRepository notificationRepository
@@ -79,6 +94,7 @@ class NotificationsTest extends Specification {
     def endTime = DateHandler.now().plusHours(2)
     def tournamentDto = new TournamentDto()
     def questionOne
+    def questionTwo
 
     def setup() {
         user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
@@ -125,6 +141,15 @@ class NotificationsTest extends Specification {
         questionOne.setCourse(course)
         questionOne.addTopic(topic1)
         questionRepository.save(questionOne)
+
+        questionTwo = new Question()
+        questionTwo.setKey(2)
+        questionTwo.setContent("Question Content")
+        questionTwo.setTitle("Question Title")
+        questionTwo.setStatus(Question.Status.AVAILABLE)
+        questionTwo.setCourse(course)
+        questionTwo.addTopic(topic1)
+        questionRepository.save(questionTwo)
     }
 
     def "user joins tournament, cancels it and receives a notification"() {
@@ -214,40 +239,6 @@ class NotificationsTest extends Specification {
 
         when:
         tournamentService.editEndTime(user.getId(), tournamentDto)
-
-        then: "1 notification"
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
-
-        when:
-        tournamentService.leaveTournament(user.getId(), tournamentDto)
-
-        then:
-        notificationRepository.getUserNotifications(user.getId()).isEmpty()
-    }
-
-    def "user joins tournament, edits number of questions and receives a notification"() {
-        given: "user joins a tournament"
-        tournamentService.joinTournament(user.getId(), tournamentDto, "")
-
-        expect: "0 notifications"
-        notificationRepository.getUserNotifications(user.getId()).isEmpty()
-
-        when:
-        tournamentService.editNumberOfQuestions(user.getId(), tournamentDto, NUMBER_OF_QUESTIONS + 1)
-
-        then:
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
-    }
-
-    def "user joins tournament, edits number of questions, leaves tournament and doesnt have notifications"() {
-        given: "user joins a tournament"
-        tournamentService.joinTournament(user.getId(), tournamentDto, "")
-
-        expect: "0 notifications"
-        notificationRepository.getUserNotifications(user.getId()).isEmpty()
-
-        when:
-        tournamentService.editNumberOfQuestions(user.getId(), tournamentDto, NUMBER_OF_QUESTIONS + 1)
 
         then: "1 notification"
         notificationRepository.getUserNotifications(user.getId()).size() == 1
