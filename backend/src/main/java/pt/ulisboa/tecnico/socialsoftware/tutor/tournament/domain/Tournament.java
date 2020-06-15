@@ -225,10 +225,7 @@ public class Tournament implements Observable {
     }
 
     public boolean hasQuiz() {
-        if (this.getQuizId() != null){
-            return true;
-        }
-        return false;
+        return this.getQuizId() != null;
     }
 
     public void remove() {

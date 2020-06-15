@@ -1,25 +1,28 @@
-package pt.ulisboa.tecnico.socialsoftware.tutor.notifications.service
+package pt.ulisboa.tecnico.socialsoftware.tutor.notifications
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.repository.NotificationRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicConjunctionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.TournamentService
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament
@@ -34,6 +37,9 @@ class NotificationsTest extends Specification {
     public static final String USER_NAME1 = "Tiago"
     public static final String USERNAME1 = "TiagoFonseca99"
     public static final Integer KEY1 = 1
+    public static final String USER_NAME2 = "João"
+    public static final String USERNAME2 = "JoãoDinis99"
+    public static final Integer KEY2 = 2
     public static final String COURSE_NAME = "Software Architecture"
     public static final String ACRONYM = "AS1"
     public static final String ACADEMIC_TERM = "1 SEM"
@@ -60,7 +66,19 @@ class NotificationsTest extends Specification {
     TopicRepository topicRepository
 
     @Autowired
+    TopicConjunctionRepository topicConjunctionRepository
+
+    @Autowired
     QuestionRepository questionRepository
+
+    @Autowired
+    QuizRepository quizRepository
+
+    @Autowired
+    QuizQuestionRepository quizQuestionRepository
+
+    @Autowired
+    QuizAnswerRepository quizAnswerRepository
 
     @Autowired
     NotificationRepository notificationRepository
@@ -76,6 +94,7 @@ class NotificationsTest extends Specification {
     def endTime = DateHandler.now().plusHours(2)
     def tournamentDto = new TournamentDto()
     def questionOne
+    def questionTwo
 
     def setup() {
         user = new User(USER_NAME1, USERNAME1, KEY1, User.Role.STUDENT)
@@ -122,20 +141,268 @@ class NotificationsTest extends Specification {
         questionOne.setCourse(course)
         questionOne.addTopic(topic1)
         questionRepository.save(questionOne)
+
+        questionTwo = new Question()
+        questionTwo.setKey(2)
+        questionTwo.setContent("Question Content")
+        questionTwo.setTitle("Question Title")
+        questionTwo.setStatus(Question.Status.AVAILABLE)
+        questionTwo.setCourse(course)
+        questionTwo.addTopic(topic1)
+        questionRepository.save(questionTwo)
     }
 
     def "user joins tournament, cancels it and receives a notification"() {
         given: "user joins a tournament"
         tournamentService.joinTournament(user.getId(), tournamentDto, "")
 
-        expect:
-        notificationRepository.count() == 0L
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
 
         when:
         tournamentService.cancelTournament(user.getId(), tournamentDto)
 
         then:
-        notificationRepository.count() == 1L
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+    }
+
+    def "user joins tournament, edits start time and receives a notification"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "new startTime"
+        def newStartTime = DateHandler.now().plusMinutes(10)
+        tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.editStartTime(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+    }
+
+    def "user joins tournament, edits start time, leaves tournament and doesnt have notifications"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "new startTime"
+        def newStartTime = DateHandler.now().plusMinutes(10)
+        tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.editStartTime(user.getId(), tournamentDto)
+
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+
+        when:
+        tournamentService.leaveTournament(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+    }
+
+    def "user joins tournament, edits end time and receives a notification"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "new endTime"
+        def newEndTime = endTime.plusMinutes(10)
+        tournamentDto.setEndTime(DateHandler.toISOString(newEndTime));
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.editEndTime(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+    }
+
+    def "user joins tournament, edits end time, leaves tournament and doesnt have notifications"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "new endTime"
+        def newEndTime = endTime.plusMinutes(10)
+        tournamentDto.setEndTime(DateHandler.toISOString(newEndTime));
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.editEndTime(user.getId(), tournamentDto)
+
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+
+        when:
+        tournamentService.leaveTournament(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+    }
+
+    def "user joins tournament, adds a topic and receives a notification"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "a new topic"
+        def topicDto3 = new TopicDto()
+        topicDto3.setName("new topic")
+        def topic3 = new Topic(course, topicDto3)
+        topicRepository.save(topic3)
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+    }
+
+    def "user joins tournament, adds a topic, leaves tournament and doesnt have notifications"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        and: "a new topic"
+        def topicDto3 = new TopicDto()
+        topicDto3.setName("new topic")
+        def topic3 = new Topic(course, topicDto3)
+        topicRepository.save(topic3)
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
+
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+
+        when:
+        tournamentService.leaveTournament(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+    }
+
+    def "user joins tournament, removes a topic and receives a notification"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+    }
+
+    def "user joins tournament, removes a topic, leaves tournament and doesnt have notifications"() {
+        given: "user joins a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+
+        when:
+        tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
+
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+
+        when:
+        tournamentService.leaveTournament(user.getId(), tournamentDto)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+    }
+
+    def "two users have both one notification"() {
+        given: "a new user"
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        courseExecution.addUser(user2)
+        courseExecutionRepository.save(courseExecution)
+
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
+
+        and: "a new tournament"
+        def tournamentDto2 = tournamentService.createTournament(user2.getId(), topics, tournamentDto)
+
+        and: "users join a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+        tournamentService.joinTournament(user2.getId(), tournamentDto2, "")
+
+        and: "new startTime"
+        def newStartTime = DateHandler.now().plusMinutes(10)
+        tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
+        tournamentDto2.setStartTime(DateHandler.toISOString(newStartTime));
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+        notificationRepository.getUserNotifications(user2.getId()).isEmpty()
+
+        when:
+        tournamentService.editStartTime(user.getId(), tournamentDto)
+        tournamentService.editStartTime(user2.getId(), tournamentDto2)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        notificationRepository.getUserNotifications(user2.getId()).size() == 1
+    }
+
+    def "two users have both one notification and one leaves tournament"() {
+        given: "a new user"
+        def user2 = new User(USER_NAME2, USERNAME2, KEY2, User.Role.STUDENT)
+        courseExecution.addUser(user2)
+        courseExecutionRepository.save(courseExecution)
+
+        user2.addCourse(courseExecution)
+        userRepository.save(user2)
+
+        and: "a new tournament"
+        def tournamentDto2 = tournamentService.createTournament(user2.getId(), topics, tournamentDto)
+
+        and: "users join a tournament"
+        tournamentService.joinTournament(user.getId(), tournamentDto, "")
+        tournamentService.joinTournament(user2.getId(), tournamentDto2, "")
+
+        and: "new startTime"
+        def newStartTime = DateHandler.now().plusMinutes(10)
+        tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
+        tournamentDto2.setStartTime(DateHandler.toISOString(newStartTime));
+
+        expect: "0 notifications"
+        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+        notificationRepository.getUserNotifications(user2.getId()).isEmpty()
+
+        when:
+        tournamentService.editStartTime(user.getId(), tournamentDto)
+        tournamentService.editStartTime(user2.getId(), tournamentDto2)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        notificationRepository.getUserNotifications(user2.getId()).size() == 1
+
+        when:
+        tournamentService.leaveTournament(user2.getId(), tournamentDto2)
+
+        then:
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        notificationRepository.getUserNotifications(user2.getId()).isEmpty()
     }
 
     @TestConfiguration
