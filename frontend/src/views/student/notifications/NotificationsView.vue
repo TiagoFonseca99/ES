@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-  import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import Notification from '@/models/user/Notification';
 import RemoteServices from '@/services/RemoteServices';
 
