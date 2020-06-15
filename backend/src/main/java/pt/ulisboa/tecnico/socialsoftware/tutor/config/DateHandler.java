@@ -18,6 +18,18 @@ public class DateHandler {
     }
 
     /**
+     *  Converts LocalDateTime to string format
+     */
+    public static String toString(LocalDateTime time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        if (time == null) {
+            return null;
+        }
+        return time.format(formatter);
+    }
+
+    /**
      *  Converts ISO8601 string format to LocalDateTime
      */
     public static LocalDateTime toLocalDateTime(String date) {
