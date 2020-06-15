@@ -145,7 +145,11 @@ export default class HomeView extends Vue {
 
   @Watch('remember')
   changeSession() {
-    console.log('SESSION: ' + (this.remember ? '1 DAY' : 'CLOSE'));
+    storage.createCookie(
+      session.SESSION_TOKEN,
+      String(!this.remember),
+      this.remember ? this.EXPIRY : undefined
+    );
   }
 }
 </script>
@@ -180,7 +184,7 @@ export default class HomeView extends Vue {
     outline: rgb(255, 255, 255) none 0;
     padding: 10px 20px;
   }
-  
+
   #announcements {
     height: 90%;
     width: 125%;
