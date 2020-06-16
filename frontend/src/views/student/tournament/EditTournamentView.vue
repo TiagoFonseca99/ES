@@ -298,8 +298,10 @@ export default class EditTournamentDialog extends Vue {
     if (this.editTournament && this.editTournament.id != null) {
       const enrolled = this.editTournament.enrolled;
       const topics = this.editTournament.topics;
+      const participants = this.editTournament.participants;
       this.editTournament.enrolled = undefined;
       this.editTournament.topics = [];
+      this.editTournament.participants = [];
 
       let topicsToAddID = this.topicsToAdd.map(topic => {
         return topic.id;
@@ -323,11 +325,13 @@ export default class EditTournamentDialog extends Vue {
         await this.$store.dispatch('error', error);
         this.editTournament.enrolled = enrolled;
         this.editTournament.topics = topics;
+        this.editTournament.participants = participants;
       }
       this.editTournament.enrolled = enrolled;
       this.editTournament.topics = this.currentTopics.map(topic => {
         return topic.name;
       });
+      this.editTournament.participants = participants;
     }
   }
 
