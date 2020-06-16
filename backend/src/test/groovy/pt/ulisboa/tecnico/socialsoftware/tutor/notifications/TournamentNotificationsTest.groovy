@@ -184,7 +184,7 @@ class TournamentNotificationsTest extends Specification {
         notificationRepository.getUserNotifications(user.getId()).size() == 1
     }
 
-    def "user joins tournament, edits start time, leaves tournament and doesnt have notifications"() {
+    def "user joins tournament, edits start time, leaves tournament and still has notifications"() {
         given: "user joins a tournament"
         tournamentService.joinTournament(user.getId(), tournamentDto, "")
 
@@ -204,8 +204,8 @@ class TournamentNotificationsTest extends Specification {
         when:
         tournamentService.leaveTournament(user.getId(), tournamentDto)
 
-        then:
-        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
     }
 
     def "user joins tournament, edits end time and receives a notification"() {
@@ -226,7 +226,7 @@ class TournamentNotificationsTest extends Specification {
         notificationRepository.getUserNotifications(user.getId()).size() == 1
     }
 
-    def "user joins tournament, edits end time, leaves tournament and doesnt have notifications"() {
+    def "user joins tournament, edits end time, leaves tournament and still has notifications"() {
         given: "user joins a tournament"
         tournamentService.joinTournament(user.getId(), tournamentDto, "")
 
@@ -246,8 +246,8 @@ class TournamentNotificationsTest extends Specification {
         when:
         tournamentService.leaveTournament(user.getId(), tournamentDto)
 
-        then:
-        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
     }
 
     def "user joins tournament, adds a topic and receives a notification"() {
@@ -270,7 +270,7 @@ class TournamentNotificationsTest extends Specification {
         notificationRepository.getUserNotifications(user.getId()).size() == 1
     }
 
-    def "user joins tournament, adds a topic, leaves tournament and doesnt have notifications"() {
+    def "user joins tournament, adds a topic, leaves tournament and still has notifications"() {
         given: "user joins a tournament"
         tournamentService.joinTournament(user.getId(), tournamentDto, "")
 
@@ -292,8 +292,8 @@ class TournamentNotificationsTest extends Specification {
         when:
         tournamentService.leaveTournament(user.getId(), tournamentDto)
 
-        then:
-        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
     }
 
     def "user joins tournament, removes a topic and receives a notification"() {
@@ -310,7 +310,7 @@ class TournamentNotificationsTest extends Specification {
         notificationRepository.getUserNotifications(user.getId()).size() == 1
     }
 
-    def "user joins tournament, removes a topic, leaves tournament and doesnt have notifications"() {
+    def "user joins tournament, removes a topic, leaves tournament and still has notifications"() {
         given: "user joins a tournament"
         tournamentService.joinTournament(user.getId(), tournamentDto, "")
 
@@ -326,8 +326,8 @@ class TournamentNotificationsTest extends Specification {
         when:
         tournamentService.leaveTournament(user.getId(), tournamentDto)
 
-        then:
-        notificationRepository.getUserNotifications(user.getId()).isEmpty()
+        then: "1 notification"
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
     }
 
     def "two users have both one notification"() {
@@ -402,7 +402,7 @@ class TournamentNotificationsTest extends Specification {
 
         then:
         notificationRepository.getUserNotifications(user.getId()).size() == 1
-        notificationRepository.getUserNotifications(user2.getId()).isEmpty()
+        notificationRepository.getUserNotifications(user.getId()).size() == 1
     }
 
     @TestConfiguration
