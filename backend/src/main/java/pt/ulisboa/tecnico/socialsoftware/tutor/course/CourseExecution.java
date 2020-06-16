@@ -209,7 +209,7 @@ public class CourseExecution implements DomainEntity, Observable {
 
     @Override
     public void Notify(Notification notification) {
-        for (Observer observer : observers) {
+        for (Observer observer : users) {
             observer.update(this, notification);
         }
     }
