@@ -12,6 +12,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.repository.Announcem
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsCreation;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
@@ -23,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsMessage.*;
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 
@@ -37,6 +42,9 @@ public class AnnouncementService {
 
     @Autowired
     private AnnouncementRepository announcementRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -59,8 +67,10 @@ public class AnnouncementService {
         }
 
         Announcement announcement = new Announcement(user, courseExecution, announcementDto);
-
         entityManager.persist(announcement);
+
+        prepareNotification(courseExecution, announcement);
+
         return new AnnouncementDto(announcement);
     }
 
@@ -115,5 +125,18 @@ public class AnnouncementService {
         if (!user.isTeacher())
             throw new TutorException(USER_NOT_TEACHER, user.getUsername());
         return user;
+    }
+
+    private void prepareNotification(CourseExecution courseExecution, Announcement announcement) {
+        String title = NotificationsCreation.createTitle(ADD_ANNOUNCEMENT_TITLE, announcement.getUser().getName());
+        String content = NotificationsCreation.createContent(ADD_ANNOUNCEMENT_CONTENT, announcement.getTitle(), announcement.getUser().getName());
+        courseExecution.Notify(createNotification(title, content));
+    }
+
+    public Notification createNotification(String title, String content) {
+        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content);
+        NotificationDto response = notificationService.createNotification(notificationsCreation.getNotificationDto());
+
+        return notificationService.getNotificationById(response.getId());
     }
 }

@@ -33,7 +33,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
 
 @DataJpaTest
-class NotificationsTest extends Specification {
+class TournamentNotificationsTest extends Specification {
     public static final String USER_NAME1 = "Tiago"
     public static final String USERNAME1 = "TiagoFonseca99"
     public static final Integer KEY1 = 1
