@@ -47,7 +47,10 @@ export default class ScanView extends Vue {
       try {
         this.quiz = await RemoteServices.getQuizByQRCode(this.quizId);
 
-        if (this.quiz.timeToAvailability === 0) {
+        if (
+          this.quiz.timeToAvailability === 0 ||
+          this.quiz.timeToAvailability === null
+        ) {
           let statementManager: StatementManager = StatementManager.getInstance;
           statementManager.statementQuiz = this.quiz;
           await this.$router.push({ name: 'solve-quiz' });
@@ -65,7 +68,10 @@ export default class ScanView extends Vue {
   }
 
   timer() {
-    if (this.quiz?.timeToAvailability === 0) {
+    if (
+      this.quiz?.timeToAvailability === 0 ||
+      this.quiz?.timeToAvailability === null
+    ) {
       this.getQuizByQRCode();
     }
 
