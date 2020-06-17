@@ -20,6 +20,9 @@
           <v-chip small>
             <span>{{ announcement.creationDate }}</span>
           </v-chip>
+          <span id="edited" v-if="announcement.edited">
+            {{ '  (edited)' }}</span
+          >
           <v-spacer />
           <v-chip small color="primary" v-if="announcement.username">
             <span>{{ announcement.username }}</span>
@@ -122,6 +125,12 @@ export default class ReviewView extends Vue {
 
   .buttons {
     margin-bottom: 20px;
+  }
+
+  #edited {
+    color: grey;
+    font-size: 15px;
+    padding-left: 2px;
   }
 }
 </style>

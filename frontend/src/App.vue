@@ -24,6 +24,7 @@ import TopBar from '@/components/TopBar.vue';
 import ErrorMessage from '@/components/ErrorMessage.vue';
 import Loading from '@/components/Loading.vue';
 import CookieConsent from '@/components/CookieConsent.vue';
+import NotificationsDropdown from '@/components/NotificationsDropdown.vue';
 import * as storage from '@/storage';
 import '@/assets/css/_global.scss';
 import '@/assets/css/_scrollbar.scss';
@@ -31,7 +32,13 @@ import '@/assets/css/_question.scss';
 require('typeface-roboto');
 
 @Component({
-  components: { TopBar, ErrorMessage, Loading, CookieConsent }
+  components: {
+    TopBar,
+    ErrorMessage,
+    Loading,
+    CookieConsent,
+    NotificationsDropdown
+  }
 })
 export default class App extends Vue {
   readonly COOKIES = 'cookies';
