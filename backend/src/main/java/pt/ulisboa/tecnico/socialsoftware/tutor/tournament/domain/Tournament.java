@@ -70,9 +70,6 @@ public class Tournament implements Observable {
     @ManyToMany(fetch = FetchType.LAZY)
     private List<User> observers = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<Notification> notifications = new ArrayList<>();
-
     public Tournament() {
     }
 
@@ -252,12 +249,6 @@ public class Tournament implements Observable {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    public List<Notification> getNotifications() { return notifications; }
-
-    public void addNotification(Notification notification) { this.notifications.add(notification); }
-
-    public void removeNotification(Notification notification) { this.notifications.remove(notification); }
 
     @Override
     public void Attach(Observer o) {

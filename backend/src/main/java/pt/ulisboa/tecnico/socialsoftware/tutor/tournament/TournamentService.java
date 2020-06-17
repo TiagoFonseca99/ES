@@ -131,7 +131,7 @@ public class TournamentService {
 
         String title = NotificationsCreation.createTitle(ADD_TOPIC_TITLE, tournament.getId());
         String content = NotificationsCreation.createContent(ADD_TOPIC_CONTENT, "'" + topic.getName() + "'", tournament.getId());
-        tournament.Notify(createNotification(tournament, title, content));
+        tournament.Notify(createNotification(title, content));
     }
 
     @Retryable(
@@ -156,7 +156,7 @@ public class TournamentService {
 
         String title = NotificationsCreation.createTitle(REMOVE_TOPIC_TITLE, tournament.getId());
         String content = NotificationsCreation.createContent(REMOVE_TOPIC_CONTENT, "'" + topic.getName() + "'", tournament.getId());
-        tournament.Notify(createNotification(tournament, title, content));
+        tournament.Notify(createNotification(title, content));
     }
 
     @Retryable(
@@ -289,9 +289,6 @@ public class TournamentService {
         }
 
         tournament.removeParticipant(user);
-        for (Notification notification: tournament.getNotifications()) {
-            notificationService.removeNotification(user.getId(), notification.getId());
-        }
     }
 
     @Retryable(
@@ -335,7 +332,7 @@ public class TournamentService {
 
         String title = NotificationsCreation.createTitle(CANCEL_TITLE, tournament.getId());
         String content = NotificationsCreation.createContent(CANCEL_CONTENT, tournament.getId());
-        tournament.Notify(createNotification(tournament, title, content));
+        tournament.Notify(createNotification(title, content));
     }
 
     @Retryable(
@@ -359,7 +356,7 @@ public class TournamentService {
 
             String title = NotificationsCreation.createTitle(EDIT_START_TIME_TITLE, tournament.getId());
             String content = NotificationsCreation.createContent(EDIT_START_TIME_CONTENT, tournament.getId(), oldTime, DateHandler.toString(tournament.getStartTime()));
-            tournament.Notify(createNotification(tournament, title, content));
+            tournament.Notify(createNotification(title, content));
         }
     }
 
@@ -384,7 +381,7 @@ public class TournamentService {
 
             String title = NotificationsCreation.createTitle(EDIT_END_TIME_TITLE, tournament.getId());
             String content = NotificationsCreation.createContent(EDIT_END_TIME_CONTENT, tournament.getId(), oldTime, DateHandler.toString(tournament.getEndTime()));
-            tournament.Notify(createNotification(tournament, title, content));
+            tournament.Notify(createNotification(title, content));
         }
     }
 
@@ -418,7 +415,7 @@ public class TournamentService {
 
         String title = NotificationsCreation.createTitle(EDIT_NUMBER_OF_QUESTIONS_TITLE, tournament.getId());
         String content = NotificationsCreation.createContent(EDIT_NUMBER_OF_QUESTIONS_CONTENT, tournament.getId(), oldNumberOfQuestions, tournament.getNumberOfQuestions());
-        tournament.Notify(createNotification(tournament, title, content));
+        tournament.Notify(createNotification(title, content));
     }
 
     @Retryable(
@@ -448,12 +445,11 @@ public class TournamentService {
         }
     }
 
-    public Notification createNotification(Tournament tournament, String title, String content) {
+    public Notification createNotification(String title, String content) {
         NotificationsCreation notificationsCreation = new NotificationsCreation(title, content);
         NotificationDto response = notificationService.createNotification(notificationsCreation.getNotificationDto());
 
         Notification notification = notificationService.getNotificationById(response.getId());
-        tournament.addNotification(notification);
 
         return notification;
     }
