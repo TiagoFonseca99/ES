@@ -36,6 +36,13 @@
           @click="showAnnouncementDialog(item)"
       /></template>
 
+      <template v-slot:item.edited="{ item }">
+        <span v-if="item.edited">
+          <v-icon color="green">fa-check</v-icon>
+        </span>
+        <span v-else><v-icon color="red">fa-times</v-icon> </span>
+      </template>
+
       <template v-slot:item.creationDate="{ item }">
         <v-chip small>
           <span> {{ item.creationDate }}</span>
@@ -131,11 +138,12 @@ export default class AnnouncementView extends Vue {
     {
       text: 'Actions',
       value: 'action',
-      align: 'left',
+      align: 'center',
       width: '20%',
       sortable: false
     },
     { text: 'Title', value: 'title', align: 'center' },
+    { text: 'Edited', value: 'edited', align: 'center' },
     {
       text: 'Creation Date',
       value: 'creationDate',
@@ -226,22 +234,3 @@ export default class AnnouncementView extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.question-textarea {
-  text-align: left;
-
-  .CodeMirror,
-  .CodeMirror-scroll {
-    min-height: 200px !important;
-  }
-}
-.option-textarea {
-  text-align: left;
-
-  .CodeMirror,
-  .CodeMirror-scroll {
-    min-height: 100px !important;
-  }
-}
-</style>
