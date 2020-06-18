@@ -130,11 +130,11 @@ public class AnnouncementService {
     private void prepareNotification(CourseExecution courseExecution, Announcement announcement) {
         String title = NotificationsCreation.createTitle(ADD_ANNOUNCEMENT_TITLE, announcement.getUser().getName());
         String content = NotificationsCreation.createContent(ADD_ANNOUNCEMENT_CONTENT, announcement.getTitle(), announcement.getUser().getName());
-        courseExecution.Notify(createNotification(title, content));
+        courseExecution.Notify(createNotification(title, content, Notification.Type.ANNOUNCEMENT));
     }
 
-    public Notification createNotification(String title, String content) {
-        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content);
+    public Notification createNotification(String title, String content, Notification.Type type) {
+        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content, type);
         NotificationDto response = notificationService.createNotification(notificationsCreation.getNotificationDto());
 
         return notificationService.getNotificationById(response.getId());

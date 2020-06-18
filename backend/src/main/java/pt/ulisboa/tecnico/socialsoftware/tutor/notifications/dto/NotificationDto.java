@@ -15,6 +15,7 @@ public class NotificationDto implements Serializable {
     private String title;
     private String content;
     private String creationDate;
+    private String type;
 
     public NotificationDto() {}
 
@@ -24,6 +25,7 @@ public class NotificationDto implements Serializable {
         this.title = notification.getTitle();
         this.content = notification.getContent();
         this.creationDate = DateHandler.toISOString(notification.getCreationDate());
+        this.type = notification.getType().name();
     }
 
     public Integer getId() { return id; }
@@ -50,4 +52,8 @@ public class NotificationDto implements Serializable {
     public String getCreationDate() { return creationDate; }
 
     public void setCreationDate(String creationDate) { this.creationDate = creationDate; }
+
+    public String getType() { return type; }
+
+    public void setType(String type) { this.type = type; }
 }

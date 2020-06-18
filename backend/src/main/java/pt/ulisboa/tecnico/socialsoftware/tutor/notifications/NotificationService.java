@@ -55,10 +55,8 @@ public class NotificationService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Notification getNotificationById(Integer notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
+        return notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new TutorException(NOTIFICATION_NOT_FOUND, notificationId));
-
-        return notification;
     }
 
     @Retryable(

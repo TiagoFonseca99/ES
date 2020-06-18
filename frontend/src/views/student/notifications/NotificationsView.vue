@@ -51,6 +51,12 @@ export default class NotificationsView extends Vue {
       width: '10%'
     },
     {
+      text: 'Type',
+      value: 'type',
+      align: 'center',
+      width: '10%'
+    },
+    {
       text: 'Content',
       value: 'content',
       align: 'center',
