@@ -107,6 +107,9 @@ public class User implements UserDetails, DomainEntity, Observer {
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
     private List<Tournament> tournaments_observers = new ArrayList<>();
 
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
+    private List<Review> review_observers = new ArrayList<>();
+
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "users")
     private List<Notification> notifications = new ArrayList<>();
 
@@ -454,6 +457,10 @@ public class User implements UserDetails, DomainEntity, Observer {
         this.tournaments_observers.add(tournament);
     }
 
+    public void addObserver(Review review) {
+        this.review_observers.add(review);
+    }
+
     public boolean isStudent() {
         return this.role == User.Role.STUDENT;
     }
@@ -461,6 +468,8 @@ public class User implements UserDetails, DomainEntity, Observer {
     public void removeTournament(Tournament tournament) { this.tournaments.remove(tournament); }
 
     public void removeObserver(Tournament tournament) { this.tournaments_observers.remove(tournament); }
+
+    public void removeObserver(Review review) { this.review_observers.remove(review); }
 
     public boolean isTeacher() {
         return this.role == User.Role.TEACHER;

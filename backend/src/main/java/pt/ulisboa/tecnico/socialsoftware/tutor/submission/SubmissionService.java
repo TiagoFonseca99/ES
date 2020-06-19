@@ -6,8 +6,12 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
@@ -18,6 +22,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
@@ -28,6 +33,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -48,6 +54,9 @@ public class SubmissionService {
 
     @Autowired
     private CourseExecutionRepository courseExecutionRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -134,6 +143,11 @@ public class SubmissionService {
         updateQuestionStatus(submission, reviewDto.getStatus());
 
         Review review = new Review(user, submission, reviewDto);
+
+        User student = getStudent(reviewDto.getStudentId());
+        review.Attach(student);
+
+        review.Notify(createNotification(review));
 
         entityManager.persist(review);
         return new ReviewDto(review);
@@ -301,5 +315,20 @@ public class SubmissionService {
         if (justification == null || justification.isBlank()) {
             throw new TutorException(REVIEW_MISSING_JUSTIFICATION);
         }
+    }
+
+    public Notification createNotification(Review review) {
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setTitle("title teste");
+        notificationDto.setContent("content teste");
+        notificationDto.setCreationDate(DateHandler.toISOString(DateHandler.now()));
+
+        NotificationDto response = notificationService.createNotification(notificationDto);
+
+        Notification notification = notificationService.getNotificationById(response.getId());
+
+        review.addNotification(notification);
+
+        return notification;
     }
 }

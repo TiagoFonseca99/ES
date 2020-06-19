@@ -1,10 +1,12 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -35,6 +37,7 @@ public class Notification {
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "notifications")
     private List<Tournament> tournaments = new ArrayList<>();
+
 
     public Notification() {}
 
