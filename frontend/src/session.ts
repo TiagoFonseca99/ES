@@ -74,9 +74,9 @@ export async function checkCourse(user: User) {
       'currentCourse',
       (Object.values(user.courses)[0] as Course[])[0]
     );
+  } else if (user.coursesNumber === 0) {
+    await router.push({ name: 'home' });
   }
-
-  await router.push({ name: 'home' });
 
   return true;
 }

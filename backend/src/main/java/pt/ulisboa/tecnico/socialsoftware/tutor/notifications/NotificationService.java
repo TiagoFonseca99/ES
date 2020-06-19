@@ -83,7 +83,5 @@ public class NotificationService {
                 .orElseThrow(() -> new TutorException(NOTIFICATION_NOT_FOUND, notificationId));
 
         notification.removeUser(user);
-        //if (notification.getUsers().isEmpty())
-            //notificationRepository.delete(notification); TODO Makes sense ??
     }
 }

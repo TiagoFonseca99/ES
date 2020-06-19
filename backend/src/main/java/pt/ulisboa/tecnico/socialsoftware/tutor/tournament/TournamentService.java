@@ -7,19 +7,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
-import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsCreation;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Assessment;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.TopicConjunction;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicConjunctionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService;
@@ -43,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsMessage.*;
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Service
@@ -62,6 +60,9 @@ public class TournamentService {
 
     @Autowired
     private TopicRepository topicRepository;
+
+    @Autowired
+    private QuizService quizService;
 
     @Autowired
     private QuizRepository quizRepository;
@@ -127,6 +128,10 @@ public class TournamentService {
         }
 
         tournament.addTopic(topic);
+
+        String title = NotificationsCreation.createTitle(ADD_TOPIC_TITLE, tournament.getId());
+        String content = NotificationsCreation.createContent(ADD_TOPIC_CONTENT, "'" + topic.getName() + "'", tournament.getId());
+        tournament.Notify(createNotification(title, content));
     }
 
     @Retryable(
@@ -148,6 +153,10 @@ public class TournamentService {
         }
 
         tournament.removeTopic(topic);
+
+        String title = NotificationsCreation.createTitle(REMOVE_TOPIC_TITLE, tournament.getId());
+        String content = NotificationsCreation.createContent(REMOVE_TOPIC_CONTENT, "'" + topic.getName() + "'", tournament.getId());
+        tournament.Notify(createNotification(title, content));
     }
 
     @Retryable(
@@ -280,9 +289,6 @@ public class TournamentService {
         }
 
         tournament.removeParticipant(user);
-        for (Notification notification: tournament.getNotifications()) {
-            notificationService.removeNotification(user.getId(), notification.getId());
-        }
     }
 
     @Retryable(
@@ -323,7 +329,10 @@ public class TournamentService {
         }
 
         tournament.setState(Tournament.Status.CANCELED);
-        tournament.Notify(createNotification(tournament));
+
+        String title = NotificationsCreation.createTitle(CANCEL_TITLE, tournament.getId());
+        String content = NotificationsCreation.createContent(CANCEL_CONTENT, tournament.getId());
+        tournament.Notify(createNotification(title, content));
     }
 
     @Retryable(
@@ -341,8 +350,14 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
         }
 
-        if (DateHandler.isValidDateFormat(tournamentDto.getStartTime()))
+        if (DateHandler.isValidDateFormat(tournamentDto.getStartTime())) {
+            String oldTime = DateHandler.toString(tournament.getStartTime());
             tournament.setStartTime(DateHandler.toLocalDateTime(tournamentDto.getStartTime()));
+
+            String title = NotificationsCreation.createTitle(EDIT_START_TIME_TITLE, tournament.getId());
+            String content = NotificationsCreation.createContent(EDIT_START_TIME_CONTENT, tournament.getId(), oldTime, DateHandler.toString(tournament.getStartTime()));
+            tournament.Notify(createNotification(title, content));
+        }
     }
 
     @Retryable(
@@ -360,8 +375,14 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
         }
 
-        if (DateHandler.isValidDateFormat(tournamentDto.getEndTime()))
+        if (DateHandler.isValidDateFormat(tournamentDto.getEndTime())) {
+            String oldTime = DateHandler.toString(tournament.getEndTime());
             tournament.setEndTime(DateHandler.toLocalDateTime(tournamentDto.getEndTime()));
+
+            String title = NotificationsCreation.createTitle(EDIT_END_TIME_TITLE, tournament.getId());
+            String content = NotificationsCreation.createContent(EDIT_END_TIME_CONTENT, tournament.getId(), oldTime, DateHandler.toString(tournament.getEndTime()));
+            tournament.Notify(createNotification(title, content));
+        }
     }
 
     @Retryable(
@@ -379,7 +400,22 @@ public class TournamentService {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
         }
 
+        Integer oldNumberOfQuestions = tournament.getNumberOfQuestions();
+
+        if (tournament.hasQuiz()) {    // update current Quiz
+            Quiz quiz = quizRepository.findById(tournamentDto.getQuizId())
+                    .orElseThrow(() -> new TutorException(QUIZ_NOT_FOUND, tournamentDto.getQuizId()));
+
+            QuizDto quizDto = quizService.findById(tournamentDto.getQuizId());
+            quizDto.setNumberOfQuestions(numberOfQuestions);
+
+            quizService.updateQuiz(quiz.getId(), quizDto);
+        }
         tournament.setNumberOfQuestions(numberOfQuestions);
+
+        String title = NotificationsCreation.createTitle(EDIT_NUMBER_OF_QUESTIONS_TITLE, tournament.getId());
+        String content = NotificationsCreation.createContent(EDIT_NUMBER_OF_QUESTIONS_CONTENT, tournament.getId(), oldNumberOfQuestions, tournament.getNumberOfQuestions());
+        tournament.Notify(createNotification(title, content));
     }
 
     @Retryable(
@@ -409,15 +445,11 @@ public class TournamentService {
         }
     }
 
-    public Notification createNotification(Tournament tournament) {
-        NotificationDto notificationDto = new NotificationDto();
-        notificationDto.setTitle("title teste");
-        notificationDto.setContent("content teste");
-        notificationDto.setCreationDate(DateHandler.toISOString(DateHandler.now()));
-        NotificationDto response = notificationService.createNotification(notificationDto);
+    public Notification createNotification(String title, String content) {
+        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content);
+        NotificationDto response = notificationService.createNotification(notificationsCreation.getNotificationDto());
 
         Notification notification = notificationService.getNotificationById(response.getId());
-        tournament.addNotification(notification);
 
         return notification;
     }

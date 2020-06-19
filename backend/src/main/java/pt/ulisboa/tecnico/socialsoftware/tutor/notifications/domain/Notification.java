@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
@@ -34,10 +33,6 @@ public class Notification {
 
     @ManyToMany(fetch = FetchType.LAZY)
     private List<User> users = new ArrayList<>();
-
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "notifications")
-    private List<Tournament> tournaments = new ArrayList<>();
-
 
     public Notification() {}
 
@@ -74,8 +69,4 @@ public class Notification {
     public void addUser(User user) { this.users.add(user); }
 
     public void removeUser(User user) { this.users.remove(user); }
-
-    public List<Tournament> getTournaments() {
-        return tournaments;
-    }
 }

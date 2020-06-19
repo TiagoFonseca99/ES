@@ -110,6 +110,9 @@ public class User implements UserDetails, DomainEntity, Observer {
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
     private List<Review> review_observers = new ArrayList<>();
 
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
+    private List<CourseExecution> executions_observers = new ArrayList<>();
+
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "users")
     private List<Notification> notifications = new ArrayList<>();
 
@@ -441,6 +444,7 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     public void addCourse(CourseExecution course) {
         this.courseExecutions.add(course);
+        course.Attach(this);
     }
 
     public void addSubmission(Submission submission) {
@@ -452,13 +456,18 @@ public class User implements UserDetails, DomainEntity, Observer {
     }
 
     public void addAnnouncement(Announcement announcement) { this.announcements.add(announcement); }
-    
+
     public void addObserver(Tournament tournament) {
         this.tournaments_observers.add(tournament);
     }
 
+<<<<<<< HEAD
     public void addObserver(Review review) {
         this.review_observers.add(review);
+=======
+    public void addObserver(CourseExecution courseExecution) {
+        this.executions_observers.add(courseExecution);
+>>>>>>> develop
     }
 
     public boolean isStudent() {
@@ -469,7 +478,11 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     public void removeObserver(Tournament tournament) { this.tournaments_observers.remove(tournament); }
 
+<<<<<<< HEAD
     public void removeObserver(Review review) { this.review_observers.remove(review); }
+=======
+    public void removeObserver(CourseExecution courseExecution) { this.executions_observers.remove(courseExecution); }
+>>>>>>> develop
 
     public boolean isTeacher() {
         return this.role == User.Role.TEACHER;
@@ -569,7 +582,7 @@ public class User implements UserDetails, DomainEntity, Observer {
             if(discussion.isAvailable()) {
                 publicDiscussions.add(discussion);
             }
-        } 
+        }
         return publicDiscussions;
     }
 
@@ -617,7 +630,7 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     @Override
     public void update(Object o, Notification notification) {
-        if (o instanceof Tournament) {
+        if (o instanceof Tournament || o instanceof CourseExecution) {
             notification.addUser(this);
         }
     }

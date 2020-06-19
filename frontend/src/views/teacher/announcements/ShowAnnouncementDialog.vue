@@ -17,6 +17,7 @@
         <v-chip small>
           <span>{{ announcement.creationDate }}</span>
         </v-chip>
+        <span id="edited" v-if="announcement.edited"> {{ '  (edited)' }}</span>
         <v-spacer />
         <v-btn data-cy="close" dark color="primary" @click="$emit('dialog')"
           >close</v-btn
@@ -42,3 +43,11 @@ export default class ShowAnnouncementDialog extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
 }
 </script>
+
+<style lang="scss" scoped>
+#edited {
+  color: grey;
+  font-size: 15px;
+  padding-left: 2px;
+}
+</style>
