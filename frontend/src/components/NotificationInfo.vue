@@ -1,5 +1,5 @@
 <template>
-  <span class="notification" v-bind:class="{ unopened: unopened }">
+  <span class="notification" v-bind:class="{ unopened: unopened, all: all }">
     <v-icon x-large style="padding: 0 30px 0 0;">{{
       notificationIcon(notification.type)
     }}</v-icon>
@@ -25,6 +25,8 @@ export default class NotificationInfo extends Vue {
   readonly notification!: Notification;
   @Prop({ type: Boolean, required: true })
   readonly unopened!: boolean;
+  @Prop({ type: Boolean, required: false })
+  readonly all!: boolean;
 
   convertDate(date: string) {
     return ISOtoString(date);
@@ -46,6 +48,9 @@ export default class NotificationInfo extends Vue {
   padding: 10px;
   opacity: 50%;
   width: 100%;
+}
+.all {
+  opacity: 100%;
 }
 .unopened {
   background-color: whitesmoke;

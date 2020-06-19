@@ -22,8 +22,11 @@
           v-if="notifications.length === 0"
           style="padding: 10px 30px 10px 0;"
         >
-          <v-icon x-large style="padding: 30px 30px;">fa-times</v-icon>
-          <h3>No notifications</h3>
+          <v-icon x-large style="padding: 30px 30px;">far fa-meh</v-icon>
+          <span style="text-align: left">
+            <h3>{{ 'No Notifications' }}</h3>
+            {{ 'Notifications will appear here as you use QuizzesTutor!' }}
+          </span>
         </v-list-item>
         <v-list-item
           v-for="notification in this.notifications"
@@ -32,6 +35,7 @@
           <notification-info
             :notification="notification"
             :unopened="isUnopenedNotification(notification)"
+            :all="allOpened()"
           />
         </v-list-item>
         <v-list-item>
@@ -98,6 +102,10 @@ export default class NotificationsButton extends Vue {
 
   isUnopened(date: string) {
     return date >= this.$store.getters.getUser.lastNotificationAccess;
+  }
+
+  allOpened() {
+    return this.oldUnopened.length === 0;
   }
 
   isUnopenedNotification(notification: Notification) {
