@@ -8,6 +8,7 @@ export default class User {
   id!: number;
   name!: string;
   username!: string;
+  lastNotificationAccess!: string;
   role!: string;
   courses: CourseMap = {};
   coursesNumber: number = 0;
@@ -18,6 +19,7 @@ export default class User {
       this.name = jsonObj.name;
       this.username = jsonObj.username;
       this.role = jsonObj.role;
+      this.lastNotificationAccess = jsonObj.lastNotificationAccess;
 
       for (let [name, courses] of Object.entries(jsonObj.courses)) {
         this.courses[name] = courses.map(course => new Course(course));

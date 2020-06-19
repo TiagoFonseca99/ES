@@ -178,6 +178,16 @@ let router = new Router({
             title: process.env.VUE_APP_NAME + ' - ImpExp',
             requiredAuth: 'Teacher'
           }
+        },
+        {
+          path: 'notifications',
+          name: 'notifications-teacher',
+          component: NotificationsView,
+          props: route => ({ username: route.query.username }),
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Notifications',
+            requiredAuth: 'Teacher'
+          }
         }
       ]
     },
@@ -324,7 +334,7 @@ let router = new Router({
         },
         {
           path: 'notifications',
-          name: 'notifications',
+          name: 'notifications-student',
           component: NotificationsView,
           props: route => ({ username: route.query.username }),
           meta: {
