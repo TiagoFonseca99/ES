@@ -50,7 +50,7 @@
         label="Remember me"
       />
     </div>
-    <v-footer class="footer" v-if="!isStudentLoggedIn">
+    <v-footer class="footer" v-if="!isLoggedIn || isAdminLoggedIn">
       <img
         :src="require('../assets/img/ist_optimized.png')"
         class="logo"
@@ -111,6 +111,10 @@ export default class HomeView extends Vue {
 
   get isStudentLoggedIn() {
     return this.isLoggedIn && Store.getters.isStudent;
+  }
+
+  get isAdminLoggedIn() {
+    return this.isLoggedIn && Store.getters.isAdmin;
   }
 
   async demoStudent() {

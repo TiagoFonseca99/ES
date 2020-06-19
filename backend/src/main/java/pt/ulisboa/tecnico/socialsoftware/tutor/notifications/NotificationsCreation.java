@@ -1,17 +1,19 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.notifications;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 
 public class NotificationsCreation {
 
     private NotificationDto notificationDto;
 
-    public NotificationsCreation(String title, String content) {
+    public NotificationsCreation(String title, String content, Notification.Type type) {
         this.notificationDto = new NotificationDto();
         this.notificationDto.setTitle(title);
         this.notificationDto.setContent(content);
         this.notificationDto.setCreationDate(DateHandler.toISOString(DateHandler.now()));
+        this.notificationDto.setType(type.name());
     }
 
     public NotificationDto getNotificationDto() {
