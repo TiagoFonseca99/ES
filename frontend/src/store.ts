@@ -51,6 +51,9 @@ export default new Vuex.Store({
       state.logged = false;
       await session.logout();
     },
+    updateUser(state, user: User) {
+      state.user = user;
+    },
     session(state, session) {
       state.session = session;
     },
@@ -93,12 +96,10 @@ export default new Vuex.Store({
     async demoStudentLogin({ commit }) {
       const user = await RemoteServices.demoStudentLogin();
       await commit('login', user);
-      commit('currentCourse', (Object.values(user.courses)[0] as Course[])[0]);
     },
     async demoTeacherLogin({ commit }) {
       const user = await RemoteServices.demoTeacherLogin();
       await commit('login', user);
-      commit('currentCourse', (Object.values(user.courses)[0] as Course[])[0]);
     },
     async demoAdminLogin({ commit }) {
       const user = await RemoteServices.demoAdminLogin();
@@ -112,6 +113,9 @@ export default new Vuex.Store({
     },
     currentCourse({ commit }, currentCourse) {
       commit('currentCourse', currentCourse);
+    },
+    updateUser({ commit }, user) {
+      commit('updateUser', user);
     }
   },
   getters: {

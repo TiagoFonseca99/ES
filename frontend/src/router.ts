@@ -10,6 +10,7 @@ import ManagementView from '@/views/teacher/ManagementView.vue';
 import QuestionsView from '@/views/teacher/questions/QuestionsView.vue';
 import TopicsView from '@/views/teacher/TopicsView.vue';
 import TournamentsView from '@/views/teacher/tournaments/TournamentsView.vue';
+import SelectedTournamentView from '@/views/teacher/tournaments/SelectedTournamentView.vue';
 import QuizzesView from '@/views/teacher/quizzes/QuizzesView.vue';
 import StudentsView from '@/views/teacher/students/StudentsView.vue';
 import CourseDashboardView from '@/views/teacher/CourseDashboardView.vue';
@@ -27,6 +28,8 @@ import DiscussionView from '@/views/student/discussion/DiscussionView.vue';
 import DashboardView from '@/views/student/dashboard/DashboardView.vue';
 import StudentDashboardView from '@/views/teacher/students/DashboardView.vue';
 import SearchStudentView from '@/views/student/dashboard/SearchStudentView.vue';
+import AnnouncementView from '@/views/teacher/announcements/AnnouncementView.vue';
+import NotificationsView from '@/views/NotificationsView.vue';
 
 import AdminManagementView from '@/views/admin/AdminManagementView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
@@ -40,7 +43,6 @@ import StudentReviews from './views/student/questions/StudentReviewsView.vue';
 import CoursesView from '@/views/admin/Courses/CoursesView.vue';
 import { Student } from '@/models/management/Student';
 import * as session from '@/session';
-import SelectedTournamentView from '@/views/teacher/tournaments/SelectedTournamentView.vue';
 
 Vue.use(Router);
 
@@ -105,6 +107,15 @@ let router = new Router({
           }
         },
         {
+          path: 'announcements',
+          name: 'announcements',
+          component: AnnouncementView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Announcements',
+            requiredAuth: 'Teacher'
+          }
+        },
+        {
           path: 'topics',
           name: 'topics-management',
           component: TopicsView,
@@ -165,6 +176,16 @@ let router = new Router({
           component: ImpExpView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - ImpExp',
+            requiredAuth: 'Teacher'
+          }
+        },
+        {
+          path: 'notifications',
+          name: 'notifications-teacher',
+          component: NotificationsView,
+          props: route => ({ username: route.query.username }),
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Notifications',
             requiredAuth: 'Teacher'
           }
         }
@@ -308,6 +329,16 @@ let router = new Router({
           component: SearchStudentView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Search Student',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'notifications',
+          name: 'notifications-student',
+          component: NotificationsView,
+          props: route => ({ username: route.query.username }),
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Notifications',
             requiredAuth: 'Student'
           }
         }

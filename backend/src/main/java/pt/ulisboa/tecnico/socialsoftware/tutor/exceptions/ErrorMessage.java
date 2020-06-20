@@ -69,9 +69,9 @@ public enum ErrorMessage {
     NOT_ENOUGH_QUESTIONS("Not enough questions to create a quiz"),
     ONE_CORRECT_OPTION_NEEDED("Questions need to have 1 and only 1 correct option"),
     CANNOT_CHANGE_ANSWERED_QUESTION("Can not change answered question"),
+    CANNOT_CHANGE_ANSWER("Can not change answer in one-way quiz"),
     QUIZ_HAS_ANSWERS("Quiz already has answers"),
     QUIZ_ALREADY_COMPLETED("Quiz already completed"),
-    QUIZ_ALREADY_STARTED("Quiz was already started"),
     QUIZ_QUESTION_HAS_ANSWERS("Quiz question has answers"),
     FENIX_ERROR("Fenix Error"),
     AUTHENTICATION_ERROR("Authentication Error"),
@@ -129,7 +129,18 @@ public enum ErrorMessage {
     REPLY_UNAUTHORIZED_DELETER("User cannot delete this reply"),
     REPLY_UNAUTHORIZED_EDITOR("User cannot edit this reply"),
     REPLY_UNAUTHORIZED_USER("User cannot create reply for given discussion"),
-    USER_NOT_IN_COURSE("User is not enrolled in course %s");
+    USER_NOT_IN_COURSE("User is not enrolled in course %s"),
+
+    // Adp
+    INVALID_TITLE_FOR_ANNOUNCEMENT("Invalid title for announcement"),
+    INVALID_CONTENT_FOR_ANNOUNCEMENT("Invalid content for announcement"),
+    TEACHER_MISSING("Teacher is missing"),
+    ANNOUNCEMENT_NOT_FOUND("Announcement not found with id %d"),
+
+    // Sdn
+    INVALID_TITLE_FOR_NOTIFICATION("Invalid title for notification"),
+    INVALID_CONTENT_FOR_NOTIFICATION("Invalid content for notification"),
+    NOTIFICATION_NOT_FOUND("Notification %s not found");
 
     public final String label;
 

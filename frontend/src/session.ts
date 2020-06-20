@@ -28,7 +28,7 @@ export async function testToken() {
 
   try {
     user = await RemoteServices.checkToken();
-  } catch (Error) {
+  } catch (error) {
     user = null;
   }
 
@@ -36,9 +36,10 @@ export async function testToken() {
 
   if (user != null) {
     store.commit('session', session == 'true');
-    store.commit('login', user);
+    await store.commit('login', user);
   } else {
     storage.remove(COURSE_TOKEN);
+    await store.commit('logout');
   }
 
   return true;
@@ -73,14 +74,16 @@ export async function checkCourse(user: User) {
       'currentCourse',
       (Object.values(user.courses)[0] as Course[])[0]
     );
+  } else if (user.coursesNumber === 0) {
+    await router.push({ name: 'home' });
   }
-
-  await router.push({ name: 'home' });
 
   return true;
 }
 
 export async function logout() {
   storage.persist(LOGGED_TOKEN, 'false');
-  await RemoteServices.logout();
+  try {
+    await RemoteServices.logout();
+  } catch (error) {}
 }

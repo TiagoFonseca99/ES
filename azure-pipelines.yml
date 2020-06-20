@@ -1,0 +1,205 @@
+trigger:
+- master
+
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+  - job: release
+    variables:
+      MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+      MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+      NPM_CONFIG_CACHE: frontend/node_modules
+    displayName: 'Build'
+    steps:
+    # ~~~~~~~~~ BACKEND ~~~~~~~~~
+    - task: Cache@2
+      displayName: 'Cache Maven dependencies'
+      inputs:
+        key: 'maven | "$(Agent.OS)" | backend/pom.xml'
+        restoreKeys: |
+          maven | "$(Agent.OS)"
+          maven
+        path: $(MAVEN_CACHE_FOLDER)
+        cacheHitVar: CACHE_RESTORED
+
+    - task: Maven@3
+      displayName: 'Resolve dependencies'
+      condition: ne(variables.CACHE_RESTORED, 'true')
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        options: '-B'
+        mavenOptions: '$(MAVEN_OPTS)'
+        publishJUnitResults: false
+        jdkVersionOption: '1.11'
+        jdkArchitectureOption: 'x64'
+        goals: 'dependency:go-offline'
+
+    - task: Maven@3
+      displayName: 'Create package'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        options: '-Pprod -Dmaven.test.skip=true'
+        mavenOptions: '$(MAVEN_OPTS)'
+        publishJUnitResults: false
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.11'
+
+    - task: CopyFiles@2
+      displayName: 'Copy file to staging directory'
+      inputs:
+        SourceFolder: 'backend/target'
+        Contents: 'quizzes-tutor-backend-0.0.1-SNAPSHOT.jar'
+        TargetFolder: $(Build.ArtifactStagingDirectory)
+
+    # ~~~~~~~~~ FRONTEND ~~~~~~~~~
+    - task: Cache@2
+      displayName: 'Cache Node dependencies'
+      inputs:
+        key: 'npm | "$(Agent.OS)" | frontend/package-lock.json'
+        restoreKeys: |
+          npm | "$(Agent.OS)"
+        path: $(NPM_CONFIG_CACHE)
+        cacheHitVar: CACHE_RESTORED
+
+    - script: |
+        cd frontend
+        npm install
+        cd ..
+      displayName: 'Install Node dependencies'
+      condition: ne(variables.CACHE_RESTORED, 'true')
+
+    - script: |
+        cd frontend
+        npm run build
+        cd dist
+        zip -r ../frontend.zip .
+        cd ..
+        cd ..
+      displayName: 'Build Node files'
+      env:
+        VUE_APP_NAME: $(VUE_APP_NAME)
+        VUE_APP_ROOT_API: $(VUE_APP_ROOT_API)
+        VUE_APP_FENIX_REDIRECT_URI: $(VUE_APP_FENIX_REDIRECT_URI)
+        VUE_APP_FENIX_CLIENT_ID: $(VUE_APP_FENIX_CLIENT_ID)
+        VUE_APP_FENIX_CLIENT_SECRET: $(VUE_APP_FENIX_CLIENT_SECRET)
+        VUE_APP_FENIX_URL: 'https://fenix.tecnico.ulisboa.pt/oauth/userdialog?client_id=$(VUE_APP_FENIX_CLIENT_ID)&redirect_uri=$(VUE_APP_FENIX_REDIRECT_URI)'
+
+    - task: CopyFiles@2
+      displayName: 'Copy Node files to staging directory (zipped)'
+      inputs:
+        SourceFolder: 'frontend'
+        Contents: 'frontend.zip'
+        TargetFolder: $(Build.ArtifactStagingDirectory)
+
+    - publish: $(Build.ArtifactStagingDirectory)
+      displayName: 'Upload artifacts'
+      artifact: newBuild
+
+    # ~~~~~~~~~ DEPLOY~~~~~~~~~
+  - deployment: Deploy
+    dependsOn: release
+    displayName: 'Deploy to VM'
+    timeoutInMinutes: 5
+    environment:
+      name: QuizzesTutor
+      resourceType: VirtualMachine
+    strategy:
+      runOnce:
+        # deploy stage not possible due to a possible bug
+        preDeploy:
+          steps:
+            - task: Bash@3
+              inputs:
+                filePath: '/home/AzureUser/stop.sh'
+                workingDirectory: '/home/AzureUser'
+                noProfile: false
+                noRc: false
+              displayName: 'Stop running'
+
+            - script: |
+                cd /home/AzureUser/
+                mv quizzes-tutor-backend-0.0.1-SNAPSHOT.jar old.jar
+                mkdir -p app
+                rm old.zip
+                cd app
+                zip -r ../old.zip *
+                rm -rf *
+                cd ..
+              displayName: 'Backup old versions'
+
+            - download: current
+              displayName: 'Downloading new version'
+              artifact: newBuild
+
+            - script: |
+                cd $(Pipeline.Workspace)/newBuild
+                mv frontend.zip /home/AzureUser/frontend.zip
+                mv quizzes-tutor-backend-0.0.1-SNAPSHOT.jar /home/AzureUser/quizzes-tutor-backend-0.0.1-SNAPSHOT.jar
+              displayName: 'Move artifacts'
+
+
+            # DEPLOY PHASE
+            - script: |
+                cd /home/AzureUser
+                cd app
+                unzip ../frontend.zip
+                cd ..
+              displayName: 'Update frontend files'
+
+            - task: Bash@3
+              inputs:
+                filePath: '/home/AzureUser/deploy.sh'
+                workingDirectory: '/home/AzureUser'
+                noProfile: false
+                noRc: false
+              displayName: 'Deploy'
+
+
+            # TO FAIL ON PURPOSE
+            - task: Bash@3
+              inputs:
+                filePath: '/home/AzureUser/failme.sh'
+                workingDirectory: '/home/AzureUser'
+                noProfile: false
+                noRc: false
+              displayName: 'FAILING'
+
+        deploy:
+          steps:
+            - task: Bash@3
+              inputs:
+                filePath: '/home/AzureUser/deploy.sh'
+                workingDirectory: '/home/AzureUser'
+                noProfile: false
+                noRc: false
+              displayName: 'Deploy'
+
+        on:
+          failure:
+            steps:
+              #- script: |
+              #    echo "Restoring old version"
+              #    cd /home/AzureUser
+              #    mv old.jar quizzes-tutor-backend-0.0.1-SNAPSHOT.jar
+              #    cd app
+              #    mv ../old.zip .
+              #    unzip old.zip
+              #    rm old.zip
+              #    cd ..
+              #  displayName: 'Failed'
+              #- task: Bash@3
+              #  inputs:
+              #    filePath: '/home/AzureUser/deploy.sh'
+              #    workingDirectory: '/home/AzureUser'
+              #    noProfile: false
+              #    noRc: false
+              #  displayName: 'Deploy old'
+              - script: echo "DONE"
+                displayName: Failing
+          success:
+            steps:
+              - script: echo "Deployed successfully"
+                displayName: 'Success'

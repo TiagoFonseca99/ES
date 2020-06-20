@@ -78,6 +78,14 @@
                 <v-list-item-title>Reviews</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item to="/management/announcements" data-cy="Announcements">
+              <v-list-item-action>
+                <v-icon>fas fa-bullhorn</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>Announcements</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item to="/management/topics">
               <v-list-item-action>
                 <v-icon>category</v-icon>
@@ -368,6 +376,14 @@
               <v-list-item-title>Reviews</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+          <v-list-item to="/management/announcements">
+            <v-list-item-action>
+              <v-icon>fas fa-bullhorn</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Announcements</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
           <v-list-item to="/management/topics">
             <v-list-item-action>
               <v-icon>category</v-icon>
@@ -408,6 +424,18 @@
               <v-list-item-title>Students</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+          <!-- ----SDN---- -->
+
+          <v-list-item
+            :to="'/notifications?username=' + $store.getters.getUser.username"
+          >
+            <v-list-item-action>
+              <v-icon>notifications</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Notifications</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
           <v-list-item to="/management/impexp">
             <v-list-item-action>
               <v-icon>cloud</v-icon>
@@ -515,6 +543,19 @@
               <v-icon>fas fa-calendar</v-icon>
             </v-list-item-action>
             <v-list-item-content>All Tournaments</v-list-item-content>
+          </v-list-item>
+
+          <!-- ----------- -->
+
+          <!-- ----SDN---- -->
+
+          <v-list-item
+            :to="'/notifications?username=' + $store.getters.getUser.username"
+          >
+            <v-list-item-action>
+              <v-icon>notifications</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>Notifications</v-list-item-content>
           </v-list-item>
 
           <!-- ----------- -->

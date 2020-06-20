@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.user;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.domain.Announcement;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
@@ -10,6 +11,11 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
@@ -24,7 +30,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
-public class User implements UserDetails, DomainEntity {
+public class User implements UserDetails, DomainEntity, Observer {
     public enum Role {
         STUDENT, TEACHER, ADMIN, DEMO_ADMIN
     }
@@ -62,6 +68,9 @@ public class User implements UserDetails, DomainEntity {
     @Column(name = "last_access")
     private LocalDateTime lastAccess;
 
+    @Column(name = "last_notification_access")
+    private LocalDateTime lastNotificationAccess = DateHandler.now();
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<QuizAnswer> quizAnswers = new HashSet<>();
 
@@ -83,6 +92,9 @@ public class User implements UserDetails, DomainEntity {
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "participants")
     private List<Tournament> tournaments = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Announcement> announcements = new HashSet<>();
+
     @Column(columnDefinition = "boolean default true")
     private boolean discussionStatsPublic = true;
 
@@ -94,6 +106,15 @@ public class User implements UserDetails, DomainEntity {
 
     @Column(columnDefinition = "boolean default true")
     private boolean userStatsPublic = true;
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
+    private List<Tournament> tournaments_observers = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
+    private List<CourseExecution> executions_observers = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "users")
+    private List<Notification> notifications = new ArrayList<>();
 
     public User() {
     }
@@ -183,6 +204,14 @@ public class User implements UserDetails, DomainEntity {
         this.lastAccess = lastAccess;
     }
 
+    public LocalDateTime getLastNotificationAccess() {
+        return lastNotificationAccess;
+    }
+
+    public void setLastNotificationAccess() {
+        this.lastNotificationAccess = DateHandler.now();
+    }
+
     public Set<QuizAnswer> getQuizAnswers() {
         return quizAnswers;
     }
@@ -194,6 +223,8 @@ public class User implements UserDetails, DomainEntity {
     public Set<Submission> getSubmissions() {
         return submissions;
     }
+
+    public Set<Announcement> getAnnouncements() { return announcements; }
 
     public Set<Question> getSubmittedQuestions() {
         Set<Question> questions = new HashSet<>();
@@ -421,6 +452,7 @@ public class User implements UserDetails, DomainEntity {
 
     public void addCourse(CourseExecution course) {
         this.courseExecutions.add(course);
+        course.Attach(this);
     }
 
     public void addSubmission(Submission submission) {
@@ -431,12 +463,25 @@ public class User implements UserDetails, DomainEntity {
         this.tournaments.add(tournament);
     }
 
+    public void addAnnouncement(Announcement announcement) { this.announcements.add(announcement); }
+
+    public void addObserver(Tournament tournament) {
+        this.tournaments_observers.add(tournament);
+    }
+
+    public void addObserver(CourseExecution courseExecution) {
+        this.executions_observers.add(courseExecution);
+    }
 
     public boolean isStudent() {
         return this.role == User.Role.STUDENT;
     }
 
     public void removeTournament(Tournament tournament) { this.tournaments.remove(tournament); }
+
+    public void removeObserver(Tournament tournament) { this.tournaments_observers.remove(tournament); }
+
+    public void removeObserver(CourseExecution courseExecution) { this.executions_observers.remove(courseExecution); }
 
     public boolean isTeacher() {
         return this.role == User.Role.TEACHER;
@@ -580,5 +625,12 @@ public class User implements UserDetails, DomainEntity {
 
     public void toggleUserStatsVisibility() {
         this.userStatsPublic = !this.userStatsPublic;
+    }
+
+    @Override
+    public void update(Object o, Notification notification) {
+        if (o instanceof Tournament || o instanceof CourseExecution) {
+            notification.addUser(this);
+        }
     }
 }

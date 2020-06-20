@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.user.dto;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -14,6 +15,7 @@ public class AuthUserDto implements Serializable {
     private String username;
     private User.Role role;
     private Map<String, List<CourseDto>> courses;
+    private String lastNotificationAccess;
 
     public AuthUserDto(User user) {
         this.id = user.getId();
@@ -21,6 +23,7 @@ public class AuthUserDto implements Serializable {
         this.username = user.getUsername();
         this.role = user.getRole();
         this.courses = getActiveAndInactiveCourses(user, new ArrayList<>());
+        this.lastNotificationAccess = DateHandler.toISOString(user.getLastNotificationAccess());
     }
 
     public Integer getId() {
@@ -86,4 +89,8 @@ public class AuthUserDto implements Serializable {
                 .collect(Collectors.groupingBy(CourseDto::getName,
                         Collectors.mapping(courseDto -> courseDto, Collectors.toList())));
     }
+
+    public String getLastNotificationAccess() { return lastNotificationAccess; }
+
+    public void setLastNotificationAccess(String lastNotificationAccess) { this.lastNotificationAccess = lastNotificationAccess; }
 }
