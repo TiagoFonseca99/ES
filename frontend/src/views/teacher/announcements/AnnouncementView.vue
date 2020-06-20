@@ -88,7 +88,7 @@
               >delete</v-icon
             >
           </template>
-          <span>Delete Question</span>
+          <span>Delete Announcement</span>
         </v-tooltip>
       </template>
     </v-data-table>
