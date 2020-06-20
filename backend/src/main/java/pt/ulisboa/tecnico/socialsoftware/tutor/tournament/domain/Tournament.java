@@ -209,9 +209,12 @@ public class Tournament implements Observable {
 
     public void addParticipant(User user) {
         this.participants.add(user);
-        this.Attach(user);
         user.addTournament(this);
-        user.addObserver(this);
+
+        if (user != creator) {
+            this.Attach(user);
+            user.addObserver(this);
+        }
     }
 
     public void removeParticipant(User user) {
