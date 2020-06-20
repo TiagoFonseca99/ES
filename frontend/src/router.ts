@@ -29,7 +29,7 @@ import DashboardView from '@/views/student/dashboard/DashboardView.vue';
 import StudentDashboardView from '@/views/teacher/students/DashboardView.vue';
 import SearchStudentView from '@/views/student/dashboard/SearchStudentView.vue';
 import AnnouncementView from '@/views/teacher/announcements/AnnouncementView.vue';
-import NotificationsView from '@/views/student/notifications/NotificationsView.vue';
+import NotificationsView from '@/views/NotificationsView.vue';
 
 import AdminManagementView from '@/views/admin/AdminManagementView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
@@ -178,6 +178,16 @@ let router = new Router({
             title: process.env.VUE_APP_NAME + ' - ImpExp',
             requiredAuth: 'Teacher'
           }
+        },
+        {
+          path: 'notifications',
+          name: 'notifications-teacher',
+          component: NotificationsView,
+          props: route => ({ username: route.query.username }),
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Notifications',
+            requiredAuth: 'Teacher'
+          }
         }
       ]
     },
@@ -324,7 +334,7 @@ let router = new Router({
         },
         {
           path: 'notifications',
-          name: 'notifications',
+          name: 'notifications-student',
           component: NotificationsView,
           props: route => ({ username: route.query.username }),
           meta: {

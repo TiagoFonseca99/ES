@@ -11,6 +11,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.repository.NotificationRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
@@ -79,7 +80,9 @@ class AnnouncementNotificationsTest extends Specification {
         announcementService.createAnnouncement(announcementDto)
 
         then:
-        notificationRepository.getUserNotifications(student.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(student.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.ANNOUNCEMENT
 
     }
 
@@ -93,7 +96,11 @@ class AnnouncementNotificationsTest extends Specification {
         announcementService.createAnnouncement(announcementDto)
 
         then:
-        notificationRepository.getUserNotifications(student.getId()).size() == 3
+        def result = notificationRepository.getUserNotifications(student.getId())
+        result.size() == 3
+        result.get(0).getType() == Notification.Type.ANNOUNCEMENT
+        result.get(1).getType() == Notification.Type.ANNOUNCEMENT
+        result.get(2).getType() == Notification.Type.ANNOUNCEMENT
 
     }
 

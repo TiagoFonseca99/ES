@@ -635,6 +635,17 @@ export default class RemoteServices {
       });
   }
 
+  static async setLastNotificationAccess(): Promise<User> {
+    return httpClient
+      .put('/notification-access')
+      .then(response => {
+        return new User(response.data);
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static async deleteAnnouncement(
     announcement: Announcement
   ): Promise<Boolean> {

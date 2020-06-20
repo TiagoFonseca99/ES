@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.AuthUserDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 
 import javax.validation.Valid;
@@ -78,5 +79,17 @@ public class UserController {
         }
 
         return userService.toggleUserStatsVisibility(user.getId());
+    }
+
+    @PutMapping(value = "/notification-access")
+    @PreAuthorize("hasRole('ROLE_STUDENT') or hasRole('ROLE_TEACHER')")
+    public AuthUserDto setLastNotificationAccess(Principal principal) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        return userService.setLastNotificationAccess(user.getId());
     }
 }
