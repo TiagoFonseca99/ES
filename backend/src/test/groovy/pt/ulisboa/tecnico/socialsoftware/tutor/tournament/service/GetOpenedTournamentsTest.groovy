@@ -14,6 +14,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
@@ -119,7 +120,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics2, tournamentDto2)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "the returned data is correct"
         result.size() == 2
@@ -170,7 +171,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
 
         then: "the returned data is correct"
@@ -220,7 +221,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "the returned data is correct"
         result.size() == 2
@@ -247,7 +248,7 @@ class GetOpenedTournamentsTest extends Specification {
         given:
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "there is no returned data"
         result.size() == 0
@@ -263,7 +264,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "there is no returned data"
         result.size() == 0
@@ -280,7 +281,7 @@ class GetOpenedTournamentsTest extends Specification {
         tournamentService.createTournament(user.getId(), topics1, tournamentDto3)
 
         when:
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
 
         then: "there is no returned data"
         result.size() == 0
@@ -320,6 +321,10 @@ class GetOpenedTournamentsTest extends Specification {
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+        @Bean
+        SubmissionService submissionService() {
+            return new SubmissionService()
         }
     }
 }

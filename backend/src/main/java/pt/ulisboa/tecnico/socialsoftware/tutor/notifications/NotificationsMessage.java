@@ -21,7 +21,18 @@ public enum NotificationsMessage {
     // adp
 
     ADD_ANNOUNCEMENT_TITLE("New announcement - %s"),
-    ADD_ANNOUNCEMENT_CONTENT("'%s' has been added by %s");
+    ADD_ANNOUNCEMENT_CONTENT("'%s' has been added by %s"),
+
+    // ppa
+
+    NEW_REVIEW_TITLE("New Review - Submission %s"),
+    NEW_REVIEW_CONTENT("Submission %s was %s by teacher %s"),
+
+    DELETED_QUESTION_TITLE("Deleted Question - Question %s"),
+    DELETED_QUESTION_CONTENT("Question %s was deleted by teacher %s"),
+
+    NEW_SUBMISSION_TITLE("New Submission - Question %s"),
+    NEW_SUBMISSION_CONTENT("Submission was created by student %s");
 
     public final String label;
 

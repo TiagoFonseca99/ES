@@ -6,8 +6,12 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.SubmissionDto;
@@ -18,6 +22,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsCreation;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
@@ -28,8 +33,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsMessage.*;
 
 @Service
 public class SubmissionService {
@@ -48,6 +55,9 @@ public class SubmissionService {
 
     @Autowired
     private CourseExecutionRepository courseExecutionRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -71,6 +81,16 @@ public class SubmissionService {
         Submission submission = new Submission(courseExecution, question, user);
 
         submission.setAnonymous(submissionDto.isAnonymous());
+
+        User student = getStudent(submissionDto.getStudentId());
+        submission.getQuestion().Attach(student);
+
+        for (User teacher : courseExecution.getUsers()) {
+            if (teacher.isTeacher()) {
+                submission.Attach(teacher);
+            }
+        }
+        prepareNotification(submission);
 
         if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
             submission.setArgument(submissionDto.getArgument());
@@ -106,6 +126,16 @@ public class SubmissionService {
 
         submission.setAnonymous(submissionDto.isAnonymous());
 
+        User student = getStudent(submissionDto.getStudentId());
+        submission.getQuestion().Attach(student);
+
+        for (User teacher : courseExecution.getUsers()) {
+            if (teacher.isTeacher()) {
+                submission.Attach(teacher);
+            }
+        }
+        prepareNotification(submission);
+
         if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
             submission.setArgument(submissionDto.getArgument());
 
@@ -135,7 +165,13 @@ public class SubmissionService {
 
         Review review = new Review(user, submission, reviewDto);
 
+        User student = getStudent(reviewDto.getStudentId());
+        review.Attach(student);
+
         entityManager.persist(review);
+
+        prepareNotification(review);
+
         return new ReviewDto(review);
     }
 
@@ -301,5 +337,34 @@ public class SubmissionService {
         if (justification == null || justification.isBlank()) {
             throw new TutorException(REVIEW_MISSING_JUSTIFICATION);
         }
+    }
+
+    private void prepareNotification(Review review) {
+        String title = NotificationsCreation.createTitle(NEW_REVIEW_TITLE, review.getSubmission().getId());
+        String content = "";
+        if (review.getStatus() == Review.Status.APPROVED)
+            content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getId(), "approved", review.getUser().getName());
+        else
+            content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getId(), "rejected", review.getUser().getName());
+        review.Notify(createNotification(title, content, Notification.Type.REVIEW));
+    }
+
+    public Notification createNotification(String title, String content, Notification.Type type) {
+        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content, type);
+        NotificationDto response = notificationService.createNotification(notificationsCreation.getNotificationDto());
+
+        return notificationService.getNotificationById(response.getId());
+    }
+
+    public void prepareNotification(Question question, User user) {
+        String title = NotificationsCreation.createTitle(DELETED_QUESTION_TITLE, question.getId());
+        String content = NotificationsCreation.createContent(DELETED_QUESTION_CONTENT, question.getId(), user.getName());
+        question.Notify(createNotification(title, content, Notification.Type.QUESTION));
+    }
+
+    public void prepareNotification(Submission submission) {
+        String title = NotificationsCreation.createTitle(NEW_SUBMISSION_TITLE, submission.getQuestion().getId());
+        String content = NotificationsCreation.createContent(NEW_SUBMISSION_CONTENT, submission.getUser().getName());
+        submission.Notify(createNotification(title, content, Notification.Type.SUBMISSION));
     }
 }

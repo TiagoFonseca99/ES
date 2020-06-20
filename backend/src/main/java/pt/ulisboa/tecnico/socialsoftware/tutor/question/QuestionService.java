@@ -30,6 +30,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -72,6 +73,9 @@ public class QuestionService {
 
     @Autowired
     private OptionRepository optionRepository;
+
+    @Autowired
+    private SubmissionService submissionService;
 
     @Retryable(
       value = { SQLException.class },
@@ -150,8 +154,11 @@ public class QuestionService {
             deleteSubmission(submission);
         }
 
+        submissionService.prepareNotification(submission.getQuestion(), submission.getUser());
+
         question.remove();
         questionRepository.delete(question);
+
     }
 
     @Retryable(
@@ -317,5 +324,7 @@ public class QuestionService {
         }
         submissionRepository.delete(submission);
     }
+
+
 }
 

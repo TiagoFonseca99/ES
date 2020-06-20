@@ -64,6 +64,7 @@ public class NotificationService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<NotificationDto> getUserNotifications(Integer userId) {
+
         return notificationRepository.getUserNotifications(userId).stream().map(NotificationDto::new).collect(Collectors.toList());
     }
 
