@@ -107,10 +107,10 @@ class GetOpenedTournamentsPerformanceTest extends Specification {
 
 
         when:
-        1.upto(1, {tournamentService.getOpenedTournaments()})
+        1.upto(1, {tournamentService.getOpenedTournaments(user)})
 
         then: "the returned data is correct"
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
         //result.size() == 1000
         def resTournament1 = result.get(0)
 
