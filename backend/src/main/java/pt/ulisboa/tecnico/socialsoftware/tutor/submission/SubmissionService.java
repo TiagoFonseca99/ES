@@ -22,7 +22,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsCreation;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.Optional;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsMessage.*;
 
 @Service
 public class SubmissionService {
@@ -81,6 +82,16 @@ public class SubmissionService {
 
         submission.setAnonymous(submissionDto.isAnonymous());
 
+        User student = getStudent(submissionDto.getStudentId());
+        submission.getQuestion().Attach(student);
+
+        for (User teacher : courseExecution.getUsers()) {
+            if (teacher.isTeacher()) {
+                submission.Attach(teacher);
+            }
+        }
+        prepareNotification(submission);
+
         if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
             submission.setArgument(submissionDto.getArgument());
 
@@ -115,6 +126,16 @@ public class SubmissionService {
 
         submission.setAnonymous(submissionDto.isAnonymous());
 
+        User student = getStudent(submissionDto.getStudentId());
+        submission.getQuestion().Attach(student);
+
+        for (User teacher : courseExecution.getUsers()) {
+            if (teacher.isTeacher()) {
+                submission.Attach(teacher);
+            }
+        }
+        prepareNotification(submission);
+
         if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
             submission.setArgument(submissionDto.getArgument());
 
@@ -147,9 +168,10 @@ public class SubmissionService {
         User student = getStudent(reviewDto.getStudentId());
         review.Attach(student);
 
-        review.Notify(createNotification(review));
-
         entityManager.persist(review);
+
+        prepareNotification(review);
+
         return new ReviewDto(review);
     }
 
@@ -317,18 +339,32 @@ public class SubmissionService {
         }
     }
 
-    public Notification createNotification(Review review) {
-        NotificationDto notificationDto = new NotificationDto();
-        notificationDto.setTitle("title teste");
-        notificationDto.setContent("content teste");
-        notificationDto.setCreationDate(DateHandler.toISOString(DateHandler.now()));
+    private void prepareNotification(Review review) {
+        String title = NotificationsCreation.createTitle(NEW_REVIEW_TITLE, review.getSubmission().getId());
+        String content = "";
+        if (review.getStatus() == Review.Status.APPROVED)
+            content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getId(), "approved", review.getUser().getName());
+        else
+            content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getId(), "rejected", review.getUser().getName());
+        review.Notify(createNotification(title, content));
+    }
 
-        NotificationDto response = notificationService.createNotification(notificationDto);
+    public Notification createNotification(String title, String content) {
+        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content);
+        NotificationDto response = notificationService.createNotification(notificationsCreation.getNotificationDto());
 
-        Notification notification = notificationService.getNotificationById(response.getId());
+        return notificationService.getNotificationById(response.getId());
+    }
 
-        review.addNotification(notification);
+    public void prepareNotification(Question question, User user) {
+        String title = NotificationsCreation.createTitle(DELETED_QUESTION_TITLE, question.getId());
+        String content = NotificationsCreation.createContent(DELETED_QUESTION_CONTENT, question.getId(), user.getName());
+        question.Notify(createNotification(title, content));
+    }
 
-        return notification;
+    public void prepareNotification(Submission submission) {
+        String title = NotificationsCreation.createTitle(NEW_SUBMISSION_TITLE, submission.getQuestion().getId());
+        String content = NotificationsCreation.createContent(NEW_SUBMISSION_CONTENT, submission.getUser().getName());
+        submission.Notify(createNotification(title, content));
     }
 }

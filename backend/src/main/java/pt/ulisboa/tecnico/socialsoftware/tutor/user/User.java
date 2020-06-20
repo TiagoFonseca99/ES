@@ -461,13 +461,13 @@ public class User implements UserDetails, DomainEntity, Observer {
         this.tournaments_observers.add(tournament);
     }
 
-<<<<<<< HEAD
+
     public void addObserver(Review review) {
         this.review_observers.add(review);
-=======
+    }
+    
     public void addObserver(CourseExecution courseExecution) {
         this.executions_observers.add(courseExecution);
->>>>>>> develop
     }
 
     public boolean isStudent() {
@@ -478,11 +478,9 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     public void removeObserver(Tournament tournament) { this.tournaments_observers.remove(tournament); }
 
-<<<<<<< HEAD
     public void removeObserver(Review review) { this.review_observers.remove(review); }
-=======
+
     public void removeObserver(CourseExecution courseExecution) { this.executions_observers.remove(courseExecution); }
->>>>>>> develop
 
     public boolean isTeacher() {
         return this.role == User.Role.TEACHER;
@@ -630,7 +628,7 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     @Override
     public void update(Object o, Notification notification) {
-        if (o instanceof Tournament || o instanceof CourseExecution) {
+        if (o instanceof Tournament || o instanceof CourseExecution || o instanceof Review || o instanceof Submission || o instanceof Question) {
             notification.addUser(this);
         }
     }

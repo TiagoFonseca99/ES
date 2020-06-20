@@ -7,9 +7,13 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -20,7 +24,7 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Entity
 @Table(name = "questions")
-public class Question implements DomainEntity {
+public class Question implements DomainEntity, Observable {
     public enum Status {
         DISABLED, REMOVED, AVAILABLE, SUBMITTED, DEPRECATED
     }
@@ -67,6 +71,12 @@ public class Question implements DomainEntity {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "question", orphanRemoval = true)
     private Set<Discussion> discussions = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<User> observers = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<Notification> notifications = new ArrayList<>();
 
     public Question() {
     }
@@ -333,5 +343,30 @@ public class Question implements DomainEntity {
 
     public Set<Discussion> getDiscussions() {
         return this.discussions;
+    }
+
+    public List<Notification> getNotifications() { return notifications; }
+
+    public void addNotification(Notification notification) { this.notifications.add(notification); }
+
+    public void removeNotification(Notification notification) { this.notifications.remove(notification); }
+
+    public List<User> getUsers() { return observers; }
+
+    @Override
+    public void Attach(pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer o) {
+        this.observers.add((User) o);
+    }
+
+    @Override
+    public void Dettach(pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer o) {
+        this.observers.remove(o);
+    }
+
+    @Override
+    public void Notify(Notification notification) {
+        for (Observer observer : observers) {
+            observer.update(this, notification);
+        }
     }
 }
