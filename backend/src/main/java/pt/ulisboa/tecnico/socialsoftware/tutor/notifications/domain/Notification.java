@@ -1,9 +1,11 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,7 +18,7 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 @Table(name = "notifications")
 public class Notification {
     public enum Type {
-        BASIC, TOURNAMENT, ANNOUNCEMENT, SUBMISSION, REVIEW, TEACHER_SUBMISSION, DISCUSSION
+        BASIC, TOURNAMENT, ANNOUNCEMENT, SUBMISSION, REVIEW, TEACHER_SUBMISSION, DISCUSSION, QUESTION
     }
 
     @Id

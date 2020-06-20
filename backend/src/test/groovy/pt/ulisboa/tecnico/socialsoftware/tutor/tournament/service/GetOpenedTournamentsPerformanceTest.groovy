@@ -13,6 +13,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
@@ -157,6 +158,10 @@ class GetOpenedTournamentsPerformanceTest extends Specification {
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+        @Bean
+        SubmissionService submissionService() {
+            return new SubmissionService()
         }
     }
 }

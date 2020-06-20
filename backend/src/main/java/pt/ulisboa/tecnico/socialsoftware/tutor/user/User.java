@@ -111,6 +111,9 @@ public class User implements UserDetails, DomainEntity, Observer {
     private List<Tournament> tournaments_observers = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
+    private List<Review> review_observers = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
     private List<CourseExecution> executions_observers = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "users")
@@ -469,6 +472,11 @@ public class User implements UserDetails, DomainEntity, Observer {
         this.tournaments_observers.add(tournament);
     }
 
+
+    public void addObserver(Review review) {
+        this.review_observers.add(review);
+    }
+    
     public void addObserver(CourseExecution courseExecution) {
         this.executions_observers.add(courseExecution);
     }
@@ -480,6 +488,8 @@ public class User implements UserDetails, DomainEntity, Observer {
     public void removeTournament(Tournament tournament) { this.tournaments.remove(tournament); }
 
     public void removeObserver(Tournament tournament) { this.tournaments_observers.remove(tournament); }
+
+    public void removeObserver(Review review) { this.review_observers.remove(review); }
 
     public void removeObserver(CourseExecution courseExecution) { this.executions_observers.remove(courseExecution); }
 
@@ -581,7 +591,7 @@ public class User implements UserDetails, DomainEntity, Observer {
             if(discussion.isAvailable()) {
                 publicDiscussions.add(discussion);
             }
-        } 
+        }
         return publicDiscussions;
     }
 
@@ -629,7 +639,7 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     @Override
     public void update(Object o, Notification notification) {
-        if (o instanceof Tournament || o instanceof CourseExecution) {
+        if (o instanceof Tournament || o instanceof CourseExecution || o instanceof Review || o instanceof Submission || o instanceof Question) {
             notification.addUser(this);
         }
     }
