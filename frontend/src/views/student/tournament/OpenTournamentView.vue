@@ -292,18 +292,22 @@ export default class OpenTournamentView extends Vue {
   async joinPublicTournament(tournamentToJoin: Tournament) {
     const enrolled = tournamentToJoin.enrolled;
     const topics = tournamentToJoin.topics;
+    const participants = tournamentToJoin.participants;
     tournamentToJoin.enrolled = false;
     tournamentToJoin.topics = [];
+    tournamentToJoin.participants = [];
     try {
       await RemoteServices.joinTournament(tournamentToJoin, this.password);
     } catch (error) {
       await this.$store.dispatch('error', error);
       tournamentToJoin.enrolled = enrolled;
       tournamentToJoin.topics = topics;
+      tournamentToJoin.participants = participants;
       return;
     }
     tournamentToJoin.enrolled = true;
     tournamentToJoin.topics = topics;
+    tournamentToJoin.participants = participants;
   }
 
   async leaveTournament(tournamentToLeave: Tournament) {
@@ -330,8 +334,10 @@ export default class OpenTournamentView extends Vue {
   async solveQuiz(tournament: Tournament) {
     const enrolled = tournament.enrolled;
     const topics = tournament.topics;
+    const participants = tournament.participants;
     tournament.enrolled = undefined;
     tournament.topics = [];
+    tournament.participants = [];
     try {
       let quiz: StatementQuiz = await RemoteServices.solveTournament(
         tournament
@@ -344,9 +350,11 @@ export default class OpenTournamentView extends Vue {
       await this.$store.dispatch('error', error);
       tournament.enrolled = enrolled;
       tournament.topics = topics;
+      tournament.participants = participants;
     }
     tournament.enrolled = enrolled;
     tournament.topics = topics;
+    tournament.participants = participants;
   }
 }
 </script>
