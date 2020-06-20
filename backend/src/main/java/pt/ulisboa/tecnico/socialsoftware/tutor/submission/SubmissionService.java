@@ -346,11 +346,11 @@ public class SubmissionService {
             content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getId(), "approved", review.getUser().getName());
         else
             content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getId(), "rejected", review.getUser().getName());
-        review.Notify(createNotification(title, content));
+        review.Notify(createNotification(title, content, Notification.Type.REVIEW));
     }
 
-    public Notification createNotification(String title, String content) {
-        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content);
+    public Notification createNotification(String title, String content, Notification.Type type) {
+        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content, type);
         NotificationDto response = notificationService.createNotification(notificationsCreation.getNotificationDto());
 
         return notificationService.getNotificationById(response.getId());
@@ -359,12 +359,12 @@ public class SubmissionService {
     public void prepareNotification(Question question, User user) {
         String title = NotificationsCreation.createTitle(DELETED_QUESTION_TITLE, question.getId());
         String content = NotificationsCreation.createContent(DELETED_QUESTION_CONTENT, question.getId(), user.getName());
-        question.Notify(createNotification(title, content));
+        question.Notify(createNotification(title, content, Notification.Type.QUESTION));
     }
 
     public void prepareNotification(Submission submission) {
         String title = NotificationsCreation.createTitle(NEW_SUBMISSION_TITLE, submission.getQuestion().getId());
         String content = NotificationsCreation.createContent(NEW_SUBMISSION_CONTENT, submission.getUser().getName());
-        submission.Notify(createNotification(title, content));
+        submission.Notify(createNotification(title, content, Notification.Type.SUBMISSION));
     }
 }

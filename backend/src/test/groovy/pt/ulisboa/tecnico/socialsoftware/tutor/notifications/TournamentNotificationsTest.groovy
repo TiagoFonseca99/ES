@@ -12,6 +12,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.repository.NotificationRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
@@ -30,6 +31,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import spock.lang.Specification
 
 @DataJpaTest
@@ -163,7 +165,9 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.cancelTournament(user.getId(), tournamentDto)
 
         then:
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "user joins tournament, edits start time and receives a notification"() {
@@ -181,7 +185,9 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.editStartTime(user.getId(), tournamentDto)
 
         then:
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "user joins tournament, edits start time, leaves tournament and still has notifications"() {
@@ -199,13 +205,17 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.editStartTime(user.getId(), tournamentDto)
 
         then: "1 notification"
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
 
         when:
         tournamentService.leaveTournament(user.getId(), tournamentDto)
 
         then: "1 notification"
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result2 = notificationRepository.getUserNotifications(user.getId())
+        result2.size() == 1
+        result2.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "user joins tournament, edits end time and receives a notification"() {
@@ -223,7 +233,9 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.editEndTime(user.getId(), tournamentDto)
 
         then:
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "user joins tournament, edits end time, leaves tournament and still has notifications"() {
@@ -241,13 +253,17 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.editEndTime(user.getId(), tournamentDto)
 
         then: "1 notification"
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
 
         when:
         tournamentService.leaveTournament(user.getId(), tournamentDto)
 
         then: "1 notification"
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result2 = notificationRepository.getUserNotifications(user.getId())
+        result2.size() == 1
+        result2.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "user joins tournament, adds a topic and receives a notification"() {
@@ -267,7 +283,9 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
 
         then:
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "user joins tournament, adds a topic, leaves tournament and still has notifications"() {
@@ -287,13 +305,17 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
 
         then: "1 notification"
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
 
         when:
         tournamentService.leaveTournament(user.getId(), tournamentDto)
 
         then: "1 notification"
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result2 = notificationRepository.getUserNotifications(user.getId())
+        result2.size() == 1
+        result2.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "user joins tournament, removes a topic and receives a notification"() {
@@ -307,7 +329,9 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
 
         then:
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "user joins tournament, removes a topic, leaves tournament and still has notifications"() {
@@ -321,13 +345,17 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
 
         then: "1 notification"
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
 
         when:
         tournamentService.leaveTournament(user.getId(), tournamentDto)
 
         then: "1 notification"
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result2 = notificationRepository.getUserNotifications(user.getId())
+        result2.size() == 1
+        result2.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "two users have both one notification"() {
@@ -360,8 +388,12 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.editStartTime(user2.getId(), tournamentDto2)
 
         then:
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
-        notificationRepository.getUserNotifications(user2.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
+        def result2 = notificationRepository.getUserNotifications(user2.getId())
+        result2.size() == 1
+        result2.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     def "two users have both one notification and one leaves tournament"() {
@@ -394,15 +426,23 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.editStartTime(user2.getId(), tournamentDto2)
 
         then:
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
-        notificationRepository.getUserNotifications(user2.getId()).size() == 1
+        def result = notificationRepository.getUserNotifications(user.getId())
+        result.size() == 1
+        result.get(0).getType() == Notification.Type.TOURNAMENT
+        def result2 = notificationRepository.getUserNotifications(user2.getId())
+        result2.size() == 1
+        result2.get(0).getType() == Notification.Type.TOURNAMENT
 
         when:
         tournamentService.leaveTournament(user2.getId(), tournamentDto2)
 
         then:
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
-        notificationRepository.getUserNotifications(user.getId()).size() == 1
+        def result3 = notificationRepository.getUserNotifications(user.getId())
+        result3.size() == 1
+        result3.get(0).getType() == Notification.Type.TOURNAMENT
+        def result4 = notificationRepository.getUserNotifications(user2.getId())
+        result4.size() == 1
+        result4.get(0).getType() == Notification.Type.TOURNAMENT
     }
 
     @TestConfiguration
@@ -439,6 +479,11 @@ class TournamentNotificationsTest extends Specification {
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+
+        @Bean
+        SubmissionService SubmissionService() {
+            return new SubmissionService()
         }
     }
 }

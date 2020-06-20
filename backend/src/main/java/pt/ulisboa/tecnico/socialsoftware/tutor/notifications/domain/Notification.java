@@ -17,6 +17,9 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 @Entity
 @Table(name = "notifications")
 public class Notification {
+    public enum Type {
+        BASIC, TOURNAMENT, ANNOUNCEMENT, SUBMISSION, REVIEW, TEACHER_SUBMISSION, DISCUSSION, QUESTION
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +30,9 @@ public class Notification {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    private Type type = Type.BASIC;
 
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
@@ -40,6 +46,7 @@ public class Notification {
         setTitle(notificationDto.getTitle());
         setContent(notificationDto.getContent());
         setCreationDate(DateHandler.toLocalDateTime(notificationDto.getCreationDate()));
+        setType(notificationDto.getType());
     }
 
     public Integer getId() { return id; }
@@ -69,4 +76,10 @@ public class Notification {
     public void addUser(User user) { this.users.add(user); }
 
     public void removeUser(User user) { this.users.remove(user); }
+
+    public Type getType() { return type; }
+
+    public void setType(Type type) { this.type = type; }
+
+    public void setType(String type) { this.type = Type.valueOf(type); }
 }

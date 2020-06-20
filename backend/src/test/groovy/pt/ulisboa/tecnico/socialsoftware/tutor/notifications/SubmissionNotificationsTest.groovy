@@ -218,7 +218,7 @@ class SubmissionNotificationsTest extends Specification {
 
 
     @TestConfiguration
-    static class SubmissionServiceImplTestContextConfiguration {
+    static class SubmissionNotificationServiceImplTestContextConfiguration {
 
         @Bean
         SubmissionService submissionService() {

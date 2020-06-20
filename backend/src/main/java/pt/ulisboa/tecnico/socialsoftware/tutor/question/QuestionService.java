@@ -150,8 +150,6 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
         Submission submission = submissionRepository.findByQuestionId(question.getId());
 
-
-
         if (submission != null) {
             deleteSubmission(submission);
         }

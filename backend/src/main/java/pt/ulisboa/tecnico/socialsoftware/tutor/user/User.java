@@ -68,10 +68,13 @@ public class User implements UserDetails, DomainEntity, Observer {
     @Column(name = "last_access")
     private LocalDateTime lastAccess;
 
+    @Column(name = "last_notification_access")
+    private LocalDateTime lastNotificationAccess = DateHandler.now();
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<QuizAnswer> quizAnswers = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<CourseExecution> courseExecutions = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
@@ -202,6 +205,14 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     public void setLastAccess(LocalDateTime lastAccess) {
         this.lastAccess = lastAccess;
+    }
+
+    public LocalDateTime getLastNotificationAccess() {
+        return lastNotificationAccess;
+    }
+
+    public void setLastNotificationAccess() {
+        this.lastNotificationAccess = DateHandler.now();
     }
 
     public Set<QuizAnswer> getQuizAnswers() {
