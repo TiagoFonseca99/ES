@@ -1,5 +1,5 @@
 <template>
-  <v-card class="table container">
+  <v-card class="table">
     <v-data-table
       :headers="headers"
       :items="items"
