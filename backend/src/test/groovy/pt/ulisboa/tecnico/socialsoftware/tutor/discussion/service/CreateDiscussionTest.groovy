@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -284,6 +285,11 @@ class CreateDiscussionTest extends Specification {
         @Bean
         DiscussionService discussionService() {
             return new DiscussionService()
+        }
+
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
         }
     }
 }

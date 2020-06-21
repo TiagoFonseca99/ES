@@ -81,4 +81,15 @@ public class NotificationService {
 
         notification.removeUser(user);
     }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public Notification createNotification(String title, String content, Notification.Type type) {
+        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content, type);
+        NotificationDto response = createNotification(notificationsCreation.getNotificationDto());
+
+        return getNotificationById(response.getId());
+    }
 }

@@ -196,17 +196,23 @@ public class AuthService {
     }
 
     public void setCookie(String name, String value, HttpServletResponse response, Boolean http, Integer age) {
+        String header = name + "=" + value + "; Path=/; SameSite=Lax;";
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(http != null ? http : false);
-        // cookie.setSecure(true);
-        cookie.setPath("/");
 
+        if (http != null) {
+            header += "; HttpOnly";
+        }
         // Allow session cookies
         if (age != null) {
-            cookie.setMaxAge(age);
+            header += "; Max-Age=" + age;
         }
 
-        response.addCookie(cookie);
+        if (activeProfile.equals("prod")) {
+            header += "; Secure";
+        }
+
+        response.setHeader("Set-Cookie", header);
     }
 
     public void removeCookie(String name, HttpServletRequest request, HttpServletResponse response) {
