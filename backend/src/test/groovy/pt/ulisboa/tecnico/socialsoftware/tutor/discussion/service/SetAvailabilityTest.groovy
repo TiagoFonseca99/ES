@@ -9,6 +9,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.ReplyRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import spock.lang.Specification
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
@@ -195,6 +196,11 @@ class SetAvailabilityTest extends Specification {
         @Bean
         DiscussionService discussionService() {
             return new DiscussionService()
+        }
+
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
         }
     }
 }
