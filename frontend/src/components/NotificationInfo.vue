@@ -55,31 +55,31 @@ export default class NotificationInfo extends Vue {
   }
 
   routeToPage(type: string) {
-    let path = '/';
+    let name = 'home';
     switch (type) {
       case 'TOURNAMENT':
-        path = '/student/open';
+        name = 'open-tournament';
         break;
       case 'ANNOUNCEMENT':
-        path = '/';
+        name = 'home';
         break;
       case 'SUBMISSION':
-        path = '/management/reviews';
+        name = 'reviews-management';
         break;
       case 'QUESTION':
-        path = '/student/submissions';
+        name = 'submissions';
         break;
       case 'REVIEW':
-        path = '/student/reviews';
+        name = 'reviews';
         break;
       case 'DISCUSSION':
         if (this.$store.getters.isStudent) {
-          path = '/student/discussions';
+          name = 'discussions';
         } else {
-          path = '/management/questions';
+          name = 'questions-management';
         }
     }
-    window.location.href = path;
+    this.$router.push({ name: name });
   }
 }
 </script>
