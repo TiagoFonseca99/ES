@@ -370,6 +370,9 @@ INSERT INTO question_answers (time_taken, option_id,  quiz_answer_id, quiz_quest
           <stringProp name="queryType">Update Statement</stringProp>
           <stringProp name="query">WITH qa AS(DELETE FROM quiz_answers WHERE user_id = 676 RETURNING id)
 DELETE FROM question_answers WHERE quiz_answer_id IN (SELECT * FROM qa);
+DELETE FROM discussions_observers WHERE 1=1;
+DELETE FROM notifications_users WHERE 1=1;
+DELETE FROM notifications WHERE id IN (SELECT max(id) FROM notifications);
 DELETE FROM discussions WHERE user_id = 676;</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>

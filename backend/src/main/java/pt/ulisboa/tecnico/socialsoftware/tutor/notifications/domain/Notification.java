@@ -11,6 +11,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -82,4 +83,21 @@ public class Notification {
     public void setType(Type type) { this.type = type; }
 
     public void setType(String type) { this.type = Type.valueOf(type); }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Notification that = (Notification) o;
+        return getId().equals(that.getId()) &&
+                getTitle().equals(that.getTitle()) &&
+                getContent().equals(that.getContent()) &&
+                getType() == that.getType() &&
+                Objects.equals(getCreationDate(), that.getCreationDate());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getTitle(), getContent(), getType(), getCreationDate());
+    }
 }

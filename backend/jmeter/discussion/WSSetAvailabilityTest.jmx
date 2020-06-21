@@ -320,8 +320,10 @@
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
-          <stringProp name="query">DELETE FROM discussions WHERE user_id=676 AND question_id = 1504;
-</stringProp>
+          <stringProp name="query">DELETE FROM discussions_observers WHERE 1=1;
+DELETE FROM notifications_users WHERE 1=1;
+DELETE FROM notifications WHERE id IN (SELECT max(id) FROM notifications);
+DELETE FROM discussions WHERE user_id=676 AND question_id = 1504;</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
