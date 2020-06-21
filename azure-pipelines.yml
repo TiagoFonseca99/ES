@@ -110,12 +110,8 @@ jobs:
       runOnce:
         preDeploy:
           steps:
-            - task: Bash@3
-              inputs:
-                filePath: '/home/AzureUser/stop.sh'
-                workingDirectory: '/home/AzureUser'
-                noProfile: false
-                noRc: false
+            - script: |
+                sudo systemctl stop tmux
               displayName: 'Stop running'
 
             - script: |
@@ -148,13 +144,9 @@ jobs:
                 cd ..
               displayName: 'Update frontend files'
 
-            - task: Bash@3
-              inputs:
-                filePath: '/home/AzureUser/deploy.sh'
-                workingDirectory: '/home/AzureUser'
-                noProfile: false
-                noRc: false
-              displayName: 'Deploy'
+            - script: |
+                sudo systemctl start tmux
+              displayName: 'Deploy backend'
 
         on:
           failure:
@@ -168,14 +160,10 @@ jobs:
                   unzip old.zip
                   rm old.zip
                   cd ..
-                displayName: 'Failed'
-              - task: Bash@3
-                inputs:
-                  filePath: '/home/AzureUser/deploy.sh'
-                  workingDirectory: '/home/AzureUser'
-                  noProfile: false
-                  noRc: false
-                displayName: 'Deploy old'
+                displayName: 'Restore old frontend files'
+              - script: |
+                  sudo systemctl restart tmux
+                displayName: 'Deploy old backend'
           success:
             steps:
               - script: echo "Deployed successfully"
