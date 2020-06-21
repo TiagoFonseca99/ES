@@ -72,7 +72,7 @@
             </v-list-item>
             <v-list-item to="/management/reviews" data-cy="Reviews">
               <v-list-item-action>
-                <v-icon>create</v-icon>
+                <v-icon>fa-edit</v-icon>
               </v-list-item-action>
               <v-list-item-content>
                 <v-list-item-title>Reviews</v-list-item-title>
@@ -206,7 +206,7 @@
             </v-list-item>
             <v-list-item to="/student/reviews">
               <v-list-item-action>
-                <v-icon>fas fa-user-check</v-icon>
+                <v-icon>fas fa-edit</v-icon>
               </v-list-item-action>
               <v-list-item-content>
                 <v-list-item-title>Reviews</v-list-item-title>
@@ -370,7 +370,7 @@
           </v-list-item>
           <v-list-item to="/management/reviews">
             <v-list-item-action>
-              <v-icon>create</v-icon>
+              <v-icon>fa-edit</v-icon>
             </v-list-item-action>
             <v-list-item-content>
               <v-list-item-title>Reviews</v-list-item-title>
@@ -508,7 +508,7 @@
 
           <v-list-item to="/student/reviews">
             <v-list-item-action>
-              <v-icon>fas fa-user-check</v-icon>
+              <v-icon>fas fa-edit</v-icon>
             </v-list-item-action>
             <v-list-item-content>Reviews</v-list-item-content>
           </v-list-item>

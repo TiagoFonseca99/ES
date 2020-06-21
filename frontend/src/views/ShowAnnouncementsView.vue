@@ -1,7 +1,7 @@
 <template>
   <div v-bind:class="{ container: this.announcements.length === 0 }">
     <h1
-      v-if="this.announcements.length === 0 && this.$store.getters.getLoading"
+      v-if="this.announcements.length === 0"
       id="home-title"
       class="display-2 font-weight-thin mb-3"
     >

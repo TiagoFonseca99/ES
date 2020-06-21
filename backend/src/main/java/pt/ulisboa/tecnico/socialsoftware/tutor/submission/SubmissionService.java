@@ -340,23 +340,23 @@ public class SubmissionService {
     }
 
     private void prepareNotification(Review review) {
-        String title = NotificationsCreation.createTitle(NEW_REVIEW_TITLE, review.getSubmission().getId());
+        String title = NotificationsCreation.createTitle(NEW_REVIEW_TITLE, review.getSubmission().getQuestion().getTitle());
         String content = "";
         if (review.getStatus() == Review.Status.APPROVED)
-            content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getId(), "approved", review.getUser().getName());
+            content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getQuestion().getTitle(), "approved", review.getUser().getName());
         else
-            content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getId(), "rejected", review.getUser().getName());
+            content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getQuestion().getTitle(), "rejected", review.getUser().getName());
         review.Notify(notificationService.createNotification(title, content, Notification.Type.REVIEW));
     }
 
     public void prepareNotification(Question question, User user) {
-        String title = NotificationsCreation.createTitle(DELETED_QUESTION_TITLE, question.getId());
-        String content = NotificationsCreation.createContent(DELETED_QUESTION_CONTENT, question.getId(), user.getName());
+        String title = NotificationsCreation.createTitle(DELETED_QUESTION_TITLE, question.getTitle());
+        String content = NotificationsCreation.createContent(DELETED_QUESTION_CONTENT, question.getTitle(), user.getName());
         question.Notify(notificationService.createNotification(title, content, Notification.Type.QUESTION));
     }
 
     public void prepareNotification(Submission submission) {
-        String title = NotificationsCreation.createTitle(NEW_SUBMISSION_TITLE, submission.getQuestion().getId());
+        String title = NotificationsCreation.createTitle(NEW_SUBMISSION_TITLE, submission.getQuestion().getTitle());
         String content = NotificationsCreation.createContent(NEW_SUBMISSION_CONTENT, submission.getUser().getName());
         submission.Notify(notificationService.createNotification(title, content, Notification.Type.SUBMISSION));
     }

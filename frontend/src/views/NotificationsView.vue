@@ -15,15 +15,24 @@
           <v-btn color="primary" @click="filterNotifications('ANNOUNCEMENT')">{{
             'Announcements'
           }}</v-btn>
-          <v-btn color="primary" @click="filterNotifications('TOURNAMENT')">{{
-            'tournaments'
-          }}</v-btn>
+          <v-btn
+            color="primary"
+            v-if="this.$store.getters.isStudent"
+            @click="filterNotifications('TOURNAMENT')"
+            >{{ 'tournaments' }}</v-btn
+          >
           <v-btn color="primary" @click="filterNotifications('DISCUSSION')">{{
             'discussions'
           }}</v-btn>
           <v-btn color="primary" @click="filterNotifications('SUBMISSION')">{{
             'submissions'
           }}</v-btn>
+          <v-btn
+            color="primary"
+            v-if="this.$store.getters.isStudent"
+            @click="filterNotifications('REVIEW')"
+            >{{ 'reviews' }}</v-btn
+          >
         </v-btn-toggle>
       </v-list-item>
       <v-list-item
@@ -98,6 +107,10 @@ export default class NotificationsView extends Vue {
     this.filter = type;
     if (type === 'ALL') {
       this.notifications = this.allNotifications;
+    } else if (type === 'SUBMISSION') {
+      this.notifications = this.allNotifications.filter(
+        a => a.type == 'SUBMISSION' || a.type == 'QUESTION'
+      );
     } else {
       this.notifications = this.allNotifications.filter(a => a.type == type);
     }
