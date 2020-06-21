@@ -3,6 +3,7 @@
     fluid
     style="height: 100%; position: relative; display: flex; flex-direction: column"
     :key="componentKey"
+    v-if="this.$store.getters.isLoggedIn"
   >
     <v-container fluid style="position: relative; max-height: 100%; flex: 1;">
       <v-row style="width: 100%; height: 100%">
@@ -31,7 +32,7 @@
                     style="flex: 1"
                     v-if="
                       info !== null &&
-                        this.username === this.$store.getters.getUser.username
+                        info.username === this.$store.getters.getUser.username
                     "
                     v-model="info.userStatsPublic"
                     :label="info.userStatsPublic ? 'Public' : 'Private'"
@@ -42,7 +43,9 @@
                   id="statsContainer"
                   v-if="
                     stats !== null &&
-                      (this.username === this.$store.getters.getUser.username ||
+                      ((info !== null &&
+                        info.username ===
+                          this.$store.getters.getUser.username) ||
                         this.info.userStatsPublic)
                   "
                 >
@@ -106,7 +109,7 @@
               style="flex: 1"
               v-if="
                 info !== null &&
-                  this.username === this.$store.getters.getUser.username
+                  info.username === this.$store.getters.getUser.username
               "
               v-model="info.tournamentStatsPublic"
               :label="info.tournamentStatsPublic ? 'Public' : 'Private'"
@@ -121,7 +124,7 @@
               class="fill-height"
               v-if="
                 this.info !== null &&
-                  (this.username === this.$store.getters.getUser.username ||
+                  (info.username === this.$store.getters.getUser.username ||
                     this.info.tournamentStatsPublic)
               "
             >
@@ -147,7 +150,7 @@
                 style="flex: 1"
                 v-if="
                   info !== null &&
-                    this.username === this.$store.getters.getUser.username
+                    info.username === this.$store.getters.getUser.username
                 "
                 v-model="info.submissionStatsPublic"
                 :label="info.submissionStatsPublic ? 'Public' : 'Private'"
@@ -158,7 +161,7 @@
               class="dashInfo"
               v-if="
                 info !== null &&
-                  (this.username === this.$store.getters.getUser.username ||
+                  (info.username === this.$store.getters.getUser.username ||
                     this.info.submissionStatsPublic)
               "
             >
@@ -204,7 +207,7 @@
                 style="flex: 1"
                 v-if="
                   info !== null &&
-                    this.username === this.$store.getters.getUser.username
+                    info.username === this.$store.getters.getUser.username
                 "
                 v-model="info.discussionStatsPublic"
                 :label="info.discussionStatsPublic ? 'Public' : 'Private'"
@@ -215,7 +218,7 @@
               class="dashInfo"
               v-if="
                 info !== null &&
-                  (this.username === this.$store.getters.getUser.username ||
+                  (info.username === this.$store.getters.getUser.username ||
                     this.info.discussionStatsPublic)
               "
             >
