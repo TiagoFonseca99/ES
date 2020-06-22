@@ -17,7 +17,12 @@
           </v-chip>
         </v-chip>
       </template>
-      <v-list min-width="250" max-width="500">
+      <v-list
+        min-width="250"
+        max-width="500"
+        max-height="600"
+        style="overflow-y: auto"
+      >
         <v-list-item
           v-if="notifications.length === 0"
           style="padding: 10px 30px 10px 0;"

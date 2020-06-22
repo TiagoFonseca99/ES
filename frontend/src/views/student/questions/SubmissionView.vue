@@ -44,6 +44,7 @@
             convertMarkDown(item.questionDto.title, item.questionDto.image)
           "
           @click="showQuestionDialog(item.questionDto)"
+          style="cursor: pointer"
       /></template>
 
       <template v-slot:item.questionDto.status="{ item }">
