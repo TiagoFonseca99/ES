@@ -89,6 +89,7 @@ export default class NotificationInfo extends Vue {
   grid-template-areas: 'icon text text text text';
   padding: 10px;
   opacity: 50%;
+  width: 100%;
   cursor: pointer;
 }
 .icon {
