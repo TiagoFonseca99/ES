@@ -51,6 +51,9 @@ export default new Vuex.Store({
       state.logged = false;
       await session.logout();
     },
+    updateUser(state, user: User) {
+      state.user = user;
+    },
     session(state, session) {
       state.session = session;
     },
@@ -110,6 +113,9 @@ export default new Vuex.Store({
     },
     currentCourse({ commit }, currentCourse) {
       commit('currentCourse', currentCourse);
+    },
+    updateUser({ commit }, user) {
+      commit('updateUser', user);
     }
   },
   getters: {

@@ -8,6 +8,7 @@ export default class Announcement {
   title: string | null = '';
   content: string | null = '';
   creationDate!: string | null;
+  edited!: boolean;
 
   constructor(jsonObj?: Announcement) {
     if (jsonObj) {
@@ -18,6 +19,7 @@ export default class Announcement {
       this.title = jsonObj.title;
       this.content = jsonObj.content;
       this.creationDate = ISOtoString(jsonObj.creationDate);
+      this.edited = jsonObj.edited;
     }
   }
 }

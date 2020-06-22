@@ -10,7 +10,7 @@ export default class Tournament {
   state!: string | undefined;
   courseAcronym!: string | undefined;
   enrolled!: boolean | undefined;
-  topics!: String[];
+  topics?: String[];
   participants!: User[];
   quizId!: number | undefined;
   privateTournament!: boolean;
@@ -30,11 +30,11 @@ export default class Tournament {
       this.courseAcronym = jsonObj.courseAcronym;
       this.topics = [];
 
-      if (jsonObj.topics) {
+      if (jsonObj.topics && jsonObj.topics !== undefined) {
         // @ts-ignore
         jsonObj.topics.forEach((topic: Topic) => {
-          if (!this.topics.includes(topic.name)) {
-            this.topics.push(topic.name);
+          if (!this.topics!.includes(topic.name)) {
+            this.topics!.push(topic.name);
           }
         });
       }

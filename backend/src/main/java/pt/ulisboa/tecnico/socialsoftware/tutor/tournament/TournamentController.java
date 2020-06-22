@@ -57,7 +57,7 @@ public class TournamentController {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        return tournamentService.getOpenedTournaments();
+        return tournamentService.getOpenedTournaments(user);
     }
 
     @GetMapping(value = "/tournaments/getUserTournaments")

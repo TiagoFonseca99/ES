@@ -14,6 +14,10 @@
       :target-link="link"
       v-on:hide="acceptCookies"
     />
+    <notifications-button
+      v-if="canSeeNotifications()"
+      :user="$store.getters.getUser"
+    />
   </v-app>
 </template>
 
@@ -24,6 +28,7 @@ import TopBar from '@/components/TopBar.vue';
 import ErrorMessage from '@/components/ErrorMessage.vue';
 import Loading from '@/components/Loading.vue';
 import CookieConsent from '@/components/CookieConsent.vue';
+import NotificationsButton from '@/components/NotificationsButton.vue';
 import * as storage from '@/storage';
 import '@/assets/css/_global.scss';
 import '@/assets/css/_scrollbar.scss';
@@ -31,7 +36,13 @@ import '@/assets/css/_question.scss';
 require('typeface-roboto');
 
 @Component({
-  components: { TopBar, ErrorMessage, Loading, CookieConsent }
+  components: {
+    TopBar,
+    ErrorMessage,
+    Loading,
+    CookieConsent,
+    NotificationsButton
+  }
 })
 export default class App extends Vue {
   readonly COOKIES = 'cookies';
@@ -56,6 +67,10 @@ export default class App extends Vue {
   acceptCookies() {
     storage.persist(this.COOKIES, 'true');
     this.cookies = 'true';
+  }
+
+  canSeeNotifications() {
+    return this.$store.getters.isLoggedIn && !this.$store.getters.isAdmin;
   }
 }
 </script>

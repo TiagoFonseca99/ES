@@ -8,17 +8,22 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.DiscussionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
-
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "discussions")
-public class Discussion {
+public class Discussion implements Observable {
     @EmbeddedId
     private DiscussionId discussionId = new DiscussionId();
 
@@ -45,6 +50,9 @@ public class Discussion {
     @Column(columnDefinition = "boolean default false")
     private boolean available;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    private Set<User> observers = new HashSet<>();
+
     public Discussion() {
     }
 
@@ -60,6 +68,13 @@ public class Discussion {
         this.user.addDiscussion(this);
         this.setDate(DateHandler.toLocalDateTime(discussionDto.getDate()));
         this.available = discussionDto.isAvailable();
+        this.observers.add(user);
+        this.observers.addAll(user.getCourseExecutions().stream()
+                .filter(execution -> execution.getCourseId() == course.getId() && execution.getUsers().contains(user))
+                .map(execution -> {
+                    return execution.getUsers().stream().filter(exUser -> exUser.isTeacher())
+                            .collect(Collectors.toList());
+                }).flatMap(List::stream).collect(Collectors.toList()));
     }
 
     public Course getCourse() {
@@ -132,8 +147,8 @@ public class Discussion {
         this.user.getDiscussions().remove(this);
         this.question.getDiscussions().remove(this);
 
-        for (Reply reply: replies) {
-           reply.discussionRemove();
+        for (Reply reply : replies) {
+            reply.discussionRemove();
         }
 
         this.replies.clear();
@@ -145,9 +160,31 @@ public class Discussion {
         }
     }
 
+    @Override
+    public void Attach(Observer o) {
+        this.observers.add((User) o);
+    }
+
+    @Override
+    public void Dettach(Observer o) {
+        this.observers.remove(o);
+    }
+
+    @Override
+    public void Notify(Notification notification, User user) {
+        for (Observer observer : observers) {
+            if (((User) observer).getId() == user.getId()) {
+                continue;
+            }
+
+            observer.update(this, notification);
+        }
+    }
+
     public boolean equals(Object o) {
         if (o instanceof Discussion) {
-            return this.discussionId.equals(((Discussion) o).getId()) && this.content.equals(((Discussion) o).getContent());
+            return this.discussionId.equals(((Discussion) o).getId())
+                    && this.content.equals(((Discussion) o).getContent());
         }
 
         return false;

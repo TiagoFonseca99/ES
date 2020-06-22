@@ -99,7 +99,7 @@ jobs:
       artifact: newBuild
 
     # ~~~~~~~~~ DEPLOY~~~~~~~~~
-  - deployment: Deploy
+  - deployment: QuizzesDeploy
     dependsOn: release
     displayName: 'Deploy to VM'
     timeoutInMinutes: 5
@@ -108,15 +108,10 @@ jobs:
       resourceType: VirtualMachine
     strategy:
       runOnce:
-        # deploy stage not possible due to a possible bug
         preDeploy:
           steps:
-            - task: Bash@3
-              inputs:
-                filePath: '/home/AzureUser/stop.sh'
-                workingDirectory: '/home/AzureUser'
-                noProfile: false
-                noRc: false
+            - script: |
+                sudo systemctl stop tmux
               displayName: 'Stop running'
 
             - script: |
@@ -140,8 +135,8 @@ jobs:
                 mv quizzes-tutor-backend-0.0.1-SNAPSHOT.jar /home/AzureUser/quizzes-tutor-backend-0.0.1-SNAPSHOT.jar
               displayName: 'Move artifacts'
 
-
-            # DEPLOY PHASE
+        deploy:
+          steps:
             - script: |
                 cd /home/AzureUser
                 cd app
@@ -149,56 +144,26 @@ jobs:
                 cd ..
               displayName: 'Update frontend files'
 
-            - task: Bash@3
-              inputs:
-                filePath: '/home/AzureUser/deploy.sh'
-                workingDirectory: '/home/AzureUser'
-                noProfile: false
-                noRc: false
-              displayName: 'Deploy'
-
-
-            # TO FAIL ON PURPOSE
-            - task: Bash@3
-              inputs:
-                filePath: '/home/AzureUser/failme.sh'
-                workingDirectory: '/home/AzureUser'
-                noProfile: false
-                noRc: false
-              displayName: 'FAILING'
-
-        deploy:
-          steps:
-            - task: Bash@3
-              inputs:
-                filePath: '/home/AzureUser/deploy.sh'
-                workingDirectory: '/home/AzureUser'
-                noProfile: false
-                noRc: false
-              displayName: 'Deploy'
+            - script: |
+                sudo systemctl start tmux
+              displayName: 'Deploy backend'
 
         on:
           failure:
             steps:
-              #- script: |
-              #    echo "Restoring old version"
-              #    cd /home/AzureUser
-              #    mv old.jar quizzes-tutor-backend-0.0.1-SNAPSHOT.jar
-              #    cd app
-              #    mv ../old.zip .
-              #    unzip old.zip
-              #    rm old.zip
-              #    cd ..
-              #  displayName: 'Failed'
-              #- task: Bash@3
-              #  inputs:
-              #    filePath: '/home/AzureUser/deploy.sh'
-              #    workingDirectory: '/home/AzureUser'
-              #    noProfile: false
-              #    noRc: false
-              #  displayName: 'Deploy old'
-              - script: echo "DONE"
-                displayName: Failing
+              - script: |
+                  echo "Restoring old version"
+                  cd /home/AzureUser
+                  mv old.jar quizzes-tutor-backend-0.0.1-SNAPSHOT.jar
+                  cd app
+                  mv ../old.zip .
+                  unzip old.zip
+                  rm old.zip
+                  cd ..
+                displayName: 'Restore old frontend files'
+              - script: |
+                  sudo systemctl restart tmux
+                displayName: 'Deploy old backend'
           success:
             steps:
               - script: echo "Deployed successfully"

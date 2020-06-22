@@ -213,7 +213,7 @@ export default class ReplyComponent extends Vue {
   discussionInd: number = 0;
   userId: number = this.$store.getters.getUser.id;
   @Prop() newReply!: string;
-  reply!: Reply;
+  reply: Reply | null = null;
   replyInd!: number;
   discussionEdit: Boolean = false;
   replyEdit: Boolean = false;

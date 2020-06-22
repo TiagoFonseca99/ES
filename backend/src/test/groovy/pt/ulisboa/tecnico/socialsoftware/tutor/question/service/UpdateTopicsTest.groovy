@@ -6,12 +6,14 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.TopicDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.TopicRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import spock.lang.Specification
 
 @DataJpaTest
@@ -144,6 +146,14 @@ class UpdateTopicsTest extends Specification {
         @Bean
         QuestionService questionService() {
             return new QuestionService()
+        }
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
+        }
+        @Bean
+        SubmissionService submissionService() {
+            return new SubmissionService()
         }
     }
 }

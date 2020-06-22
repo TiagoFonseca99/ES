@@ -39,7 +39,7 @@ public class NotificationService {
       value = { SQLException.class },
       backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public NotificationDto createNotification(NotificationDto notificationDto) {
+    public Notification createNotification(NotificationDto notificationDto) {
         if (notificationDto.getCreationDate() == null) {
             notificationDto.setCreationDate(DateHandler.toISOString(DateHandler.now()));
         }
@@ -47,17 +47,6 @@ public class NotificationService {
         Notification notification = new Notification(notificationDto);
 
         entityManager.persist(notification);
-        return new NotificationDto(notification);
-    }
-
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public Notification getNotificationById(Integer notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new TutorException(NOTIFICATION_NOT_FOUND, notificationId));
-
         return notification;
     }
 
@@ -66,6 +55,7 @@ public class NotificationService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<NotificationDto> getUserNotifications(Integer userId) {
+
         return notificationRepository.getUserNotifications(userId).stream().map(NotificationDto::new).collect(Collectors.toList());
     }
 
@@ -81,7 +71,5 @@ public class NotificationService {
                 .orElseThrow(() -> new TutorException(NOTIFICATION_NOT_FOUND, notificationId));
 
         notification.removeUser(user);
-        //if (notification.getUsers().isEmpty())
-            //notificationRepository.delete(notification); TODO Makes sense ??
     }
 }

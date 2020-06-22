@@ -147,6 +147,13 @@
           :quality="1"
           :scale="100"
         />
+        <v-flex style="margin-top: -50pt;">
+          <span class="quizCode">{{
+            4 > qrValue.toString().length
+              ? '0'.repeat(4 - qrValue.toString().length) + qrValue
+              : qrValue
+          }}</span>
+        </v-flex>
       </v-card>
     </v-dialog>
   </v-card>
@@ -294,6 +301,12 @@ export default class QuizList extends Vue {
 </script>
 
 <style lang="scss">
+.quizCode {
+  font-family: 'Lucida Console', Monaco, monospace;
+  font-weight: bolder;
+  font-size: 50pt;
+}
+
 .qrcode {
   width: 80vw !important;
   height: 80vw !important;

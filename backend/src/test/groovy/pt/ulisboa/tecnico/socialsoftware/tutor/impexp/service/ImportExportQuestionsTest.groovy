@@ -8,13 +8,22 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.OptionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.QuestionDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
+
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.COURSE_NOT_FOUND
 
 @DataJpaTest
 class ImportExportQuestionsTest extends Specification {
@@ -25,6 +34,8 @@ class ImportExportQuestionsTest extends Specification {
     public static final String QUESTION_CONTENT = 'question content\n ![image][image]\n question content'
     public static final String OPTION_CONTENT = "optionId content"
     public static final String URL = 'URL'
+    public static final String STUDENT_NAME = "João Silva"
+    public static final String STUDENT_USERNAME = "joaosilva"
 
     @Autowired
     QuestionService questionService
@@ -38,9 +49,18 @@ class ImportExportQuestionsTest extends Specification {
     @Autowired
     QuestionRepository questionRepository
 
+    @Autowired
+    SubmissionRepository submissionRepository
+
+    @Autowired
+    UserRepository userRepository
+
     def course
     def questionId
     def courseExecution
+    def submission
+    def student
+    def teacher
 
     def setup() {
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -48,6 +68,13 @@ class ImportExportQuestionsTest extends Specification {
 
         courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
         courseExecutionRepository.save(courseExecution)
+
+        student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
+        teacher = new User(STUDENT_NAME + "1", STUDENT_USERNAME + "1", 2, User.Role.TEACHER)
+        student.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
+        teacher.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
+        userRepository.save(student)
+        userRepository.save(teacher)
 
         def questionDto = new QuestionDto()
         questionDto.setTitle(QUESTION_TITLE)
@@ -72,14 +99,21 @@ class ImportExportQuestionsTest extends Specification {
         options.add(optionDto)
         questionDto.setOptions(options)
 
-        questionId = questionService.createQuestion(course.getId(), questionDto).getId()
+        def question = questionService.createQuestion(course.getId(), questionDto)
+        questionId = question.getId()
+
+        submission = new Submission()
+        submission.setQuestion(questionRepository.getOne(questionId))
+        submission.setUser(student)
+        submission.setCourseExecution(courseExecution)
+        submissionRepository.save(submission)
     }
 
     def 'export and import questions to xml'() {
         given: 'a xml with questions'
         def questionsXml = questionService.exportQuestionsToXml()
         and: 'a clean database'
-        questionService.removeQuestion(questionId)
+        questionService.removeQuestion(teacher.getId(), questionId)
 
         when:
         questionService.importQuestionsFromXml(questionsXml)
@@ -118,6 +152,14 @@ class ImportExportQuestionsTest extends Specification {
         @Bean
         QuestionService questionService() {
             return new QuestionService()
+        }
+        @Bean
+        SubmissionService submissionService() {
+            return new SubmissionService()
+        }
+        @Bean
+        NotificationService NotificationService() {
+            return new NotificationService()
         }
     }
 }

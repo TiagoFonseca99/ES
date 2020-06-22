@@ -142,6 +142,9 @@ public class AnswerService {
                 }
 
                 if (questionAnswer.getOption() != null) {
+                    if (quizAnswer.getQuiz().isOneWay()) {
+                        throw new TutorException(CANNOT_CHANGE_ANSWER);
+                    }
                     questionAnswer.getOption().getQuestionAnswers().remove(questionAnswer);
                 }
 
