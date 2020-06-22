@@ -34,6 +34,7 @@
         <p
           v-html="convertMarkDown(item.title)"
           @click="showAnnouncementDialog(item)"
+          style="cursor: pointer"
       /></template>
 
       <template v-slot:item.edited="{ item }">

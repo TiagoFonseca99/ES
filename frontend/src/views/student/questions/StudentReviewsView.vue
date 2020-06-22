@@ -11,7 +11,11 @@
         <div class="col">Justification</div>
       </li>
       <li class="list-row" v-for="review in this.reviews" :key="review.id">
-        <div class="col" @click="showQuestionDialog(getQuestion(review))">
+        <div
+          class="col"
+          style="cursor: pointer"
+          @click="showQuestionDialog(getQuestion(review))"
+        >
           {{ getQuestion(review).title }}
         </div>
         <div class="col">
