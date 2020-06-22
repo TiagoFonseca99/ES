@@ -1,8 +1,8 @@
 <template>
   <v-dialog
     :value="dialog"
-    @input="$emit('close-dialog')"
-    @keydown.esc="$emit('close-dialog')"
+    @input="$emit('close-edit-dialog')"
+    @keydown.esc="$emit('close-edit-dialog')"
     max-width="75%"
     max-height="80%"
   >
@@ -187,7 +187,6 @@ import Tournament from '@/models/user/Tournament';
 import Topic from '@/models/management/Topic';
 import VueCtkDateTimePicker from 'vue-ctk-date-time-picker';
 import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css';
-import { ISOtoString } from '@/services/ConvertDateService';
 
 Vue.component('VueCtkDateTimePicker', VueCtkDateTimePicker);
 
@@ -244,18 +243,20 @@ export default class EditTournamentDialog extends Vue {
     if (this.editTournament.numberOfQuestions) {
       this.oldNumberOfQuestions = this.editTournament.numberOfQuestions;
     }
-    this.oldTopics = this.editTournament.topics;
+    this.oldTopics = this.editTournament.topics!;
     await this.$store.dispatch('loading');
     try {
       [this.allTopics] = await Promise.all([RemoteServices.getTopics()]);
       this.availableTopics = this.allTopics;
-      this.editTournament.topics.forEach(topicName => {
-        this.availableTopics.forEach(topic => {
-          if (topic.name.valueOf() == topicName.valueOf()) {
-            this.addTopic(topic);
-          }
+      if (this.editTournament.topics !== undefined) {
+        this.editTournament.topics!.forEach(topicName => {
+          this.availableTopics!.forEach(topic => {
+            if (topic.name.valueOf() == topicName.valueOf()) {
+              this.addTopic(topic);
+            }
+          });
         });
-      });
+      }
       this.topicsToAdd = [];
       this.topicsToRemove = [];
     } catch (error) {
@@ -273,7 +274,7 @@ export default class EditTournamentDialog extends Vue {
 
   async cancelTournament() {
     await this.resetChanges();
-    this.$emit('close-dialog');
+    this.$emit('close-edit-dialog');
   }
 
   async saveTournament() {

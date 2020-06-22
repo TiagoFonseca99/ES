@@ -7,9 +7,9 @@
       disable-pagination
       :hide-default-footer="true"
       :mobile-breakpoint="0"
-      :items-per-page="15"
       multi-sort
-      data-cy="allTournaments"
+      data-cy="myTournaments"
+      item-key="item.id"
     >
       <template v-slot:top>
         <v-card-title>
@@ -20,7 +20,30 @@
             class="mx-2"
           />
           <v-spacer />
+          <v-btn
+            color="primary"
+            dark
+            @click="newTournament"
+            data-cy="createButton"
+            >New Tournament
+          </v-btn>
         </v-card-title>
+      </template>
+      <template v-slot:item.topics="{ item }">
+        <view-tournament-topics :tournament="item" />
+      </template>
+      <template v-slot:item.times="{ item }">
+        <v-chip x-small>
+          {{ item.startTime }}
+        </v-chip>
+        <v-chip x-small>
+          {{ item.endTime }}
+        </v-chip>
+      </template>
+      <template v-slot:item.id="{ item }">
+        <v-chip color="primary">
+          {{ item.id }}
+        </v-chip>
       </template>
       <template v-slot:item.state="{ item }">
         <v-chip :color="getStateColor(item.state)">
@@ -41,7 +64,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="editTournament(item)"
@@ -54,7 +77,7 @@
         <v-tooltip bottom v-if="isNotCanceled(item)">
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="cancelTournament(item)"
@@ -67,7 +90,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="removeTournament(item)"
@@ -81,12 +104,19 @@
       </template>
     </v-data-table>
 
+    <create-tournament-dialog
+      v-if="currentTournament"
+      v-model="createTournamentDialog"
+      :tournament="currentTournament"
+      v-on:new-tournament="onCreateTournament"
+      v-on:close-dialog="onCloseDialog"
+    />
     <edit-tournament-dialog
       v-if="currentTournament"
       v-model="editTournamentDialog"
       :tournament="currentTournament"
       v-on:edit-tournament="onEditTournament"
-      v-on:close-dialog="onCloseDialog"
+      v-on:close-edit-dialog="onCloseEditDialog"
     />
   </v-card>
 </template>
@@ -95,19 +125,31 @@
 import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
+import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
 import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
+import ViewTournamentTopics from '@/views/student/tournament/ViewTournamentTopics.vue';
 
 @Component({
   components: {
-    'edit-tournament-dialog': EditTournamentDialog
+    'create-tournament-dialog': CreateTournamentDialog,
+    'edit-tournament-dialog': EditTournamentDialog,
+    'view-tournament-topics': ViewTournamentTopics
   }
 })
 export default class MyTournamentsView extends Vue {
   tournaments: Tournament[] = [];
   currentTournament: Tournament | null = null;
+  createTournamentDialog: boolean = false;
   editTournamentDialog: boolean = false;
   search: string = '';
   headers: object = [
+    {
+      text: 'Actions',
+      value: 'action',
+      align: 'left',
+      sortable: false,
+      width: '20%'
+    },
     {
       text: 'Course Acronym',
       value: 'courseAcronym',
@@ -118,8 +160,7 @@ export default class MyTournamentsView extends Vue {
     {
       text: 'Topics',
       value: 'topics',
-      align: 'center',
-      width: '10%'
+      align: 'center'
     },
     {
       text: 'State',
@@ -134,14 +175,8 @@ export default class MyTournamentsView extends Vue {
       width: '10%'
     },
     {
-      text: 'Start Time',
-      value: 'startTime',
-      align: 'center',
-      width: '10%'
-    },
-    {
-      text: 'End Time',
-      value: 'endTime',
+      text: 'Start / End Time',
+      value: 'times',
       align: 'center',
       width: '10%'
     },
@@ -149,18 +184,11 @@ export default class MyTournamentsView extends Vue {
       text: 'Number of Questions',
       value: 'numberOfQuestions',
       align: 'center',
-      width: '10%'
+      width: '5%'
     },
     {
       text: 'Enrolled',
       value: 'enrolled',
-      align: 'center',
-      sortable: false,
-      width: '10%'
-    },
-    {
-      text: 'Actions',
-      value: 'action',
       align: 'center',
       sortable: false,
       width: '10%'
@@ -183,6 +211,22 @@ export default class MyTournamentsView extends Vue {
     else return 0;
   }
 
+  newTournament() {
+    this.currentTournament = new Tournament();
+    this.createTournamentDialog = true;
+  }
+
+  async onCreateTournament(tournament: Tournament) {
+    this.tournaments.unshift(tournament);
+    this.createTournamentDialog = false;
+    this.currentTournament = null;
+  }
+
+  onCloseDialog() {
+    this.createTournamentDialog = false;
+    this.currentTournament = null;
+  }
+
   editTournament(tournamentToEdit: Tournament) {
     this.currentTournament = tournamentToEdit;
     this.editTournamentDialog = true;
@@ -199,7 +243,7 @@ export default class MyTournamentsView extends Vue {
     this.currentTournament = null;
   }
 
-  onCloseDialog() {
+  onCloseEditDialog() {
     this.editTournamentDialog = false;
     this.currentTournament = null;
   }
@@ -210,8 +254,8 @@ export default class MyTournamentsView extends Vue {
   }
 
   getStateName(state: string) {
-    if (state === 'NOT_CANCELED') return 'Available';
-    else return 'Cancelled';
+    if (state === 'NOT_CANCELED') return 'AVAILABLE';
+    else return 'CANCELLED';
   }
 
   getEnrolledColor(enrolled: string) {
@@ -230,8 +274,8 @@ export default class MyTournamentsView extends Vue {
   }
 
   getPrivateName(privateTournament: boolean) {
-    if (privateTournament) return 'Private';
-    else return 'Public';
+    if (privateTournament) return 'PRIVATE';
+    else return 'PUBLIC';
   }
 
   isNotCanceled(tournamentToCancel: Tournament) {
