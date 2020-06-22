@@ -325,13 +325,15 @@ export default class ReplyComponent extends Vue {
   async deleteReply() {
     try {
       if (!this.discussion) return;
-      await RemoteServices.deleteReply(this.reply!.id);
-      this.$emit(
-        'replies',
-        (this.discussion.replies = this.discussion.replies!.filter(
-          obj => obj !== this.reply
-        ))
-      );
+      if (confirm('Are you sure you want to delete this reply?')) {
+        await RemoteServices.deleteReply(this.reply!.id);
+        this.$emit(
+          'replies',
+          (this.discussion.replies = this.discussion.replies!.filter(
+            obj => obj !== this.reply
+          ))
+        );
+      }
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -358,14 +360,16 @@ export default class ReplyComponent extends Vue {
   async deleteDiscussion() {
     try {
       if (!this.discussion) return;
-      await RemoteServices.deleteDiscussion(
-        this.discussion.userId,
-        this.discussion.questionId
-      );
-      this.$emit(
-        'discussions',
-        this.discussions.filter(obj => obj !== this.discussion)
-      );
+      if (confirm('Are you sure you want to delete this discussion?')) {
+        await RemoteServices.deleteDiscussion(
+          this.discussion.userId,
+          this.discussion.questionId
+        );
+        this.$emit(
+          'discussions',
+          this.discussions.filter(obj => obj !== this.discussion)
+        );
+      }
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

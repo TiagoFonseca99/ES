@@ -352,17 +352,19 @@ export default class DiscussionView extends Vue {
   }
 
   async deleteDiscussion() {
-    try {
-      await RemoteServices.deleteDiscussion(
-        this.currentDiscussion!.userId,
-        this.currentDiscussion!.questionId
-      );
-      this.discussions = this.discussions.filter(
-        obj => obj !== this.currentDiscussion
-      );
-      this.customFilter();
-    } catch (error) {
-      await this.$store.dispatch('error', error);
+    if (confirm('Are you sure you want to delete this discussion?')) {
+      try {
+        await RemoteServices.deleteDiscussion(
+          this.currentDiscussion!.userId,
+          this.currentDiscussion!.questionId
+        );
+        this.discussions = this.discussions.filter(
+          obj => obj !== this.currentDiscussion
+        );
+        this.customFilter();
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+      }
     }
   }
 
