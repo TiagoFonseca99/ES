@@ -102,7 +102,7 @@ public class DiscussionService {
 
         String title = NotificationsCreation.createTitle(DISCUSSION_CREATE, question.getTitle());
         String content = NotificationsCreation.createContent(DISCUSSION_CREATE_CONTENT, user.getName(), question.getTitle());
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION), user);
 
         return new DiscussionDto(discussion);
     }
@@ -131,7 +131,7 @@ public class DiscussionService {
 
         String title = NotificationsCreation.createTitle(DISCUSSION_REPLY, discussion.getQuestion().getTitle());
         String content = NotificationsCreation.createContent(DISCUSSION_REPLY_CONTENT, user.getName(), discussion.getQuestion().getTitle());
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION), user);
 
         return new ReplyDto(reply);
     }
@@ -162,7 +162,7 @@ public class DiscussionService {
 
         String title = NotificationsCreation.createTitle(DISCUSSION_AVAILABILITY, discussion.getQuestion().getTitle());
         String content = NotificationsCreation.createContent(DISCUSSION_AVAILABILITY_CONTENT, user.getName(), discussion.getQuestion().getTitle(), discussion.isAvailable() ? "public" : "private");
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION), user);
 
         return new DiscussionDto(discussion);
     }
@@ -181,7 +181,7 @@ public class DiscussionService {
 
         String title = NotificationsCreation.createTitle(DISCUSSION_DELETE_REPLY, reply.getDiscussion().getQuestion().getTitle());
         String content = NotificationsCreation.createContent(DISCUSSION_DELETE_REPLY_CONTENT, user.getName(), reply.getDiscussion().getQuestion().getTitle());
-        reply.getDiscussion().Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        reply.getDiscussion().Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION), user);
 
         reply.remove();
 
@@ -210,7 +210,7 @@ public class DiscussionService {
 
         String title = NotificationsCreation.createTitle(DISCUSSION_EDIT_REPLY, reply.getDiscussion().getQuestion().getTitle());
         String content = NotificationsCreation.createContent(DISCUSSION_EDIT_REPLY_CONTENT, user.getName(), reply.getDiscussion().getQuestion().getTitle());
-        reply.getDiscussion().Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        reply.getDiscussion().Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION), user);
 
         return new ReplyDto(reply);
     }
@@ -231,7 +231,7 @@ public class DiscussionService {
 
         String title = NotificationsCreation.createTitle(DISCUSSION_DELETE, discussion.getQuestion().getTitle());
         String content = NotificationsCreation.createContent(DISCUSSION_DELETE_CONTENT, user.getName(), discussion.getQuestion().getTitle());
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION), user);
 
         discussion.remove();
 
@@ -266,7 +266,7 @@ public class DiscussionService {
 
         String title = NotificationsCreation.createTitle(DISCUSSION_EDIT, discussion.getQuestion().getTitle());
         String content = NotificationsCreation.createContent(DISCUSSION_EDIT_CONTENT, user.getName(), discussion.getQuestion().getTitle());
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION), user);
 
         return new DiscussionDto(discussion);
     }
