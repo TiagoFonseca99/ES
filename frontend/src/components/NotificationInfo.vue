@@ -85,8 +85,7 @@ export default class NotificationInfo extends Vue {
 </script>
 <style lang="scss" scoped>
 .notification {
-  display: grid;
-  grid-template-areas: 'icon text text text text';
+  display: flex;
   padding: 10px;
   opacity: 50%;
   width: 100%;
@@ -94,12 +93,10 @@ export default class NotificationInfo extends Vue {
 }
 .icon {
   padding: 0px 30px 0 0;
-  grid-area: icon;
 }
 
 .text {
   text-align: left;
-  grid-area: text;
 }
 
 .all {

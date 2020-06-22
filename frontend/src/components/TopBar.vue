@@ -427,7 +427,10 @@
           <!-- ----SDN---- -->
 
           <v-list-item
-            :to="'/notifications?username=' + $store.getters.getUser.username"
+            :to="
+              '/management/notifications?username=' +
+                $store.getters.getUser.username
+            "
           >
             <v-list-item-action>
               <v-icon>notifications</v-icon>
@@ -550,7 +553,10 @@
           <!-- ----SDN---- -->
 
           <v-list-item
-            :to="'/notifications?username=' + $store.getters.getUser.username"
+            :to="
+              '/student/notifications?username=' +
+                $store.getters.getUser.username
+            "
           >
             <v-list-item-action>
               <v-icon>notifications</v-icon>
