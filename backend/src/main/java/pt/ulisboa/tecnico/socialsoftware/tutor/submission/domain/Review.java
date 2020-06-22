@@ -1,6 +1,9 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -8,11 +11,13 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "reviews")
 
-public class Review {
+public class Review implements Observable {
 
     public enum Status {
         APPROVED, REJECTED
@@ -46,6 +51,11 @@ public class Review {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "review")
     private Image image;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<User> observers = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<Notification> notifications = new ArrayList<>();
 
     public Review() {}
 
@@ -125,6 +135,14 @@ public class Review {
         }
     }
 
+    public List<Notification> getNotifications() { return notifications; }
+
+    public void addNotification(Notification notification) { this.notifications.add(notification); }
+
+    public void removeNotification(Notification notification) { this.notifications.remove(notification); }
+
+    public List<User> getUsers() { return observers; }
+
     @Override
     public String toString() {
         return "Review{" +
@@ -135,5 +153,22 @@ public class Review {
                 ", submission=" + submission.getQuestion() +
                 ", image=" + image +
                 '}';
+    }
+
+    @Override
+    public void Attach(Observer o) {
+        this.observers.add((User) o);
+    }
+
+    @Override
+    public void Dettach(Observer o) {
+        this.observers.remove(o);
+    }
+
+    @Override
+    public void Notify(Notification notification) {
+        for (Observer observer : observers) {
+            observer.update(this, notification);
+        }
     }
 }

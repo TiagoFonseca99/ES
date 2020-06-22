@@ -64,6 +64,7 @@ public class NotificationService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<NotificationDto> getUserNotifications(Integer userId) {
+
         return notificationRepository.getUserNotifications(userId).stream().map(NotificationDto::new).collect(Collectors.toList());
     }
 
@@ -79,5 +80,16 @@ public class NotificationService {
                 .orElseThrow(() -> new TutorException(NOTIFICATION_NOT_FOUND, notificationId));
 
         notification.removeUser(user);
+    }
+
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public Notification createNotification(String title, String content, Notification.Type type) {
+        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content, type);
+        NotificationDto response = createNotification(notificationsCreation.getNotificationDto());
+
+        return getNotificationById(response.getId());
     }
 }

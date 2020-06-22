@@ -13,6 +13,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
@@ -107,10 +108,10 @@ class GetOpenedTournamentsPerformanceTest extends Specification {
 
 
         when:
-        1.upto(1, {tournamentService.getOpenedTournaments()})
+        1.upto(1, {tournamentService.getOpenedTournaments(user)})
 
         then: "the returned data is correct"
-        def result = tournamentService.getOpenedTournaments()
+        def result = tournamentService.getOpenedTournaments(user)
         //result.size() == 1000
         def resTournament1 = result.get(0)
 
@@ -157,6 +158,10 @@ class GetOpenedTournamentsPerformanceTest extends Specification {
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+        @Bean
+        SubmissionService submissionService() {
+            return new SubmissionService()
         }
     }
 }

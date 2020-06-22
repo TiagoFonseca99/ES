@@ -1,9 +1,12 @@
 <template>
   <div class="container">
-    <show-announcements id="announcements" v-if="isStudentLoggedIn">
+    <show-announcements
+      id="announcements"
+      v-if="isLoggedIn && !isAdminLoggedIn"
+    >
     </show-announcements>
     <h1
-      v-if="!isLoggedIn || !isStudentLoggedIn"
+      v-if="!isLoggedIn || isAdminLoggedIn"
       id="home-title"
       class="display-2 font-weight-thin mb-3"
     >

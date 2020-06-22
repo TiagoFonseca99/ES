@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import static pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsMessage.*;
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
-
 @Service
 public class AnnouncementService {
 
@@ -49,12 +48,9 @@ public class AnnouncementService {
     @PersistenceContext
     EntityManager entityManager;
 
-
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public AnnouncementDto createAnnouncement(AnnouncementDto announcementDto){
+    public AnnouncementDto createAnnouncement(AnnouncementDto announcementDto) {
 
         checkIfConsistentAnnouncement(announcementDto);
 
@@ -63,61 +59,59 @@ public class AnnouncementService {
         CourseExecution courseExecution = getCourseExecution(announcementDto.getCourseExecutionId());
 
         if (announcementDto.getCreationDate() == null) {
-            announcementDto.setCreationDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+            announcementDto
+                    .setCreationDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         }
 
         Announcement announcement = new Announcement(user, courseExecution, announcementDto);
         entityManager.persist(announcement);
 
-        prepareNotification(courseExecution, announcement);
+        notify(courseExecution, announcement);
 
         return new AnnouncementDto(announcement);
     }
 
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<AnnouncementDto> getAnnouncements(Integer teacherId, Integer courseExecutionId) {
-        if(teacherId == null)
+        if (teacherId == null)
             throw new TutorException(TEACHER_MISSING);
-        else if(courseExecutionId == null)
+        else if (courseExecutionId == null)
             throw new TutorException(COURSE_EXECUTION_MISSING);
 
-        return announcementRepository.getAnnouncements(teacherId, courseExecutionId).stream().map(AnnouncementDto::new).collect(Collectors.toList());
+        return announcementRepository.getAnnouncements(teacherId, courseExecutionId).stream().map(AnnouncementDto::new)
+                .collect(Collectors.toList());
     }
 
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public AnnouncementDto updateAnnouncement(Integer announcementId, AnnouncementDto announcementDto) {
-        Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new TutorException(ANNOUNCEMENT_NOT_FOUND, announcementId));
+        Announcement announcement = announcementRepository.findById(announcementId)
+                .orElseThrow(() -> new TutorException(ANNOUNCEMENT_NOT_FOUND, announcementId));
         announcement.update(announcementDto);
         return new AnnouncementDto(announcement);
     }
 
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public boolean removeAnnouncement(Integer announcementId) {
-        Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new TutorException(ANNOUNCEMENT_NOT_FOUND, announcementId));
+        Announcement announcement = announcementRepository.findById(announcementId)
+                .orElseThrow(() -> new TutorException(ANNOUNCEMENT_NOT_FOUND, announcementId));
         announcement.remove();
         announcementRepository.delete(announcement);
         return true;
     }
 
     private void checkIfConsistentAnnouncement(AnnouncementDto announcementDto) {
-        if(announcementDto.getUserId() == null)
+        if (announcementDto.getUserId() == null)
             throw new TutorException(TEACHER_MISSING);
-        else if(announcementDto.getCourseExecutionId() == null)
+        else if (announcementDto.getCourseExecutionId() == null)
             throw new TutorException(COURSE_EXECUTION_MISSING);
     }
 
-
     private CourseExecution getCourseExecution(Integer executionId) {
-        return courseExecutionRepository.findById(executionId).orElseThrow(() -> new TutorException(COURSE_EXECUTION_NOT_FOUND, executionId));
+        return courseExecutionRepository.findById(executionId)
+                .orElseThrow(() -> new TutorException(COURSE_EXECUTION_NOT_FOUND, executionId));
     }
 
     private User getTeacher(Integer teacherId) {
@@ -127,16 +121,10 @@ public class AnnouncementService {
         return user;
     }
 
-    private void prepareNotification(CourseExecution courseExecution, Announcement announcement) {
+    private void notify(CourseExecution courseExecution, Announcement announcement) {
         String title = NotificationsCreation.createTitle(ADD_ANNOUNCEMENT_TITLE, announcement.getUser().getName());
-        String content = NotificationsCreation.createContent(ADD_ANNOUNCEMENT_CONTENT, announcement.getTitle(), announcement.getUser().getName());
-        courseExecution.Notify(createNotification(title, content, Notification.Type.ANNOUNCEMENT));
-    }
-
-    public Notification createNotification(String title, String content, Notification.Type type) {
-        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content, type);
-        NotificationDto response = notificationService.createNotification(notificationsCreation.getNotificationDto());
-
-        return notificationService.getNotificationById(response.getId());
+        String content = NotificationsCreation.createContent(ADD_ANNOUNCEMENT_CONTENT, announcement.getTitle(),
+                announcement.getUser().getName());
+        courseExecution.Notify(notificationService.createNotification(title, content, Notification.Type.ANNOUNCEMENT));
     }
 }

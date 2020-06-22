@@ -319,7 +319,10 @@ INSERT INTO replies (id, discussion_question_id, discussion_user_id, user_id, me
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
-          <stringProp name="query">DELETE FROM replies WHERE id = 5000;
+          <stringProp name="query">DELETE FROM discussions_observers WHERE 1=1;
+DELETE FROM notifications_users WHERE 1=1;
+DELETE FROM notifications WHERE id IN (SELECT max(id) FROM notifications);
+DELETE FROM replies WHERE id = 5000;
 DELETE FROM discussions WHERE user_id = 676 AND question_id = 1536;</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>

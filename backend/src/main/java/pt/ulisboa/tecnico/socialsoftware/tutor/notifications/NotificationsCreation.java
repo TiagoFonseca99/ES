@@ -28,12 +28,20 @@ public class NotificationsCreation {
         return String.format(message.getMessage(), value);
     }
 
+    public static String createContent(NotificationsMessage message, String value) {
+        return String.format(message.getMessage(), value);
+    }
+
     public static String createContent(NotificationsMessage message, Integer value) {
         return String.format(message.getMessage(), value);
     }
 
     public static String createContent(NotificationsMessage message, String value1, String value2) {
         return String.format(message.getMessage(), value1, value2);
+    }
+
+    public static String createContent(NotificationsMessage message, String value1, String value2, String value3) {
+        return String.format(message.getMessage(), value1, value2, value3);
     }
 
     public static String createContent(NotificationsMessage message, String value1, Integer value2) {

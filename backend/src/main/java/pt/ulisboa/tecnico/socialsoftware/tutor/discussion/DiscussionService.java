@@ -24,15 +24,22 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.dto.ReplyDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.ReplyRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsCreation;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsMessage.*;
 
 @Service
 public class DiscussionService {
+    @Autowired
+    private NotificationService notificationService;
+
     @Autowired
     private CourseRepository courseRepository;
 
@@ -93,6 +100,10 @@ public class DiscussionService {
             }
         }
 
+        String title = NotificationsCreation.createTitle(DISCUSSION_CREATE, question.getTitle());
+        String content = NotificationsCreation.createContent(DISCUSSION_CREATE_CONTENT, user.getName(), question.getTitle());
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+
         return new DiscussionDto(discussion);
     }
 
@@ -117,6 +128,10 @@ public class DiscussionService {
         Reply reply = new Reply(user, discussion, replyDto);
         this.entityManager.persist(reply);
         this.entityManager.merge(discussion);
+
+        String title = NotificationsCreation.createTitle(DISCUSSION_REPLY, discussion.getQuestion().getTitle());
+        String content = NotificationsCreation.createContent(DISCUSSION_REPLY_CONTENT, user.getName(), discussion.getQuestion().getTitle());
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
 
         return new ReplyDto(reply);
     }
@@ -145,6 +160,10 @@ public class DiscussionService {
 
         this.entityManager.merge(discussion);
 
+        String title = NotificationsCreation.createTitle(DISCUSSION_AVAILABILITY, discussion.getQuestion().getTitle());
+        String content = NotificationsCreation.createContent(DISCUSSION_AVAILABILITY_CONTENT, user.getName(), discussion.getQuestion().getTitle(), discussion.isAvailable() ? "public" : "private");
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+
         return new DiscussionDto(discussion);
     }
 
@@ -159,6 +178,10 @@ public class DiscussionService {
         if (!hasPermission(user, reply.getUser().getId())) {
             throw new TutorException(REPLY_UNAUTHORIZED_DELETER);
         }
+
+        String title = NotificationsCreation.createTitle(DISCUSSION_DELETE_REPLY, reply.getDiscussion().getQuestion().getTitle());
+        String content = NotificationsCreation.createContent(DISCUSSION_DELETE_REPLY_CONTENT, user.getName(), reply.getDiscussion().getQuestion().getTitle());
+        reply.getDiscussion().Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
 
         reply.remove();
 
@@ -185,6 +208,10 @@ public class DiscussionService {
 
         this.entityManager.merge(reply);
 
+        String title = NotificationsCreation.createTitle(DISCUSSION_EDIT_REPLY, reply.getDiscussion().getQuestion().getTitle());
+        String content = NotificationsCreation.createContent(DISCUSSION_EDIT_REPLY_CONTENT, user.getName(), reply.getDiscussion().getQuestion().getTitle());
+        reply.getDiscussion().Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+
         return new ReplyDto(reply);
     }
 
@@ -201,6 +228,10 @@ public class DiscussionService {
         if (!hasPermission(user, creatorId)) {
             throw new TutorException(DISCUSSION_UNAUTHORIZED_DELETER);
         }
+
+        String title = NotificationsCreation.createTitle(DISCUSSION_DELETE, discussion.getQuestion().getTitle());
+        String content = NotificationsCreation.createContent(DISCUSSION_DELETE_CONTENT, user.getName(), discussion.getQuestion().getTitle());
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
 
         discussion.remove();
 
@@ -232,6 +263,10 @@ public class DiscussionService {
         discussion.setContent(discussionDto.getContent());
 
         this.entityManager.merge(discussion);
+
+        String title = NotificationsCreation.createTitle(DISCUSSION_EDIT, discussion.getQuestion().getTitle());
+        String content = NotificationsCreation.createContent(DISCUSSION_EDIT_CONTENT, user.getName(), discussion.getQuestion().getTitle());
+        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
 
         return new DiscussionDto(discussion);
     }
