@@ -64,7 +64,7 @@
           depressed
           small
           color="secondary"
-          href="https://github.com/socialsoftware/quizzes-tutor"
+          href="https://github.com/tecnico-softeng/es20al_18-project/"
           target="_blank"
         >
           <i class="fab fa-github" /> View code
@@ -75,7 +75,7 @@
           depressed
           small
           color="secondary"
-          href="https://github.com/socialsoftware/quizzes-tutor/issues"
+          href="https://github.com/tecnico-softeng/es20al_18-project/issues"
           target="_blank"
         >
           <i class="fab fa-github" /> Bug report
