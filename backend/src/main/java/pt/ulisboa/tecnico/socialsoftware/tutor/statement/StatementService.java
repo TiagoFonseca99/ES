@@ -172,11 +172,10 @@ public class StatementService {
                         QuizAnswer quizAnswer = new QuizAnswer(user, quiz);
                         quizAnswerRepository.save(quizAnswer);
                     }
-                });
+                    });
 
         return user.getQuizAnswers().stream()
                 .filter(quizAnswer -> !quizAnswer.isCompleted())
-                .filter(quizAnswer -> !quizAnswer.getQuiz().isOneWay() || quizAnswer.getCreationDate() == null)
                 .filter(quizAnswer -> quizAnswer.getQuiz().getCourseExecution().getId() == executionId)
                 .filter(quizAnswer -> quizAnswer.getQuiz().getConclusionDate() == null || DateHandler.now().isBefore(quizAnswer.getQuiz().getConclusionDate()))
                 .filter(quizAnswer -> quizAnswer.getQuiz().getAvailableDate().isBefore(now))
@@ -258,8 +257,6 @@ public class StatementService {
             throw new TutorException(QUIZ_ALREADY_COMPLETED);
         } else if (quizAnswer.getCreationDate() == null) {
             quizAnswer.setCreationDate(DateHandler.now());
-        } else if (quiz.isOneWay()) {
-            throw new TutorException(QUIZ_ALREADY_STARTED);
         }
     }
 

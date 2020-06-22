@@ -70,9 +70,6 @@ public class Tournament implements Observable {
     @ManyToMany(fetch = FetchType.LAZY)
     private List<User> observers = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<Notification> notifications = new ArrayList<>();
-
     public Tournament() {
     }
 
@@ -212,8 +209,8 @@ public class Tournament implements Observable {
 
     public void addParticipant(User user) {
         this.participants.add(user);
-        this.Attach(user);
         user.addTournament(this);
+        this.Attach(user);
         user.addObserver(this);
     }
 
@@ -225,10 +222,7 @@ public class Tournament implements Observable {
     }
 
     public boolean hasQuiz() {
-        if (this.getQuizId() != null){
-            return true;
-        }
-        return false;
+        return this.getQuizId() != null;
     }
 
     public void remove() {
@@ -256,12 +250,6 @@ public class Tournament implements Observable {
         this.password = password;
     }
 
-    public List<Notification> getNotifications() { return notifications; }
-
-    public void addNotification(Notification notification) { this.notifications.add(notification); }
-
-    public void removeNotification(Notification notification) { this.notifications.remove(notification); }
-
     @Override
     public void Attach(Observer o) {
         this.observers.add((User) o);
@@ -273,8 +261,11 @@ public class Tournament implements Observable {
     }
 
     @Override
-    public void Notify(Notification notification) {
+    public void Notify(Notification notification, User user) {
         for (Observer observer : observers) {
+            if (((User) observer).getId() == user.getId()) {
+                continue;
+            }
             observer.update(this, notification);
         }
     }

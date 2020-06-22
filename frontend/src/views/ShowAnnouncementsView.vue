@@ -1,8 +1,12 @@
 <template>
-  <div>
-    <h2 v-if="this.announcements.length === 0">
-      Welcome! Announcements will appear here
-    </h2>
+  <div v-bind:class="{ container: this.announcements.length === 0 }">
+    <h1
+      v-if="this.announcements.length === 0"
+      id="home-title"
+      class="display-2 font-weight-thin mb-3"
+    >
+      {{ appName }}
+    </h1>
     <ul>
       <v-card
         class="announcement"
@@ -20,6 +24,9 @@
           <v-chip small>
             <span>{{ announcement.creationDate }}</span>
           </v-chip>
+          <span id="edited" v-if="announcement.edited">
+            {{ '  (edited)' }}</span
+          >
           <v-spacer />
           <v-chip small color="primary" v-if="announcement.username">
             <span>{{ announcement.username }}</span>
@@ -60,6 +67,7 @@ import ShowAnnouncement from '@/views/teacher/announcements/ShowAnnouncement.vue
 
 @Component({ components: { 'show-announcement': ShowAnnouncement } })
 export default class ReviewView extends Vue {
+  appName: string = process.env.VUE_APP_NAME;
   allAnnouncements: Announcement[] = [];
   announcements: Announcement[] = [];
 
@@ -96,32 +104,50 @@ export default class ReviewView extends Vue {
 
 <style lang="scss" scoped>
 .container {
-  display: flex;
   height: 100%;
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 10px;
-  padding-right: 10px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
 
-  h2 {
-    font-size: 26px;
-    margin: 20px 0;
+  #home-title {
+    box-sizing: border-box;
+    color: rgb(255, 255, 255);
+    min-height: auto;
+    min-width: auto;
     text-align: center;
-    small {
-      font-size: 0.5em;
-    }
+    text-decoration: none solid rgb(255, 255, 255);
+    text-rendering: optimizelegibility;
+    text-size-adjust: 100%;
+    column-rule-color: rgb(255, 255, 255);
+    perspective-origin: 229.922px 34px;
+    transform-origin: 229.922px 34px;
+    caret-color: rgb(255, 255, 255);
+    background: rgba(0, 0, 0, 0.75) none no-repeat scroll 0 0 / auto padding-box
+      border-box;
+    border: 0 none rgb(255, 255, 255);
+    font: normal normal 100 normal 45px / 48px Roboto, sans-serif !important;
+    margin-bottom: 70px !important;
+    outline: rgb(255, 255, 255) none 0;
+    padding: 10px 20px;
   }
+}
 
-  .announcement {
-    border-radius: 3px;
-    padding: 15px 10px;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
+.announcement {
+  border-radius: 3px;
+  padding: 15px 10px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
 
-  .buttons {
-    margin-bottom: 20px;
-  }
+.buttons {
+  margin-bottom: 20px;
+}
+
+#edited {
+  color: grey;
+  font-size: 15px;
+  padding-left: 2px;
 }
 </style>

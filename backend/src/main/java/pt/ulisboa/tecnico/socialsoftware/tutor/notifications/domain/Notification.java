@@ -1,21 +1,26 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Entity
 @Table(name = "notifications")
 public class Notification {
+    public enum Type {
+        BASIC, TOURNAMENT, ANNOUNCEMENT, SUBMISSION, REVIEW, TEACHER_SUBMISSION, DISCUSSION, QUESTION
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,14 +32,14 @@ public class Notification {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    private Type type = Type.BASIC;
+
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
 
     @ManyToMany(fetch = FetchType.LAZY)
     private List<User> users = new ArrayList<>();
-
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "notifications")
-    private List<Tournament> tournaments = new ArrayList<>();
 
     public Notification() {}
 
@@ -42,6 +47,7 @@ public class Notification {
         setTitle(notificationDto.getTitle());
         setContent(notificationDto.getContent());
         setCreationDate(DateHandler.toLocalDateTime(notificationDto.getCreationDate()));
+        setType(notificationDto.getType());
     }
 
     public Integer getId() { return id; }
@@ -72,7 +78,26 @@ public class Notification {
 
     public void removeUser(User user) { this.users.remove(user); }
 
-    public List<Tournament> getTournaments() {
-        return tournaments;
+    public Type getType() { return type; }
+
+    public void setType(Type type) { this.type = type; }
+
+    public void setType(String type) { this.type = Type.valueOf(type); }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Notification that = (Notification) o;
+        return getId().equals(that.getId()) &&
+                getTitle().equals(that.getTitle()) &&
+                getContent().equals(that.getContent()) &&
+                getType() == that.getType() &&
+                Objects.equals(getCreationDate(), that.getCreationDate());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getTitle(), getContent(), getType(), getCreationDate());
     }
 }

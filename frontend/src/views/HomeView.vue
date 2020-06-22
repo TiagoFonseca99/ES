@@ -1,9 +1,12 @@
 <template>
   <div class="container">
-    <show-announcements id="announcements" v-if="isStudentLoggedIn">
+    <show-announcements
+      id="announcements"
+      v-if="isLoggedIn && !isAdminLoggedIn"
+    >
     </show-announcements>
     <h1
-      v-if="!isLoggedIn || !isStudentLoggedIn"
+      v-if="!isLoggedIn || isAdminLoggedIn"
       id="home-title"
       class="display-2 font-weight-thin mb-3"
     >
@@ -50,7 +53,7 @@
         label="Remember me"
       />
     </div>
-    <v-footer class="footer" v-if="!isStudentLoggedIn">
+    <v-footer class="footer" v-if="!isLoggedIn || isAdminLoggedIn">
       <img
         :src="require('../assets/img/ist_optimized.png')"
         class="logo"
@@ -61,7 +64,7 @@
           depressed
           small
           color="secondary"
-          href="https://github.com/socialsoftware/quizzes-tutor"
+          href="https://github.com/tecnico-softeng/es20al_18-project/"
           target="_blank"
         >
           <i class="fab fa-github" /> View code
@@ -72,7 +75,7 @@
           depressed
           small
           color="secondary"
-          href="https://github.com/socialsoftware/quizzes-tutor/issues"
+          href="https://github.com/tecnico-softeng/es20al_18-project/issues"
           target="_blank"
         >
           <i class="fab fa-github" /> Bug report
@@ -113,6 +116,10 @@ export default class HomeView extends Vue {
     return this.isLoggedIn && Store.getters.isStudent;
   }
 
+  get isAdminLoggedIn() {
+    return this.isLoggedIn && Store.getters.isAdmin;
+  }
+
   async demoStudent() {
     await this.$store.dispatch('loading');
     try {
@@ -145,7 +152,11 @@ export default class HomeView extends Vue {
 
   @Watch('remember')
   changeSession() {
-    console.log('SESSION: ' + (this.remember ? '1 DAY' : 'CLOSE'));
+    storage.createCookie(
+      session.SESSION_TOKEN,
+      String(!this.remember),
+      this.remember ? this.EXPIRY : undefined
+    );
   }
 }
 </script>
@@ -180,7 +191,7 @@ export default class HomeView extends Vue {
     outline: rgb(255, 255, 255) none 0;
     padding: 10px 20px;
   }
-  
+
   #announcements {
     height: 90%;
     width: 125%;

@@ -8,7 +8,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 

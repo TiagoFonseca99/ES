@@ -11,6 +11,7 @@ public class UserDto implements Serializable {
     private String name;
     private User.Role role;
     private String creationDate;
+    private String lastNotificationAccess;
 
     public UserDto(User user) {
         this.id = user.getId();
@@ -18,6 +19,7 @@ public class UserDto implements Serializable {
         this.name = user.getName();
         this.role = user.getRole();
         this.creationDate = DateHandler.toISOString(user.getCreationDate());
+        this.lastNotificationAccess = DateHandler.toISOString(user.getLastNotificationAccess());
     }
 
     public int getId() {
@@ -55,6 +57,10 @@ public class UserDto implements Serializable {
     public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
     }
+
+    public String getLastNotificationAccess() { return lastNotificationAccess; }
+
+    public void setLastNotificationAccess(String lastNotificationAccess) { this.lastNotificationAccess = lastNotificationAccess; }
 
     @Override
     public String toString() {

@@ -420,6 +420,9 @@ INSERT INTO discussions (question_id, user_id, content) VALUES (1504, 676,&apos;
           <stringProp name="queryType">Update Statement</stringProp>
           <stringProp name="query">WITH qa AS(DELETE FROM quiz_answers WHERE user_id = 676 RETURNING id)
 DELETE FROM question_answers WHERE quiz_answer_id = (SELECT id FROM qa);
+DELETE FROM discussions_observers WHERE 1=1;
+DELETE FROM notifications_users WHERE 1=1;
+DELETE FROM notifications WHERE id IN (SELECT max(id) FROM notifications);
 DELETE FROM replies WHERE user_id = 677;
 DELETE FROM replies WHERE user_id = 676;
 DELETE FROM discussions WHERE user_id = 676;</stringProp>

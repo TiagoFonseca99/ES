@@ -30,6 +30,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,8 +46,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.COURSE_NOT_FOUND;
-import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.QUESTION_NOT_FOUND;
+import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Service
 public class QuestionService {
@@ -72,6 +74,12 @@ public class QuestionService {
 
     @Autowired
     private OptionRepository optionRepository;
+
+    @Autowired
+    private SubmissionService submissionService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Retryable(
       value = { SQLException.class },
@@ -142,7 +150,8 @@ public class QuestionService {
       value = { SQLException.class },
       backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void removeQuestion(Integer questionId) {
+    public void removeQuestion(Integer userId, Integer questionId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, questionId));
         Submission submission = submissionRepository.findByQuestionId(question.getId());
 
@@ -150,8 +159,11 @@ public class QuestionService {
             deleteSubmission(submission);
         }
 
+        submissionService.prepareNotification(submission.getQuestion(), submission.getUser(), user);
+
         question.remove();
         questionRepository.delete(question);
+
     }
 
     @Retryable(
@@ -317,5 +329,7 @@ public class QuestionService {
         }
         submissionRepository.delete(submission);
     }
+
+
 }
 

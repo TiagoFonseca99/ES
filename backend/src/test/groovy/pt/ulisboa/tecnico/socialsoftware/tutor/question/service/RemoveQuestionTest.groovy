@@ -5,9 +5,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
+import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Image
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option
@@ -22,6 +25,11 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import spock.lang.Specification
 
 @DataJpaTest
@@ -31,6 +39,14 @@ class RemoveQuestionTest extends Specification {
     public static final String QUESTION_CONTENT = 'question content'
     public static final String OPTION_CONTENT = "optionId content"
     public static final String URL = 'URL'
+    public static final String ACRONYM = "AS1"
+    public static final String ACADEMIC_TERM = "1 SEM"
+    public static final String APPROVED = 'APPROVED'
+    public static final String REJECTED = 'REJECTED'
+    public static final String STUDENT_NAME = "João Silva"
+    public static final String STUDENT_USERNAME = "joaosilva"
+    public static final String TEACHER_NAME = "Ana Rita"
+    public static final String TEACHER_USERNAME = "anarita"
 
     @Autowired
     QuestionService questionService
@@ -56,15 +72,38 @@ class RemoveQuestionTest extends Specification {
     @Autowired
     QuizRepository quizRepository
 
+    @Autowired
+    SubmissionRepository submissionRepository
+
+    @Autowired
+    CourseExecutionRepository courseExecutionRepository
+
+    @Autowired
+    UserRepository userRepository
+
     def course
     def question
     def optionOK
     def optionKO
+    def submission
+    def student
+    def courseExecution
+    def teacher
 
     def setup() {
         course = new Course()
         course.setName(COURSE_NAME)
         courseRepository.save(course)
+
+        courseExecution = new CourseExecution(course, ACRONYM, ACADEMIC_TERM, Course.Type.TECNICO)
+        courseExecutionRepository.save(courseExecution)
+
+        student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
+        teacher = new User(STUDENT_NAME + "1", STUDENT_USERNAME + "1", 2, User.Role.TEACHER)
+        student.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
+        teacher.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
+        userRepository.save(student)
+        userRepository.save(teacher)
 
         question = new Question()
         question.setKey(1)
@@ -94,11 +133,17 @@ class RemoveQuestionTest extends Specification {
         optionKO.setQuestion(question)
         optionRepository.save(optionKO)
         questionRepository.save(question)
+
+        submission = new Submission()
+        submission.setQuestion(question)
+        submission.setUser(student)
+        submission.setCourseExecution(courseExecution)
+        submissionRepository.save(submission)
     }
 
     def "remove a question"() {
         when:
-        questionService.removeQuestion(question.getId())
+        questionService.removeQuestion(teacher.getId(), question.getId())
 
         then: "the question is removeQuestion"
         questionRepository.count() == 0L
@@ -118,7 +163,7 @@ class RemoveQuestionTest extends Specification {
         quizQuestionRepository.save(quizQuestion)
 
         when:
-        questionService.removeQuestion(question.getId())
+        questionService.removeQuestion(teacher.getId(), question.getId())
 
         then: "the question an exception is thrown"
         def exception = thrown(TutorException)
@@ -140,7 +185,7 @@ class RemoveQuestionTest extends Specification {
         topicRepository.save(topicTwo)
 
         when:
-        questionService.removeQuestion(question.getId())
+        questionService.removeQuestion(teacher.getId(), question.getId())
 
         then:
         questionRepository.count() == 0L
@@ -157,6 +202,14 @@ class RemoveQuestionTest extends Specification {
         @Bean
         QuestionService questionService() {
             return new QuestionService()
+        }
+        @Bean
+        NotificationService notificationService() {
+            return new NotificationService()
+        }
+        @Bean
+        SubmissionService submissionService() {
+            return new SubmissionService()
         }
     }
 }

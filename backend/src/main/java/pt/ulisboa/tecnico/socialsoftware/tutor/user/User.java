@@ -68,10 +68,13 @@ public class User implements UserDetails, DomainEntity, Observer {
     @Column(name = "last_access")
     private LocalDateTime lastAccess;
 
+    @Column(name = "last_notification_access")
+    private LocalDateTime lastNotificationAccess = DateHandler.now();
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<QuizAnswer> quizAnswers = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<CourseExecution> courseExecutions = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
@@ -105,7 +108,16 @@ public class User implements UserDetails, DomainEntity, Observer {
     private boolean userStatsPublic = true;
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
-    private List<Tournament> tournaments_observers = new ArrayList<>();
+    private Set<Tournament> tournaments_observers = new HashSet<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
+    private Set<Review> review_observers = new HashSet<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
+    private Set<CourseExecution> executions_observers = new HashSet<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
+    private Set<Discussion> discussions_observers = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "users")
     private List<Notification> notifications = new ArrayList<>();
@@ -196,6 +208,14 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     public void setLastAccess(LocalDateTime lastAccess) {
         this.lastAccess = lastAccess;
+    }
+
+    public LocalDateTime getLastNotificationAccess() {
+        return lastNotificationAccess;
+    }
+
+    public void setLastNotificationAccess() {
+        this.lastNotificationAccess = DateHandler.now();
     }
 
     public Set<QuizAnswer> getQuizAnswers() {
@@ -438,6 +458,7 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     public void addCourse(CourseExecution course) {
         this.courseExecutions.add(course);
+        course.Attach(this);
     }
 
     public void addSubmission(Submission submission) {
@@ -449,9 +470,21 @@ public class User implements UserDetails, DomainEntity, Observer {
     }
 
     public void addAnnouncement(Announcement announcement) { this.announcements.add(announcement); }
-    
+
     public void addObserver(Tournament tournament) {
         this.tournaments_observers.add(tournament);
+    }
+
+    public void addObserver(Review review) {
+        this.review_observers.add(review);
+    }
+    
+    public void addObserver(CourseExecution courseExecution) {
+        this.executions_observers.add(courseExecution);
+    }
+
+    public void addObserver(Discussion discussion) {
+        this.discussions_observers.add(discussion);
     }
 
     public boolean isStudent() {
@@ -461,6 +494,14 @@ public class User implements UserDetails, DomainEntity, Observer {
     public void removeTournament(Tournament tournament) { this.tournaments.remove(tournament); }
 
     public void removeObserver(Tournament tournament) { this.tournaments_observers.remove(tournament); }
+
+    public void removeObserver(Review review) { this.review_observers.remove(review); }
+
+    public void removeObserver(CourseExecution courseExecution) { this.executions_observers.remove(courseExecution); }
+
+    public void removeObserver(Discussion discussion) {
+        this.discussions_observers.remove(discussion);
+    }
 
     public boolean isTeacher() {
         return this.role == User.Role.TEACHER;
@@ -560,7 +601,7 @@ public class User implements UserDetails, DomainEntity, Observer {
             if(discussion.isAvailable()) {
                 publicDiscussions.add(discussion);
             }
-        } 
+        }
         return publicDiscussions;
     }
 
@@ -608,7 +649,7 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     @Override
     public void update(Object o, Notification notification) {
-        if (o instanceof Tournament) {
+        if (o instanceof Tournament || o instanceof CourseExecution || o instanceof Review || o instanceof Submission || o instanceof Question || o instanceof Discussion) {
             notification.addUser(this);
         }
     }

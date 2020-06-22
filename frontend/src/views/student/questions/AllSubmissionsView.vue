@@ -61,6 +61,7 @@
             convertMarkDown(item.questionDto.title, item.questionDto.image)
           "
           @click="showQuestionDialog(item.questionDto)"
+          style="cursor: pointer"
         />
       </template>
 

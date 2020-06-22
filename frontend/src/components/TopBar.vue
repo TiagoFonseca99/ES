@@ -72,7 +72,7 @@
             </v-list-item>
             <v-list-item to="/management/reviews" data-cy="Reviews">
               <v-list-item-action>
-                <v-icon>create</v-icon>
+                <v-icon>fa-edit</v-icon>
               </v-list-item-action>
               <v-list-item-content>
                 <v-list-item-title>Reviews</v-list-item-title>
@@ -206,7 +206,7 @@
             </v-list-item>
             <v-list-item to="/student/reviews">
               <v-list-item-action>
-                <v-icon>fas fa-user-check</v-icon>
+                <v-icon>fas fa-edit</v-icon>
               </v-list-item-action>
               <v-list-item-content>
                 <v-list-item-title>Reviews</v-list-item-title>
@@ -283,23 +283,6 @@
               </v-list-item-content>
             </v-list-item>
           </v-list>
-        </v-menu>
-
-        <v-menu offset-y v-if="isStudent && currentCourse" open-on-hover>
-          <template v-slot:activator="{ on }">
-            <v-btn
-              :to="
-                '/student/notifications?username=' +
-                  $store.getters.getUser.username
-              "
-              v-on="on"
-              text
-              dark
-            >
-              Notifications
-              <v-icon>notifications</v-icon>
-            </v-btn>
-          </template>
         </v-menu>
 
         <v-btn
@@ -387,7 +370,7 @@
           </v-list-item>
           <v-list-item to="/management/reviews">
             <v-list-item-action>
-              <v-icon>create</v-icon>
+              <v-icon>fa-edit</v-icon>
             </v-list-item-action>
             <v-list-item-content>
               <v-list-item-title>Reviews</v-list-item-title>
@@ -441,6 +424,7 @@
               <v-list-item-title>Students</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+
           <v-list-item to="/management/impexp">
             <v-list-item-action>
               <v-icon>cloud</v-icon>
@@ -513,7 +497,7 @@
 
           <v-list-item to="/student/reviews">
             <v-list-item-action>
-              <v-icon>fas fa-user-check</v-icon>
+              <v-icon>fas fa-edit</v-icon>
             </v-list-item-action>
             <v-list-item-content>Reviews</v-list-item-content>
           </v-list-item>
@@ -548,22 +532,6 @@
               <v-icon>fas fa-calendar</v-icon>
             </v-list-item-action>
             <v-list-item-content>All Tournaments</v-list-item-content>
-          </v-list-item>
-
-          <!-- ----------- -->
-
-          <!-- ----SDN---- -->
-
-          <v-list-item
-            :to="
-              '/student/notifications?username=' +
-                $store.getters.getUser.username
-            "
-          >
-            <v-list-item-action>
-              <v-icon>notifications</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>Notifications</v-list-item-content>
           </v-list-item>
 
           <!-- ----------- -->

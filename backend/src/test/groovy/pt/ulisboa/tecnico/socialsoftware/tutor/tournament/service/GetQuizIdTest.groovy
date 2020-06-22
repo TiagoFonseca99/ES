@@ -17,6 +17,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
+import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
@@ -230,6 +231,10 @@ class GetQuizIdTest extends Specification {
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+        @Bean
+        SubmissionService submissionService() {
+            return new SubmissionService()
         }
     }
 

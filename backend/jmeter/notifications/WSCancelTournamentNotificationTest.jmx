@@ -356,12 +356,17 @@
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="query">DELETE FROM tournaments_topics;
 DELETE FROM tournaments_participants;
-DELETE FROM tournaments_notifications;
 DELETE FROM tournaments_observers;
 DELETE FROM tournaments t;
 
+DELETE FROM notifications_users;
+DELETE FROM notifications;
+
 ALTER SEQUENCE tournaments_id_seq RESTART WITH 1;
 UPDATE tournaments SET id=nextval(&apos;tournaments_id_seq&apos;);
+
+ALTER SEQUENCE notifications_id_seq RESTART WITH 1;
+UPDATE notifications SET id=nextval(&apos;notifications_id_seq&apos;);
 
 
 

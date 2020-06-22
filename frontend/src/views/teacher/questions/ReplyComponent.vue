@@ -235,9 +235,9 @@ import ShowDashboardDialog from '@/views/teacher/students/DashboardDialogView.vu
 })
 export default class ReplyComponent extends Vue {
   @Prop() readonly discussions!: Discussion[];
-  discussion!: Discussion;
+  discussion: Discussion | null = null;
   discussionInd!: number;
-  reply!: Reply;
+  reply: Reply | null = null;
   replyInd!: number;
   replyMessages: Map<number, string> = new Map();
   discussionEdit: Boolean = false;
@@ -248,6 +248,7 @@ export default class ReplyComponent extends Vue {
   @Emit('submit')
   async submitReply() {
     try {
+      if (!this.discussion) return;
       if (this.replyMessages.get(this.discussion.userId!) === undefined) {
         this.replyMessages.set(this.discussion.userId!, '');
       }
@@ -279,6 +280,7 @@ export default class ReplyComponent extends Vue {
 
   async setAvailability() {
     try {
+      if (!this.discussion) return;
       this.discussion = await RemoteServices.setAvailability(
         this.discussion,
         this.discussion.available
@@ -289,6 +291,7 @@ export default class ReplyComponent extends Vue {
   }
 
   setReplyMessage(message: string) {
+    if (!this.discussion) return;
     this.replyMessages.set(this.discussion.userId!, message);
   }
 
@@ -315,20 +318,22 @@ export default class ReplyComponent extends Vue {
 
   onSaveReply(reply: Reply) {
     this.reply = reply;
-    console.log(this.discussions[this.discussionInd]);
     this.discussions[this.discussionInd].replies![this.replyInd] = reply;
     this.closeDialog(false);
   }
 
   async deleteReply() {
     try {
-      await RemoteServices.deleteReply(this.reply!.id);
-      this.$emit(
-        'replies',
-        (this.discussion.replies = this.discussion.replies!.filter(
-          obj => obj !== this.reply
-        ))
-      );
+      if (!this.discussion) return;
+      if (confirm('Are you sure you want to delete this reply?')) {
+        await RemoteServices.deleteReply(this.reply!.id);
+        this.$emit(
+          'replies',
+          (this.discussion.replies = this.discussion.replies!.filter(
+            obj => obj !== this.reply
+          ))
+        );
+      }
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -354,14 +359,17 @@ export default class ReplyComponent extends Vue {
 
   async deleteDiscussion() {
     try {
-      await RemoteServices.deleteDiscussion(
-        this.discussion.userId,
-        this.discussion.questionId
-      );
-      this.$emit(
-        'discussions',
-        this.discussions.filter(obj => obj !== this.discussion)
-      );
+      if (!this.discussion) return;
+      if (confirm('Are you sure you want to delete this discussion?')) {
+        await RemoteServices.deleteDiscussion(
+          this.discussion.userId,
+          this.discussion.questionId
+        );
+        this.$emit(
+          'discussions',
+          this.discussions.filter(obj => obj !== this.discussion)
+        );
+      }
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

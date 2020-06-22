@@ -1,17 +1,22 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
 @Entity
 @Table(name = "submissions")
-public class Submission {
+public class Submission implements Observable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +41,12 @@ public class Submission {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "submission", fetch=FetchType.LAZY, orphanRemoval=true)
     private Set<Review> reviews = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private Set<User> observers = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<Notification> notifications = new ArrayList<>();
 
     public Submission() {}
 
@@ -77,6 +88,14 @@ public class Submission {
 
     public void setCourseExecution(CourseExecution courseExecution) { this.courseExecution = courseExecution; }
 
+    public List<Notification> getNotifications() { return notifications; }
+
+    public void addNotification(Notification notification) { this.notifications.add(notification); }
+
+    public void removeNotification(Notification notification) { this.notifications.remove(notification); }
+
+    public Set<User> getUsers() { return observers; }
+
     @Override
     public String toString() {
         return "Submission{" +
@@ -84,6 +103,27 @@ public class Submission {
                 ", question=" + question +
                 ", user='" + user +
                 '}';
+    }
+
+    @Override
+    public void Attach(Observer o) {
+        this.observers.add((User) o);
+    }
+
+    @Override
+    public void Dettach(Observer o) {
+        this.observers.remove(o);
+    }
+
+    @Override
+    public void Notify(Notification notification, User user) {
+        for (Observer observer : observers) {
+            if (((User) observer).getId() == user.getId()) {
+                continue;
+            }
+
+            observer.update(this, notification);
+        }
     }
 
 }
