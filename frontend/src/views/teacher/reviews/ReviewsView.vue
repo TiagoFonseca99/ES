@@ -30,6 +30,7 @@
               convertMarkDown(item.questionDto.title, item.questionDto.image)
             "
             @click="showQuestionDialog(item.questionDto)"
+            style="cursor: pointer"
         /></template>
         <template v-slot:item.questionDto.status="{ item }">
           <v-chip color="pink" small>
@@ -144,6 +145,7 @@
                 )
               "
               @click="showQuestionDialog(getSubmission(item))"
+              style="cursor: pointer"
             >
               {{ getSubmission(item).title }}
             </p>
