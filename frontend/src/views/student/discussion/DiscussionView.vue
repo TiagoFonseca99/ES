@@ -34,6 +34,18 @@
               large
               class="mr-2"
               v-on="on"
+              @click="showQuestionDialog(item.question)"
+              >visibility</v-icon
+            >
+          </template>
+          <span>Show Question</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              large
+              class="mr-2"
+              v-on="on"
               @click="
                 setDiscussion(item);
                 editDiscussion();
@@ -41,6 +53,11 @@
               data-cy="editDiscussion"
               >edit</v-icon
             >
+          </template>
+          <span>Edit Discussion</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
             <v-icon
               large
               class="mr-2"
@@ -56,6 +73,14 @@
           </template>
           <span>Delete Discussion</span>
         </v-tooltip>
+      </template>
+      <template v-slot:item.question.title="{ item }">
+        <span
+          @click="showQuestionDialog(item.question)"
+          style="cursor: pointer"
+        >
+          {{ item.question.title }}
+        </span>
       </template>
       <template v-slot:item.content="{ item }">
         <td class="justify-center">
@@ -144,6 +169,10 @@
         </td>
       </template>
     </v-data-table>
+    <footer>
+      <v-icon class="mr-2">mouse</v-icon>Left-click on question's title to view
+      it.
+    </footer>
     <edit-discussion-dialog
       :discussion="currentDiscussion"
       :dialog="discussionEdit"
@@ -156,6 +185,12 @@
       v-on:dialog="closeDialog"
       v-on:save-reply="onSaveReply"
     />
+    <show-question-dialog
+      v-if="currentQuestion"
+      v-model="questionDialog"
+      :question="currentQuestion"
+      v-on:close-show-question-dialog="onCloseShowQuestionDialog"
+    />
   </v-card>
 </template>
 
@@ -167,6 +202,8 @@ import RemoteServices from '@/services/RemoteServices';
 import Reply from '@/models/management/Reply';
 import EditDiscussionDialog from '@/views/student/discussion/EditDiscussionDialog.vue';
 import EditReplyDialog from '@/views/student/discussion/EditReplyDialog.vue';
+import Question from '@/models/management/Question';
+import ShowQuestionDialog from '@/views/student/questions/ShowQuestionDialog.vue';
 
 enum FilterState {
   REPLY = 'See all discussions',
@@ -176,13 +213,16 @@ enum FilterState {
 @Component({
   components: {
     'edit-discussion-dialog': EditDiscussionDialog,
-    'edit-reply-dialog': EditReplyDialog
+    'edit-reply-dialog': EditReplyDialog,
+    'show-question-dialog': ShowQuestionDialog
   }
 })
 export default class DiscussionView extends Vue {
   discussions: Discussion[] = [];
   search: String = '';
   filterLabel: FilterState = FilterState.ALL;
+  currentQuestion: Question | null = null;
+  questionDialog: boolean = false;
   items: Discussion[] = [];
   expanded = [];
   currentDiscussion: Discussion | null = null;
@@ -370,6 +410,15 @@ export default class DiscussionView extends Vue {
 
   convertToMarkdown(text: string) {
     return convertMarkDown(text, null);
+  }
+
+  showQuestionDialog(question: Question) {
+    this.currentQuestion = question;
+    this.questionDialog = true;
+  }
+
+  onCloseShowQuestionDialog() {
+    this.questionDialog = false;
   }
 }
 </script>
