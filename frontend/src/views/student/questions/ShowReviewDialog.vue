@@ -1,5 +1,10 @@
 <template>
-  <v-dialog v-model="dialog" @keydown.esc="closeReviewDialog" max-width="75%">
+  <v-dialog
+    v-model="dialog"
+    @input="closeReviewDialog"
+    @keydown.esc="closeReviewDialog"
+    max-width="75%"
+  >
     <v-card>
       <v-card-title>
         <span class="headline">Review</span>

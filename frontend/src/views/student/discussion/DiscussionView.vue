@@ -1,5 +1,5 @@
 <template>
-  <v-card class="table">
+  <v-card class="table" v-if="$store.getters.isLoggedIn">
     <v-data-table
       :headers="headers"
       :items="items"
@@ -185,9 +185,9 @@ export default class DiscussionView extends Vue {
   filterLabel: FilterState = FilterState.ALL;
   items: Discussion[] = [];
   expanded = [];
-  currentDiscussion?: Discussion;
+  currentDiscussion: Discussion | null = null;
   replyMessages: Map<number, string> = new Map();
-  reply?: Reply;
+  reply: Reply | null = null;
   replyInd!: number;
   discussionEdit: Boolean = false;
   replyEdit: Boolean = false;

@@ -215,7 +215,7 @@ export default class ReplyComponent extends Vue {
   discussionInd: number = 0;
   replyMessages: Map<number, string> = new Map();
   userId: number = this.$store.getters.getUser.id;
-  reply!: Reply;
+  reply: Reply | null = null;
   replyInd!: number;
   discussionEdit: Boolean = false;
   replyEdit: Boolean = false;
