@@ -64,19 +64,6 @@
         </v-chip>
       </template>
       <template v-slot:item.action="{ item }">
-        <v-tooltip bottom v-if="!isNotEnrolled(item)">
-          <template v-slot:activator="{ on }">
-            <v-icon
-              large
-              class="mr-2"
-              v-on="on"
-              @click="solveQuiz(item)"
-              data-cy="SolveQuiz"
-              >fa-pen-alt</v-icon
-            >
-          </template>
-          <span>Solve Quiz</span>
-        </v-tooltip>
         <v-tooltip bottom v-if="isNotEnrolled(item) && !isPrivate(item)">
           <template v-slot:activator="{ on }">
             <v-icon
@@ -118,9 +105,6 @@
         </v-tooltip>
       </template>
     </v-data-table>
-    <footer>
-      Press <v-icon class="mr-2">fa-pen-alt</v-icon> to solve tournament quiz.
-    </footer>
     <edit-tournament-dialog
       v-if="currentTournament"
       v-model="createTournamentDialog"
@@ -350,32 +334,6 @@ export default class AllTournamentView extends Vue {
     tournamentToLeave.enrolled = false;
     tournamentToLeave.topics = topics;
     tournamentToLeave.participants = participants;
-  }
-
-  async solveQuiz(tournament: Tournament) {
-    const enrolled = tournament.enrolled;
-    const topics = tournament.topics;
-    const participants = tournament.participants;
-    tournament.enrolled = undefined;
-    tournament.topics = [];
-    tournament.participants = [];
-    try {
-      let quiz: StatementQuiz = await RemoteServices.solveTournament(
-        tournament
-      );
-      let statementManager: StatementManager = StatementManager.getInstance;
-      statementManager.statementQuiz = quiz;
-      await this.$router.push({ name: 'solve-quiz' });
-      return;
-    } catch (error) {
-      await this.$store.dispatch('error', error);
-      tournament.enrolled = enrolled;
-      tournament.topics = topics;
-      tournament.participants = participants;
-    }
-    tournament.enrolled = enrolled;
-    tournament.topics = topics;
-    tournament.participants = participants;
   }
 }
 </script>

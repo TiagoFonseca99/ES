@@ -8,6 +8,7 @@
       :hide-default-footer="true"
       :mobile-breakpoint="0"
       multi-sort
+      data-cy="openTournaments"
       item-key="item.id"
     >
       <template v-slot:top>
@@ -71,7 +72,7 @@
               v-on="on"
               @click="solveQuiz(item)"
               data-cy="SolveQuiz"
-              >fa-pen-alt</v-icon
+              >fa-file-signature</v-icon
             >
           </template>
           <span>Solve Quiz</span>
@@ -118,7 +119,7 @@
       </template>
     </v-data-table>
     <footer>
-      Press <v-icon class="mr-2">fa-pen-alt</v-icon> to solve tournament quiz.
+      Press <v-icon class="mr-2">fa-file-signature</v-icon> to solve tournament quiz.
     </footer>
     <edit-tournament-dialog
       v-if="currentTournament"

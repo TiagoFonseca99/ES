@@ -7,9 +7,8 @@
       disable-pagination
       :hide-default-footer="true"
       :mobile-breakpoint="0"
-      :items-per-page="15"
       multi-sort
-      data-cy="allTournaments"
+      data-cy="myTournaments"
       item-key="item.id"
     >
       <template v-slot:top>
@@ -21,6 +20,13 @@
             class="mx-2"
           />
           <v-spacer />
+          <v-btn
+            color="primary"
+            dark
+            @click="newTournament"
+            data-cy="createButton"
+            >New Tournament
+          </v-btn>
         </v-card-title>
       </template>
       <template v-slot:item.topics="{ item }">
@@ -98,12 +104,19 @@
       </template>
     </v-data-table>
 
+    <create-tournament-dialog
+      v-if="currentTournament"
+      v-model="createTournamentDialog"
+      :tournament="currentTournament"
+      v-on:new-tournament="onCreateTournament"
+      v-on:close-dialog="onCloseDialog"
+    />
     <edit-tournament-dialog
       v-if="currentTournament"
       v-model="editTournamentDialog"
       :tournament="currentTournament"
       v-on:edit-tournament="onEditTournament"
-      v-on:close-dialog="onCloseDialog"
+      v-on:close-edit-dialog="onCloseEditDialog"
     />
   </v-card>
 </template>
@@ -112,11 +125,13 @@
 import { Component, Vue } from 'vue-property-decorator';
 import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
+import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
 import EditTournamentDialog from '@/views/student/tournament/EditTournamentView.vue';
 import ViewTournamentTopics from '@/views/student/tournament/ViewTournamentTopics.vue';
 
 @Component({
   components: {
+    'create-tournament-dialog': CreateTournamentDialog,
     'edit-tournament-dialog': EditTournamentDialog,
     'view-tournament-topics': ViewTournamentTopics
   }
@@ -124,6 +139,7 @@ import ViewTournamentTopics from '@/views/student/tournament/ViewTournamentTopic
 export default class MyTournamentsView extends Vue {
   tournaments: Tournament[] = [];
   currentTournament: Tournament | null = null;
+  createTournamentDialog: boolean = false;
   editTournamentDialog: boolean = false;
   search: string = '';
   headers: object = [
@@ -132,7 +148,7 @@ export default class MyTournamentsView extends Vue {
       value: 'action',
       align: 'left',
       sortable: false,
-      width: '10%'
+      width: '20%'
     },
     {
       text: 'Course Acronym',
@@ -140,7 +156,7 @@ export default class MyTournamentsView extends Vue {
       align: 'center',
       width: '10%'
     },
-    { text: 'Tournament Number', value: 'id', align: 'center', width: '5%' },
+    { text: 'Tournament Number', value: 'id', align: 'center', width: '10%' },
     {
       text: 'Topics',
       value: 'topics',
@@ -195,6 +211,22 @@ export default class MyTournamentsView extends Vue {
     else return 0;
   }
 
+  newTournament() {
+    this.currentTournament = new Tournament();
+    this.createTournamentDialog = true;
+  }
+
+  async onCreateTournament(tournament: Tournament) {
+    this.tournaments.unshift(tournament);
+    this.createTournamentDialog = false;
+    this.currentTournament = null;
+  }
+
+  onCloseDialog() {
+    this.createTournamentDialog = false;
+    this.currentTournament = null;
+  }
+
   editTournament(tournamentToEdit: Tournament) {
     this.currentTournament = tournamentToEdit;
     this.editTournamentDialog = true;
@@ -211,7 +243,7 @@ export default class MyTournamentsView extends Vue {
     this.currentTournament = null;
   }
 
-  onCloseDialog() {
+  onCloseEditDialog() {
     this.editTournamentDialog = false;
     this.currentTournament = null;
   }
