@@ -13,7 +13,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
-
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -172,8 +171,12 @@ public class Discussion implements Observable {
     }
 
     @Override
-    public void Notify(Notification notification) {
+    public void Notify(Notification notification, User user) {
         for (Observer observer : observers) {
+            if (((User) observer).getId() == user.getId()) {
+                continue;
+            }
+
             observer.update(this, notification);
         }
     }

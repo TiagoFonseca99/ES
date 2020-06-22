@@ -208,8 +208,12 @@ public class CourseExecution implements DomainEntity, Observable {
     }
 
     @Override
-    public void Notify(Notification notification) {
+    public void Notify(Notification notification, User user) {
         for (Observer observer : users) {
+            if (((User) observer).getId() == user.getId()) {
+                continue;
+            }
+
             observer.update(this, notification);
         }
     }

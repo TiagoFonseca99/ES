@@ -90,7 +90,8 @@ public class SubmissionService {
                 submission.Attach(teacher);
             }
         }
-        prepareNotification(submission);
+
+        prepareNotification(submission, user);
 
         if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
             submission.setArgument(submissionDto.getArgument());
@@ -134,7 +135,8 @@ public class SubmissionService {
                 submission.Attach(teacher);
             }
         }
-        prepareNotification(submission);
+
+        prepareNotification(submission, user);
 
         if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
             submission.setArgument(submissionDto.getArgument());
@@ -170,7 +172,7 @@ public class SubmissionService {
 
         entityManager.persist(review);
 
-        prepareNotification(review);
+        prepareNotification(review, user);
 
         return new ReviewDto(review);
     }
@@ -339,25 +341,25 @@ public class SubmissionService {
         }
     }
 
-    private void prepareNotification(Review review) {
+    private void prepareNotification(Review review, User user) {
         String title = NotificationsCreation.createTitle(NEW_REVIEW_TITLE, review.getSubmission().getQuestion().getTitle());
         String content = "";
         if (review.getStatus() == Review.Status.APPROVED)
             content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getQuestion().getTitle(), "approved", review.getUser().getName());
         else
             content = NotificationsCreation.createContent(NEW_REVIEW_CONTENT, review.getSubmission().getQuestion().getTitle(), "rejected", review.getUser().getName());
-        review.Notify(notificationService.createNotification(title, content, Notification.Type.REVIEW));
+        review.Notify(notificationService.createNotification(title, content, Notification.Type.REVIEW), user);
     }
 
-    public void prepareNotification(Question question, User user) {
+    public void prepareNotification(Question question, User user, User exclude) {
         String title = NotificationsCreation.createTitle(DELETED_QUESTION_TITLE, question.getTitle());
         String content = NotificationsCreation.createContent(DELETED_QUESTION_CONTENT, question.getTitle(), user.getName());
-        question.Notify(notificationService.createNotification(title, content, Notification.Type.QUESTION));
+        question.Notify(notificationService.createNotification(title, content, Notification.Type.QUESTION), exclude);
     }
 
-    public void prepareNotification(Submission submission) {
+    public void prepareNotification(Submission submission, User user) {
         String title = NotificationsCreation.createTitle(NEW_SUBMISSION_TITLE, submission.getQuestion().getTitle());
         String content = NotificationsCreation.createContent(NEW_SUBMISSION_CONTENT, submission.getUser().getName());
-        submission.Notify(notificationService.createNotification(title, content, Notification.Type.SUBMISSION));
+        submission.Notify(notificationService.createNotification(title, content, Notification.Type.SUBMISSION), user);
     }
 }
