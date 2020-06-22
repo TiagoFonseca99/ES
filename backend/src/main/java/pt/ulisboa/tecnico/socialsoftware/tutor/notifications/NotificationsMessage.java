@@ -14,8 +14,8 @@ public enum NotificationsMessage {
     EDIT_START_TIME_CONTENT("Tournament %s start time changed from %s to %s"),
     EDIT_END_TIME_CONTENT("Tournament %s end time changed from %s to %s"),
     EDIT_NUMBER_OF_QUESTIONS_CONTENT("Tournament %s number of questions changed from %s to %s"),
-    ADD_TOPIC_CONTENT("Topic %s added to tournament %s"),
-    REMOVE_TOPIC_CONTENT("Topic %s removed from tournament %s"),
+    ADD_TOPIC_CONTENT("Topic '%s' added to tournament %s"),
+    REMOVE_TOPIC_CONTENT("Topic '%s' removed from tournament %s"),
     CANCEL_CONTENT("Tournament %s canceled and no longer accessible"),
 
     // ddp

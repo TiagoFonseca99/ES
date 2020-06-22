@@ -39,7 +39,7 @@ public class NotificationService {
       value = { SQLException.class },
       backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public NotificationDto createNotification(NotificationDto notificationDto) {
+    public Notification createNotification(NotificationDto notificationDto) {
         if (notificationDto.getCreationDate() == null) {
             notificationDto.setCreationDate(DateHandler.toISOString(DateHandler.now()));
         }
@@ -47,16 +47,7 @@ public class NotificationService {
         Notification notification = new Notification(notificationDto);
 
         entityManager.persist(notification);
-        return new NotificationDto(notification);
-    }
-
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public Notification getNotificationById(Integer notificationId) {
-        return notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new TutorException(NOTIFICATION_NOT_FOUND, notificationId));
+        return notification;
     }
 
     @Retryable(
@@ -80,16 +71,5 @@ public class NotificationService {
                 .orElseThrow(() -> new TutorException(NOTIFICATION_NOT_FOUND, notificationId));
 
         notification.removeUser(user);
-    }
-
-    @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public Notification createNotification(String title, String content, Notification.Type type) {
-        NotificationsCreation notificationsCreation = new NotificationsCreation(title, content, type);
-        NotificationDto response = createNotification(notificationsCreation.getNotificationDto());
-
-        return getNotificationById(response.getId());
     }
 }
