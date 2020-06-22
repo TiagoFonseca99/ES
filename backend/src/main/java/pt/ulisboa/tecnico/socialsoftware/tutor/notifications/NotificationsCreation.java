@@ -1,60 +1,26 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.notifications;
 
+import java.util.List;
+
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 
 public class NotificationsCreation {
+    private NotificationsCreation(){}
 
-    private NotificationDto notificationDto;
-
-    public NotificationsCreation(String title, String content, Notification.Type type) {
-        this.notificationDto = new NotificationDto();
-        this.notificationDto.setTitle(title);
-        this.notificationDto.setContent(content);
-        this.notificationDto.setCreationDate(DateHandler.toISOString(DateHandler.now()));
-        this.notificationDto.setType(type.name());
+    public static String createString(NotificationsMessage message, List<Object> arguments) {
+        return String.format(message.getMessage(), arguments.toArray());
     }
 
-    public NotificationDto getNotificationDto() {
-        return notificationDto;
-    }
+    public static NotificationDto create(NotificationsMessage title, List<Object> titleArgs, NotificationsMessage content,
+            List<Object> contentArgs, Notification.Type type) {
+        NotificationDto notification = new NotificationDto();
+        notification.setCreationDate(DateHandler.toISOString(DateHandler.now()));
+        notification.setTitle(createString(title, titleArgs));
+        notification.setContent(createString(content, contentArgs));
+        notification.setType(type.name());
 
-    public static String createTitle(NotificationsMessage message, Integer value) {
-        return String.format(message.getMessage(), value);
-    }
-
-    public static String createTitle(NotificationsMessage message, String value) {
-        return String.format(message.getMessage(), value);
-    }
-
-    public static String createContent(NotificationsMessage message, String value) {
-        return String.format(message.getMessage(), value);
-    }
-
-    public static String createContent(NotificationsMessage message, Integer value) {
-        return String.format(message.getMessage(), value);
-    }
-
-    public static String createContent(NotificationsMessage message, String value1, String value2) {
-        return String.format(message.getMessage(), value1, value2);
-    }
-
-    public static String createContent(NotificationsMessage message, String value1, String value2, String value3) {
-        return String.format(message.getMessage(), value1, value2, value3);
-    }
-
-    public static String createContent(NotificationsMessage message, String value1, Integer value2) {
-        return String.format(message.getMessage(), value1, value2);
-    }
-
-    public static String createContent(NotificationsMessage message, Integer value1, String value2, String value3) {
-        return String.format(message.getMessage(), value1, value2, value3);
-    }
-
-    public static String createContent(NotificationsMessage message, Integer value1, Integer value2, Integer value3) {
-        return String.format(message.getMessage(), value1, value2, value3);
+        return notification;
     }
 }
-
-

@@ -66,7 +66,10 @@ public class AnnouncementService {
         Announcement announcement = new Announcement(user, courseExecution, announcementDto);
         entityManager.persist(announcement);
 
-        notify(courseExecution, announcement, user);
+        NotificationDto notification = NotificationsCreation.create(ADD_ANNOUNCEMENT_TITLE,
+                List.of(announcement.getUser().getName()), ADD_ANNOUNCEMENT_CONTENT,
+                List.of(announcement.getTitle(), user.getName()), Notification.Type.ANNOUNCEMENT);
+        courseExecution.Notify(notificationService.createNotification(notification), user);
 
         return new AnnouncementDto(announcement);
     }
@@ -119,12 +122,5 @@ public class AnnouncementService {
         if (!user.isTeacher())
             throw new TutorException(USER_NOT_TEACHER, user.getUsername());
         return user;
-    }
-
-    private void notify(CourseExecution courseExecution, Announcement announcement, User user) {
-        String title = NotificationsCreation.createTitle(ADD_ANNOUNCEMENT_TITLE, announcement.getUser().getName());
-        String content = NotificationsCreation.createContent(ADD_ANNOUNCEMENT_CONTENT, announcement.getTitle(),
-                announcement.getUser().getName());
-        courseExecution.Notify(notificationService.createNotification(title, content, Notification.Type.ANNOUNCEMENT), user);
     }
 }
