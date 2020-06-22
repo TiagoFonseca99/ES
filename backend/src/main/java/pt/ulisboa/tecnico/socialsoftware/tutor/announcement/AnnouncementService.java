@@ -69,7 +69,7 @@ public class AnnouncementService {
         NotificationDto notification = NotificationsCreation.create(ADD_ANNOUNCEMENT_TITLE,
                 List.of(announcement.getUser().getName()), ADD_ANNOUNCEMENT_CONTENT,
                 List.of(announcement.getTitle(), user.getName()), Notification.Type.ANNOUNCEMENT);
-        courseExecution.Notify(notificationService.createNotification(notification));
+        courseExecution.Notify(notificationService.createNotification(notification), user);
 
         return new AnnouncementDto(announcement);
     }

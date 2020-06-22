@@ -34,7 +34,8 @@
                       info !== null &&
                         info.username === this.$store.getters.getUser.username
                     "
-                    v-model="info.userStatsPublic"
+                    :input-value="!info.userStatsPublic"
+                    append-icon="lock"
                     :label="info.userStatsPublic ? 'Public' : 'Private'"
                     @change="toggleStats()"
                   />
@@ -105,16 +106,19 @@
         <v-col :cols="5">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Tournaments</v-card-title>
-            <v-switch
-              style="flex: 1"
-              v-if="
-                info !== null &&
-                  info.username === this.$store.getters.getUser.username
-              "
-              v-model="info.tournamentStatsPublic"
-              :label="info.tournamentStatsPublic ? 'Public' : 'Private'"
-              @change="toggleTournaments()"
-            />
+            <v-container>
+              <v-switch
+                style="flex: 1"
+                v-if="
+                  info !== null &&
+                    info.username === this.$store.getters.getUser.username
+                "
+                :input-value="!info.tournamentStatsPublic"
+                append-icon="lock"
+                :label="info.tournamentStatsPublic ? 'Public' : 'Private'"
+                @change="toggleTournaments()"
+              />
+            </v-container>
             <v-data-table
               :headers="headers"
               :items="tournaments"
@@ -142,21 +146,19 @@
         <v-col :cols="2">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Submissions</v-card-title>
-            <div
-              class="switchContainer"
-              style="display: flex; flex-direction: row; position: relative;"
-            >
+            <v-container>
               <v-switch
                 style="flex: 1"
                 v-if="
                   info !== null &&
                     info.username === this.$store.getters.getUser.username
                 "
-                v-model="info.submissionStatsPublic"
+                :input-value="!info.submissionStatsPublic"
+                append-icon="lock"
                 :label="info.submissionStatsPublic ? 'Public' : 'Private'"
                 @change="toggleSubmissions()"
               />
-            </div>
+            </v-container>
             <div
               class="dashInfo"
               v-if="
@@ -199,21 +201,19 @@
             <v-card-title class="justify-center" style="display: block;"
               >Discussions</v-card-title
             >
-            <div
-              class="switchContainer"
-              style="display: flex; flex-direction: row; position: relative;"
-            >
+            <v-container>
               <v-switch
                 style="flex: 1"
                 v-if="
                   info !== null &&
                     info.username === this.$store.getters.getUser.username
                 "
-                v-model="info.discussionStatsPublic"
+                :input-value="!info.discussionStatsPublic"
+                append-icon="lock"
                 :label="info.discussionStatsPublic ? 'Public' : 'Private'"
                 @change="toggleDiscussions()"
               />
-            </div>
+            </v-container>
             <div
               class="dashInfo"
               v-if="

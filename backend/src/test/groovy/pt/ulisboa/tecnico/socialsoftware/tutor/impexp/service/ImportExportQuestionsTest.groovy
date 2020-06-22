@@ -60,6 +60,7 @@ class ImportExportQuestionsTest extends Specification {
     def courseExecution
     def submission
     def student
+    def teacher
 
     def setup() {
         course = new Course(COURSE_NAME, Course.Type.TECNICO)
@@ -69,8 +70,11 @@ class ImportExportQuestionsTest extends Specification {
         courseExecutionRepository.save(courseExecution)
 
         student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
+        teacher = new User(STUDENT_NAME + "1", STUDENT_USERNAME + "1", 2, User.Role.TEACHER)
         student.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
+        teacher.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
         userRepository.save(student)
+        userRepository.save(teacher)
 
         def questionDto = new QuestionDto()
         questionDto.setTitle(QUESTION_TITLE)
@@ -109,7 +113,7 @@ class ImportExportQuestionsTest extends Specification {
         given: 'a xml with questions'
         def questionsXml = questionService.exportQuestionsToXml()
         and: 'a clean database'
-        questionService.removeQuestion(questionId)
+        questionService.removeQuestion(teacher.getId(), questionId)
 
         when:
         questionService.importQuestionsFromXml(questionsXml)

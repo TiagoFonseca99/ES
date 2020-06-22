@@ -117,7 +117,7 @@ public class TournamentService {
 
         NotificationDto notification = NotificationsCreation.create(ADD_TOPIC_TITLE, List.of(tournament.getId()),
                 ADD_TOPIC_CONTENT, List.of(topic.getName(), tournament.getId()), Notification.Type.TOURNAMENT);
-        this.notify(tournament, notification);
+        this.notify(tournament, notification, user);
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -138,7 +138,7 @@ public class TournamentService {
 
         NotificationDto notification = NotificationsCreation.create(REMOVE_TOPIC_TITLE, List.of(tournament.getId()),
                 REMOVE_TOPIC_CONTENT, List.of(topic.getName(), tournament.getId()), Notification.Type.TOURNAMENT);
-        this.notify(tournament, notification);
+        this.notify(tournament, notification, user);
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -296,7 +296,7 @@ public class TournamentService {
 
         NotificationDto notification = NotificationsCreation.create(CANCEL_TITLE, List.of(tournament.getId()), CANCEL_CONTENT,
                 List.of(tournament.getId()), Notification.Type.TOURNAMENT);
-        this.notify(tournament, notification);
+        this.notify(tournament, notification, user);
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -319,7 +319,7 @@ public class TournamentService {
                     EDIT_START_TIME_CONTENT,
                     List.of(tournament.getId(), oldTime, DateHandler.toString(tournament.getStartTime())),
                     Notification.Type.TOURNAMENT);
-            this.notify(tournament, notification);
+            this.notify(tournament, notification, user);
         }
     }
 
@@ -343,7 +343,7 @@ public class TournamentService {
                     EDIT_END_TIME_CONTENT,
                     List.of(tournament.getId(), oldTime, DateHandler.toString(tournament.getEndTime())),
                     Notification.Type.TOURNAMENT);
-            this.notify(tournament, notification);
+            this.notify(tournament, notification, user);
         }
     }
 
@@ -376,7 +376,7 @@ public class TournamentService {
                 List.of(tournament.getId()), EDIT_NUMBER_OF_QUESTIONS_CONTENT,
                 List.of(tournament.getId(), oldNumberOfQuestions, tournament.getNumberOfQuestions()),
                 Notification.Type.TOURNAMENT);
-        this.notify(tournament, notification);
+        this.notify(tournament, notification, user);
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -404,7 +404,7 @@ public class TournamentService {
         }
     }
 
-    private void notify(Tournament tournament, NotificationDto notification) {
-        tournament.Notify(notificationService.createNotification(notification));
+    private void notify(Tournament tournament, NotificationDto notification, User user) {
+        tournament.Notify(notificationService.createNotification(notification), user);
     }
 }

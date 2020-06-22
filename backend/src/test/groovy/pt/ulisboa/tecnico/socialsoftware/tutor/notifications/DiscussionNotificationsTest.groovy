@@ -209,16 +209,16 @@ class DiscussionNotificationsTest extends Specification {
         then: "student1 has no notification"
         def result1 = notificationRepository.getUserNotifications(student1.getId())
         result1.size() == 0
-        and: "all others got notification"
+        and: "own user has no notification"
         def result2 = notificationRepository.getUserNotifications(student2.getId())
+        result2.size() == 0
+        and: "all others got notification"
         def result3 = notificationRepository.getUserNotifications(teacher1.getId())
         def result4 = notificationRepository.getUserNotifications(teacher2.getId())
-        result2.size() == 1
         result3.size() == 1
-        result3.size() == 1
-        result2.get(0) == result3.get(0)
+        result4.size() == 1
         result3.get(0) == result4.get(0)
-        result2.get(0).getType() == Notification.Type.DISCUSSION
+        result3.get(0).getType() == Notification.Type.DISCUSSION
     }
 
     def "reply to discussion"() {
@@ -228,16 +228,16 @@ class DiscussionNotificationsTest extends Specification {
         then: "student2 has no notification"
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
+        and: "own user has no notification"
+        def result2 = notificationRepository.getUserNotifications(teacher1.getId())
+        result2.size() == 0
         and: "all others got notification"
-        def result2 = notificationRepository.getUserNotifications(student1.getId())
-        def result3 = notificationRepository.getUserNotifications(teacher1.getId())
+        def result3 = notificationRepository.getUserNotifications(student1.getId())
         def result4 = notificationRepository.getUserNotifications(teacher2.getId())
-        result2.size() == 1
         result3.size() == 1
-        result3.size() == 1
-        result2.get(0) == result3.get(0)
+        result4.size() == 1
         result3.get(0) == result4.get(0)
-        result2.get(0).getType() == Notification.Type.DISCUSSION
+        result3.get(0).getType() == Notification.Type.DISCUSSION
     }
 
     def "edit discussion"() {
@@ -250,16 +250,16 @@ class DiscussionNotificationsTest extends Specification {
         then: "student2 has no notification"
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
-        and: "all others got notification"
+        and: "own user has no notification"
         def result2 = notificationRepository.getUserNotifications(student1.getId())
+        result2.size() == 0
+        and: "all others got notification"
         def result3 = notificationRepository.getUserNotifications(teacher1.getId())
         def result4 = notificationRepository.getUserNotifications(teacher2.getId())
-        result2.size() == 1
         result3.size() == 1
-        result3.size() == 1
-        result2.get(0) == result3.get(0)
+        result4.size() == 1
         result3.get(0) == result4.get(0)
-        result2.get(0).getType() == Notification.Type.DISCUSSION
+        result3.get(0).getType() == Notification.Type.DISCUSSION
     }
 
     def "edit reply"() {
@@ -272,16 +272,16 @@ class DiscussionNotificationsTest extends Specification {
         then: "student2 has no notification"
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
+        and: "own user has no notification"
+        def result2 = notificationRepository.getUserNotifications(teacher1.getId())
+        result2.size() == 0
         and: "all others got notification"
-        def result2 = notificationRepository.getUserNotifications(student1.getId())
-        def result3 = notificationRepository.getUserNotifications(teacher1.getId())
+        def result3 = notificationRepository.getUserNotifications(student1.getId())
         def result4 = notificationRepository.getUserNotifications(teacher2.getId())
-        result2.size() == 1
         result3.size() == 1
-        result3.size() == 1
-        result2.get(0) == result3.get(0)
+        result4.size() == 1
         result3.get(0) == result4.get(0)
-        result2.get(0).getType() == Notification.Type.DISCUSSION
+        result3.get(0).getType() == Notification.Type.DISCUSSION
     }
 
     def "remove discussion"() {
@@ -291,16 +291,16 @@ class DiscussionNotificationsTest extends Specification {
         then: "student2 has no notification"
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
-        and: "all others got notification"
+        and: "own user has no notification"
         def result2 = notificationRepository.getUserNotifications(student1.getId())
+        result2.size() == 0
+        and: "all others got notification"
         def result3 = notificationRepository.getUserNotifications(teacher1.getId())
         def result4 = notificationRepository.getUserNotifications(teacher2.getId())
-        result2.size() == 1
         result3.size() == 1
-        result3.size() == 1
-        result2.get(0) == result3.get(0)
+        result4.size() == 1
         result3.get(0) == result4.get(0)
-        result2.get(0).getType() == Notification.Type.DISCUSSION
+        result3.get(0).getType() == Notification.Type.DISCUSSION
     }
 
     def "remove reply"() {
@@ -310,16 +310,16 @@ class DiscussionNotificationsTest extends Specification {
         then: "student2 has no notification"
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
+        and: "own user has no notification"
+        def result2 = notificationRepository.getUserNotifications(teacher1.getId())
+        result2.size() == 0
         and: "all others got notification"
-        def result2 = notificationRepository.getUserNotifications(student1.getId())
-        def result3 = notificationRepository.getUserNotifications(teacher1.getId())
+        def result3 = notificationRepository.getUserNotifications(student1.getId())
         def result4 = notificationRepository.getUserNotifications(teacher2.getId())
-        result2.size() == 1
         result3.size() == 1
-        result3.size() == 1
-        result2.get(0) == result3.get(0)
+        result4.size() == 1
         result3.get(0) == result4.get(0)
-        result2.get(0).getType() == Notification.Type.DISCUSSION
+        result3.get(0).getType() == Notification.Type.DISCUSSION
     }
 
     def "change availability"() {
@@ -329,16 +329,16 @@ class DiscussionNotificationsTest extends Specification {
         then: "student2 has no notification"
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
+        and: "own user has no notification"
+        def result2 = notificationRepository.getUserNotifications(teacher1.getId())
+        result2.size() == 0
         and: "all others got notification"
-        def result2 = notificationRepository.getUserNotifications(student1.getId())
-        def result3 = notificationRepository.getUserNotifications(teacher1.getId())
+        def result3 = notificationRepository.getUserNotifications(student1.getId())
         def result4 = notificationRepository.getUserNotifications(teacher2.getId())
-        result2.size() == 1
         result3.size() == 1
-        result3.size() == 1
-        result2.get(0) == result3.get(0)
+        result4.size() == 1
         result3.get(0) == result4.get(0)
-        result2.get(0).getType() == Notification.Type.DISCUSSION
+        result3.get(0).getType() == Notification.Type.DISCUSSION
     }
 
     @TestConfiguration

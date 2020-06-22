@@ -192,7 +192,7 @@ class SubmissionNotificationsTest extends Specification {
         notificationRepository.getUserNotifications(student.getId()).isEmpty()
 
         when:
-        questionService.removeQuestion(question3.getId())
+        questionService.removeQuestion(teacher.getId(), question3.getId())
 
         then:
         notificationRepository.getUserNotifications(student.getId()).size() == 1
@@ -208,8 +208,8 @@ class SubmissionNotificationsTest extends Specification {
         notificationRepository.getUserNotifications(student.getId()).isEmpty()
 
         when:
-        questionService.removeQuestion(question2.getId())
-        questionService.removeQuestion(question3.getId())
+        questionService.removeQuestion(teacher.getId(), question2.getId())
+        questionService.removeQuestion(teacher.getId(), question3.getId())
 
         then:
         notificationRepository.getUserNotifications(student.getId()).size() == 2

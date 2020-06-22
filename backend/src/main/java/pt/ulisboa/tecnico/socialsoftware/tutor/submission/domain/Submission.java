@@ -43,7 +43,7 @@ public class Submission implements Observable {
     private Set<Review> reviews = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
-    private List<User> observers = new ArrayList<>();
+    private Set<User> observers = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     private List<Notification> notifications = new ArrayList<>();
@@ -94,7 +94,7 @@ public class Submission implements Observable {
 
     public void removeNotification(Notification notification) { this.notifications.remove(notification); }
 
-    public List<User> getUsers() { return observers; }
+    public Set<User> getUsers() { return observers; }
 
     @Override
     public String toString() {
@@ -116,8 +116,12 @@ public class Submission implements Observable {
     }
 
     @Override
-    public void Notify(Notification notification) {
+    public void Notify(Notification notification, User user) {
         for (Observer observer : observers) {
+            if (((User) observer).getId() == user.getId()) {
+                continue;
+            }
+
             observer.update(this, notification);
         }
     }

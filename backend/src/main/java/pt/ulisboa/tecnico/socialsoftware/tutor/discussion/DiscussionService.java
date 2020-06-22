@@ -104,7 +104,7 @@ public class DiscussionService {
 
         NotificationDto notification = NotificationsCreation.create(DISCUSSION_CREATE, List.of(question.getTitle()),
                 DISCUSSION_CREATE_CONTENT, List.of(user.getName(), question.getTitle()), Notification.Type.DISCUSSION);
-        this.notify(discussion, notification);
+        this.notify(discussion, notification, user);
 
         return new DiscussionDto(discussion);
     }
@@ -134,7 +134,7 @@ public class DiscussionService {
         NotificationDto notification = NotificationsCreation.create(DISCUSSION_REPLY,
                 List.of(discussion.getQuestion().getTitle()), DISCUSSION_REPLY_CONTENT,
                 List.of(user.getName(), discussion.getQuestion().getTitle()), Notification.Type.DISCUSSION);
-        this.notify(discussion, notification);
+        this.notify(discussion, notification, user);
 
         return new ReplyDto(reply);
     }
@@ -166,7 +166,7 @@ public class DiscussionService {
                 List.of(discussion.getQuestion().getTitle()), DISCUSSION_AVAILABILITY_CONTENT, List.of(user.getName(),
                         discussion.getQuestion().getTitle(), discussion.isAvailable() ? "public" : "private"),
                 Notification.Type.DISCUSSION);
-        this.notify(discussion, notification);
+        this.notify(discussion, notification, user);
 
         return new DiscussionDto(discussion);
     }
@@ -186,7 +186,7 @@ public class DiscussionService {
         NotificationDto notification = NotificationsCreation.create(DISCUSSION_DELETE_REPLY,
                 List.of(reply.getDiscussion().getQuestion().getTitle()), DISCUSSION_DELETE_REPLY_CONTENT,
                 List.of(user.getName(), reply.getDiscussion().getQuestion().getTitle()), Notification.Type.DISCUSSION);
-        this.notify(reply.getDiscussion(), notification);
+        this.notify(reply.getDiscussion(), notification, user);
 
         reply.remove();
 
@@ -217,7 +217,7 @@ public class DiscussionService {
         NotificationDto notification = NotificationsCreation.create(DISCUSSION_EDIT_REPLY,
                 List.of(reply.getDiscussion().getQuestion().getTitle()), DISCUSSION_EDIT_REPLY_CONTENT,
                 List.of(user.getName(), reply.getDiscussion().getQuestion().getTitle()), Notification.Type.DISCUSSION);
-        this.notify(reply.getDiscussion(), notification);
+        this.notify(reply.getDiscussion(), notification, user);
 
         return new ReplyDto(reply);
     }
@@ -239,7 +239,7 @@ public class DiscussionService {
         NotificationDto notification = NotificationsCreation.create(DISCUSSION_DELETE,
                 List.of(discussion.getQuestion().getTitle()), DISCUSSION_DELETE_CONTENT,
                 List.of(user.getName(), discussion.getQuestion().getTitle()), Notification.Type.DISCUSSION);
-        this.notify(discussion, notification);
+        this.notify(discussion, notification, user);
 
         discussion.remove();
 
@@ -275,7 +275,7 @@ public class DiscussionService {
         NotificationDto notification = NotificationsCreation.create(DISCUSSION_EDIT,
                 List.of(discussion.getQuestion().getTitle()), DISCUSSION_EDIT_CONTENT,
                 List.of(user.getName(), discussion.getQuestion().getTitle()), Notification.Type.DISCUSSION);
-        this.notify(discussion, notification);
+        this.notify(discussion, notification, user);
 
         return new DiscussionDto(discussion);
     }
@@ -335,7 +335,7 @@ public class DiscussionService {
         }
     }
 
-    private void notify(Discussion discussion, NotificationDto notification) {
-        discussion.Notify(notificationService.createNotification(notification));
+    private void notify(Discussion discussion, NotificationDto notification, User user) {
+        discussion.Notify(notificationService.createNotification(notification), user);
     }
 }

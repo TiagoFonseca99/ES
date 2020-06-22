@@ -88,6 +88,7 @@ class RemoveQuestionTest extends Specification {
     def submission
     def student
     def courseExecution
+    def teacher
 
     def setup() {
         course = new Course()
@@ -98,8 +99,11 @@ class RemoveQuestionTest extends Specification {
         courseExecutionRepository.save(courseExecution)
 
         student = new User(STUDENT_NAME, STUDENT_USERNAME, 1, User.Role.STUDENT)
+        teacher = new User(STUDENT_NAME + "1", STUDENT_USERNAME + "1", 2, User.Role.TEACHER)
         student.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
+        teacher.setEnrolledCoursesAcronyms(courseExecution.getAcronym())
         userRepository.save(student)
+        userRepository.save(teacher)
 
         question = new Question()
         question.setKey(1)
@@ -139,7 +143,7 @@ class RemoveQuestionTest extends Specification {
 
     def "remove a question"() {
         when:
-        questionService.removeQuestion(question.getId())
+        questionService.removeQuestion(teacher.getId(), question.getId())
 
         then: "the question is removeQuestion"
         questionRepository.count() == 0L
@@ -159,7 +163,7 @@ class RemoveQuestionTest extends Specification {
         quizQuestionRepository.save(quizQuestion)
 
         when:
-        questionService.removeQuestion(question.getId())
+        questionService.removeQuestion(teacher.getId(), question.getId())
 
         then: "the question an exception is thrown"
         def exception = thrown(TutorException)
@@ -181,7 +185,7 @@ class RemoveQuestionTest extends Specification {
         topicRepository.save(topicTwo)
 
         when:
-        questionService.removeQuestion(question.getId())
+        questionService.removeQuestion(teacher.getId(), question.getId())
 
         then:
         questionRepository.count() == 0L

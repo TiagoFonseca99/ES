@@ -89,7 +89,8 @@ public class SubmissionService {
                 submission.Attach(teacher);
             }
         }
-        prepareNotification(submission);
+
+        prepareNotification(submission, user);
 
         if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
             submission.setArgument(submissionDto.getArgument());
@@ -130,7 +131,8 @@ public class SubmissionService {
                 submission.Attach(teacher);
             }
         }
-        prepareNotification(submission);
+
+        prepareNotification(submission, user);
 
         if (submissionDto.getArgument() != null && !submissionDto.getArgument().isBlank())
             submission.setArgument(submissionDto.getArgument());
@@ -163,7 +165,7 @@ public class SubmissionService {
 
         entityManager.persist(review);
 
-        prepareNotification(review);
+        prepareNotification(review, user);
 
         return new ReviewDto(review);
     }
@@ -331,24 +333,24 @@ public class SubmissionService {
         }
     }
 
-    private void prepareNotification(Review review) {
+    private void prepareNotification(Review review, User user) {
         NotificationDto notification = NotificationsCreation.create(NEW_REVIEW_TITLE,
                 List.of(review.getSubmission().getQuestion().getTitle()), NEW_REVIEW_CONTENT,
                 List.of(review.getSubmission().getQuestion().getTitle(),
                         (review.getStatus() == Review.Status.APPROVED ? "approved" : "rejected"), review.getUser().getName()),
                 Notification.Type.REVIEW);
-        review.Notify(notificationService.createNotification(notification));
+        review.Notify(notificationService.createNotification(notification), user);
     }
 
-    public void prepareNotification(Question question, User user) {
+    public void prepareNotification(Question question, User user, User exclude) {
         NotificationDto notification = NotificationsCreation.create(DELETED_QUESTION_TITLE, List.of(question.getTitle()),
                 DELETED_QUESTION_CONTENT, List.of(question.getTitle(), user.getName()), Notification.Type.QUESTION);
-        question.Notify(notificationService.createNotification(notification));
+        question.Notify(notificationService.createNotification(notification), exclude);
     }
 
-    public void prepareNotification(Submission submission) {
+    public void prepareNotification(Submission submission, User user) {
         NotificationDto notification = NotificationsCreation.create(NEW_SUBMISSION_TITLE, List.of(submission.getQuestion().getTitle()),
                 NEW_SUBMISSION_CONTENT, List.of(submission.getUser().getName()), Notification.Type.SUBMISSION);
-        submission.Notify(notificationService.createNotification(notification));
+        submission.Notify(notificationService.createNotification(notification), user);
     }
 }
