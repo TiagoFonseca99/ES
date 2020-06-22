@@ -210,11 +210,8 @@ public class Tournament implements Observable {
     public void addParticipant(User user) {
         this.participants.add(user);
         user.addTournament(this);
-
-        if (user != creator) {
-            this.Attach(user);
-            user.addObserver(this);
-        }
+        this.Attach(user);
+        user.addObserver(this);
     }
 
     public void removeParticipant(User user) {
@@ -266,6 +263,9 @@ public class Tournament implements Observable {
     @Override
     public void Notify(Notification notification, User user) {
         for (Observer observer : observers) {
+            if (((User) observer).getId() == user.getId()) {
+                continue;
+            }
             observer.update(this, notification);
         }
     }
