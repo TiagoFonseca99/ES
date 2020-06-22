@@ -9,6 +9,7 @@
       :mobile-breakpoint="0"
       multi-sort
       data-cy="allTournaments"
+      item-key="item.id"
     >
       <template v-slot:top>
         <v-card-title>
@@ -31,6 +32,22 @@
           </v-btn>
         </v-card-title>
       </template>
+      <template v-slot:item.topics="{ item }">
+        <view-tournament-topics :tournament="item" />
+      </template>
+      <template v-slot:item.times="{ item }">
+        <v-chip x-small>
+          {{ item.startTime }}
+        </v-chip>
+        <v-chip x-small>
+          {{ item.endTime }}
+        </v-chip>
+      </template>
+      <template v-slot:item.id="{ item }">
+        <v-chip color="primary">
+          {{ item.id }}
+        </v-chip>
+      </template>
       <template v-slot:item.state="{ item }">
         <v-chip :color="getStateColor(item.state)">
           {{ getStateName(item.state) }}
@@ -47,15 +64,28 @@
         </v-chip>
       </template>
       <template v-slot:item.action="{ item }">
+        <v-tooltip bottom v-if="!isNotEnrolled(item)">
+          <template v-slot:activator="{ on }">
+            <v-icon
+              large
+              class="mr-2"
+              v-on="on"
+              @click="solveQuiz(item)"
+              data-cy="SolveQuiz"
+              >fa-pen-alt</v-icon
+            >
+          </template>
+          <span>Solve Quiz</span>
+        </v-tooltip>
         <v-tooltip bottom v-if="isNotEnrolled(item) && !isPrivate(item)">
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="joinPublicTournament(item)"
               data-cy="JoinTournament"
-              >fas fa-sign-in-alt</v-icon
+              >fa-sign-in-alt</v-icon
             >
           </template>
           <span>Join Tournament</span>
@@ -63,12 +93,12 @@
         <v-tooltip bottom v-if="isNotEnrolled(item) && isPrivate(item)">
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="openPasswordDialog(item)"
               data-cy="JoinTournament"
-              >fas fa-sign-in-alt</v-icon
+              >fa-sign-in-alt</v-icon
             >
           </template>
           <span>Join Tournament</span>
@@ -76,7 +106,7 @@
         <v-tooltip bottom v-if="!isNotEnrolled(item)">
           <template v-slot:activator="{ on }">
             <v-icon
-              small
+              large
               class="mr-2"
               v-on="on"
               @click="leaveTournament(item)"
@@ -88,7 +118,9 @@
         </v-tooltip>
       </template>
     </v-data-table>
-
+    <footer>
+      Press <v-icon class="mr-2">fa-pen-alt</v-icon> to solve tournament quiz.
+    </footer>
     <edit-tournament-dialog
       v-if="currentTournament"
       v-model="createTournamentDialog"
@@ -112,11 +144,15 @@ import Tournament from '@/models/user/Tournament';
 import RemoteServices from '@/services/RemoteServices';
 import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
 import EditPasswordDialog from '@/views/student/tournament/PasswordTournamentView.vue';
+import ViewTournamentTopics from '@/views/student/tournament/ViewTournamentTopics.vue';
+import StatementQuiz from '@/models/statement/StatementQuiz';
+import StatementManager from '@/models/statement/StatementManager';
 
 @Component({
   components: {
     'edit-tournament-dialog': CreateTournamentDialog,
-    'edit-password-dialog': EditPasswordDialog
+    'edit-password-dialog': EditPasswordDialog,
+    'view-tournament-topics': ViewTournamentTopics
   }
 })
 export default class AllTournamentView extends Vue {
@@ -127,6 +163,13 @@ export default class AllTournamentView extends Vue {
   search: string = '';
   password: string = '';
   headers: object = [
+    {
+      text: 'Actions',
+      value: 'action',
+      align: 'center',
+      sortable: false,
+      width: '20%'
+    },
     {
       text: 'Course Acronym',
       value: 'courseAcronym',
@@ -158,14 +201,8 @@ export default class AllTournamentView extends Vue {
       width: '10%'
     },
     {
-      text: 'Start Time',
-      value: 'startTime',
-      align: 'center',
-      width: '10%'
-    },
-    {
-      text: 'End Time',
-      value: 'endTime',
+      text: 'Start/End Time',
+      value: 'times',
       align: 'center',
       width: '10%'
     },
@@ -178,13 +215,6 @@ export default class AllTournamentView extends Vue {
     {
       text: 'Enrolled',
       value: 'enrolled',
-      align: 'center',
-      sortable: false,
-      width: '10%'
-    },
-    {
-      text: 'Actions',
-      value: 'action',
       align: 'center',
       sortable: false,
       width: '10%'
@@ -239,8 +269,8 @@ export default class AllTournamentView extends Vue {
   }
 
   getStateName(state: string) {
-    if (state === 'NOT_CANCELED') return 'Available';
-    else return 'Cancelled';
+    if (state === 'NOT_CANCELED') return 'AVAILABLE';
+    else return 'CANCELLED';
   }
 
   getEnrolledColor(enrolled: string) {
@@ -259,8 +289,8 @@ export default class AllTournamentView extends Vue {
   }
 
   getPrivateName(privateTournament: boolean) {
-    if (privateTournament) return 'Private';
-    else return 'Public';
+    if (privateTournament) return 'PRIVATE';
+    else return 'PUBLIC';
   }
 
   isNotEnrolled(tournamentToJoin: Tournament) {
@@ -320,6 +350,32 @@ export default class AllTournamentView extends Vue {
     tournamentToLeave.enrolled = false;
     tournamentToLeave.topics = topics;
     tournamentToLeave.participants = participants;
+  }
+
+  async solveQuiz(tournament: Tournament) {
+    const enrolled = tournament.enrolled;
+    const topics = tournament.topics;
+    const participants = tournament.participants;
+    tournament.enrolled = undefined;
+    tournament.topics = [];
+    tournament.participants = [];
+    try {
+      let quiz: StatementQuiz = await RemoteServices.solveTournament(
+        tournament
+      );
+      let statementManager: StatementManager = StatementManager.getInstance;
+      statementManager.statementQuiz = quiz;
+      await this.$router.push({ name: 'solve-quiz' });
+      return;
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+      tournament.enrolled = enrolled;
+      tournament.topics = topics;
+      tournament.participants = participants;
+    }
+    tournament.enrolled = enrolled;
+    tournament.topics = topics;
+    tournament.participants = participants;
   }
 }
 </script>

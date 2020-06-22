@@ -22,7 +22,7 @@ import Topic from '@/models/management/Topic';
 import Submission from '@/models/management/Submission';
 
 @Component
-export default class EditQuestionTopics extends Vue {
+export default class ViewSubmissionTopics extends Vue {
   @Prop({ type: Submission, required: true }) readonly submission!: Submission;
   @Prop({ type: Array, required: true }) readonly topics!: Topic[];
 
