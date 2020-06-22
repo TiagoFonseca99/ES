@@ -3,6 +3,7 @@
     fluid
     style="height: 100%; position: relative; display: flex; flex-direction: column"
     :key="componentKey"
+    v-if="this.$store.getters.isLoggedIn"
   >
     <v-container fluid style="position: relative; max-height: 100%; flex: 1;">
       <v-row style="width: 100%; height: 100%">

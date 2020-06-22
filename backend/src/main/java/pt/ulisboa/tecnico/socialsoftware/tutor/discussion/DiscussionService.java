@@ -27,6 +27,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsCreation;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -68,7 +69,8 @@ public class DiscussionService {
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<DiscussionDto> findDiscussionsByUserId(Integer userId, Integer courseId) {
-        return discussionRepository.findByUserId(userId, courseId).stream().map(DiscussionDto::new).collect(Collectors.toList());
+        return discussionRepository.findByUserId(userId, courseId).stream().map(DiscussionDto::new)
+                .collect(Collectors.toList());
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -81,7 +83,7 @@ public class DiscussionService {
         Question question = questionRepository.findById(discussionDto.getQuestionId())
                 .orElseThrow(() -> new TutorException(QUESTION_NOT_FOUND, discussionDto.getQuestionId()));
         Course course = courseRepository.findById(discussionDto.getCourseId())
-            .orElseThrow(() -> new TutorException(COURSE_NOT_FOUND, discussionDto.getCourseId()));
+                .orElseThrow(() -> new TutorException(COURSE_NOT_FOUND, discussionDto.getCourseId()));
 
         checkUserInCourse(user, course);
         checkUserAndQuestion(user, question);
@@ -100,9 +102,9 @@ public class DiscussionService {
             }
         }
 
-        String title = NotificationsCreation.createTitle(DISCUSSION_CREATE, question.getTitle());
-        String content = NotificationsCreation.createContent(DISCUSSION_CREATE_CONTENT, user.getName(), question.getTitle());
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        NotificationDto notification = NotificationsCreation.create(DISCUSSION_CREATE, List.of(question.getTitle()),
+                DISCUSSION_CREATE_CONTENT, List.of(user.getName(), question.getTitle()), Notification.Type.DISCUSSION);
+        this.notify(discussion, notification, user);
 
         return new DiscussionDto(discussion);
     }
@@ -116,22 +118,23 @@ public class DiscussionService {
         User user = userRepository.findById(replyDto.getUserId())
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, replyDto.getUserId()));
         Course course = courseRepository.findById(discussionDto.getCourseId())
-            .orElseThrow(() -> new TutorException(COURSE_NOT_FOUND, discussionDto.getCourseId()));
+                .orElseThrow(() -> new TutorException(COURSE_NOT_FOUND, discussionDto.getCourseId()));
 
         checkUserInCourse(user, course);
         checkUserAndDiscussion(user, discussionDto);
 
         Discussion discussion = discussionRepository
                 .findByUserIdQuestionId(discussionDto.getUserId(), discussionDto.getQuestionId())
-            .orElseThrow(() -> new TutorException(DISCUSSION_NOT_FOUND));
+                .orElseThrow(() -> new TutorException(DISCUSSION_NOT_FOUND));
 
         Reply reply = new Reply(user, discussion, replyDto);
         this.entityManager.persist(reply);
         this.entityManager.merge(discussion);
 
-        String title = NotificationsCreation.createTitle(DISCUSSION_REPLY, discussion.getQuestion().getTitle());
-        String content = NotificationsCreation.createContent(DISCUSSION_REPLY_CONTENT, user.getName(), discussion.getQuestion().getTitle());
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        NotificationDto notification = NotificationsCreation.create(DISCUSSION_REPLY,
+                List.of(discussion.getQuestion().getTitle()), DISCUSSION_REPLY_CONTENT,
+                List.of(user.getName(), discussion.getQuestion().getTitle()), Notification.Type.DISCUSSION);
+        this.notify(discussion, notification, user);
 
         return new ReplyDto(reply);
     }
@@ -141,10 +144,9 @@ public class DiscussionService {
     public DiscussionDto setAvailability(Integer userId, DiscussionDto discussionDto) {
         checkDiscussionDto(discussionDto);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
         Course course = courseRepository.findById(discussionDto.getCourseId())
-            .orElseThrow(() -> new TutorException(COURSE_NOT_FOUND, discussionDto.getCourseId()));
+                .orElseThrow(() -> new TutorException(COURSE_NOT_FOUND, discussionDto.getCourseId()));
 
         checkUserInCourse(user, course);
 
@@ -160,9 +162,11 @@ public class DiscussionService {
 
         this.entityManager.merge(discussion);
 
-        String title = NotificationsCreation.createTitle(DISCUSSION_AVAILABILITY, discussion.getQuestion().getTitle());
-        String content = NotificationsCreation.createContent(DISCUSSION_AVAILABILITY_CONTENT, user.getName(), discussion.getQuestion().getTitle(), discussion.isAvailable() ? "public" : "private");
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        NotificationDto notification = NotificationsCreation.create(DISCUSSION_AVAILABILITY,
+                List.of(discussion.getQuestion().getTitle()), DISCUSSION_AVAILABILITY_CONTENT, List.of(user.getName(),
+                        discussion.getQuestion().getTitle(), discussion.isAvailable() ? "public" : "private"),
+                Notification.Type.DISCUSSION);
+        this.notify(discussion, notification, user);
 
         return new DiscussionDto(discussion);
     }
@@ -179,9 +183,10 @@ public class DiscussionService {
             throw new TutorException(REPLY_UNAUTHORIZED_DELETER);
         }
 
-        String title = NotificationsCreation.createTitle(DISCUSSION_DELETE_REPLY, reply.getDiscussion().getQuestion().getTitle());
-        String content = NotificationsCreation.createContent(DISCUSSION_DELETE_REPLY_CONTENT, user.getName(), reply.getDiscussion().getQuestion().getTitle());
-        reply.getDiscussion().Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        NotificationDto notification = NotificationsCreation.create(DISCUSSION_DELETE_REPLY,
+                List.of(reply.getDiscussion().getQuestion().getTitle()), DISCUSSION_DELETE_REPLY_CONTENT,
+                List.of(user.getName(), reply.getDiscussion().getQuestion().getTitle()), Notification.Type.DISCUSSION);
+        this.notify(reply.getDiscussion(), notification, user);
 
         reply.remove();
 
@@ -196,7 +201,8 @@ public class DiscussionService {
         checkReplyDto(replyDto);
 
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-        Reply reply = replyRepository.findById(replyDto.getId()).orElseThrow(() -> new TutorException(REPLY_NOT_FOUND, replyDto.getId()));
+        Reply reply = replyRepository.findById(replyDto.getId())
+                .orElseThrow(() -> new TutorException(REPLY_NOT_FOUND, replyDto.getId()));
 
         checkUserInCourse(user, reply.getDiscussion().getCourse());
 
@@ -208,9 +214,10 @@ public class DiscussionService {
 
         this.entityManager.merge(reply);
 
-        String title = NotificationsCreation.createTitle(DISCUSSION_EDIT_REPLY, reply.getDiscussion().getQuestion().getTitle());
-        String content = NotificationsCreation.createContent(DISCUSSION_EDIT_REPLY_CONTENT, user.getName(), reply.getDiscussion().getQuestion().getTitle());
-        reply.getDiscussion().Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        NotificationDto notification = NotificationsCreation.create(DISCUSSION_EDIT_REPLY,
+                List.of(reply.getDiscussion().getQuestion().getTitle()), DISCUSSION_EDIT_REPLY_CONTENT,
+                List.of(user.getName(), reply.getDiscussion().getQuestion().getTitle()), Notification.Type.DISCUSSION);
+        this.notify(reply.getDiscussion(), notification, user);
 
         return new ReplyDto(reply);
     }
@@ -229,9 +236,10 @@ public class DiscussionService {
             throw new TutorException(DISCUSSION_UNAUTHORIZED_DELETER);
         }
 
-        String title = NotificationsCreation.createTitle(DISCUSSION_DELETE, discussion.getQuestion().getTitle());
-        String content = NotificationsCreation.createContent(DISCUSSION_DELETE_CONTENT, user.getName(), discussion.getQuestion().getTitle());
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        NotificationDto notification = NotificationsCreation.create(DISCUSSION_DELETE,
+                List.of(discussion.getQuestion().getTitle()), DISCUSSION_DELETE_CONTENT,
+                List.of(user.getName(), discussion.getQuestion().getTitle()), Notification.Type.DISCUSSION);
+        this.notify(discussion, notification, user);
 
         discussion.remove();
 
@@ -264,9 +272,10 @@ public class DiscussionService {
 
         this.entityManager.merge(discussion);
 
-        String title = NotificationsCreation.createTitle(DISCUSSION_EDIT, discussion.getQuestion().getTitle());
-        String content = NotificationsCreation.createContent(DISCUSSION_EDIT_CONTENT, user.getName(), discussion.getQuestion().getTitle());
-        discussion.Notify(notificationService.createNotification(title, content, Notification.Type.DISCUSSION));
+        NotificationDto notification = NotificationsCreation.create(DISCUSSION_EDIT,
+                List.of(discussion.getQuestion().getTitle()), DISCUSSION_EDIT_CONTENT,
+                List.of(user.getName(), discussion.getQuestion().getTitle()), Notification.Type.DISCUSSION);
+        this.notify(discussion, notification, user);
 
         return new DiscussionDto(discussion);
     }
@@ -302,8 +311,8 @@ public class DiscussionService {
     }
 
     private void checkDiscussionDto(DiscussionDto discussion) {
-        if (discussion.getCourseId() == null || discussion.getQuestion() == null || discussion.getUserId() == null || discussion.getContent() == null
-                || discussion.getContent().trim().length() == 0) {
+        if (discussion.getCourseId() == null || discussion.getQuestion() == null || discussion.getUserId() == null
+                || discussion.getContent() == null || discussion.getContent().trim().length() == 0) {
             throw new TutorException(DISCUSSION_MISSING_DATA);
         }
     }
@@ -324,5 +333,9 @@ public class DiscussionService {
         if (!user.checkQuestionAnswered(question)) {
             throw new TutorException(QUESTION_NOT_ANSWERED, question.getId());
         }
+    }
+
+    private void notify(Discussion discussion, NotificationDto notification, User user) {
+        discussion.Notify(notificationService.createNotification(notification), user);
     }
 }

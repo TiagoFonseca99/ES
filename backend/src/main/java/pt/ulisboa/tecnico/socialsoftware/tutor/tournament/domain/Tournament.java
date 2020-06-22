@@ -264,7 +264,7 @@ public class Tournament implements Observable {
     }
 
     @Override
-    public void Notify(Notification notification) {
+    public void Notify(Notification notification, User user) {
         for (Observer observer : observers) {
             observer.update(this, notification);
         }
