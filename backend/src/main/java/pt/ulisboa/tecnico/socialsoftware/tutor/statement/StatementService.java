@@ -177,6 +177,7 @@ public class StatementService {
         return user.getQuizAnswers().stream()
                 .filter(quizAnswer -> !quizAnswer.isCompleted())
                 .filter(quizAnswer -> quizAnswer.getQuiz().getCourseExecution().getId() == executionId)
+                .filter(quizAnswer -> quizAnswer.getQuiz().getType() != Quiz.QuizType.TOURNAMENT)
                 .filter(quizAnswer -> quizAnswer.getQuiz().getConclusionDate() == null || DateHandler.now().isBefore(quizAnswer.getQuiz().getConclusionDate()))
                 .filter(quizAnswer -> quizAnswer.getQuiz().getAvailableDate().isBefore(now))
                 .map(StatementQuizDto::new)
