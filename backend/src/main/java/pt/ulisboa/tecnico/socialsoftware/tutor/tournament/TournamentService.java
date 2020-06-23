@@ -174,6 +174,15 @@ public class TournamentService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<TournamentDto> getClosedTournaments(User user) {
+
+        List<CourseExecution> list = new ArrayList<>(user.getCourseExecutions());
+        return tournamentRepository.getClosedTournaments(list).stream().map(TournamentDto::new)
+                .collect(Collectors.toList());
+    }
+    
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<TournamentDto> getUserTournaments(User user) {
         return tournamentRepository.getUserTournaments(user.getId()).stream().map(TournamentDto::new)
                 .collect(Collectors.toList());

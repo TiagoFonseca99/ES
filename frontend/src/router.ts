@@ -20,6 +20,7 @@ import ParticipantsTournament from '@/views/student/tournament/ParticipantsTourn
 import MyTournamentsView from '@/views/student/tournament/MyTournamentsView.vue';
 import AllTournamentView from './views/student/tournament/AllTournamentView.vue';
 import OpenTournamentView from './views/student/tournament/OpenTournamentView.vue';
+import ClosedTournamentView from './views/student/tournament/ClosedTournamentView.vue';
 import AvailableQuizzesView from '@/views/student/AvailableQuizzesView.vue';
 import SolvedQuizzesView from '@/views/student/SolvedQuizzesView.vue';
 import QuizView from '@/views/student/quiz/QuizView.vue';
@@ -273,6 +274,15 @@ let router = new Router({
           path: 'open',
           name: 'open-tournament',
           component: OpenTournamentView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Tournament',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'closed',
+          name: 'closed-tournament',
+          component: ClosedTournamentView,
           meta: {
             title: process.env.VUE_APP_NAME + ' - Tournament',
             requiredAuth: 'Student'
