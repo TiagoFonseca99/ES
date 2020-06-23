@@ -15,6 +15,7 @@ import QuizzesView from '@/views/teacher/quizzes/QuizzesView.vue';
 import StudentsView from '@/views/teacher/students/StudentsView.vue';
 import CourseDashboardView from '@/views/teacher/CourseDashboardView.vue';
 import StudentView from '@/views/student/StudentView.vue';
+import ParticipantsTournament from '@/views/student/tournament/ParticipantsTournament.vue';
 
 import MyTournamentsView from '@/views/student/tournament/MyTournamentsView.vue';
 import AllTournamentView from './views/student/tournament/AllTournamentView.vue';
@@ -339,6 +340,16 @@ let router = new Router({
           props: route => ({ username: route.query.username }),
           meta: {
             title: process.env.VUE_APP_NAME + ' - Notifications',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'tournament',
+          name: 'tournament participants',
+          component: ParticipantsTournament,
+          props: route => ({ id: route.query.id }),
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Tournament Participants',
             requiredAuth: 'Student'
           }
         }

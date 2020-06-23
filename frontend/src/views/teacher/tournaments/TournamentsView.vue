@@ -34,8 +34,8 @@
       </template>
     </v-data-table>
     <footer>
-      <v-icon class="mr-2">mouse</v-icon>Left-click on tournament's id to view
-      it.
+      <v-icon class="mr-2">mouse</v-icon>Left-click on tournament's number to
+      view it.
     </footer>
   </v-card>
 </template>
