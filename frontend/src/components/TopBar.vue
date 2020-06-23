@@ -444,119 +444,98 @@
           <template v-slot:activator>
             <v-list-item-title data-cy="Student">Student</v-list-item-title>
           </template>
-
-          <v-list-item
-            to="/student/available"
-            v-if="isStudent && currentCourse"
-          >
+          <v-list-item to="/student/available">
             <v-list-item-action>
               <v-icon>assignment</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Available Quizzes</v-list-item-content>
+            <v-list-item-title>Available Quizzes</v-list-item-title>
           </v-list-item>
-
           <v-list-item to="/student/create">
             <v-list-item-action>
               <v-icon>create</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Create Quiz</v-list-item-content>
+            <v-list-item-title>Create Quiz</v-list-item-title>
           </v-list-item>
-
           <v-list-item to="/student/scan">
             <v-list-item-action>
               <v-icon>fas fa-qrcode</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Scan</v-list-item-content>
+            <v-list-item-title>Scan</v-list-item-title>
           </v-list-item>
-
           <v-list-item to="/student/solved">
             <v-list-item-action>
               <v-icon>done</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Solved Quizzes</v-list-item-content>
+            <v-list-item-title>Solved Quizzes</v-list-item-title>
           </v-list-item>
-
           <!-- ----DDP---- -->
-
           <v-list-item to="/student/discussions">
             <v-list-item-action>
               <v-icon>fas fa-comment-alt</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Discussions</v-list-item-content>
+            <v-list-item-title>Discussions</v-list-item-title>
           </v-list-item>
-
           <!-- ----------- -->
           <!-- ----PPA---- -->
-
           <v-list-item to="/student/submissions">
             <v-list-item-action>
               <v-icon>fas fa-user-edit</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Submissions</v-list-item-content>
+            <v-list-item-title>Submissions</v-list-item-title>
           </v-list-item>
-
           <v-list-item to="/student/reviews">
             <v-list-item-action>
               <v-icon>fas fa-edit</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Reviews</v-list-item-content>
+            <v-list-item-title>Reviews</v-list-item-title>
           </v-list-item>
-
           <v-list-item to="/student/submissions/all">
             <v-list-item-action>
               <v-icon>fas fa-users</v-icon>
             </v-list-item-action>
-            <v-list-item-content>All Submissions</v-list-item-content>
+            <v-list-item-title>All Submissions</v-list-item-title>
           </v-list-item>
-
           <!-- ----------- -->
-
           <!-- ----TDP---- -->
-
           <v-list-item to="/student/myTournaments">
             <v-list-item-action>
               <v-icon>fas fa-medal</v-icon>
             </v-list-item-action>
-            <v-list-item-content>My Tournaments</v-list-item-content>
+            <v-list-item-title>My Tournaments</v-list-item-title>
           </v-list-item>
-
           <v-list-item to="/student/open">
             <v-list-item-action>
               <v-icon>fas fa-medal</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Open Tournaments</v-list-item-content>
+            <v-list-item-title>Open Tournaments</v-list-item-title>
           </v-list-item>
-
           <v-list-item to="/student/all">
             <v-list-item-action>
               <v-icon>fas fa-calendar</v-icon>
             </v-list-item-action>
-            <v-list-item-content>All Tournaments</v-list-item-content>
+            <v-list-item-title>All Tournaments</v-list-item-title>
           </v-list-item>
-
           <!-- ----------- -->
-
           <v-list-item
             :to="'/student/user?username=' + $store.getters.getUser.username"
           >
             <v-list-item-action>
               <v-icon>fas fa-user</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Dashboard</v-list-item-content>
+            <v-list-item-title>Dashboard</v-list-item-title>
           </v-list-item>
           <v-list-item to="/student/search">
             <v-list-item-action>
               <v-icon>fas fa-search</v-icon>
             </v-list-item-action>
-            <v-list-item-content>Search User </v-list-item-content>
+            <v-list-item-title>Search User </v-list-item-title>
           </v-list-item>
         </v-list-group>
-
         <v-list-item to="/courses" v-if="isLoggedIn && moreThanOneCourse">
           <v-list-item-action>
             <v-icon>fas fa-book</v-icon>
           </v-list-item-action>
-          <v-list-item-content>Change course</v-list-item-content>
+          <v-list-item-title>Change course</v-list-item-title>
         </v-list-item>
         <v-list-item @click="logout" v-if="isLoggedIn">
           <v-list-item-action>
