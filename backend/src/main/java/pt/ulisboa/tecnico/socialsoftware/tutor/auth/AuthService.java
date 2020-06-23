@@ -20,6 +20,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.AuthUserDto;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -28,10 +29,14 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.US
 
 @Service
 public class AuthService {
-    private static final int COOKIE_EXP_TIME = JwtTokenProvider.TOKEN_EXPIRATION / 1000;
+    public static final int COOKIE_EXP_TIME = JwtTokenProvider.TOKEN_EXPIRATION / 1000;
+
+    private static String activeProfile;
 
     @Value("${spring.profiles.active}")
-    private String activeProfile;
+    private void init(String profile) {
+        AuthService.activeProfile = profile;
+    }
 
     @Autowired
     private UserService userService;
@@ -44,11 +49,19 @@ public class AuthService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public AuthUserDto checkToken(String token, HttpServletRequest request, HttpServletResponse response) {
+    public AuthUserDto checkToken(Boolean session, String token, HttpServletRequest request,
+            HttpServletResponse response) {
         token = JwtTokenProvider.getToken(token);
 
         try {
             User user = this.userService.findById(JwtTokenProvider.getUserId(token));
+
+            if (JwtTokenProvider.getExpiry(token)
+                    .before(new Date(new Date().getTime() + JwtTokenProvider.TOKEN_RENEW))) {
+                AuthService.setCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, JwtTokenProvider.generateToken(user),
+                        (HttpServletResponse) response, true,
+                        session != null && session ? null : AuthService.COOKIE_EXP_TIME);
+            }
             return new AuthUserDto(user);
         } catch (TutorException e) {
             removeCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, request, response);
@@ -195,7 +208,7 @@ public class AuthService {
         return new AuthUserDto(user);
     }
 
-    public void setCookie(String name, String value, HttpServletResponse response, Boolean http, Integer age) {
+    public static void setCookie(String name, String value, HttpServletResponse response, Boolean http, Integer age) {
         String header = name + "=" + value + "; Path=/; SameSite=Lax;";
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(http != null ? http : false);
@@ -215,7 +228,7 @@ public class AuthService {
         response.setHeader("Set-Cookie", header);
     }
 
-    public void removeCookie(String name, HttpServletRequest request, HttpServletResponse response) {
+    public static void removeCookie(String name, HttpServletRequest request, HttpServletResponse response) {
         for (Cookie cookie : request.getCookies()) {
             if (cookie.getName().equals(name)) {
                 cookie.setMaxAge(0);
@@ -226,5 +239,19 @@ public class AuthService {
             }
         }
 
+    }
+
+    public static String getValueCookie(String cookieName, HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(cookieName)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 }
