@@ -24,7 +24,9 @@ class AnnouncementNotificationsTest extends Specification {
     public static final String ACADEMIC_TERM = "1 SEM"
     public static final String STUDENT_NAME = "João Silva"
     public static final String ANNOUNCEMENT_TITLE = "Announcement"
+    public static final String ANNOUNCEMENT_TITLE2 = "Announcement2"
     public static final String ANNOUNCEMENT_CONTENT = "Here is an announcement"
+    public static final String ANNOUNCEMENT_CONTENT2 = "Here is another announcement"
     public static final String STUDENT_USERNAME = "joaosilva"
     public static final String TEACHER_NAME = "Ana Rita"
     public static final String TEACHER_USERNAME = "anarita"
@@ -84,6 +86,29 @@ class AnnouncementNotificationsTest extends Specification {
         def result = notificationRepository.getUserNotifications(student.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.ANNOUNCEMENT
+
+    }
+
+    def "teacher edits announcement and student receives notification"() {
+        given: "an announcementDto"
+        def announcementDto2 = new AnnouncementDto()
+        announcementDto2.setTitle(ANNOUNCEMENT_TITLE2)
+        announcementDto2.setContent(ANNOUNCEMENT_CONTENT2)
+        announcementDto2.setCourseExecutionId(courseExecution.getId())
+        announcementDto2.setUserId(teacher.getId())
+
+        when: "announcement created"
+        announcementService.createAnnouncement(announcementDto)
+
+        and:
+        announcementService.updateAnnouncement(announcementRepository.findAll().get(0).getId(), announcementDto2)
+
+        then:
+        sleep(1000)
+        def result = notificationRepository.getUserNotifications(student.getId())
+        result.size() == 2
+        result.get(0).getType() == Notification.Type.ANNOUNCEMENT
+        result.get(1).getType() == Notification.Type.ANNOUNCEMENT
 
     }
 

@@ -59,6 +59,7 @@ public class AnnouncementController {
     }
 
     @DeleteMapping("/management/announcements/{announcementId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     @Retryable(
             value = { SQLException.class },
             backoff = @Backoff(delay = 5000))

@@ -40,6 +40,8 @@ public enum NotificationsMessage {
 
     ADD_ANNOUNCEMENT_TITLE("New announcement - %s"),
     ADD_ANNOUNCEMENT_CONTENT("'%s' added by %s"),
+    EDIT_ANNOUNCEMENT_TITLE("Announcement edited - %s"),
+    EDIT_ANNOUNCEMENT_CONTENT("'%s' edited by %s"),
 
     // ppa
 

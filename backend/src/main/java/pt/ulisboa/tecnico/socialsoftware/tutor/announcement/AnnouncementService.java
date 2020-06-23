@@ -92,6 +92,16 @@ public class AnnouncementService {
         Announcement announcement = announcementRepository.findById(announcementId)
                 .orElseThrow(() -> new TutorException(ANNOUNCEMENT_NOT_FOUND, announcementId));
         announcement.update(announcementDto);
+
+        User user = getTeacher(announcementDto.getUserId());
+
+        CourseExecution courseExecution = getCourseExecution(announcementDto.getCourseExecutionId());
+
+        NotificationDto notification = NotificationsCreation.create(EDIT_ANNOUNCEMENT_TITLE,
+                List.of(announcement.getUser().getName()), EDIT_ANNOUNCEMENT_CONTENT,
+                List.of(announcement.getTitle(), user.getName()), Notification.Type.ANNOUNCEMENT);
+        this.notify(courseExecution, notification, user);
+
         return new AnnouncementDto(announcement);
     }
 

@@ -205,7 +205,7 @@
           <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert notification content" enabled="true">
             <stringProp name="JSON_PATH">$[0].content</stringProp>
-            <stringProp name="EXPECTED_VALUE">&apos;${title1}&apos; has been added by Demo Teacher</stringProp>
+            <stringProp name="EXPECTED_VALUE">&apos;${title1}&apos; added by Demo Teacher</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
             <boolProp name="INVERT">false</boolProp>
