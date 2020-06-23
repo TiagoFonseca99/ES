@@ -119,7 +119,8 @@
       </template>
     </v-data-table>
     <footer>
-      Press <v-icon class="mr-2">fa-file-signature</v-icon> to solve tournament quiz.
+      Press <v-icon class="mr-2">fa-file-signature</v-icon> to solve tournament
+      quiz.
     </footer>
     <edit-tournament-dialog
       v-if="currentTournament"

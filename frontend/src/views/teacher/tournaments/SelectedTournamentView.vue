@@ -27,7 +27,13 @@
               <b style="color: #1976d2">Topics: </b>
               <span data-cy="Topics"
                 >{{ selectedTournament !== null ? '' : 'Unknown tournament' }}
-                <ul v-if="selectedTournament.topics.length">
+                <ul
+                  v-if="
+                    selectedTournament !== null &&
+                      selectedTournament.topics !== null &&
+                      selectedTournament.topics.length
+                  "
+                >
                   <div
                     v-for="topic in selectedTournament.topics"
                     :key="topic.id"
