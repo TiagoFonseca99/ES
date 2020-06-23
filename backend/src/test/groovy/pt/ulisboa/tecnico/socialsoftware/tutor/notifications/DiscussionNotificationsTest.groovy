@@ -207,6 +207,7 @@ class DiscussionNotificationsTest extends Specification {
         discussionService.createDiscussion(discussionDto)
 
         then: "student1 has no notification"
+        sleep(100)
         def result1 = notificationRepository.getUserNotifications(student1.getId())
         result1.size() == 0
         and: "own user has no notification"
@@ -226,6 +227,7 @@ class DiscussionNotificationsTest extends Specification {
         discussionService.createReply(new ReplyDto(reply), new DiscussionDto(discussion))
 
         then: "student2 has no notification"
+        sleep(100)
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
         and: "own user has no notification"
@@ -248,6 +250,7 @@ class DiscussionNotificationsTest extends Specification {
         discussionService.editDiscussion(student1.getId(), new DiscussionDto(discussion))
 
         then: "student2 has no notification"
+        sleep(100)
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
         and: "own user has no notification"
@@ -270,6 +273,7 @@ class DiscussionNotificationsTest extends Specification {
         discussionService.editReply(teacher1.getId(), new ReplyDto(reply))
 
         then: "student2 has no notification"
+        sleep(100)
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
         and: "own user has no notification"
@@ -289,6 +293,7 @@ class DiscussionNotificationsTest extends Specification {
         discussionService.removeDiscussion(student1.getId(), discussion.getUser().getId(), discussion.getQuestion().getId())
 
         then: "student2 has no notification"
+        sleep(100)
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
         and: "own user has no notification"
@@ -308,6 +313,7 @@ class DiscussionNotificationsTest extends Specification {
         discussionService.removeReply(teacher1.getId(), reply.getId())
 
         then: "student2 has no notification"
+        sleep(100)
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
         and: "own user has no notification"
@@ -327,6 +333,7 @@ class DiscussionNotificationsTest extends Specification {
         discussionService.setAvailability(teacher1.getId(), new DiscussionDto(discussion))
 
         then: "student2 has no notification"
+        sleep(100)
         def result1 = notificationRepository.getUserNotifications(student2.getId())
         result1.size() == 0
         and: "own user has no notification"

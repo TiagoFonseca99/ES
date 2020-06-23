@@ -405,6 +405,6 @@ public class TournamentService {
     }
 
     private void notify(Tournament tournament, NotificationDto notification, User user) {
-        tournament.Notify(notificationService.createNotification(notification), user);
+        notificationService.notifyObservers(tournament, notificationService.createNotification(notification), user);
     }
 }

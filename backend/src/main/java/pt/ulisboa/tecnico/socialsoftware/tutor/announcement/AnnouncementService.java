@@ -69,7 +69,7 @@ public class AnnouncementService {
         NotificationDto notification = NotificationsCreation.create(ADD_ANNOUNCEMENT_TITLE,
                 List.of(announcement.getUser().getName()), ADD_ANNOUNCEMENT_CONTENT,
                 List.of(announcement.getTitle(), user.getName()), Notification.Type.ANNOUNCEMENT);
-        courseExecution.Notify(notificationService.createNotification(notification), user);
+        this.notify(courseExecution, notification, user);
 
         return new AnnouncementDto(announcement);
     }
@@ -122,5 +122,9 @@ public class AnnouncementService {
         if (!user.isTeacher())
             throw new TutorException(USER_NOT_TEACHER, user.getUsername());
         return user;
+    }
+
+    private void notify(CourseExecution course, NotificationDto notification, User user) {
+        notificationService.notifyObservers(course, notificationService.createNotification(notification), user);
     }
 }

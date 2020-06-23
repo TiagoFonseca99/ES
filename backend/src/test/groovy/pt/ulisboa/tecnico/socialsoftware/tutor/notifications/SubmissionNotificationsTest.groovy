@@ -141,6 +141,7 @@ class SubmissionNotificationsTest extends Specification {
         submissionService.createSubmission(question1.getId(), submissionDto)
 
         then:
+        sleep(100)
         notificationRepository.getUserNotifications(teacher.getId()).size() == 1
 
     }
@@ -155,6 +156,7 @@ class SubmissionNotificationsTest extends Specification {
         submissionService.createSubmission(question3.getId(), submissionDto)
 
         then:
+        sleep(100)
         notificationRepository.getUserNotifications(teacher.getId()).size() == 3
 
     }
@@ -167,6 +169,7 @@ class SubmissionNotificationsTest extends Specification {
         submissionService.reviewSubmission(teacher.getId(), reviewDto1)
 
         then:
+        sleep(100)
         notificationRepository.getUserNotifications(student.getId()).size() == 1
 
     }
@@ -181,6 +184,7 @@ class SubmissionNotificationsTest extends Specification {
         submissionService.reviewSubmission(teacher.getId(), reviewDto3)
 
         then:
+        sleep(100)
         notificationRepository.getUserNotifications(student.getId()).size() == 3
     }
 
@@ -189,12 +193,14 @@ class SubmissionNotificationsTest extends Specification {
         submissionService.createSubmission(question3.getId(), submissionDto)
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(student.getId()).isEmpty()
 
         when:
         questionService.removeQuestion(teacher.getId(), question3.getId())
 
         then:
+        sleep(100)
         notificationRepository.getUserNotifications(student.getId()).size() == 1
 
     }
@@ -205,6 +211,7 @@ class SubmissionNotificationsTest extends Specification {
         submissionService.createSubmission(question3.getId(), submissionDto)
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(student.getId()).isEmpty()
 
         when:
@@ -212,6 +219,7 @@ class SubmissionNotificationsTest extends Specification {
         questionService.removeQuestion(teacher.getId(), question3.getId())
 
         then:
+        sleep(100)
         notificationRepository.getUserNotifications(student.getId()).size() == 2
 
     }
