@@ -80,6 +80,7 @@ class AnnouncementNotificationsTest extends Specification {
         announcementService.createAnnouncement(announcementDto)
 
         then:
+        sleep(1000)
         def result = notificationRepository.getUserNotifications(student.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.ANNOUNCEMENT
@@ -96,6 +97,7 @@ class AnnouncementNotificationsTest extends Specification {
         announcementService.createAnnouncement(announcementDto)
 
         then:
+        sleep(1000)
         def result = notificationRepository.getUserNotifications(student.getId())
         result.size() == 3
         result.get(0).getType() == Notification.Type.ANNOUNCEMENT

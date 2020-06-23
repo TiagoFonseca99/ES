@@ -336,6 +336,6 @@ public class DiscussionService {
     }
 
     private void notify(Discussion discussion, NotificationDto notification, User user) {
-        discussion.Notify(notificationService.createNotification(notification), user);
+        notificationService.notifyObservers(discussion, notificationService.createNotification(notification), user);
     }
 }
