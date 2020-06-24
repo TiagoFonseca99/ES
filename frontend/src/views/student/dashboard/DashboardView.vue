@@ -132,9 +132,24 @@
                     this.info.tournamentStatsPublic)
               "
             >
+              <template v-slot:item.id="{ item }">
+                <v-chip small color="primary">
+                  {{ item.id }}
+                </v-chip>
+              </template>
+              <template v-slot:item.startTime="{ item }">
+                <v-chip small>
+                  {{ item.startTime }}
+                </v-chip>
+              </template>
+              <template v-slot:item.endTime="{ item }">
+                <v-chip small>
+                  {{ item.endTime }}
+                </v-chip>
+              </template>
               <template v-slot:item.score="{ item }">
-                <v-chip :color="getPercentageColor(score(item))">
-                  {{ score(item) }}
+                <v-chip small :color="getPercentageColor(score(item))">
+                  {{ score(item) === '' ? 'NOT SOLVED' : score(item) }}
                 </v-chip>
               </template>
             </v-data-table>
@@ -358,8 +373,6 @@ export default class DashboardView extends Vue {
         score = this.calculateScore(quiz);
       }
     });
-
-    if (score == '') return 'NOT SOLVED';
     return score;
   }
 
@@ -370,7 +383,6 @@ export default class DashboardView extends Vue {
     else if (percentage < 50) return 'orange';
     else if (percentage < 75) return 'lime';
     else if (percentage <= 100) return 'green';
-    else return 'primary';
   }
 }
 </script>

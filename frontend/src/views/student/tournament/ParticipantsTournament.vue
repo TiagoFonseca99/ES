@@ -2,23 +2,51 @@
   <v-container
     fluid
     style="height: 100%; position: relative; display: flex; flex-direction: column"
+    v-if="this.$store.getters.isLoggedIn"
   >
-    <h2>Tournament</h2>
-    <v-container fluid style="position: relative; max-height: 100%; flex: 1;">
+    <v-container fluid style="position: relative; max-height: 100%;">
       <v-row style="width: 100%; height: 100%">
         <v-col>
           <v-card class="dashCard flexCard">
-            <v-card-title class="justify-center">Ranking</v-card-title>
+            <v-card-title class="justify-center"
+              >Tournament {{ this.id }} - Ranking</v-card-title
+            >
             <v-data-table
               :headers="headers"
               :items="tournamentScores"
               :hide-default-footer="true"
               :mobile-breakpoint="0"
               class="fill-height"
+              disable-sort
             >
+              <template v-slot:item.ranking="{ item }">
+                <v-chip
+                  v-if="item.ranking < 4 && item.ranking != 0"
+                  :color="getRankingColor(item.ranking)"
+                  text-color="white"
+                >
+                  {{ item.ranking }}
+                </v-chip>
+                <span v-else-if="item.ranking != 0">
+                  {{ item.ranking }}
+                </span>
+              </template>
+              <template v-slot:item.username="{ item }">
+                <v-chip
+                  :color="getUserColor(item.username)"
+                  small
+                  @click="openStudentDashboardDialog(item)"
+                  text-color="white"
+                >
+                  <v-icon left small v-if="isCurrentUser(item)" color="white"
+                    >star</v-icon
+                  >
+                  <span> {{ item.username }} </span>
+                </v-chip>
+              </template>
               <template v-slot:item.score="{ item }">
                 <v-chip :color="getPercentageColor(item.score)">
-                  {{ item.score }}
+                  {{ item.score === '' ? 'NOT SOLVED' : item.score }}
                 </v-chip>
               </template>
             </v-data-table>
@@ -26,6 +54,12 @@
         </v-col>
       </v-row>
     </v-container>
+    <show-dashboard-dialog
+      v-if="currentUsername"
+      v-model="dashboardDialog"
+      :username="currentUsername"
+      v-on:close-show-dashboard-dialog="onCloseShowDashboardDialog"
+    />
   </v-container>
 </template>
 
@@ -36,10 +70,10 @@ import SolvedQuiz from '@/models/statement/SolvedQuiz';
 import TournamentScore from '@/models/user/TournamentScore';
 import User from '@/models/user/User';
 import RemoteServices from '@/services/RemoteServices';
-import AnimatedNumber from '@/components/AnimatedNumber.vue';
+import ShowDashboardDialog from '@/views/student/dashboard/DashboardDialogView.vue';
 
 @Component({
-  components: { AnimatedNumber }
+  components: { 'show-dashboard-dialog': ShowDashboardDialog }
 })
 export default class ParticipantsTournament extends Vue {
   @Prop({ type: String, required: true }) id!: number;
@@ -49,6 +83,8 @@ export default class ParticipantsTournament extends Vue {
   quizzes: SolvedQuiz[] = [];
   tournamentScores: TournamentScore[] = [];
   correctAnswers: number = 0;
+  currentUsername: string | null = null;
+  dashboardDialog: boolean = false;
 
   headers: object = [
     { text: 'Ranking', value: 'ranking', align: 'center' },
@@ -80,8 +116,9 @@ export default class ParticipantsTournament extends Vue {
   }
 
   sortByScore(a: TournamentScore, b: TournamentScore) {
-    if (a && b) return a.correctAnswers < b.correctAnswers ? 1 : -1;
-    else return 0;
+    if (a && b) {
+      return a.score < b.score ? 1 : -1;
+    } else return 0;
   }
 
   setRankings() {
@@ -116,8 +153,6 @@ export default class ParticipantsTournament extends Vue {
         score = this.calculateScore(quiz);
       }
     });
-
-    if (score == '') return 'NOT SOLVED';
     return score;
   }
 
@@ -128,6 +163,30 @@ export default class ParticipantsTournament extends Vue {
     else if (percentage < 50) return 'orange';
     else if (percentage < 75) return 'lime';
     else if (percentage <= 100) return 'green';
+  }
+
+  getRankingColor(ranking: number) {
+    if (ranking == 1) return '#d4Af37';
+    else if (ranking == 2) return '#c0c0c0';
+    else if (ranking == 3) return '#b9722d';
+    else return 'primary';
+  }
+
+  isCurrentUser(a: TournamentScore) {
+    return a.name === this.$store.getters.getUser.name;
+  }
+
+  openStudentDashboardDialog(tournamentScore: TournamentScore) {
+    this.dashboardDialog = true;
+    this.currentUsername = tournamentScore.username;
+  }
+
+  onCloseShowDashboardDialog() {
+    this.dashboardDialog = false;
+  }
+
+  getUserColor(username: string) {
+    if (username == this.$store.getters.getUser.username) return '#fae319';
     else return 'primary';
   }
 }
@@ -149,66 +208,5 @@ export default class ParticipantsTournament extends Vue {
 .dashCard {
   height: 100%;
   @include background-opacity(#fff, 0.6);
-
-  .dashInfo {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    padding: 20px;
-    align-items: stretch;
-    height: 100%;
-  }
-
-  #statsContainer {
-    display: grid;
-    grid-template-areas: 'a a';
-    grid-auto-columns: 1fr;
-    grid-auto-rows: 1fr;
-    justify-items: stretch;
-    justify-content: space-around;
-    align-items: stretch;
-    align-content: stretch;
-    column-gap: 15px;
-    row-gap: 15px;
-  }
-
-  .square {
-    border: 3px solid #ffffff;
-    border-radius: 5px;
-    display: flex;
-    color: #1976d2;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    @include background-opacity(#ffffff, 0.85);
-
-    .num {
-      display: block;
-      font-size: 30pt;
-      transition: all 0.5s;
-    }
-
-    .num2 {
-      display: block;
-      font-size: 20pt;
-      transition: all 0.5s;
-    }
-
-    .statName {
-      display: block;
-      font-size: 15pt;
-    }
-  }
-
-  .square:hover {
-    border: 2px solid #1976d2;
-    font-weight: bolder;
-  }
-}
-
-.description {
-  font-size: 15pt;
-  font-weight: bold;
-  color: inherit;
 }
 </style>
