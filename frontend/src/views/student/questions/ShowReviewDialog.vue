@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    v-model="dialog"
+    :value="dialog"
     @input="closeReviewDialog"
     @keydown.esc="closeReviewDialog"
     max-width="75%"

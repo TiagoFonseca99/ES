@@ -1165,6 +1165,19 @@ export default class RemoteServices {
       });
   }
 
+  static getClosedTournaments(): Promise<Tournament[]> {
+    return httpClient
+      .get('/tournaments/getClosedTournaments')
+      .then(response => {
+        return response.data.map((tournament: any) => {
+          return new Tournament(tournament, Store.getters.getUser);
+        });
+      })
+      .catch(async error => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   static getUserTournaments(): Promise<Tournament[]> {
     return httpClient
       .get('/tournaments/getUserTournaments')

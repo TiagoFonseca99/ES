@@ -170,8 +170,10 @@ export default class QuizView extends Vue {
   async created() {
     if (!this.statementQuiz?.id) {
       await this.$router.push({ name: 'create-quiz' });
+      await this.$store.dispatch('toggleInQuiz', true);
     } else {
       try {
+        await this.$store.dispatch('toggleInQuiz', true);
         await RemoteServices.startQuiz(this.statementQuiz?.id);
       } catch (error) {
         await this.$store.dispatch('error', error);
@@ -266,12 +268,14 @@ export default class QuizView extends Vue {
     try {
       this.calculateTime();
       this.confirmed = true;
+      await this.$store.dispatch('toggleInQuiz', false);
       await this.statementManager.concludeQuiz();
 
       if (
         !this.statementQuiz?.timeToResults &&
         this.statementManager.correctAnswers.length !== 0
       ) {
+        await this.$store.dispatch('toggleInQuiz', false);
         await this.$router.push({ name: 'quiz-results' });
       }
     } catch (error) {

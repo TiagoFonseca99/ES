@@ -131,6 +131,9 @@ class GetCourseDashboardInfoTest extends Specification {
         student2.addCourse(courseExecution)
         student3.addCourse(courseExecution)
 
+        userRepository.save(student1)
+        userRepository.save(student2)
+        userRepository.save(student3)
 
         def topics = new ArrayList<Integer>()
 
@@ -298,7 +301,7 @@ class GetCourseDashboardInfoTest extends Specification {
         result.getNumSubmissions() == 2
         result.getNumApprovedSubmissions() == 1
         result.getNumRejectedSubmissions() == 1
-        result.getJoinedTournaments().size() == 0
+        result.getJoinedTournaments().size() == 2
     }
 
     def "get course dashboard info with one student's submission information private"(){
@@ -344,7 +347,7 @@ class GetCourseDashboardInfoTest extends Specification {
         result.getNumSubmissions() == 0
         result.getNumApprovedSubmissions() == 0
         result.getNumRejectedSubmissions() == 0
-        result.getJoinedTournaments().size() == 0
+        result.getJoinedTournaments().size() == 2
     }
 
     def "get course dashboard info from invalid course execution"(){
