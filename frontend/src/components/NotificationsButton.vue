@@ -1,5 +1,9 @@
 <template>
-  <v-toolbar-items class="hidden-sm-and-down" hide-details>
+  <v-toolbar-items
+    class="hidden-sm-and-down"
+    hide-details
+    v-if="this.$store.getters.outOfQuiz"
+  >
     <v-menu open-on-click nudge-right="10" nudge-top="10" top>
       <template v-slot:activator="{ on }">
         <v-chip

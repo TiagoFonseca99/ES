@@ -11,16 +11,14 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.Demo;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.StudentDto;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collector;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -35,6 +33,9 @@ public class CourseService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TournamentRepository tournamentRepository;
 
     @Retryable(
             value = { SQLException.class },
@@ -168,16 +169,16 @@ public class CourseService {
         List<User> allStudents = courseExecution.getUsers().stream().filter(user -> user.getRole().equals(User.Role.STUDENT)).collect(Collectors.toList());
         List<DashboardDto> publicStudentsInfo = allStudents.stream().map(u -> userService.getDashboardInfo(u.getId())).collect(Collectors.toList());
 
-        return getAllPublicStudentsInfo(publicStudentsInfo);
+        return getAllPublicStudentsInfo(publicStudentsInfo, courseExecutionId);
     }
 
-    private DashboardDto getAllPublicStudentsInfo(List<DashboardDto> publicStudentsInfo) {
+    private DashboardDto getAllPublicStudentsInfo(List<DashboardDto> publicStudentsInfo,int  courseExecutionId) {
         Integer numDiscussions = 0;
         Integer numPublicDiscussions = 0;
         Integer numSubmissions = 0;
         Integer numApprovedSubmissions = 0;
         Integer numRejectedSubmissions = 0;
-        List<TournamentDto> joinedTournaments = new ArrayList<>();
+        List<TournamentDto> courseTournaments = tournamentRepository.getCourseExecutionTournaments(courseExecutionId).stream().map(TournamentDto::new).collect(Collectors.toList());
 
         for (DashboardDto studentInfo : publicStudentsInfo) {
             if (studentInfo.isDiscussionStatsPublic()) {
@@ -189,11 +190,8 @@ public class CourseService {
                 numApprovedSubmissions += studentInfo.getNumApprovedSubmissions();
                 numRejectedSubmissions += studentInfo.getNumRejectedSubmissions();
             }
-            if (studentInfo.isTournamentStatsPublic()) {
-                joinedTournaments.addAll(studentInfo.getJoinedTournaments());
-            }
         }
-        return new DashboardDto(numDiscussions, numPublicDiscussions, numSubmissions, numApprovedSubmissions, numRejectedSubmissions, joinedTournaments);
+        return new DashboardDto(numDiscussions, numPublicDiscussions, numSubmissions, numApprovedSubmissions, numRejectedSubmissions, courseTournaments);
     }
 
     private CourseExecution createCourseExecution(Course existingCourse, CourseDto courseDto) {

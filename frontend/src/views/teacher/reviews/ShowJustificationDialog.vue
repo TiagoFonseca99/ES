@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    v-model="dialog"
+    :value="dialog"
     @input="closeReviewDialog"
     @keydown.esc="closeReviewDialog"
     max-width="75%"
@@ -34,7 +34,7 @@ import ShowReview from '@/views/teacher/reviews/ShowJustification.vue';
     'show-review': ShowReview
   }
 })
-export default class ShowReviewDialog extends Vue {
+export default class ShowJustificationDialog extends Vue {
   @Prop({ type: Review, required: true }) readonly review!: Review;
   @Model('dialog', Boolean) dialog!: boolean;
 
