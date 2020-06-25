@@ -84,6 +84,9 @@ public enum ErrorMessage {
     USER_NOT_STUDENT("Username %s is not a student"),
     USER_NOT_TEACHER("Username %s is not a teacher"),
 
+    SUBSCRIPTION_NOT_FOUND("Couldn't find subscription"),
+    SUBSCRIPTION_NOT_FROM_USER("Subscription is not from logged user"),
+
     // Ppa
     QUESTION_ALREADY_APPROVED("User %s has already approved this question"),
     QUESTION_ALREADY_SUBMITTED("User %s has already submitted this question"),

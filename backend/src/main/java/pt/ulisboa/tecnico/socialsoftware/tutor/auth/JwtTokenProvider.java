@@ -46,12 +46,12 @@ public class JwtTokenProvider {
         }
     }
 
-    static String generateToken(User user) {
+    public static String generateToken(String audience, User user) {
         if (publicKey == null) {
             generateKeys();
         }
 
-        Claims claims = Jwts.claims().setSubject(String.valueOf(user.getId()));
+        Claims claims = Jwts.claims().setSubject(String.valueOf(user.getId())).setAudience(audience);
         claims.put("role", user.getRole());
 
         Date now = new Date();
@@ -59,6 +59,10 @@ public class JwtTokenProvider {
 
         return Jwts.builder().setClaims(claims).setIssuedAt(new Date()).setExpiration(expiryDate).signWith(privateKey)
                 .compact();
+    }
+
+    static String generateToken(User user) {
+        return generateToken("", user);
     }
 
     static String getToken(String token) {

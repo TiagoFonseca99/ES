@@ -45,6 +45,10 @@ public class ServerKeys {
         return this.pubKeyUncompressed;
     }
 
+    public String getBase64() {
+        return this.pubKeyB64;
+    }
+
     @PostConstruct
     private void initKeys() {
         Path pubFile = Paths.get(this.pubPath);

@@ -86,4 +86,17 @@ public class Subscription {
     public void setAuth(String auth) {
         this.auth = auth;
     }
+
+    public User getUser() {
+        return this.user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void remove() {
+        this.user.getSubscriptions().remove(this);
+        this.user = null;
+    }
 }
