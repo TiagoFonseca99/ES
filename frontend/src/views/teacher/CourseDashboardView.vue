@@ -59,13 +59,18 @@
               :mobile-breakpoint="0"
               class="fill-height"
             >
-              <template v-slot:item.startTime="{ item }">
+              <template v-slot:item.id="{ item }">
                 <v-chip small color="primary">
+                  {{ item.id }}
+                </v-chip>
+              </template>
+              <template v-slot:item.startTime="{ item }">
+                <v-chip small>
                   {{ item.startTime }}
                 </v-chip>
               </template>
               <template v-slot:item.endTime="{ item }">
-                <v-chip small color="primary">
+                <v-chip small>
                   {{ item.endTime }}
                 </v-chip>
               </template>
