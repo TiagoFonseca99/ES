@@ -43,11 +43,6 @@
           {{ item.endTime }}
         </v-chip>
       </template>
-      <template v-slot:item.id="{ item }">
-        <v-chip color="primary">
-          {{ item.id }}
-        </v-chip>
-      </template>
       <template v-slot:item.state="{ item }">
         <v-chip :color="getStateColor(item.state)">
           {{ getStateName(item.state) }}
@@ -131,8 +126,7 @@
     <footer>
       Press <v-icon class="mr-2">fa-file-signature</v-icon> to solve tournament
       quiz.
-    </footer>
-    <footer>
+
       <v-icon class="mr-2">mouse</v-icon>Left-click on tournament's number to
       view the current ranking.
     </footer>

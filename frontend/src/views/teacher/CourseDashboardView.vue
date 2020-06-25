@@ -60,7 +60,11 @@
               class="fill-height"
             >
               <template v-slot:item.id="{ item }">
-                <v-chip small color="primary">
+                <v-chip
+                  small
+                  color="primary"
+                  :to="openTournamentDashboard(item)"
+                >
                   {{ item.id }}
                 </v-chip>
               </template>
@@ -180,6 +184,10 @@ export default class DashboardView extends Vue {
     }
 
     await this.$store.dispatch('clearLoading');
+  }
+
+  openTournamentDashboard(tournament: Tournament) {
+    if (tournament) return '/teacher/tournament?id=' + tournament.id;
   }
 }
 </script>

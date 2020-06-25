@@ -19,4 +19,7 @@ public interface TournamentRepository extends JpaRepository<Tournament, Integer>
 
     @Query(value = "SELECT * FROM tournaments t WHERE t.user_id = :user_id", nativeQuery = true)
     List<Tournament> getUserTournaments(Integer user_id);
+
+    @Query(value = "SELECT * FROM tournaments t WHERE t.course_execution_id = :execution_id", nativeQuery = true)
+    List<Tournament> getCourseExecutionTournaments(Integer execution_id);
 }
