@@ -133,8 +133,12 @@
               "
             >
               <template v-slot:item.id="{ item }">
-                <v-chip small color="primary">
-                  {{ item.id }}
+                <v-chip
+                  color="primary"
+                  small
+                  :to="openTournamentDashboard(item)"
+                >
+                  <span> {{ item.id }} </span>
                 </v-chip>
               </template>
               <template v-slot:item.startTime="{ item }">
@@ -383,6 +387,10 @@ export default class DashboardView extends Vue {
     else if (percentage < 50) return 'orange';
     else if (percentage < 75) return 'lime';
     else if (percentage <= 100) return 'green';
+  }
+
+  openTournamentDashboard(tournament: Tournament) {
+    if (tournament) return '/student/tournament?id=' + tournament.id;
   }
 }
 </script>
