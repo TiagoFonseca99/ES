@@ -114,9 +114,6 @@ public class User implements UserDetails, DomainEntity, Observer {
     private Set<Review> review_observers = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
-    private Set<CourseExecution> executions_observers = new HashSet<>();
-
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "observers")
     private Set<Discussion> discussions_observers = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "users")
@@ -456,10 +453,7 @@ public class User implements UserDetails, DomainEntity, Observer {
         this.quizAnswers.add(quizAnswer);
     }
 
-    public void addCourse(CourseExecution course) {
-        this.courseExecutions.add(course);
-        course.Attach(this);
-    }
+    public void addCourse(CourseExecution course) { this.courseExecutions.add(course); }
 
     public void addSubmission(Submission submission) {
         this.submissions.add(submission);
@@ -478,10 +472,6 @@ public class User implements UserDetails, DomainEntity, Observer {
     public void addObserver(Review review) {
         this.review_observers.add(review);
     }
-    
-    public void addObserver(CourseExecution courseExecution) {
-        this.executions_observers.add(courseExecution);
-    }
 
     public void addObserver(Discussion discussion) {
         this.discussions_observers.add(discussion);
@@ -496,8 +486,6 @@ public class User implements UserDetails, DomainEntity, Observer {
     public void removeObserver(Tournament tournament) { this.tournaments_observers.remove(tournament); }
 
     public void removeObserver(Review review) { this.review_observers.remove(review); }
-
-    public void removeObserver(CourseExecution courseExecution) { this.executions_observers.remove(courseExecution); }
 
     public void removeObserver(Discussion discussion) {
         this.discussions_observers.remove(discussion);

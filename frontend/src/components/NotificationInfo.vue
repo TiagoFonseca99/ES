@@ -40,8 +40,6 @@ export default class NotificationInfo extends Vue {
     switch (type) {
       case 'TOURNAMENT':
         return 'fa-trophy';
-      case 'ANNOUNCEMENT':
-        return 'fa-bullhorn';
       case 'SUBMISSION':
       case 'QUESTION':
         return 'fa-question-circle';
@@ -59,9 +57,6 @@ export default class NotificationInfo extends Vue {
     switch (type) {
       case 'TOURNAMENT':
         name = 'open-tournament';
-        break;
-      case 'ANNOUNCEMENT':
-        name = 'home';
         break;
       case 'SUBMISSION':
         name = 'reviews-management';
