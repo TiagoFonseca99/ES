@@ -36,13 +36,6 @@ public enum NotificationsMessage {
     DISCUSSION_EDIT_REPLY_CONTENT("%s edited reply to discussion to question '%s'"),
     DISCUSSION_DELETE_REPLY_CONTENT("%s removed reply to discussion to question '%s'"),
 
-    // adp
-
-    ADD_ANNOUNCEMENT_TITLE("New announcement - %s"),
-    ADD_ANNOUNCEMENT_CONTENT("'%s' added by %s"),
-    EDIT_ANNOUNCEMENT_TITLE("Announcement edited - %s"),
-    EDIT_ANNOUNCEMENT_CONTENT("'%s' edited by %s"),
-
     // ppa
 
     NEW_REVIEW_TITLE("New Review - Submission '%s'"),
