@@ -12,9 +12,6 @@
           <v-btn color="primary" @click="filterNotifications('ALL')">{{
             'all'
           }}</v-btn>
-          <v-btn color="primary" @click="filterNotifications('ANNOUNCEMENT')">{{
-            'Announcements'
-          }}</v-btn>
           <v-btn
             color="primary"
             v-if="this.$store.getters.isStudent"
