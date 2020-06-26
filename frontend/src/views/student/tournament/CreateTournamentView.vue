@@ -42,7 +42,7 @@
             </v-row>
             <v-flex xs24 sm12 md8>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col cols="12" sm="4">
                   <p>
                     <b>Number Of Questions:</b>
                     {{ editTournament.numberOfQuestions }}
@@ -56,35 +56,29 @@
                     data-cy="NumberOfQuestions"
                   />
                 </v-col>
-                <v-spacer></v-spacer>
-                <v-col cols="12" sm="6">
-                  <v-row>
-                    <v-col cols="6" sm="3">
-                      <b>Privacy:</b>
-                    </v-col>
-                    <v-spacer></v-spacer>
-                    <v-col cols="6" sm="9">
-                      <div
-                        class="switchContainer"
-                        style="display: flex; flex-direction: row; position: relative;"
-                      >
-                        <v-switch
-                          style="flex: 1"
-                          data-cy="SwitchPrivacy"
-                          v-model="editTournament.privateTournament"
-                          :label="
-                            editTournament.privateTournament
-                              ? 'Private'
-                              : 'Public'
-                          "
-                          @change="togglePrivacy()"
-                        />
-                      </div>
-                    </v-col>
-                  </v-row>
-
+                <v-col cols="12" sm="2">
+                  <p>
+                    <b>Privacy:</b>
+                  </p>
+                  <div
+                    class="switchContainer"
+                    style="display: flex; flex-direction: row; position: relative;"
+                  >
+                    <v-switch
+                      data-cy="SwitchPrivacy"
+                      v-model="editTournament.privateTournament"
+                      :label="
+                        editTournament.privateTournament ? 'Private' : 'Public'
+                      "
+                      @change="togglePrivacy()"
+                    />
+                  </div>
+                </v-col>
+                <v-col cols="12" sm="6" v-if="this.typePassword">
+                  <p>
+                    <b>Set Password:</b>
+                  </p>
                   <v-text-field
-                    v-if="this.typePassword"
                     :type="passwordFieldType"
                     v-model="password"
                     label="Password"
