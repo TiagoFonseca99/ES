@@ -45,9 +45,6 @@ public class Submission implements Observable {
     @ManyToMany(fetch = FetchType.LAZY)
     private Set<User> observers = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<Notification> notifications = new ArrayList<>();
-
     public Submission() {}
 
     public Submission(CourseExecution courseExecution, Question question, User user){
@@ -87,12 +84,6 @@ public class Submission implements Observable {
     public Integer getCourseId() { return courseExecution.getCourseId(); }
 
     public void setCourseExecution(CourseExecution courseExecution) { this.courseExecution = courseExecution; }
-
-    public List<Notification> getNotifications() { return notifications; }
-
-    public void addNotification(Notification notification) { this.notifications.add(notification); }
-
-    public void removeNotification(Notification notification) { this.notifications.remove(notification); }
 
     public Set<User> getUsers() { return observers; }
 
