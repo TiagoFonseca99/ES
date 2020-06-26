@@ -174,6 +174,15 @@ public class TournamentService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public List<TournamentDto> getClosedTournaments(User user) {
+
+        List<CourseExecution> list = new ArrayList<>(user.getCourseExecutions());
+        return tournamentRepository.getClosedTournaments(list).stream().map(TournamentDto::new)
+                .collect(Collectors.toList());
+    }
+    
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<TournamentDto> getUserTournaments(User user) {
         return tournamentRepository.getUserTournaments(user.getId()).stream().map(TournamentDto::new)
                 .collect(Collectors.toList());
@@ -223,8 +232,8 @@ public class TournamentService {
             topicConjunctionRepository.save(topicConjunction);
 
             Assessment assessment = new Assessment();
-            assessment.setTitle("Generated Assessment");
-            assessment.setStatus(Assessment.Status.AVAILABLE);
+            assessment.setTitle("Tournament " + tournament.getId() + " Assessment");
+            assessment.setStatus(Assessment.Status.TOURNAMENT);
             assessment.setCourseExecution(tournament.getCourseExecution());
             assessment.addTopicConjunction(topicConjunction);
             topicConjunction.setAssessment(assessment);
@@ -241,6 +250,8 @@ public class TournamentService {
                 quiz.setAvailableDate(tournament.getStartTime());
             }
             quiz.setConclusionDate(tournament.getEndTime());
+            quiz.setTitle("Tournament " + tournament.getId() + " Quiz");
+            quiz.setType(Quiz.QuizType.TOURNAMENT.toString());
 
             tournament.setQuizId(statementQuizDto.getId());
         }

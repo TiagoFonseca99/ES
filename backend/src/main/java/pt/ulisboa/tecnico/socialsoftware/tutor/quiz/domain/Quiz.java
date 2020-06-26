@@ -25,7 +25,7 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 @Table(name = "quizzes", indexes = { @Index(name = "quizzes_indx_0", columnList = "key") })
 public class Quiz implements DomainEntity {
     public enum QuizType {
-        EXAM, TEST, GENERATED, PROPOSED, IN_CLASS
+        EXAM, TEST, GENERATED, PROPOSED, IN_CLASS, TOURNAMENT
     }
 
     @Id

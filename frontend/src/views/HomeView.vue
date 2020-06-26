@@ -194,7 +194,7 @@ export default class HomeView extends Vue {
 
   #announcements {
     height: 90%;
-    width: 125%;
+    width: 100%;
   }
 
   .remember {
