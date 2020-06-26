@@ -29,8 +29,8 @@ public class WorkerController {
     private WorkerService workerService;
 
     @GetMapping("/worker/publicKey")
-    public byte[] publicKey() {
-        return serverKeys.getUncompressed();
+    public String publicKey() {
+        return serverKeys.getBase64();
     }
 
     @PostMapping("/worker/subscribe")
@@ -42,6 +42,17 @@ public class WorkerController {
         }
 
         workerService.subscribe(user.getId(), subscription);
+    }
+
+    @PostMapping("/worker/isSubscribed")
+    public void isSubscribed(Principal principal, @RequestBody SubscriptionDto subscription) {
+        User user = (User) ((Authentication) principal).getPrincipal();
+
+        if (user == null) {
+            throw new TutorException(AUTHENTICATION_ERROR);
+        }
+
+        workerService.isSubscribed(user.getId(), subscription);
     }
 
     @DeleteMapping("/worker/unsubscribe")

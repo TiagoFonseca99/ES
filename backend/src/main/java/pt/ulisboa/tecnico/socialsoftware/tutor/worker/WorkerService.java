@@ -3,7 +3,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.worker;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -11,7 +10,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
-import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -42,7 +40,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.JwtTokenProvider;
-import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
@@ -87,24 +84,25 @@ public class WorkerService {
         Subscription subscription = new Subscription(user, subscriptionDto);
 
         this.entityManager.persist(subscription);
+    }
 
-        logger.info("SUCCESSFULLY SUBSCRIBED");
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public boolean isSubscribed(Integer userId, SubscriptionDto subscriptionDto) {
+        checkEndpoint(subscriptionDto);
+
+        return subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint())
+            .filter(sub -> sub.getUser().getId() == userId).count() == 1;
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void unsubscribe(Integer userId, SubscriptionDto subscriptionDto) {
-        if (subscriptionDto == null || subscriptionDto.getEndpoint() == null) {
-            throw new TutorException(INVALID_SUBSCRIPTION);
-        }
+        checkEndpoint(subscriptionDto);
 
         Subscription subscription = subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint())
-                .orElseThrow(() -> new TutorException(SUBSCRIPTION_NOT_FOUND));
-
-        if (subscription.getUser().getId() != userId) {
-            throw new TutorException(SUBSCRIPTION_NOT_FROM_USER);
-        }
-
+            .filter(sub -> sub.getUser().getId() == userId).findFirst()
+            .orElseThrow(() -> new TutorException(SUBSCRIPTION_NOT_FOUND));
 
         subscription.remove();
 
@@ -133,17 +131,17 @@ public class WorkerService {
                             URI endpoint = URI.create(sub.getEndpoint());
 
                             HttpRequest request = requestBuilder.POST(BodyPublishers.ofByteArray(result)).uri(endpoint)
-                                    .header("Content-Type", "application/octet-stream")
-                                    .header("Content-Encoding", "aes128gcm").header("TTL", "180")
-                                    .header("Authorization", "vapid t=" + token + ", k=" + serverKeys.getBase64())
-                                    .build();
+                                .header("Content-Type", "application/octet-stream")
+                                .header("Content-Encoding", "aes128gcm").header("TTL", "180")
+                                .header("Authorization", "vapid t=" + token + ", k=" + serverKeys.getBase64())
+                                .build();
 
                             HttpResponse<Void> response = httpClient.send(request, BodyHandlers.discarding());
                             switch (response.statusCode()) {
-                                case 201:
-                                    break;
-                                default:
-                                    logger.error("HTTP Response: {} ### {}", response.statusCode(), request);
+                            case 201:
+                                break;
+                            default:
+                                logger.error("HTTP Response: {} ### {}", response.statusCode(), request);
                             }
                         } catch (InterruptedException | IOException e) {
                             logger.error("Error sending notification");
@@ -152,22 +150,28 @@ public class WorkerService {
                     }
                 }
             } catch (JsonProcessingException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
-                    | InvalidAlgorithmParameterException | InvalidKeySpecException | NoSuchAlgorithmException
-                    | InvalidKeyException e) {
+                     | InvalidAlgorithmParameterException | InvalidKeySpecException | NoSuchAlgorithmException
+                     | InvalidKeyException e) {
                 logger.error(e.getMessage());
             }
         }
     }
 
     private void checkSubscription(SubscriptionDto subscription) {
-        if (subscription == null || subscription.getExpirationTime() == null
-                || subscription.getExpirationTime() < new Date().getTime() || subscription.getEndpoint() == null
-                || !validSubscriptionKey(subscription.getKeys())) {
+        if (subscription == null
+            || (subscription.getExpirationTime() != null && subscription.getExpirationTime() < new Date().getTime()) || subscription.getEndpoint() == null
+            || !validSubscriptionKey(subscription.getKeys())) {
             throw new TutorException(INVALID_SUBSCRIPTION);
         }
     }
 
     private boolean validSubscriptionKey(SubscriptionKeyDto key) {
         return key != null && key.getAuth() != null && key.getP256dh() != null;
+    }
+
+    private void checkEndpoint(SubscriptionDto subscription) {
+        if (subscription == null || subscription.getEndpoint() == null) {
+            throw new TutorException(INVALID_SUBSCRIPTION);
+        }
     }
 }

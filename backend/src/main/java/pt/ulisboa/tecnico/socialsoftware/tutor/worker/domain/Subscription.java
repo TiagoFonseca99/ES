@@ -4,6 +4,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.worker.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,7 +21,7 @@ public class Subscription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "endpoint", unique = true)
+    @Column(name = "endpoint")
     private String endpoint;
 
     @Column(name = "expiration")
@@ -32,7 +33,7 @@ public class Subscription {
     @Column(name = "auth")
     private String auth;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     public Subscription() {
