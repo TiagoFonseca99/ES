@@ -15,6 +15,7 @@ interface State {
   error: boolean;
   errorMessage: string;
   loading: boolean;
+  inQuiz: boolean;
 }
 
 const state: State = {
@@ -24,7 +25,8 @@ const state: State = {
   currentCourse: null,
   error: false,
   errorMessage: '',
-  loading: false
+  loading: false,
+  inQuiz: false
 };
 
 Vue.use(Vuex);
@@ -55,6 +57,9 @@ export default new Vuex.Store({
     },
     updateUser(state, user: User) {
       state.user = user;
+    },
+    toggleInQuiz(state, inQuiz: boolean) {
+      state.inQuiz = inQuiz;
     },
     session(state, session) {
       state.session = session;
@@ -118,6 +123,9 @@ export default new Vuex.Store({
     },
     updateUser({ commit }, user) {
       commit('updateUser', user);
+    },
+    toggleInQuiz({ commit }, inQuiz) {
+      commit('toggleInQuiz', inQuiz);
     }
   },
   getters: {
@@ -150,6 +158,9 @@ export default new Vuex.Store({
     },
     getLoading(state): boolean {
       return state.loading;
+    },
+    outOfQuiz(state): boolean {
+      return !state.inQuiz;
     }
   }
 });

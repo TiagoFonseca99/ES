@@ -59,13 +59,22 @@
               :mobile-breakpoint="0"
               class="fill-height"
             >
+              <template v-slot:item.id="{ item }">
+                <v-chip
+                  small
+                  color="primary"
+                  :to="openTournamentDashboard(item)"
+                >
+                  {{ item.id }}
+                </v-chip>
+              </template>
               <template v-slot:item.startTime="{ item }">
-                <v-chip small color="primary">
+                <v-chip small>
                   {{ item.startTime }}
                 </v-chip>
               </template>
               <template v-slot:item.endTime="{ item }">
-                <v-chip small color="primary">
+                <v-chip small>
                   {{ item.endTime }}
                 </v-chip>
               </template>
@@ -175,6 +184,10 @@ export default class DashboardView extends Vue {
     }
 
     await this.$store.dispatch('clearLoading');
+  }
+
+  openTournamentDashboard(tournament: Tournament) {
+    if (tournament) return '/teacher/tournament?id=' + tournament.id;
   }
 }
 </script>

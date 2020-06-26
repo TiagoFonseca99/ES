@@ -22,7 +22,7 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Entity
 @Table(name = "course_executions")
-public class CourseExecution implements DomainEntity, Observable {
+public class CourseExecution implements DomainEntity {
      public enum Status {ACTIVE, INACTIVE, HISTORIC}
 
     @Id
@@ -57,9 +57,6 @@ public class CourseExecution implements DomainEntity, Observable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "courseExecution", fetch=FetchType.LAZY, orphanRemoval=true)
     private final Set<Assessment> assessments = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<User> observers = new ArrayList<>();
-
     public CourseExecution() {
     }
 
@@ -73,7 +70,6 @@ public class CourseExecution implements DomainEntity, Observable {
         setAcronym(acronym);
         setAcademicTerm(academicTerm);
         setStatus(Status.ACTIVE);
-        setObservers(new ArrayList<>(getUsers()));
     }
 
     @Override
@@ -167,11 +163,6 @@ public class CourseExecution implements DomainEntity, Observable {
     public void addAnnouncement(Announcement announcement) { announcements.add(announcement); }
 
     public Set<Announcement> getAnnouncements() { return announcements; }
-
-    public List<User> getObservers() { return observers; }
-
-    public void setObservers(List<User> observers) { this.observers = observers; }
-
     @Override
     public String toString() {
         return "CourseExecution{" +
@@ -195,26 +186,5 @@ public class CourseExecution implements DomainEntity, Observable {
 
         course.getCourseExecutions().remove(this);
         users.forEach(user -> user.getCourseExecutions().remove(this));
-    }
-
-    @Override
-    public void Attach(Observer o) {
-        this.observers.add((User) o);
-    }
-
-    @Override
-    public void Dettach(Observer o) {
-        this.observers.remove(o);
-    }
-
-    @Override
-    public void Notify(Notification notification, User user) {
-        for (Observer observer : users) {
-            if (((User) observer).getId() == user.getId()) {
-                continue;
-            }
-
-            observer.update(this, notification);
-        }
     }
 }
