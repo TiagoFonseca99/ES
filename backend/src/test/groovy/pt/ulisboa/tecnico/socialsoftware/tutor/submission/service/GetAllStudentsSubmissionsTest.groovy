@@ -19,6 +19,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.SUBMISSION_MISSING_STUDENT
@@ -179,16 +182,30 @@ class GetAllStudentsSubmissionsTest extends Specification {
 
     @TestConfiguration
     static class SubmissionServiceImplTestContextConfiguration {
-
         @Bean
         SubmissionService submissionService() {
             return new SubmissionService()
         }
+
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
         }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
     }
 
+    @Bean
+    ServerKeys serverKeys() {
+        return new ServerKeys()
+    }
 }
 

@@ -351,7 +351,8 @@ public class Question implements DomainEntity, Observable {
 
     public void removeNotification(Notification notification) { this.notifications.remove(notification); }
 
-    public Set<User> getUsers() { return observers; }
+    @Override
+    public Set<User> getObservers() { return observers; }
 
     @Override
     public void Attach(pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer o) {

@@ -19,6 +19,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -220,29 +223,50 @@ class GetAvailableQuizzesTest extends Specification {
         StatementService statementService() {
             return new StatementService()
         }
+
         @Bean
         AnswerService answerService() {
             return new AnswerService()
         }
+
         @Bean
         AnswersXmlImport answersXmlImport() {
             return new AnswersXmlImport()
         }
+
         @Bean
         QuizService quizService() {
             return new QuizService()
         }
+
         @Bean
         QuestionService questionService() {
             return new QuestionService()
         }
+
         @Bean
         SubmissionService submissionService() {
             return new SubmissionService()
         }
+
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }
