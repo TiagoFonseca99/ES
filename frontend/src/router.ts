@@ -15,10 +15,12 @@ import QuizzesView from '@/views/teacher/quizzes/QuizzesView.vue';
 import StudentsView from '@/views/teacher/students/StudentsView.vue';
 import CourseDashboardView from '@/views/teacher/CourseDashboardView.vue';
 import StudentView from '@/views/student/StudentView.vue';
+import ParticipantsTournament from '@/views/student/tournament/ParticipantsTournament.vue';
 
 import MyTournamentsView from '@/views/student/tournament/MyTournamentsView.vue';
 import AllTournamentView from './views/student/tournament/AllTournamentView.vue';
 import OpenTournamentView from './views/student/tournament/OpenTournamentView.vue';
+import ClosedTournamentView from './views/student/tournament/ClosedTournamentView.vue';
 import AvailableQuizzesView from '@/views/student/AvailableQuizzesView.vue';
 import SolvedQuizzesView from '@/views/student/SolvedQuizzesView.vue';
 import QuizView from '@/views/student/quiz/QuizView.vue';
@@ -278,6 +280,15 @@ let router = new Router({
           }
         },
         {
+          path: 'closed',
+          name: 'closed-tournament',
+          component: ClosedTournamentView,
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Tournament',
+            requiredAuth: 'Student'
+          }
+        },
+        {
           path: 'submissions',
           name: 'submissions',
           component: SubmissionView,
@@ -339,6 +350,16 @@ let router = new Router({
           props: route => ({ username: route.query.username }),
           meta: {
             title: process.env.VUE_APP_NAME + ' - Notifications',
+            requiredAuth: 'Student'
+          }
+        },
+        {
+          path: 'tournament',
+          name: 'tournament participants',
+          component: ParticipantsTournament,
+          props: route => ({ id: route.query.id }),
+          meta: {
+            title: process.env.VUE_APP_NAME + ' - Tournament Participants',
             requiredAuth: 'Student'
           }
         }

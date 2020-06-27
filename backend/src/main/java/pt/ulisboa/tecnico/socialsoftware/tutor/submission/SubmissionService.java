@@ -6,7 +6,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
@@ -33,7 +32,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.Optional;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 import static pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsMessage.*;
@@ -337,20 +335,23 @@ public class SubmissionService {
         NotificationDto notification = NotificationsCreation.create(NEW_REVIEW_TITLE,
                 List.of(review.getSubmission().getQuestion().getTitle()), NEW_REVIEW_CONTENT,
                 List.of(review.getSubmission().getQuestion().getTitle(),
-                        (review.getStatus() == Review.Status.APPROVED ? "approved" : "rejected"), review.getUser().getName()),
+                        (review.getStatus() == Review.Status.APPROVED ? "approved" : "rejected"),
+                        review.getUser().getName()),
                 Notification.Type.REVIEW);
-        review.Notify(notificationService.createNotification(notification), user);
+        notificationService.notifyObservers(review, notificationService.createNotification(notification), user);
     }
 
     public void prepareNotification(Question question, User user, User exclude) {
-        NotificationDto notification = NotificationsCreation.create(DELETED_QUESTION_TITLE, List.of(question.getTitle()),
-                DELETED_QUESTION_CONTENT, List.of(question.getTitle(), user.getName()), Notification.Type.QUESTION);
-        question.Notify(notificationService.createNotification(notification), exclude);
+        NotificationDto notification = NotificationsCreation.create(DELETED_QUESTION_TITLE,
+                List.of(question.getTitle()), DELETED_QUESTION_CONTENT, List.of(question.getTitle(), user.getName()),
+                Notification.Type.QUESTION);
+        notificationService.notifyObservers(question, notificationService.createNotification(notification), exclude);
     }
 
     public void prepareNotification(Submission submission, User user) {
-        NotificationDto notification = NotificationsCreation.create(NEW_SUBMISSION_TITLE, List.of(submission.getQuestion().getTitle()),
-                NEW_SUBMISSION_CONTENT, List.of(submission.getUser().getName()), Notification.Type.SUBMISSION);
-        submission.Notify(notificationService.createNotification(notification), user);
+        NotificationDto notification = NotificationsCreation.create(NEW_SUBMISSION_TITLE,
+                List.of(submission.getQuestion().getTitle()), NEW_SUBMISSION_CONTENT,
+                List.of(submission.getUser().getName()), Notification.Type.SUBMISSION);
+        notificationService.notifyObservers(submission, notificationService.createNotification(notification), user);
     }
 }

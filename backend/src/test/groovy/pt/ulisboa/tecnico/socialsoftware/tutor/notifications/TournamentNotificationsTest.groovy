@@ -164,12 +164,14 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
         tournamentService.cancelTournament(user.getId(), tournamentDto)
 
         then:
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user2.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.TOURNAMENT
@@ -184,12 +186,14 @@ class TournamentNotificationsTest extends Specification {
         tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
         tournamentService.editStartTime(user.getId(), tournamentDto)
 
         then:
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user2.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.TOURNAMENT
@@ -204,12 +208,14 @@ class TournamentNotificationsTest extends Specification {
         tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
         tournamentService.editStartTime(user.getId(), tournamentDto)
 
         then: "1 notification"
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user2.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.TOURNAMENT
@@ -218,6 +224,7 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.leaveTournament(user2.getId(), tournamentDto)
 
         then: "1 notification"
+        sleep(100)
         def result2 = notificationRepository.getUserNotifications(user2.getId())
         result2.size() == 1
         result2.get(0).getType() == Notification.Type.TOURNAMENT
@@ -232,12 +239,14 @@ class TournamentNotificationsTest extends Specification {
         tournamentDto.setEndTime(DateHandler.toISOString(newEndTime));
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
         tournamentService.editEndTime(user.getId(), tournamentDto)
 
         then:
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user2.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.TOURNAMENT
@@ -252,12 +261,14 @@ class TournamentNotificationsTest extends Specification {
         tournamentDto.setEndTime(DateHandler.toISOString(newEndTime));
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
         tournamentService.editEndTime(user.getId(), tournamentDto)
 
         then: "1 notification"
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user2.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.TOURNAMENT
@@ -266,6 +277,7 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.leaveTournament(user2.getId(), tournamentDto)
 
         then: "1 notification"
+        sleep(100)
         def result2 = notificationRepository.getUserNotifications(user2.getId())
         result2.size() == 1
         result2.get(0).getType() == Notification.Type.TOURNAMENT
@@ -282,12 +294,14 @@ class TournamentNotificationsTest extends Specification {
         topicRepository.save(topic3)
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
         tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
 
         then:
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user2.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.TOURNAMENT
@@ -304,12 +318,14 @@ class TournamentNotificationsTest extends Specification {
         topicRepository.save(topic3)
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
         tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
 
         then: "1 notification"
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user2.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.TOURNAMENT
@@ -318,6 +334,7 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.leaveTournament(user2.getId(), tournamentDto)
 
         then: "1 notification"
+        sleep(100)
         def result2 = notificationRepository.getUserNotifications(user2.getId())
         result2.size() == 1
         result2.get(0).getType() == Notification.Type.TOURNAMENT
@@ -328,12 +345,14 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
         tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
 
         then:
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user2.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.TOURNAMENT
@@ -344,12 +363,14 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
         tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
 
         then: "1 notification"
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user2.getId())
         result.size() == 1
         result.get(0).getType() == Notification.Type.TOURNAMENT
@@ -358,6 +379,7 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.leaveTournament(user2.getId(), tournamentDto)
 
         then: "1 notification"
+        sleep(100)
         def result2 = notificationRepository.getUserNotifications(user2.getId())
         result2.size() == 1
         result2.get(0).getType() == Notification.Type.TOURNAMENT
@@ -373,6 +395,7 @@ class TournamentNotificationsTest extends Specification {
         tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user.getId()).isEmpty()
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
@@ -380,6 +403,7 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.editStartTime(user.getId(), tournamentDto)
 
         then:
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user.getId())
         result.size() == 0
         def result2 = notificationRepository.getUserNotifications(user2.getId())
@@ -397,6 +421,7 @@ class TournamentNotificationsTest extends Specification {
         tournamentDto.setStartTime(DateHandler.toISOString(newStartTime));
 
         expect: "0 notifications"
+        sleep(100)
         notificationRepository.getUserNotifications(user.getId()).isEmpty()
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
@@ -404,6 +429,7 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.editStartTime(user.getId(), tournamentDto)
 
         then:
+        sleep(100)
         def result = notificationRepository.getUserNotifications(user.getId())
         result.size() == 0
         def result2 = notificationRepository.getUserNotifications(user2.getId())
@@ -414,6 +440,7 @@ class TournamentNotificationsTest extends Specification {
         tournamentService.leaveTournament(user2.getId(), tournamentDto)
 
         then:
+        sleep(100)
         def result3 = notificationRepository.getUserNotifications(user.getId())
         result3.size() == 0
         def result4 = notificationRepository.getUserNotifications(user2.getId())

@@ -31,7 +31,7 @@ module.exports = {
       .set('@plugins', path.join(__dirname, 'src/plugins'))
       .set('@services', path.join(__dirname, 'src/services'))
       .set('@components', path.join(__dirname, 'src/components'))
-      .set('@css', path.join(__dirname, 'src/css'))
+      .set('@css', path.join(__dirname, 'src/assets/css'))
       .set('@views', path.join(__dirname, 'src/views'));
 
     const splitOptions = config.optimization.get('splitChunks');
@@ -82,6 +82,7 @@ module.exports = {
                 path.join(__dirname, './public/index.html'),
                 path.join(__dirname, './**/*.vue'),
                 path.join(__dirname, './src/**/*.js'),
+                path.join(__dirname, './src/**/*.scss'),
                 path.join(__dirname, './node_modules/vuetify/src/**/*.ts'),
                 path.join(
                   __dirname,
@@ -95,6 +96,10 @@ module.exports = {
       isProductionEnvFlag ? new CompressionPlugin() : () => {},
       isProductionEnvFlag ? new TerserPlugin() : () => {}
     ]
+  },
+
+  css: {
+    extract: false
   },
 
   // use thread-loader for babel & TS in production build

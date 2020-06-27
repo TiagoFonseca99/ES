@@ -40,20 +40,21 @@ public class AuthController {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        this.authService.removeCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, request, response);
+        AuthService.removeCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, request, response);
         return true;
     }
 
     @GetMapping("/auth/check")
     public AuthUserDto checkToken(
             @CookieValue(value = JwtTokenProvider.TOKEN_COOKIE_NAME, required = false) String token,
-            HttpServletRequest request, HttpServletResponse response) {
+            @CookieValue(value = "session", required = false) Boolean session, HttpServletRequest request,
+            HttpServletResponse response) {
         if (token == null) {
-            this.authService.removeCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, request, response);
+            AuthService.removeCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, request, response);
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        return this.authService.checkToken(token, request, response);
+        return this.authService.checkToken(session, token, request, response);
     }
 
     @GetMapping("/auth/fenix")

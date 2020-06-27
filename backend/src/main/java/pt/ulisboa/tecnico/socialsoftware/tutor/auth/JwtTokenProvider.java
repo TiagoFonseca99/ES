@@ -10,7 +10,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -29,6 +28,7 @@ public class JwtTokenProvider {
     private static PrivateKey privateKey;
     public static final String TOKEN_COOKIE_NAME = "auth";
     public static final int TOKEN_EXPIRATION = 1000 * 60 * 60 * 24;
+    public static final int TOKEN_RENEW = 1000 * 60 * 60 * 6;
 
     public JwtTokenProvider(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -80,19 +80,23 @@ public class JwtTokenProvider {
     }
 
     static String getTokenFromCookie(HttpServletRequest req) {
-        Cookie[] cookies = req.getCookies();
+        return getToken(AuthService.getValueCookie(TOKEN_COOKIE_NAME, req));
+    }
 
-        String token = null;
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(TOKEN_COOKIE_NAME)) {
-                    token = cookie.getValue();
-                    break;
-                }
-            }
+    static Date getExpiry(String token) {
+        try {
+            return Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token).getBody()
+                    .getExpiration();
+        } catch (MalformedJwtException ex) {
+            logger.error("Invalkey JWT token");
+        } catch (ExpiredJwtException ex) {
+            logger.error("Expired JWT token");
+        } catch (UnsupportedJwtException ex) {
+            logger.error("Unsupported JWT token");
+        } catch (IllegalArgumentException ex) {
+            logger.error("JWT claims string is empty.");
         }
-
-        return getToken(token);
+        throw new TutorException(AUTHENTICATION_ERROR);
     }
 
     static int getUserId(String token) {
@@ -111,9 +115,13 @@ public class JwtTokenProvider {
         throw new TutorException(AUTHENTICATION_ERROR);
     }
 
-    Authentication getAuthentication(String token) {
-        User user = this.userRepository.findById(getUserId(token))
+    User getUser(String token) {
+        return this.userRepository.findById(getUserId(token))
                 .orElseThrow(() -> new TutorException(USER_NOT_FOUND, getUserId(token)));
+    }
+
+    Authentication getAuthentication(String token) {
+        User user = this.getUser(token);
         return new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
     }
 }

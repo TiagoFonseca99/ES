@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.notifications;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,6 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Service
 public class NotificationService {
-
     @Autowired
     private NotificationRepository notificationRepository;
 
@@ -71,5 +71,10 @@ public class NotificationService {
                 .orElseThrow(() -> new TutorException(NOTIFICATION_NOT_FOUND, notificationId));
 
         notification.removeUser(user);
+    }
+
+    @Async("notifyExecutor")
+    public void notifyObservers(Observable observable, Notification notification, User exclude) {
+        observable.Notify(notification, exclude);
     }
 }
