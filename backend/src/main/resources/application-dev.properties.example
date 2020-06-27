@@ -11,6 +11,10 @@ figures.dir=${maven.basedir}/../data/images/
 export.dir=${maven.basedir}/../data/export/
 load.dir=${maven.basedir}/../data/load/
 
+## Service Worker keys
+public.key.path=${maven.basedir}/../data/keys/pub.key
+private.key.path=${maven.basedir}/../data/keys/priv.key
+
 ## Fenix oauth
 oauth.consumer.key=<FENIX CLIENT KEY>
 oauth.consumer.secret=<FENIX SECRET>

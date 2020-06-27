@@ -29,6 +29,39 @@ httpClient.defaults.withCredentials = true;
 httpClient.defaults.headers.post['Content-Type'] = 'application/json';
 
 export default class RemoteServices {
+  static async getWorkerKey(): Promise<string> {
+    return httpClient
+      .get('/worker/publicKey')
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        console.error(error);
+        return '';
+      });
+  }
+
+  static async isWorkerSubscribed(
+    subscription: PushSubscription
+  ): Promise<Boolean> {
+    return httpClient
+      .post('/worker/isSubscribed', subscription)
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        console.error(error);
+      });
+  }
+
+  static async subscribeWorker(subscription: PushSubscription) {
+    return httpClient
+      .post('/worker/subscribe', subscription)
+      .catch(async error => {
+        console.error(error);
+      });
+  }
+
   static async checkToken(): Promise<User> {
     return httpClient
       .get('/auth/check')

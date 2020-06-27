@@ -18,6 +18,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.QuizService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.StatementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementCreationDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 
 @DataJpaTest
@@ -174,7 +177,6 @@ class FilterByAssessmentTest extends Specification {
 
     @TestConfiguration
     static class StatementServiceImplTestContextConfiguration {
-
         @Bean
         StatementService statementService() {
             return new StatementService()
@@ -198,13 +200,30 @@ class FilterByAssessmentTest extends Specification {
         QuestionService questionService() {
             return new QuestionService()
         }
+
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
         }
+
         @Bean
         SubmissionService submissionService() {
             return new SubmissionService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }

@@ -137,8 +137,9 @@ public class Review implements Observable {
             this.creationDate = creationDate;
         }
     }
-    
-    public Set<User> getUsers() {
+
+    @Override
+    public Set<User> getObservers() {
         return observers;
     }
 

@@ -14,6 +14,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.repository.NotificationRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -26,6 +27,9 @@ import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Service
 public class NotificationService {
+    @Autowired
+    private WorkerService workerService;
+
     @Autowired
     private NotificationRepository notificationRepository;
 
@@ -75,6 +79,7 @@ public class NotificationService {
 
     @Async("notifyExecutor")
     public void notifyObservers(Observable observable, Notification notification, User exclude) {
+        workerService.notifySubscriptions(notification, observable.getObservers());
         observable.Notify(notification, exclude);
     }
 }

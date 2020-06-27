@@ -11,17 +11,15 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.domain.Subscription;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -94,6 +92,9 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Announcement> announcements = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Subscription> subscriptions = new HashSet<>();
 
     @Column(columnDefinition = "boolean default true")
     private boolean discussionStatsPublic = true;
@@ -227,7 +228,13 @@ public class User implements UserDetails, DomainEntity, Observer {
         return submissions;
     }
 
-    public Set<Announcement> getAnnouncements() { return announcements; }
+    public Set<Announcement> getAnnouncements() {
+        return announcements;
+    }
+
+    public Set<Subscription> getSubscriptions() {
+        return subscriptions;
+    }
 
     public Set<Question> getSubmittedQuestions() {
         Set<Question> questions = new HashSet<>();
@@ -259,10 +266,8 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     public Integer getNumberOfStudentQuizzes() {
         if (this.numberOfStudentQuizzes == null)
-            this.numberOfStudentQuizzes = (int) getQuizAnswers().stream()
-                    .filter(QuizAnswer::isCompleted)
-                    .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.GENERATED))
-                    .count();
+            this.numberOfStudentQuizzes = (int) getQuizAnswers().stream().filter(QuizAnswer::isCompleted)
+                    .filter(quizAnswer -> quizAnswer.getQuiz().getType().equals(Quiz.QuizType.GENERATED)).count();
 
         return numberOfStudentQuizzes;
     }
@@ -370,35 +375,34 @@ public class User implements UserDetails, DomainEntity, Observer {
         this.numberOfCorrectStudentAnswers = numberOfCorrectStudentAnswers;
     }
 
-    public Integer getNumberOfApprovedSubmissions() { return numberOfApprovedSubmissions; }
+    public Integer getNumberOfApprovedSubmissions() {
+        return numberOfApprovedSubmissions;
+    }
 
-    public void setNumberOfApprovedSubmissions(Integer numberOfApprovedSubmissions) { this.numberOfApprovedSubmissions = numberOfApprovedSubmissions; }
+    public void setNumberOfApprovedSubmissions(Integer numberOfApprovedSubmissions) {
+        this.numberOfApprovedSubmissions = numberOfApprovedSubmissions;
+    }
 
-    public Integer getNumberOfRejectedSubmissions() { return numberOfRejectedSubmissions; }
+    public Integer getNumberOfRejectedSubmissions() {
+        return numberOfRejectedSubmissions;
+    }
 
-    public void setNumberOfRejectedSubmissions(Integer numberOfRejectedSubmissions) { this.numberOfRejectedSubmissions = numberOfRejectedSubmissions; }
+    public void setNumberOfRejectedSubmissions(Integer numberOfRejectedSubmissions) {
+        this.numberOfRejectedSubmissions = numberOfRejectedSubmissions;
+    }
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", key=" + key +
-                ", role=" + role +
-                ", username='" + username + '\'' +
-                ", name='" + name + '\'' +
-                ", enrolledCoursesAcronyms='" + enrolledCoursesAcronyms + '\'' +
-                ", numberOfTeacherQuizzes=" + numberOfTeacherQuizzes +
-                ", numberOfStudentQuizzes=" + numberOfStudentQuizzes +
-                ", numberOfInClassQuizzes=" + numberOfInClassQuizzes +
-                ", numberOfTeacherAnswers=" + numberOfTeacherAnswers +
-                ", numberOfInClassAnswers=" + numberOfInClassAnswers +
-                ", numberOfStudentAnswers=" + numberOfStudentAnswers +
-                ", numberOfCorrectTeacherAnswers=" + numberOfCorrectTeacherAnswers +
-                ", numberOfCorrectInClassAnswers=" + numberOfCorrectInClassAnswers +
-                ", numberOfCorrectStudentAnswers=" + numberOfCorrectStudentAnswers +
-                ", creationDate=" + creationDate +
-                ", lastAccess=" + lastAccess +
-                '}';
+        return "User{" + "id=" + id + ", key=" + key + ", role=" + role + ", username='" + username + '\'' + ", name='"
+                + name + '\'' + ", enrolledCoursesAcronyms='" + enrolledCoursesAcronyms + '\''
+                + ", numberOfTeacherQuizzes=" + numberOfTeacherQuizzes + ", numberOfStudentQuizzes="
+                + numberOfStudentQuizzes + ", numberOfInClassQuizzes=" + numberOfInClassQuizzes
+                + ", numberOfTeacherAnswers=" + numberOfTeacherAnswers + ", numberOfInClassAnswers="
+                + numberOfInClassAnswers + ", numberOfStudentAnswers=" + numberOfStudentAnswers
+                + ", numberOfCorrectTeacherAnswers=" + numberOfCorrectTeacherAnswers
+                + ", numberOfCorrectInClassAnswers=" + numberOfCorrectInClassAnswers
+                + ", numberOfCorrectStudentAnswers=" + numberOfCorrectStudentAnswers + ", creationDate=" + creationDate
+                + ", lastAccess=" + lastAccess + '}';
     }
 
     public void increaseNumberOfQuizzes(Quiz.QuizType type) {
@@ -463,7 +467,13 @@ public class User implements UserDetails, DomainEntity, Observer {
         this.tournaments.add(tournament);
     }
 
-    public void addAnnouncement(Announcement announcement) { this.announcements.add(announcement); }
+    public void addAnnouncement(Announcement announcement) {
+        this.announcements.add(announcement);
+    }
+
+    public void addSubscription(Subscription subscription) {
+        this.subscriptions.add(subscription);
+    }
 
     public void addObserver(Tournament tournament) {
         this.tournaments_observers.add(tournament);
@@ -481,11 +491,17 @@ public class User implements UserDetails, DomainEntity, Observer {
         return this.role == User.Role.STUDENT;
     }
 
-    public void removeTournament(Tournament tournament) { this.tournaments.remove(tournament); }
+    public void removeTournament(Tournament tournament) {
+        this.tournaments.remove(tournament);
+    }
 
-    public void removeObserver(Tournament tournament) { this.tournaments_observers.remove(tournament); }
+    public void removeObserver(Tournament tournament) {
+        this.tournaments_observers.remove(tournament);
+    }
 
-    public void removeObserver(Review review) { this.review_observers.remove(review); }
+    public void removeObserver(Review review) {
+        this.review_observers.remove(review);
+    }
 
     public void removeObserver(Discussion discussion) {
         this.discussions_observers.remove(discussion);
@@ -585,8 +601,8 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     public Set<Discussion> getPublicDiscussions() {
         Set<Discussion> publicDiscussions = new HashSet<>();
-        for(Discussion discussion: this.discussions) {
-            if(discussion.isAvailable()) {
+        for (Discussion discussion : this.discussions) {
+            if (discussion.isAvailable()) {
                 publicDiscussions.add(discussion);
             }
         }
@@ -629,7 +645,9 @@ public class User implements UserDetails, DomainEntity, Observer {
         this.tournamentStatsPublic = !this.tournamentStatsPublic;
     }
 
-    public boolean isUserStatsPublic() { return userStatsPublic; }
+    public boolean isUserStatsPublic() {
+        return userStatsPublic;
+    }
 
     public void toggleUserStatsVisibility() {
         this.userStatsPublic = !this.userStatsPublic;
@@ -637,7 +655,8 @@ public class User implements UserDetails, DomainEntity, Observer {
 
     @Override
     public void update(Object o, Notification notification) {
-        if (o instanceof Tournament || o instanceof CourseExecution || o instanceof Review || o instanceof Submission || o instanceof Question || o instanceof Discussion) {
+        if (o instanceof Tournament || o instanceof CourseExecution || o instanceof Review || o instanceof Submission
+                || o instanceof Question || o instanceof Discussion) {
             notification.addUser(this);
         }
     }

@@ -56,7 +56,9 @@
             </div>
           </div>
           <v-expansion-panels
-            v-if="discussion.replies !== null"
+            v-if="
+              discussion.replies !== null && discussion.replies.length !== 0
+            "
             :popout="true"
             style="margin-bottom: 20px"
           >
@@ -113,14 +115,13 @@
                     clearable
                     outlined
                     auto-grow
-                    v-on:focus="setDiscussion(discussion, index)"
-                    @input="setReplyMessage"
+                    @focus="setDiscussion(discussion, index)"
+                    v-model="newReply"
                     rows="2"
                     label="Message"
                     class="text"
                     data-cy="ReplyMessage"
                     style="padding-top: 20px;"
-                    :id="'reply' + discussion.userId"
                   ></v-textarea>
                   <v-card-actions>
                     <v-spacer />
@@ -130,7 +131,6 @@
                       @click="
                         setDiscussion(discussion, index);
                         submitReply();
-                        clearTextarea('#reply' + discussion.userId);
                       "
                       >Submit</v-btn
                     >
@@ -146,12 +146,11 @@
               auto-grow
               v-if="discussion.userId === userId"
               v-on:focus="setDiscussion(discussion, index)"
-              @input="setReplyMessage"
+              v-model="newReply"
               rows="2"
               label="Message"
               class="text"
               data-cy="ReplyMessage"
-              :id="'reply' + discussion.userId"
             ></v-textarea>
             <v-card-actions>
               <v-spacer />
@@ -161,7 +160,6 @@
                 @click="
                   setDiscussion(discussion, index);
                   submitReply();
-                  clearTextarea('#reply' + discussion.userId);
                 "
                 v-if="discussion.userId === userId"
                 >Submit</v-btn
@@ -213,8 +211,8 @@ export default class ReplyComponent extends Vue {
   @Prop() readonly discussions!: Discussion[];
   discussion: Discussion = this.discussions[0];
   discussionInd: number = 0;
-  replyMessages: Map<number, string> = new Map();
   userId: number = this.$store.getters.getUser.id;
+  @Prop() newReply!: string;
   reply: Reply | null = null;
   replyInd!: number;
   discussionEdit: Boolean = false;
@@ -224,11 +222,8 @@ export default class ReplyComponent extends Vue {
 
   async submitReply() {
     try {
-      if (this.replyMessages.get(this.discussion.userId!) === undefined) {
-        this.replyMessages.set(this.discussion.userId!, '');
-      }
       const reply = await RemoteServices.createReply(
-        this.replyMessages.get(this.discussion.userId!)!,
+        this.newReply,
         this.discussion!
       );
 
@@ -238,7 +233,7 @@ export default class ReplyComponent extends Vue {
 
       this.discussion.replies.push(reply);
 
-      this.replyMessages.set(this.discussion.userId!, '');
+      this.newReply = '';
       this.$emit('submit', true);
     } catch (error) {
       await this.$store.dispatch('error', error);
@@ -251,10 +246,6 @@ export default class ReplyComponent extends Vue {
     }
 
     return true;
-  }
-
-  setReplyMessage(message: string) {
-    this.replyMessages.set(this.discussion.userId!, message);
   }
 
   setDiscussion(discussion: Discussion, index: number) {
@@ -335,13 +326,6 @@ export default class ReplyComponent extends Vue {
 
   convertMarkDown(text: string) {
     return convertMarkDown(text, null);
-  }
-
-  clearTextarea(name: string) {
-    let textArea: HTMLTextAreaElement;
-    let val = document.querySelector(name)!;
-    textArea = val as HTMLTextAreaElement;
-    textArea.value = '';
   }
 }
 </script>

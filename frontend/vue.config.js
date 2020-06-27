@@ -23,6 +23,17 @@ module.exports = {
   // generate sourceMap for production build?
   productionSourceMap: process.env.NODE_ENV !== 'production',
 
+  pwa: {
+    name: 'Quizzes Tutor',
+    themeColor: 'blue',
+    msTileColor: 'blue',
+    appleMobileWebAppStatusBarStyle: 'blue',
+    workboxPluginMode: 'InjectManifest',
+    workboxOptions: {
+      swSrc: 'src/sw.js'
+    }
+  },
+
   chainWebpack: config => {
     config.resolve.alias
       .set('vue$', 'vue/dist/vue.esm.js')
