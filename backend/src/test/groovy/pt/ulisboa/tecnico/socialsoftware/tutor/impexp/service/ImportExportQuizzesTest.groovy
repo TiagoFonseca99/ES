@@ -21,6 +21,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 
 @DataJpaTest
@@ -163,6 +166,21 @@ class ImportExportQuizzesTest extends Specification {
         @Bean
         NotificationService NotificationService() {
             return new NotificationService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }

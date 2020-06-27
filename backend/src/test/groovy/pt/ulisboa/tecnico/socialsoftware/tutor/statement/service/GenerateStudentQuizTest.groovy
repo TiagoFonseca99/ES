@@ -26,6 +26,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 
 import java.util.stream.Collectors
@@ -219,9 +222,25 @@ class GenerateStudentQuizTest extends Specification {
         SubmissionService submissionService() {
             return new SubmissionService()
         }
+
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }

@@ -77,6 +77,9 @@ export default class NotificationsButton extends Vue {
   old!: string;
 
   async created() {
+    navigator.serviceWorker.addEventListener('message', event =>
+      this.addNotification(event)
+    );
     await this.getNotifications();
   }
 
@@ -86,10 +89,10 @@ export default class NotificationsButton extends Vue {
       [this.notifications] = await Promise.all([
         RemoteServices.getNotifications(this.user.username)
       ]);
-      this.updateUnopened();
       this.notifications = this.notifications
         .sort((a, b) => this.sortByDate(a, b))
         .slice(0, 5);
+      this.updateUnopened();
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -107,6 +110,18 @@ export default class NotificationsButton extends Vue {
   sortByDate(a: Notification, b: Notification) {
     if (a.id && b.id) return a.creationDate > b.creationDate ? -1 : 1;
     else return 0;
+  }
+
+  addNotification(event: MessageEvent) {
+    const obj = event.data;
+    if (event.data.usersId.indexOf(this.$store.getters.getUser.id) > -1) {
+      const notification = new Notification(obj);
+      this.notifications.unshift(notification);
+      this.notifications = this.notifications
+        .sort((a, b) => this.sortByDate(a, b))
+        .slice(0, 5);
+      this.updateUnopened();
+    }
   }
 
   isUnopened(date: string) {

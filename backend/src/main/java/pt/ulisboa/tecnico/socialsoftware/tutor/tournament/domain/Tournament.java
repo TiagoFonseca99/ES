@@ -68,7 +68,7 @@ public class Tournament implements Observable {
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    private List<User> observers = new ArrayList<>();
+    private Set<User> observers = new HashSet<>();
 
     public Tournament() {
     }
@@ -248,6 +248,11 @@ public class Tournament implements Observable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public Set<User> getObservers() {
+        return this.observers;
     }
 
     @Override

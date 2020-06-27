@@ -21,6 +21,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Submission
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.COURSE_NOT_FOUND
@@ -160,6 +163,21 @@ class ImportExportQuestionsTest extends Specification {
         @Bean
         NotificationService NotificationService() {
             return new NotificationService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }
