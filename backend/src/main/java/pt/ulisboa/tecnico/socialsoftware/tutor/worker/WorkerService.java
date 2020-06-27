@@ -96,7 +96,7 @@ public class WorkerService {
         checkEndpoint(subscriptionDto);
 
         return subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint()).filter(sub -> {
-            return sub.getUser().getId() == userId;
+            return sub.getUser().getId().equals(userId);
         }).count() == 1;
     }
 
