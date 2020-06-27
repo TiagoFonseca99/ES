@@ -1149,9 +1149,9 @@ export default class RemoteServices {
       });
   }
 
-  static getTournaments(): Promise<Tournament[]> {
+  static getAllTournaments(): Promise<Tournament[]> {
     return httpClient
-      .get('/tournaments/getTournaments')
+      .get('/tournaments/getAllTournaments')
       .then(response => {
         return response.data.map((tournament: any) => {
           return new Tournament(tournament, Store.getters.getUser);
