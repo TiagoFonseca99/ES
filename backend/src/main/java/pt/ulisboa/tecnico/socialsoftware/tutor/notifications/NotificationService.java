@@ -79,7 +79,7 @@ public class NotificationService {
 
     @Async("notifyExecutor")
     public void notifyObservers(Observable observable, Notification notification, User exclude) {
-        workerService.notifySubscriptions(notification, observable.getObservers());
+        workerService.notifySubscriptions(notification, observable.getObservers(), exclude);
         observable.Notify(notification, exclude);
     }
 }
