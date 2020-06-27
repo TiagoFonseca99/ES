@@ -42,8 +42,8 @@
             <v-btn
               color="primary"
               data-cy="SeeApproved"
-              @click="filterSubmissions('accepted')"
-              >{{ 'See Accepted' }}</v-btn
+              @click="filterSubmissions('approved')"
+              >{{ 'See Approved' }}</v-btn
             >
             <v-btn
               color="primary"
@@ -259,7 +259,7 @@ export default class AllSubmissionsView extends Vue {
     if (this.filterLabel == FilterState.EXCLUDE) {
       if (value == 'all') {
         this.choosensubmissions = this.allsubmissions;
-      } else if (value == 'accepted') {
+      } else if (value == 'approved') {
         this.choosensubmissions = this.allsubmissions.filter(submission => {
           return submission.questionDto.status == 'AVAILABLE';
         });
@@ -271,7 +271,7 @@ export default class AllSubmissionsView extends Vue {
       this.items = this.choosensubmissions;
     } else {
       if (value == 'all') {
-      } else if (value == 'accepted') {
+      } else if (value == 'approved') {
         this.choosensubmissions = this.choosensubmissions.filter(submission => {
           return submission.questionDto.status == 'AVAILABLE';
         });
