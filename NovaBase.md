@@ -38,27 +38,76 @@
 
 #### 2. Dashboard
 
-- Docente pode ver dashboard de alunos
-  - Breve descrição
+- ##### Docente pode ver dashboard de alunos
+  - Extendendo a funcionalidade que implementámos que permite aos alunos ver a informação pública no dashboard de outros alunos,
+agora os docentes também podem aceder a esses dashboards, clickando no username de um aluno. Em certos casos, aparecerá uma 
+caixa de diálogo que serve como preview do dashboard, para evitar sair da página atual.
 
-  - Caso de uso
+    Exemplos:
+
+    ##### - Students View
+    1 - Docente carrega no username de um aluno
+    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/StudentsView.png)  
+    2 - Docente vê o dashboard do aluno
+    ![Teacher sees dashboard](assets/img/NovaBase/Dashboard/Dashboard.png)
+
+    ##### - Reviews View
+    1 - Docente carrega no username de um aluno
+    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/DashboardDialog_1.png)  
+    2 - Docente vê um preview do dashboard do aluno
+    ![Teacher sees dashboard preview](assets/img/NovaBase/Dashboard/DashboardDialog_2.png)
+    3 - Docente pode abrir o dashboard completo
+    ![Teacher sees dashboard](assets/img/NovaBase/Dashboard/Dashboard.png)
+
+    **NOTA:** Este comportamento acontece sempre que aparecer o username de um utilizador
+
 
 #### 3. Perguntas por Alunos (PpA)
 
-- Aluno pode ver perguntas submetidas por outros alunos
-  - Breve descrição
+- ##### Aluno pode ver perguntas submetidas por outros alunos
+  - Esta funcionalidade permite ao aluno ter uma ideia das submissões que já foram feitas e deste modo evitar uma possível
+submissão repetida. Também permite ao aluno perceber o critério dos docentes no processo de review. Também é possivel filtrar
+as submissões de modo a retirar as que foram feitas pelo próprio utilizador, ou pelo estado do review da submissão
 
-  - Caso de uso
+  1 - Aluno acede à lista de todas as submissões do curso em execução
+  ![All submissions](assets/img/NovaBase/Ppa/AllSubmissions_1.png)
 
-- Aluno pode selecionar tópicos da pergunta submetida
-  - Breve descrição
+  2 - Aluno pode excluir as suas submissões da listagem
+  ![All submissions excluding his](assets/img/NovaBase/Ppa/AllSubmissions_2.png)
 
-  - Caso de uso
+  3 - Aluno pode ver apenas as submissões aprovadas
+  ![All approved submissions](assets/img/NovaBase/Ppa/AllSubmissions_3.png)
 
-- Aluno pode acrescentar um argumento à submissão que justifique a mesma
-  - Breve descrição
+  4 - Aluno pode ver apenas as submissões rejeitadas
+  ![All rejected submissions](assets/img/NovaBase/Ppa/AllSubmissions_4.png)
 
-  - Caso de uso
+- ##### Aluno pode selecionar tópicos da pergunta submetida
+  - Agora é possivel adicionar também tópicos à pergunta submetida, que podem ser alterados pelo docente
+
+  1 - Aluno escolhe tópicos a associar à pergunta (opcional)
+  ![Student chooses topics](assets/img/NovaBase/Ppa/Topics_1.png)
+
+  2 - Docente pode mudar tópicos associados à pergunta antes de dar review à submissão
+  ![Teacher changes topics](assets/img/NovaBase/Ppa/Topics_2.png)
+
+  3 - Aluno pode ver os tópicos atuais da submissão
+  ![Student sees topics](assets/img/NovaBase/Ppa/Topics_3.png)
+
+  **NOTA**: Docente pode continuar a editar os tópicos de uma pergunta aprovada no menu das perguntas
+
+- ##### Aluno pode acrescentar um argumento à submissão que justifique a mesma
+  - Extendido do teste prático, o aluno agora pode, de forma opcional, apresentar um breve argumento que justifique a sua submissão.
+
+  1 - Antes da submissão ser enviada, aluno pode escolher se quer adicionar um argumento
+  ![Argument question](assets/img/NovaBase/Ppa/Argument_1.png)
+
+  2 - Se não quiser, a submissão é enviada sem argumento
+
+  3 - Se quiser, o aluno pode escrever o seu argumento
+  ![Student writes argument](assets/img/NovaBase/Ppa/Argument_2.png)
+
+  4 - Docente pode ver o argumento (se existir) antes de escrever a justificação da sua decisão
+  ![Teacher sees argument](assets/img/NovaBase/Ppa/Argument_3.png)
 
 #### 4. Discussão de Perguntas (DdP)
 
@@ -131,27 +180,46 @@
 
 #### 1. Anúncios de Professores (AdP)
 
-- Breve descrição geral a justificar a criação desta funcionalidade (valor, etc...)
+- Esta nova funcionalidade permite uma maior comunicação entre os docentes com os alunos que não existia ao introduzir um sistema de
+anúncios em que docentes criam e alunos/outros docentes vêem na sua home page
 
-- Docente pode criar anúncios
-  - Breve descrição
+- #### Docente pode criar anúncios
+  - Docente pode criar um anúncio que será partilhado com todos os utilizadores do curso em execução
 
-  - Caso de uso
+  1 - Docente carrega no botão para criar anúncio
+  ![Teacher creates announcement](assets/img/NovaBase/Adp/CreateAnnouncement_1.png)
+  2 - Docente preenche campos para criar anúncio e guarda
+  ![Teacher fills in requiremnts for announcement](assets/img/NovaBase/Adp/CreateAnnouncement_2.png)
 
-- Docente pode editar anúncios
-  - Breve descrição
+- ##### Docente pode editar anúncios
+  - Docente pode editar um anúncio criado, e caso um docente decida editar um anúncio existente, será indicado que o anúncio foi editado 
 
-  - Caso de uso
+  1 - Docente carrega no ícone para editar anúncio
+  ![Teacher clicks on edit announcement](assets/img/NovaBase/Adp/EditAnnouncement_1.png)
+  2 - Docente edita o anúncio
+  ![Teacher edits announcement](assets/img/NovaBase/Adp/EditAnnouncement_2.png)
+  3 - Indicação de que anúncio foi editado é visivel
+  ![Teacher sees edited announcement](assets/img/NovaBase/Adp/EditAnnouncement_3.png)
 
-- Docente pode eliminar anúncios
-  - Breve descrição
+- ##### Docente pode eliminar anúncios
+  - Docente pode remover um anúncio criado
 
-  - Caso de uso
+  1 - Docente carrega no ícone para eliminar anúncio
+  ![Teacher clicks on delete announcement](assets/img/NovaBase/Adp/DeleteAnnouncement_1.png)
+  2 - Docente elimina o anúncio
+  ![Teacher deletes announcement](assets/img/NovaBase/Adp/DeleteAnnouncement_2.png)
+  3 - Anúncio é eliminado definitivamente
+  ![Announcement eliminated](assets/img/NovaBase/Adp/DeleteAnnouncement_3.png)
 
-- Aluno/Docente podem ver anúncios do curso em execução na página principal
-  - Breve descrição
 
-  - Caso de uso
+- ##### Aluno/Docente podem ver anúncios do curso em execução na página principal
+  - Os anúncios do curso em execução que se encontra selecionado sao visiveis na pagina principal, 
+ou seja, assim que se faz login
+
+  1 - Aluno/Docente abre página principal
+  ![Student/Teacher sees course execution announcements](assets/img/NovaBase/Adp/ShowAnnouncements.png)
+
+
 
 #### 2. Sistema de Notificações (SdN)
 
