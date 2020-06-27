@@ -93,7 +93,7 @@ public class User implements UserDetails, DomainEntity, Observer {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Announcement> announcements = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Subscription> subscriptions = new HashSet<>();
 
     @Column(columnDefinition = "boolean default true")

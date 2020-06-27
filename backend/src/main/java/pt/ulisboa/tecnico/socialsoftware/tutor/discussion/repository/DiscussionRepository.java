@@ -22,4 +22,7 @@ public interface DiscussionRepository extends JpaRepository<Discussion, Discussi
 
     @Query(value = "SELECT * FROM discussions d WHERE d.user_id = :userId AND d.question_id = :questionId", nativeQuery = true)
     Optional<Discussion> findByUserIdQuestionId(Integer userId, Integer questionId);
+
+    @Query(value = "SELECT * FROM discussions d WHERE d.course_id = :course", nativeQuery = true)
+    List<Discussion> findByCourse(Integer course);
 }
