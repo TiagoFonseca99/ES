@@ -80,19 +80,23 @@
                     <p class="statName">Number of Participants</p>
                   </div>
                   <div class="square text-center">
-                    <span data-cy="Id" class="num2">{{
-                      selectedTournament !== null
-                        ? getStateName(selectedTournament.state)
-                        : 'Unknown tournament'
-                    }}</span>
+                    <span data-cy="Id" class="num2"
+                      ><b>{{
+                        selectedTournament !== null
+                          ? getStateName(selectedTournament.state)
+                          : 'Unknown tournament'
+                      }}</b></span
+                    >
                     <p class="statName">State</p>
                   </div>
                   <div class="square text-center">
-                    <span data-cy="Id" class="num2">{{
-                      selectedTournament !== null
-                        ? getPrivateName(selectedTournament)
-                        : 'Unknown tournament'
-                    }}</span>
+                    <span data-cy="Id" class="num2"
+                      ><b>{{
+                        selectedTournament !== null
+                          ? getPrivateName(selectedTournament)
+                          : 'Unknown tournament'
+                      }}</b></span
+                    >
                     <p class="statName">Privacy</p>
                   </div>
                 </div>
@@ -110,7 +114,23 @@
               :hide-default-footer="true"
               :mobile-breakpoint="0"
               class="fill-height"
-            ></v-data-table>
+            >
+              <template v-slot:item.username="{ item }">
+                <v-chip
+                  color="primary"
+                  small
+                  @click="openStudentDashboardDialog(item.username)"
+                >
+                  {{ item.username }}
+                </v-chip>
+              </template>
+            </v-data-table>
+            <show-dashboard-dialog
+              v-if="currentUsername"
+              v-model="dashboardDialog"
+              :username="currentUsername"
+              v-on:close-show-dashboard-dialog="onCloseShowDashboardDialog"
+            />
           </v-card>
         </v-col>
       </v-row>
@@ -124,9 +144,10 @@ import Tournament from '@/models/user/Tournament';
 import User from '@/models/user/User';
 import RemoteServices from '@/services/RemoteServices';
 import AnimatedNumber from '@/components/AnimatedNumber.vue';
+import ShowDashboardDialog from '@/views/teacher/students/DashboardDialogView.vue';
 
 @Component({
-  components: { AnimatedNumber }
+  components: { AnimatedNumber, 'show-dashboard-dialog': ShowDashboardDialog }
 })
 export default class SelectedTournamentView extends Vue {
   @Model('dialog', Boolean) dialog!: boolean;
@@ -135,6 +156,8 @@ export default class SelectedTournamentView extends Vue {
   tournaments: Tournament[] = [];
   selectedTournament: Tournament | null = null;
   participants: User[] = [];
+  currentUsername: string | null = null;
+  dashboardDialog: boolean = false;
 
   headers: object = [
     { text: 'Name', value: 'name', align: 'center' },
@@ -157,13 +180,22 @@ export default class SelectedTournamentView extends Vue {
   }
 
   getStateName(state: string) {
-    if (state === 'NOT_CANCELED') return 'Available';
-    else return 'Cancelled';
+    if (state === 'NOT_CANCELED') return 'AVAILABLE';
+    else return 'CANCELLED';
   }
 
   getPrivateName(privateTournament: boolean) {
-    if (privateTournament) return 'Private';
-    else return 'Public';
+    if (privateTournament) return 'PRIVATE';
+    else return 'PUBLIC';
+  }
+
+  openStudentDashboardDialog(username: string) {
+    this.dashboardDialog = true;
+    this.currentUsername = username;
+  }
+
+  onCloseShowDashboardDialog() {
+    this.dashboardDialog = false;
   }
 }
 </script>

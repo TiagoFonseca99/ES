@@ -96,8 +96,8 @@ public class WorkerService {
         checkEndpoint(subscriptionDto);
 
         return subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint()).filter(sub -> {
-            return sub.getUser().getId().equals(userId);
-        }).count() == 1;
+                return sub.getUser().getId().equals(userId);
+            }).count() == 1;
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -106,8 +106,8 @@ public class WorkerService {
         checkEndpoint(subscriptionDto);
 
         Subscription subscription = subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint())
-                .filter(sub -> sub.getUser().getId() == userId).findFirst()
-                .orElseThrow(() -> new TutorException(SUBSCRIPTION_NOT_FOUND));
+            .filter(sub -> sub.getUser().getId() == userId).findFirst()
+            .orElseThrow(() -> new TutorException(SUBSCRIPTION_NOT_FOUND));
 
         subscription.remove();
 
@@ -117,44 +117,46 @@ public class WorkerService {
     @Async("notifySubscriptionExecutor")
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void notifySubscriptions(Notification notification, Collection<User> users) {
+    public void notifySubscriptions(Notification notification, Collection<User> users, User exclude) {
         if (notification != null && users != null) {
             try {
                 final String message = objectMapper.writeValueAsString(new NotificationDto(notification));
 
                 for (User user : users) {
-                    for (Subscription sub : user.getSubscriptions()) {
-                        try {
-                            Builder requestBuilder = HttpRequest.newBuilder();
-                            byte[] result = cryptoService.encrypt(message, sub.getP256dh(), sub.getAuth(), 0);
-                            URL url = new URL(sub.getEndpoint());
-                            String origin = url.getProtocol() + "://" + url.getHost();
+                    if (user.getId() != exclude.getId()) {
+                        for (Subscription sub : user.getSubscriptions()) {
+                            try {
+                                Builder requestBuilder = HttpRequest.newBuilder();
+                                byte[] result = cryptoService.encrypt(message, sub.getP256dh(), sub.getAuth(), 0);
+                                URL url = new URL(sub.getEndpoint());
+                                String origin = url.getProtocol() + "://" + url.getHost();
 
-                            String token = JwtTokenProvider.generateToken(origin, user, serverKeys.getPrivate());
+                                String token = JwtTokenProvider.generateToken(origin, user, serverKeys.getPrivate());
 
-                            URI endpoint = URI.create(sub.getEndpoint());
+                                URI endpoint = URI.create(sub.getEndpoint());
 
-                            HttpRequest request = requestBuilder.POST(BodyPublishers.ofByteArray(result)).uri(endpoint)
+                                HttpRequest request = requestBuilder.POST(BodyPublishers.ofByteArray(result)).uri(endpoint)
                                     .header("Content-Type", "application/octet-stream")
                                     .header("Content-Encoding", "aes128gcm").header("TTL", "180")
                                     .header("Authorization", "vapid t=" + token + ", k=" + serverKeys.getBase64())
                                     .build();
 
-                            HttpResponse<Void> response = httpClient.send(request, BodyHandlers.discarding());
-                            switch (response.statusCode()) {
+                                HttpResponse<Void> response = httpClient.send(request, BodyHandlers.discarding());
+                                switch (response.statusCode()) {
                                 case 201:
                                     break;
                                 default:
                                     logger.error("HTTP Response: {} ### {}", response.statusCode(), response.body());
+                                }
+                            } catch (InterruptedException | IOException e) {
+                                logger.error("Error sending notification");
                             }
-                        } catch (InterruptedException | IOException e) {
-                            logger.error("Error sending notification");
                         }
                     }
                 }
             } catch (JsonProcessingException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
-                    | InvalidAlgorithmParameterException | InvalidKeySpecException | NoSuchAlgorithmException
-                    | InvalidKeyException e) {
+                     | InvalidAlgorithmParameterException | InvalidKeySpecException | NoSuchAlgorithmException
+                     | InvalidKeyException e) {
                 logger.error(e.getMessage());
             }
         }
@@ -162,8 +164,8 @@ public class WorkerService {
 
     private void checkSubscription(SubscriptionDto subscription) {
         if (subscription == null
-                || (subscription.getExpirationTime() != null && subscription.getExpirationTime() < new Date().getTime())
-                || subscription.getEndpoint() == null || !validSubscriptionKey(subscription.getKeys())) {
+            || (subscription.getExpirationTime() != null && subscription.getExpirationTime() < new Date().getTime())
+            || subscription.getEndpoint() == null || !validSubscriptionKey(subscription.getKeys())) {
             throw new TutorException(INVALID_SUBSCRIPTION);
         }
     }
