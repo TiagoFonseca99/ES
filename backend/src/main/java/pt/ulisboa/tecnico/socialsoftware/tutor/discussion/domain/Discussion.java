@@ -161,6 +161,11 @@ public class Discussion implements Observable {
     }
 
     @Override
+    public Set<User> getObservers() {
+        return this.observers;
+    }
+
+    @Override
     public void Attach(Observer o) {
         this.observers.add((User) o);
     }

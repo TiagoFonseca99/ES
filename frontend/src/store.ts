@@ -5,6 +5,7 @@ import Course from '@/models/user/Course';
 import User from '@/models/user/User';
 import * as storage from '@/storage';
 import * as session from '@/session';
+import * as worker from '@/registerServiceWorker';
 
 interface State {
   logged: boolean;
@@ -46,6 +47,7 @@ export default new Vuex.Store({
       storage.createCookie(session.SESSION_TOKEN, String(state.session));
       storage.persist(session.LOGGED_TOKEN, 'true');
       await session.checkCourse(state.user);
+      worker.registerWorker();
     },
     async logout(state) {
       state.user = null;
