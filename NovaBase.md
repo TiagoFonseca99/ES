@@ -96,8 +96,11 @@
     2 - Seleciona um torneio existente
     ![Tournament Dashboard](assets/img/NovaBase/Tdp/TeacherTournaments_2.png)
 
-    3 - Acede à dashboard de um aluno
+    3 - Visualiza uma preview da dashboard de um aluno
     ![Tournament Dashboard](assets/img/NovaBase/Tdp/TeacherTournaments_3.png)
+
+    4 - Acede à dashboard de um aluno
+    ![Tournament Dashboard](assets/img/NovaBase/Tdp/TeacherTournaments_4.png)
 
 - ##### Lista de Torneios Fechados
   - É possivel agora cada aluno consultar e obter informação sobre os torneios que já terminaram
@@ -109,8 +112,8 @@
 - ##### Ranking de participantes
   - É possivel agora cada aluno consultar o ranking de um determinado torneio, permitindo ver quem é o aluno com melhor classificação, sendo que o vencedor será o / os participantes com melhor nota aquando do fim do torneio
 
-    1 - Aluno acede à lista de torneios fechados
-    ![Closed Tournaments List](assets/img/NovaBase/Tdp/TournamentRankings_1.png)
+    1 - Aluno acede à lista de torneios existentes
+    ![Tournaments List](assets/img/NovaBase/Tdp/TournamentRankings_1.png)
 
     2 - Seleciona um torneio existente e observa a lista de participantes e os respetivos lugares
     ![Tournament Rankings](assets/img/NovaBase/Tdp/TournamentRankings_2.png)

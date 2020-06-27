@@ -33,10 +33,9 @@
               </template>
               <template v-slot:item.username="{ item }">
                 <v-chip
-                  :color="getUserColor(item.username)"
+                  color="primary"
                   small
                   @click="openStudentDashboardDialog(item)"
-                  text-color="white"
                 >
                   <v-icon left small v-if="isCurrentUser(item)" color="white"
                     >star</v-icon
@@ -183,11 +182,6 @@ export default class ParticipantsTournament extends Vue {
 
   onCloseShowDashboardDialog() {
     this.dashboardDialog = false;
-  }
-
-  getUserColor(username: string) {
-    if (username == this.$store.getters.getUser.username) return '#fae319';
-    else return 'primary';
   }
 }
 </script>
