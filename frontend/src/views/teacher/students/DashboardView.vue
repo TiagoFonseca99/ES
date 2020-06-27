@@ -11,12 +11,12 @@
           <v-card class="dashCard">
             <v-card-title class="justify-center">User Info</v-card-title>
             <div class="text-left" style="padding-left: 25px;">
-              <b style="color: #1976d2">Name: </b>
+              <b class="primary--text">Name: </b>
               <span data-cy="name">{{
                 info !== null ? info.name : 'Unknown user'
               }}</span
               ><br />
-              <b style="color: #1976d2">Username: </b>
+              <b class="primary--text">Username: </b>
               <span data-cy="username">{{
                 info !== null ? info.username : 'Unknown user'
               }}</span>
@@ -25,10 +25,28 @@
               <v-col>
                 <v-card-title class="justify-center">Statistics</v-card-title>
                 <div
+                  class="switchContainer"
+                  style="display: flex; flex-direction: row; position: relative;"
+                >
+                  <v-switch
+                    style="flex: 1"
+                    v-if="
+                      info !== null &&
+                        info.username === this.$store.getters.getUser.username
+                    "
+                    :input-value="!info.userStatsPublic"
+                    append-icon="lock"
+                    :label="info.userStatsPublic ? 'Public' : 'Private'"
+                    @change="toggleStats()"
+                  />
+                </div>
+                <div
                   id="statsContainer"
                   v-if="
                     stats !== null &&
-                      (this.username === this.$store.getters.getUser.username ||
+                      ((info !== null &&
+                        info.username ===
+                          this.$store.getters.getUser.username) ||
                         this.info.userStatsPublic)
                   "
                 >
@@ -88,6 +106,19 @@
         <v-col :cols="5">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Tournaments</v-card-title>
+            <v-container>
+              <v-switch
+                style="flex: 1"
+                v-if="
+                  info !== null &&
+                    info.username === this.$store.getters.getUser.username
+                "
+                :input-value="!info.tournamentStatsPublic"
+                append-icon="lock"
+                :label="info.tournamentStatsPublic ? 'Public' : 'Private'"
+                @change="toggleTournaments()"
+              />
+            </v-container>
             <v-data-table
               :headers="headers"
               :items="tournaments"
@@ -97,13 +128,32 @@
               class="fill-height"
               v-if="
                 this.info !== null &&
-                  (this.username === this.$store.getters.getUser.username ||
+                  (info.username === this.$store.getters.getUser.username ||
                     this.info.tournamentStatsPublic)
               "
             >
+              <template v-slot:item.id="{ item }">
+                <v-chip
+                  color="primary"
+                  small
+                  :to="openTournamentDashboard(item)"
+                >
+                  <span> {{ item.id }} </span>
+                </v-chip>
+              </template>
+              <template v-slot:item.startTime="{ item }">
+                <v-chip small>
+                  {{ item.startTime }}
+                </v-chip>
+              </template>
+              <template v-slot:item.endTime="{ item }">
+                <v-chip small>
+                  {{ item.endTime }}
+                </v-chip>
+              </template>
               <template v-slot:item.score="{ item }">
-                <v-chip :color="getPercentageColor(score(item))">
-                  {{ score(item) }}
+                <v-chip small :color="getPercentageColor(score(item))">
+                  {{ score(item) === '' ? 'NOT SOLVED' : score(item) }}
                 </v-chip>
               </template>
             </v-data-table>
@@ -115,11 +165,24 @@
         <v-col :cols="2">
           <v-card class="dashCard flexCard">
             <v-card-title class="justify-center">Submissions</v-card-title>
+            <v-container>
+              <v-switch
+                style="flex: 1"
+                v-if="
+                  info !== null &&
+                    info.username === this.$store.getters.getUser.username
+                "
+                :input-value="!info.submissionStatsPublic"
+                append-icon="lock"
+                :label="info.submissionStatsPublic ? 'Public' : 'Private'"
+                @change="toggleSubmissions()"
+              />
+            </v-container>
             <div
               class="dashInfo"
               v-if="
                 info !== null &&
-                  (this.username === this.$store.getters.getUser.username ||
+                  (info.username === this.$store.getters.getUser.username ||
                     this.info.submissionStatsPublic)
               "
             >
@@ -157,11 +220,24 @@
             <v-card-title class="justify-center" style="display: block;"
               >Discussions</v-card-title
             >
+            <v-container>
+              <v-switch
+                style="flex: 1"
+                v-if="
+                  info !== null &&
+                    info.username === this.$store.getters.getUser.username
+                "
+                :input-value="!info.discussionStatsPublic"
+                append-icon="lock"
+                :label="info.discussionStatsPublic ? 'Public' : 'Private'"
+                @change="toggleDiscussions()"
+              />
+            </v-container>
             <div
               class="dashInfo"
               v-if="
                 info !== null &&
-                  (this.username === this.$store.getters.getUser.username ||
+                  (info.username === this.$store.getters.getUser.username ||
                     this.info.discussionStatsPublic)
               "
             >
@@ -248,6 +324,38 @@ export default class DashboardView extends Vue {
     await this.$store.dispatch('clearLoading');
   }
 
+  async toggleDiscussions() {
+    try {
+      this.info = await RemoteServices.toggleDiscussionStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  async toggleSubmissions() {
+    try {
+      this.info = await RemoteServices.toggleSubmissionStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  async toggleTournaments() {
+    try {
+      this.info = await RemoteServices.toggleTournamentStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
+  async toggleStats() {
+    try {
+      this.info = await RemoteServices.toggleUserStats();
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+  }
+
   calculateScore(quiz: SolvedQuiz) {
     let correct = 0;
     for (let i = 0; i < quiz.statementQuiz.questions.length; i++) {
@@ -269,8 +377,6 @@ export default class DashboardView extends Vue {
         score = this.calculateScore(quiz);
       }
     });
-
-    if (score == '') return 'NOT SOLVED';
     return score;
   }
 
@@ -281,7 +387,10 @@ export default class DashboardView extends Vue {
     else if (percentage < 50) return 'orange';
     else if (percentage < 75) return 'lime';
     else if (percentage <= 100) return 'green';
-    else return 'primary';
+  }
+
+  openTournamentDashboard(tournament: Tournament) {
+    if (tournament) return '/teacher/tournament?id=' + tournament.id;
   }
 }
 </script>
