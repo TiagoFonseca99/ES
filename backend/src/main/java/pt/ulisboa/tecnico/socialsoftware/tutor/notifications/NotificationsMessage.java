@@ -40,7 +40,7 @@ public enum NotificationsMessage {
     NEW_REVIEW_CONTENT("Submission '%s' %s by teacher %s"),
 
     DELETED_QUESTION_TITLE("Deleted Question - Question '%s'"),
-    DELETED_QUESTION_CONTENT("Question '%s' deleted by teacher %s"),
+    DELETED_QUESTION_CONTENT("Question '%s' deleted by %s"),
 
     NEW_SUBMISSION_TITLE("New Submission - Question '%s'"),
     NEW_SUBMISSION_CONTENT("Submission created by student %s");
