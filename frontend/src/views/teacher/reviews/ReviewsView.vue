@@ -240,7 +240,6 @@ import ShowReviewDialog from '@/views/teacher/reviews/ShowJustificationDialog.vu
 import EditQuestionTopics from '@/views/teacher/questions/EditQuestionTopics.vue';
 import Topic from '@/models/management/Topic';
 import ShowDashboardDialog from '@/views/teacher/students/DashboardDialogView.vue';
-import { Student } from '@/models/management/Student';
 
 @Component({
   components: {
