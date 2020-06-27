@@ -82,7 +82,7 @@ export default class NotificationInfo extends Vue {
 .notification {
   display: flex;
   padding: 10px;
-  opacity: 50%;
+  opacity: 0.5;
   width: 100%;
   cursor: pointer;
 }
@@ -95,10 +95,10 @@ export default class NotificationInfo extends Vue {
 }
 
 .all {
-  opacity: 100%;
+  opacity: 1;
 }
 .unopened {
   background-color: whitesmoke;
-  opacity: 100%;
+  opacity: 1;
 }
 </style>
