@@ -100,4 +100,13 @@ public class Subscription {
         this.user.getSubscriptions().remove(this);
         this.user = null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Subscription)) {
+            return false;
+        }
+
+        return ((Subscription) o).getEndpoint() == getEndpoint();
+    }
 }

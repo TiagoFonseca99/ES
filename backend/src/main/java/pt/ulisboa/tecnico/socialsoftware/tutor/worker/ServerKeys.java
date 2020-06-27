@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -47,6 +48,10 @@ public class ServerKeys {
 
     public String getBase64() {
         return this.pubKeyB64;
+    }
+
+    public Key getPrivate() {
+        return this.privKey;
     }
 
     @PostConstruct

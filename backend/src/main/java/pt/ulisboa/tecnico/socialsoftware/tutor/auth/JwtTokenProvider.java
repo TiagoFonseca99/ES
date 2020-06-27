@@ -11,6 +11,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -46,23 +48,23 @@ public class JwtTokenProvider {
         }
     }
 
-    public static String generateToken(String audience, User user) {
-        if (publicKey == null) {
-            generateKeys();
-        }
-
+    public static String generateToken(String audience, User user, Key key) {
         Claims claims = Jwts.claims().setSubject(String.valueOf(user.getId())).setAudience(audience);
         claims.put("role", user.getRole());
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + TOKEN_EXPIRATION);
 
-        return Jwts.builder().setClaims(claims).setIssuedAt(new Date()).setExpiration(expiryDate).signWith(privateKey)
+        return Jwts.builder().setClaims(claims).setIssuedAt(new Date()).setExpiration(expiryDate).signWith(key)
                 .compact();
     }
 
     static String generateToken(User user) {
-        return generateToken("", user);
+        if (publicKey == null) {
+            generateKeys();
+        }
+
+        return generateToken("", user, privateKey);
     }
 
     static String getToken(String token) {

@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.JwtTokenProvider;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
+import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.worker.domain.Subscription;
@@ -91,8 +95,9 @@ public class WorkerService {
     public boolean isSubscribed(Integer userId, SubscriptionDto subscriptionDto) {
         checkEndpoint(subscriptionDto);
 
-        return subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint())
-            .filter(sub -> sub.getUser().getId() == userId).count() == 1;
+        return subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint()).filter(sub -> {
+            return sub.getUser().getId() == userId;
+        }).count() == 1;
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -101,22 +106,21 @@ public class WorkerService {
         checkEndpoint(subscriptionDto);
 
         Subscription subscription = subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint())
-            .filter(sub -> sub.getUser().getId() == userId).findFirst()
-            .orElseThrow(() -> new TutorException(SUBSCRIPTION_NOT_FOUND));
+                .filter(sub -> sub.getUser().getId() == userId).findFirst()
+                .orElseThrow(() -> new TutorException(SUBSCRIPTION_NOT_FOUND));
 
         subscription.remove();
 
         this.entityManager.remove(subscription);
     }
 
+    @Async("notifySubscriptionExecutor")
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void notifySubscriptions(Notification notification, Collection<User> users) {
         if (notification != null && users != null) {
-            List<Subscription> toRemove = new ArrayList<Subscription>();
-
-            logger.info("NOTIFYING {} USERS", users.size());
-
             try {
-                final String message = objectMapper.writeValueAsString(notification);
+                final String message = objectMapper.writeValueAsString(new NotificationDto(notification));
 
                 for (User user : users) {
                     for (Subscription sub : user.getSubscriptions()) {
@@ -126,32 +130,31 @@ public class WorkerService {
                             URL url = new URL(sub.getEndpoint());
                             String origin = url.getProtocol() + "://" + url.getHost();
 
-                            String token = JwtTokenProvider.generateToken(origin, user);
+                            String token = JwtTokenProvider.generateToken(origin, user, serverKeys.getPrivate());
 
                             URI endpoint = URI.create(sub.getEndpoint());
 
                             HttpRequest request = requestBuilder.POST(BodyPublishers.ofByteArray(result)).uri(endpoint)
-                                .header("Content-Type", "application/octet-stream")
-                                .header("Content-Encoding", "aes128gcm").header("TTL", "180")
-                                .header("Authorization", "vapid t=" + token + ", k=" + serverKeys.getBase64())
-                                .build();
+                                    .header("Content-Type", "application/octet-stream")
+                                    .header("Content-Encoding", "aes128gcm").header("TTL", "180")
+                                    .header("Authorization", "vapid t=" + token + ", k=" + serverKeys.getBase64())
+                                    .build();
 
                             HttpResponse<Void> response = httpClient.send(request, BodyHandlers.discarding());
                             switch (response.statusCode()) {
-                            case 201:
-                                break;
-                            default:
-                                logger.error("HTTP Response: {} ### {}", response.statusCode(), request);
+                                case 201:
+                                    break;
+                                default:
+                                    logger.error("HTTP Response: {} ### {}", response.statusCode(), response.body());
                             }
                         } catch (InterruptedException | IOException e) {
                             logger.error("Error sending notification");
-                            toRemove.add(sub);
                         }
                     }
                 }
             } catch (JsonProcessingException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
-                     | InvalidAlgorithmParameterException | InvalidKeySpecException | NoSuchAlgorithmException
-                     | InvalidKeyException e) {
+                    | InvalidAlgorithmParameterException | InvalidKeySpecException | NoSuchAlgorithmException
+                    | InvalidKeyException e) {
                 logger.error(e.getMessage());
             }
         }
@@ -159,8 +162,8 @@ public class WorkerService {
 
     private void checkSubscription(SubscriptionDto subscription) {
         if (subscription == null
-            || (subscription.getExpirationTime() != null && subscription.getExpirationTime() < new Date().getTime()) || subscription.getEndpoint() == null
-            || !validSubscriptionKey(subscription.getKeys())) {
+                || (subscription.getExpirationTime() != null && subscription.getExpirationTime() < new Date().getTime())
+                || subscription.getEndpoint() == null || !validSubscriptionKey(subscription.getKeys())) {
             throw new TutorException(INVALID_SUBSCRIPTION);
         }
     }

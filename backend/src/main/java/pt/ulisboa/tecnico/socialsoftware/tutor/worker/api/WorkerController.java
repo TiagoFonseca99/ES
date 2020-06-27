@@ -45,14 +45,14 @@ public class WorkerController {
     }
 
     @PostMapping("/worker/isSubscribed")
-    public void isSubscribed(Principal principal, @RequestBody SubscriptionDto subscription) {
+    public boolean isSubscribed(Principal principal, @RequestBody SubscriptionDto subscription) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if (user == null) {
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        workerService.isSubscribed(user.getId(), subscription);
+        return workerService.isSubscribed(user.getId(), subscription);
     }
 
     @DeleteMapping("/worker/unsubscribe")
