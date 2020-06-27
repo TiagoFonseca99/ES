@@ -100,6 +100,10 @@ public class Topic implements DomainEntity {
         this.tournaments.add(tournament);
     }
 
+    public void removeTournament(Tournament tournament) {
+        this.tournaments.remove(tournament);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -101,43 +101,26 @@ public class TournamentService {
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void addTopic(Integer userId, TournamentDto tournamentDto, Integer topicId) {
+    public void updateTopics(Integer userId, TournamentDto tournamentDto, List<Integer> topicsId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
         Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
                 .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
 
-        Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
-
         if (tournament.getCreator() != user) {
             throw new TutorException(TOURNAMENT_CREATOR, user.getId());
         }
 
-        tournament.addTopic(topic);
-
-        NotificationDto notification = NotificationsCreation.create(ADD_TOPIC_TITLE, List.of(tournament.getId()),
-                ADD_TOPIC_CONTENT, List.of(topic.getName(), tournament.getId()), Notification.Type.TOURNAMENT);
-        this.notify(tournament, notification, user);
-    }
-
-    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void removeTopic(Integer userId, TournamentDto tournamentDto, Integer topicId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
-
-        Tournament tournament = tournamentRepository.findById(tournamentDto.getId())
-                .orElseThrow(() -> new TutorException(TOURNAMENT_NOT_FOUND, tournamentDto.getId()));
-
-        Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
-
-        if (tournament.getCreator() != user) {
-            throw new TutorException(TOURNAMENT_CREATOR, user.getId());
+        List<Topic> topics = new ArrayList<>();
+        for (Integer topicId : topicsId) {
+            Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
+            topics.add(topic);
         }
 
-        tournament.removeTopic(topic);
+        tournament.updateTopics(topics);
 
-        NotificationDto notification = NotificationsCreation.create(REMOVE_TOPIC_TITLE, List.of(tournament.getId()),
-                REMOVE_TOPIC_CONTENT, List.of(topic.getName(), tournament.getId()), Notification.Type.TOURNAMENT);
+        NotificationDto notification = NotificationsCreation.create(UPDATE_TOPIC_TITLE, List.of(tournament.getId()),
+                UPDATE_TOPIC_CONTENT, List.of(tournament.getId()), Notification.Type.TOURNAMENT);
         this.notify(tournament, notification, user);
     }
 

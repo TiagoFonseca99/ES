@@ -213,8 +213,6 @@ export default class EditTournamentDialog extends Vue {
 
   newStartTime: string = '';
   newEndTime: string = '';
-  topicsToAdd: Topic[] = [];
-  topicsToRemove: Topic[] = [];
 
   topicHeaders: object = [
     {
@@ -257,8 +255,6 @@ export default class EditTournamentDialog extends Vue {
           });
         });
       }
-      this.topicsToAdd = [];
-      this.topicsToRemove = [];
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -304,11 +300,7 @@ export default class EditTournamentDialog extends Vue {
       this.editTournament.topics = [];
       this.editTournament.participants = [];
 
-      let topicsToAddID = this.topicsToAdd.map(topic => {
-        return topic.id;
-      });
-
-      let topicsToRemoveID = this.topicsToRemove.map(topic => {
+      let topicsList = this.currentTopics.map(topic => {
         return topic.id;
       });
 
@@ -317,8 +309,7 @@ export default class EditTournamentDialog extends Vue {
           this.oldStartTime,
           this.oldEndTime,
           this.oldNumberOfQuestions,
-          topicsToAddID,
-          topicsToRemoveID,
+          topicsList,
           this.editTournament
         );
         this.$emit('edit-tournament', result);
@@ -355,14 +346,6 @@ export default class EditTournamentDialog extends Vue {
   }
 
   removeTopic(topic: Topic) {
-    if (this.oldTopics.includes(topic.name)) {
-      this.topicsToRemove.push(topic);
-    }
-
-    if (this.topicsToAdd.includes(topic)) {
-      this.topicsToAdd = this.topicsToAdd.filter(t => t.id != topic.id);
-    }
-
     this.availableTopics.push(topic);
     this.availableTopics.sort((a, b) => {
       let result = a.name.localeCompare(b.name);
@@ -372,14 +355,6 @@ export default class EditTournamentDialog extends Vue {
   }
 
   addTopic(topic: Topic) {
-    if (!this.oldTopics.includes(topic.name)) {
-      this.topicsToAdd.push(topic);
-    }
-
-    if (this.topicsToRemove.includes(topic)) {
-      this.topicsToRemove = this.topicsToRemove.filter(t => t.id != topic.id);
-    }
-
     this.currentTopics.push(topic);
     this.currentTopics.sort((a, b) => {
       let result = a.name.localeCompare(b.name);

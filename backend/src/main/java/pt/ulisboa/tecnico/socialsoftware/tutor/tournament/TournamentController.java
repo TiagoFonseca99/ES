@@ -154,32 +154,16 @@ public class TournamentController {
         tournamentService.editNumberOfQuestions(user.getId(), tournamentDto, numberOfQuestions);
     }
 
-    @PutMapping(value = "/tournaments/addTopics")
+    @PutMapping(value = "/tournaments/updateTopics")
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public void addTopics(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam List<Integer> topicsId) {
+    public void updateTopics(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam List<Integer> topicsId) {
         User user = (User) ((Authentication) principal).getPrincipal();
 
         if(user == null){
             throw new TutorException(AUTHENTICATION_ERROR);
         }
 
-        for (Integer topicId : topicsId) {
-            tournamentService.addTopic(user.getId(), tournamentDto, topicId);
-        }
-    }
-
-    @PutMapping(value = "/tournaments/removeTopics")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public void removeTopics(Principal principal, @Valid @RequestBody TournamentDto tournamentDto, @RequestParam List<Integer> topicsId) {
-        User user = (User) ((Authentication) principal).getPrincipal();
-
-        if(user == null){
-            throw new TutorException(AUTHENTICATION_ERROR);
-        }
-
-        for (Integer topicId : topicsId) {
-            tournamentService.removeTopic(user.getId(), tournamentDto, topicId);
-        }
+        tournamentService.updateTopics(user.getId(), tournamentDto, topicsId);
     }
 
     @DeleteMapping(value = "/tournaments/removeTournament/{tournamentId}")
