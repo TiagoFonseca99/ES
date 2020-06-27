@@ -26,6 +26,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 
 @DataJpaTest
@@ -170,6 +173,21 @@ class GetUserDiscussionsTest extends Specification {
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }

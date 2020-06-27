@@ -29,6 +29,39 @@ httpClient.defaults.withCredentials = true;
 httpClient.defaults.headers.post['Content-Type'] = 'application/json';
 
 export default class RemoteServices {
+  static async getWorkerKey(): Promise<string> {
+    return httpClient
+      .get('/worker/publicKey')
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        console.error(error);
+        return '';
+      });
+  }
+
+  static async isWorkerSubscribed(
+    subscription: PushSubscription
+  ): Promise<Boolean> {
+    return httpClient
+      .post('/worker/isSubscribed', subscription)
+      .then(response => {
+        return response.data;
+      })
+      .catch(async error => {
+        console.error(error);
+      });
+  }
+
+  static async subscribeWorker(subscription: PushSubscription) {
+    return httpClient
+      .post('/worker/subscribe', subscription)
+      .catch(async error => {
+        console.error(error);
+      });
+  }
+
   static async checkToken(): Promise<User> {
     return httpClient
       .get('/auth/check')
@@ -1033,8 +1066,7 @@ export default class RemoteServices {
     startTime: string,
     endTime: string,
     numberOfQuestions: number,
-    topicsToAdd: Number[],
-    topicsToRemove: Number[],
+    topicsList: Number[],
     tournament: Tournament
   ): Promise<Tournament> {
     let result = tournament;
@@ -1050,11 +1082,8 @@ export default class RemoteServices {
     ) {
       tournament = await this.editNumberOfQuestions(result);
     }
-    if (topicsToAdd.length > 0) {
-      tournament = await this.addTopics(topicsToAdd, result);
-    }
-    if (topicsToRemove.length > 0) {
-      tournament = await this.removeTopics(topicsToRemove, result);
+    if (topicsList.length > 0) {
+      tournament = await this.updateTopics(topicsList, result);
     }
     return new Tournament(tournament);
   }
@@ -1101,11 +1130,11 @@ export default class RemoteServices {
       });
   }
 
-  static async addTopics(
+  static async updateTopics(
     topicsID: Number[],
     tournament: Tournament
   ): Promise<Tournament> {
-    let path: string = '/tournaments/addTopics?';
+    let path: string = '/tournaments/updateTopics?';
     for (let topicID of topicsID) {
       path += 'topicsId=' + topicID + '&';
     }
@@ -1120,28 +1149,9 @@ export default class RemoteServices {
       });
   }
 
-  static async removeTopics(
-    topicsID: Number[],
-    tournament: Tournament
-  ): Promise<Tournament> {
-    let path: string = '/tournaments/removeTopics?';
-    for (let topicID of topicsID) {
-      path += 'topicsId=' + topicID + '&';
-    }
-    path = path.substring(0, path.length - 1);
+  static getAllTournaments(): Promise<Tournament[]> {
     return httpClient
-      .put(path, tournament)
-      .then(response => {
-        return new Tournament(response.data);
-      })
-      .catch(async error => {
-        throw Error(await this.errorMessage(error));
-      });
-  }
-
-  static getTournaments(): Promise<Tournament[]> {
-    return httpClient
-      .get('/tournaments/getTournaments')
+      .get('/tournaments/getAllTournaments')
       .then(response => {
         return response.data.map((tournament: any) => {
           return new Tournament(tournament, Store.getters.getUser);

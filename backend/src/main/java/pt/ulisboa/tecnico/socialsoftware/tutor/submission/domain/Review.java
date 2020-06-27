@@ -55,9 +55,6 @@ public class Review implements Observable {
     @ManyToMany(fetch = FetchType.LAZY)
     private Set<User> observers = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<Notification> notifications = new ArrayList<>();
-
     public Review() {
     }
 
@@ -141,19 +138,8 @@ public class Review implements Observable {
         }
     }
 
-    public List<Notification> getNotifications() {
-        return notifications;
-    }
-
-    public void addNotification(Notification notification) {
-        this.notifications.add(notification);
-    }
-
-    public void removeNotification(Notification notification) {
-        this.notifications.remove(notification);
-    }
-
-    public Set<User> getUsers() {
+    @Override
+    public Set<User> getObservers() {
         return observers;
     }
 

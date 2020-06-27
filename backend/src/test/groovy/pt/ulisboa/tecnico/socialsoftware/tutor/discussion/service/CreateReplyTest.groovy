@@ -10,6 +10,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.ReplyRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
@@ -238,6 +241,21 @@ class CreateReplyTest extends Specification {
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }

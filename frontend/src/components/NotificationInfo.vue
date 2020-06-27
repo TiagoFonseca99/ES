@@ -40,8 +40,6 @@ export default class NotificationInfo extends Vue {
     switch (type) {
       case 'TOURNAMENT':
         return 'fa-trophy';
-      case 'ANNOUNCEMENT':
-        return 'fa-bullhorn';
       case 'SUBMISSION':
       case 'QUESTION':
         return 'fa-question-circle';
@@ -59,9 +57,6 @@ export default class NotificationInfo extends Vue {
     switch (type) {
       case 'TOURNAMENT':
         name = 'open-tournament';
-        break;
-      case 'ANNOUNCEMENT':
-        name = 'home';
         break;
       case 'SUBMISSION':
         name = 'reviews-management';
@@ -87,7 +82,7 @@ export default class NotificationInfo extends Vue {
 .notification {
   display: flex;
   padding: 10px;
-  opacity: 50%;
+  opacity: 0.5;
   width: 100%;
   cursor: pointer;
 }
@@ -100,10 +95,10 @@ export default class NotificationInfo extends Vue {
 }
 
 .all {
-  opacity: 100%;
+  opacity: 1;
 }
 .unopened {
   background-color: whitesmoke;
-  opacity: 100%;
+  opacity: 1;
 }
 </style>

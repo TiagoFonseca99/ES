@@ -24,6 +24,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizQuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 
 @DataJpaTest
@@ -119,7 +122,6 @@ class RemoveQuizTest extends Specification {
 
     @TestConfiguration
     static class TestContextConfiguration {
-
         @Bean
         QuizService quizService() {
             return new QuizService()
@@ -139,13 +141,30 @@ class RemoveQuizTest extends Specification {
         AnswersXmlImport xmlImporter() {
             return new AnswersXmlImport()
         }
+
         @Bean
         SubmissionService submissionService() {
             return new SubmissionService()
         }
+
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }

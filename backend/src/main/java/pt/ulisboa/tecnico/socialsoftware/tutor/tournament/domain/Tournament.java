@@ -6,9 +6,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observable;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.Observer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto;
-import pt.ulisboa.tecnico.socialsoftware.tutor.statement.dto.StatementQuizDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Topic;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
@@ -16,6 +13,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.dto.TournamentDto;
 import javax.persistence.*;
 import java.util.*;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -68,7 +66,7 @@ public class Tournament implements Observable {
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    private List<User> observers = new ArrayList<>();
+    private Set<User> observers = new HashSet<>();
 
     public Tournament() {
     }
@@ -80,8 +78,7 @@ public class Tournament implements Observable {
         this.state = tournamentDto.getState();
         this.creator = user;
         setCourseExecution(user);
-        setTopics(topics);
-        topicsAddTournament(topics, this);
+        updateTopics(topics);
         setPassword(tournamentDto.getPassword());
         setPrivateTournament(tournamentDto.isPrivateTournament());
     }
@@ -163,47 +160,33 @@ public class Tournament implements Observable {
         this.quizId = quizId;
     }
 
-    private void setTopics(List<Topic> topics) {
-        for (Topic topic : topics) {
-            checkTopicCourse(topic);
-        }
-        this.topics = topics;
-    }
-
     public List<Topic> getTopics() {
         return topics;
     }
 
-    public void addTopic(Topic topic) {
-        if (topics.contains(topic)) {
-            throw new TutorException(DUPLICATE_TOURNAMENT_TOPIC, topic.getId());
-        }
-        checkTopicCourse(topic);
+    public void updateTopics(List<Topic> newTopics) {
+        if (newTopics.isEmpty()) throw new TutorException(TOURNAMENT_MUST_HAVE_ONE_TOPIC);
 
-        this.topics.add(topic);
-    }
-
-    public void removeTopic(Topic topic) {
-        if (!this.topics.contains(topic)) {
-            throw new TutorException(TOURNAMENT_TOPIC_MISMATCH, this.id, topic.getId());
+        for (Topic topic : newTopics) {
+            checkTopicCourse(topic);
         }
 
-        if (topics.size() <= 1) {
-            throw new TutorException(TOURNAMENT_HAS_ONLY_ONE_TOPIC);
-        }
+        List<Topic> toRemove = this.topics.stream().filter(topic -> !newTopics.contains(topic)).collect(Collectors.toList());
 
-        this.topics.remove(topic);
+        toRemove.forEach(topic -> {
+            this.topics.remove(topic);
+            topic.removeTournament(this);
+        });
+
+        newTopics.stream().filter(topic -> !this.topics.contains(topic)).forEach(topic -> {
+            this.topics.add(topic);
+            topic.addTournament(this);
+        });
     }
 
     public void checkTopicCourse(Topic topic) {
         if (topic.getCourse() != courseExecution.getCourse()) {
             throw new TutorException(TOURNAMENT_TOPIC_COURSE);
-        }
-    }
-
-    public void topicsAddTournament(List<Topic> topics, Tournament tournament) {
-        for (Topic topic : topics) {
-            topic.addTournament(tournament);
         }
     }
 
@@ -248,6 +231,11 @@ public class Tournament implements Observable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public Set<User> getObservers() {
+        return this.observers;
     }
 
     @Override

@@ -22,6 +22,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.dto.QuizDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.SubmissionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -185,7 +188,6 @@ class CreateQuizTest extends Specification {
 
     @TestConfiguration
     static class QuizServiceImplTestContextConfiguration {
-
         @Bean
         QuizService quizService() {
             return new QuizService()
@@ -205,13 +207,30 @@ class CreateQuizTest extends Specification {
         AnswersXmlImport xmlImporter() {
             return new AnswersXmlImport()
         }
+
         @Bean
         SubmissionService submissionService() {
             return new SubmissionService()
         }
+
         @Bean
         NotificationService notificationService() {
             return new NotificationService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }

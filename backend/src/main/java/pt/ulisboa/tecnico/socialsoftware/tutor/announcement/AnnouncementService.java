@@ -12,10 +12,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.repository.Announcem
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsCreation;
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.domain.Notification;
-import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.dto.NotificationDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository;
 
@@ -42,9 +38,6 @@ public class AnnouncementService {
     @Autowired
     private AnnouncementRepository announcementRepository;
 
-    @Autowired
-    private NotificationService notificationService;
-
     @PersistenceContext
     EntityManager entityManager;
 
@@ -65,11 +58,6 @@ public class AnnouncementService {
 
         Announcement announcement = new Announcement(user, courseExecution, announcementDto);
         entityManager.persist(announcement);
-
-        NotificationDto notification = NotificationsCreation.create(ADD_ANNOUNCEMENT_TITLE,
-                List.of(announcement.getUser().getName()), ADD_ANNOUNCEMENT_CONTENT,
-                List.of(announcement.getTitle(), user.getName()), Notification.Type.ANNOUNCEMENT);
-        this.notify(courseExecution, notification, user);
 
         return new AnnouncementDto(announcement);
     }
@@ -92,6 +80,7 @@ public class AnnouncementService {
         Announcement announcement = announcementRepository.findById(announcementId)
                 .orElseThrow(() -> new TutorException(ANNOUNCEMENT_NOT_FOUND, announcementId));
         announcement.update(announcementDto);
+
         return new AnnouncementDto(announcement);
     }
 
@@ -122,9 +111,5 @@ public class AnnouncementService {
         if (!user.isTeacher())
             throw new TutorException(USER_NOT_TEACHER, user.getUsername());
         return user;
-    }
-
-    private void notify(CourseExecution course, NotificationDto notification, User user) {
-        notificationService.notifyObservers(course, notificationService.createNotification(notification), user);
     }
 }

@@ -7,15 +7,13 @@ public enum NotificationsMessage {
     EDIT_START_TIME_TITLE("New start time - Tournament %s"),
     EDIT_END_TIME_TITLE("New end time - Tournament %s"),
     EDIT_NUMBER_OF_QUESTIONS_TITLE("New number of questions - Tournament %s"),
-    ADD_TOPIC_TITLE("Topic added - Tournament %s"),
-    REMOVE_TOPIC_TITLE("Topic removed - Tournament %s"),
+    UPDATE_TOPIC_TITLE("New topics list - Tournament %s"),
     CANCEL_TITLE("Tournament %s Canceled"),
 
     EDIT_START_TIME_CONTENT("Tournament %s start time changed from %s to %s"),
     EDIT_END_TIME_CONTENT("Tournament %s end time changed from %s to %s"),
     EDIT_NUMBER_OF_QUESTIONS_CONTENT("Tournament %s number of questions changed from %s to %s"),
-    ADD_TOPIC_CONTENT("Topic '%s' added to tournament %s"),
-    REMOVE_TOPIC_CONTENT("Topic '%s' removed from tournament %s"),
+    UPDATE_TOPIC_CONTENT("Tournament %s topics list has been updated"),
     CANCEL_CONTENT("Tournament %s canceled and no longer accessible"),
 
     // ddp
@@ -35,11 +33,6 @@ public enum NotificationsMessage {
     DISCUSSION_REPLY_CONTENT("%s replied to discussion to question '%s'"),
     DISCUSSION_EDIT_REPLY_CONTENT("%s edited reply to discussion to question '%s'"),
     DISCUSSION_DELETE_REPLY_CONTENT("%s removed reply to discussion to question '%s'"),
-
-    // adp
-
-    ADD_ANNOUNCEMENT_TITLE("New announcement - %s"),
-    ADD_ANNOUNCEMENT_CONTENT("'%s' added by %s"),
 
     // ppa
 
