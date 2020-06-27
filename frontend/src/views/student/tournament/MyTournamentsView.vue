@@ -20,6 +20,9 @@
             class="mx-2"
           />
           <v-spacer />
+          <v-btn to="/student/all" color="primary" dark data-cy="createButton"
+            >See All Tournaments
+          </v-btn>
           <v-btn
             color="primary"
             dark
