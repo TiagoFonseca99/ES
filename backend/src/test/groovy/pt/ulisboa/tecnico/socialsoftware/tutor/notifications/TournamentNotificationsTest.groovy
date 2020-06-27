@@ -293,12 +293,15 @@ class TournamentNotificationsTest extends Specification {
         def topic3 = new Topic(course, topicDto3)
         topicRepository.save(topic3)
 
+        and: "a new topics list"
+        topics.add(topic3.getId())
+
         expect: "0 notifications"
         sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
-        tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
+        tournamentService.updateTopics(user.getId(), tournamentDto, topics)
 
         then:
         sleep(100)
@@ -317,12 +320,15 @@ class TournamentNotificationsTest extends Specification {
         def topic3 = new Topic(course, topicDto3)
         topicRepository.save(topic3)
 
+        and: "a new topics list"
+        topics.add(topic3.getId())
+
         expect: "0 notifications"
         sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
-        tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
+        tournamentService.updateTopics(user.getId(), tournamentDto, topics)
 
         then: "1 notification"
         sleep(100)
@@ -344,12 +350,15 @@ class TournamentNotificationsTest extends Specification {
         given: "user joins a tournament"
         tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
+        and: "a new topics list"
+        topics.removeElement(topic2.getId())
+
         expect: "0 notifications"
         sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
-        tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
+        tournamentService.updateTopics(user.getId(), tournamentDto, topics)
 
         then:
         sleep(100)
@@ -362,12 +371,15 @@ class TournamentNotificationsTest extends Specification {
         given: "user joins a tournament"
         tournamentService.joinTournament(user2.getId(), tournamentDto, "")
 
+        and: "a new topics list"
+        topics.removeElement(topic2.getId())
+
         expect: "0 notifications"
         sleep(100)
         notificationRepository.getUserNotifications(user2.getId()).isEmpty()
 
         when:
-        tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
+        tournamentService.updateTopics(user.getId(), tournamentDto, topics)
 
         then: "1 notification"
         sleep(100)

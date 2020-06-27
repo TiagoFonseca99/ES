@@ -1033,8 +1033,7 @@ export default class RemoteServices {
     startTime: string,
     endTime: string,
     numberOfQuestions: number,
-    topicsToAdd: Number[],
-    topicsToRemove: Number[],
+    topicsList: Number[],
     tournament: Tournament
   ): Promise<Tournament> {
     let result = tournament;
@@ -1050,11 +1049,8 @@ export default class RemoteServices {
     ) {
       tournament = await this.editNumberOfQuestions(result);
     }
-    if (topicsToAdd.length > 0) {
-      tournament = await this.addTopics(topicsToAdd, result);
-    }
-    if (topicsToRemove.length > 0) {
-      tournament = await this.removeTopics(topicsToRemove, result);
+    if (topicsList.length > 0) {
+      tournament = await this.updateTopics(topicsList, result);
     }
     return new Tournament(tournament);
   }
@@ -1101,30 +1097,11 @@ export default class RemoteServices {
       });
   }
 
-  static async addTopics(
+  static async updateTopics(
     topicsID: Number[],
     tournament: Tournament
   ): Promise<Tournament> {
-    let path: string = '/tournaments/addTopics?';
-    for (let topicID of topicsID) {
-      path += 'topicsId=' + topicID + '&';
-    }
-    path = path.substring(0, path.length - 1);
-    return httpClient
-      .put(path, tournament)
-      .then(response => {
-        return new Tournament(response.data);
-      })
-      .catch(async error => {
-        throw Error(await this.errorMessage(error));
-      });
-  }
-
-  static async removeTopics(
-    topicsID: Number[],
-    tournament: Tournament
-  ): Promise<Tournament> {
-    let path: string = '/tournaments/removeTopics?';
+    let path: string = '/tournaments/updateTopics?';
     for (let topicID of topicsID) {
       path += 'topicsId=' + topicID + '&';
     }

@@ -167,8 +167,11 @@ class EditTournamentTest extends Specification {
         def topic3 = new Topic(course, topicDto3)
         topicRepository.save(topic3)
 
+        and: "a new topics list"
+        topics.add(topic3.getId())
+
         when:
-        tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
+        tournamentService.updateTopics(user.getId(), tournamentDto, topics)
 
         then:
         tournamentRepository.count() == 1L
@@ -190,8 +193,11 @@ class EditTournamentTest extends Specification {
         def topic3 = new Topic(differentCourse, topicDto3)
         topicRepository.save(topic3)
 
+        and: "a new topics list"
+        topics.add(topic3.getId())
+
         when:
-        tournamentService.addTopic(user.getId(), tournamentDto, topic3.getId())
+        tournamentService.updateTopics(user.getId(), tournamentDto, topics)
 
         then:
         def exception = thrown(TutorException)
@@ -201,53 +207,20 @@ class EditTournamentTest extends Specification {
         result.getTopics() == [topic1, topic2]
     }
 
-    def "user that created tournament adds duplicate topic"() {
-        given: "a tournament"
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
-
-        when:
-        tournamentService.addTopic(user.getId(), tournamentDto, topic1.getId())
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.DUPLICATE_TOURNAMENT_TOPIC
-        tournamentRepository.count() == 1L
-        def result = tournamentRepository.findAll().get(0)
-        result.getTopics() == [topic1, topic2]
-    }
-
     def "user that created tournament removes existing topic from tournament that contains that topic"() {
         given: "a tournament"
         tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
+        and: "a new topics list"
+        topics.removeElement(topic2.getId())
+
         when:
-        tournamentService.removeTopic(user.getId(), tournamentDto, topic2.getId())
+        tournamentService.updateTopics(user.getId(), tournamentDto, topics)
 
         then:
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
         result.getTopics() == [topic1]
-    }
-
-    def "user that created tournament removes existing topic from tournament that does not contains that topic"() {
-        given: "a tournament"
-        tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
-
-        and: "new topic"
-        def topicDto3 = new TopicDto()
-        topicDto3.setName("TOPIC3")
-        def topic3 = new Topic(course, topicDto3)
-        topicRepository.save(topic3)
-
-        when:
-        tournamentService.removeTopic(user.getId(), tournamentDto, topic3.getId())
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_TOPIC_MISMATCH
-        tournamentRepository.count() == 1L
-        def result = tournamentRepository.findAll().get(0)
-        result.getTopics() == [topic1, topic2]
     }
 
     def "user that created tournament removes existing topic from tournament when only one left"() {
@@ -256,11 +229,11 @@ class EditTournamentTest extends Specification {
         tournamentDto = tournamentService.createTournament(user.getId(), topics, tournamentDto)
 
         when:
-        tournamentService.removeTopic(user.getId(), tournamentDto, topic1.getId())
+        tournamentService.updateTopics(user.getId(), tournamentDto, [])
 
         then:
         def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_HAS_ONLY_ONE_TOPIC
+        exception.getErrorMessage() == ErrorMessage.TOURNAMENT_MUST_HAVE_ONE_TOPIC
         tournamentRepository.count() == 1L
         def result = tournamentRepository.findAll().get(0)
         result.getTopics() == [topic1]
@@ -359,8 +332,11 @@ class EditTournamentTest extends Specification {
         user2.addCourse(courseExecution)
         userRepository.save(user2)
 
+        and: "a new topics list"
+        topics.add(topic2.getId())
+
         when:
-        tournamentService.addTopic(user2.getId(), tournamentDto, topic2.getId())
+        tournamentService.updateTopics(user2.getId(), tournamentDto, topics)
 
         then:
         def exception = thrown(TutorException)
@@ -382,8 +358,11 @@ class EditTournamentTest extends Specification {
         user2.addCourse(courseExecution)
         userRepository.save(user2)
 
+        and: "a new topics list"
+        topics.removeElement(topic2.getId())
+
         when:
-        tournamentService.removeTopic(user2.getId(), tournamentDto, topic2.getId())
+        tournamentService.updateTopics(user2.getId(), tournamentDto, topics)
 
         then:
         def exception = thrown(TutorException)

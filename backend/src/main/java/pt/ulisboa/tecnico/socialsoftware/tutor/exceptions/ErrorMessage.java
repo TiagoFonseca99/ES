@@ -97,10 +97,9 @@ public enum ErrorMessage {
 
     // Tdp
     DUPLICATE_TOURNAMENT_PARTICIPANT("Duplicate tournament participant: %s"),
-    DUPLICATE_TOURNAMENT_TOPIC("Duplicate tournament topic: %s"),
     TOURNAMENT_NOT_OPEN("Tournament not open: %s"),
     TOURNAMENT_CANCELED("Tournament canceled: %s"),
-    TOURNAMENT_HAS_ONLY_ONE_TOPIC("This tournament has only one topic left"),
+    TOURNAMENT_MUST_HAVE_ONE_TOPIC("Tournament must have at least one topic"),
     TOURNAMENT_MISSING_START_TIME("Missing start time for tournament"),
     TOURNAMENT_MISSING_END_TIME("Missing end time for tournament"),
     TOURNAMENT_MISSING_NUMBER_OF_QUESTIONS("Missing number of questions for tournament"),
@@ -108,7 +107,6 @@ public enum ErrorMessage {
     TOURNAMENT_NOT_CONSISTENT("Field %s of tournament is not consistent"),
     TOURNAMENT_NOT_FOUND("Tournament %s not found"),
     TOURNAMENT_TOPIC_COURSE("Tournament topics must be of the same course execution"),
-    TOURNAMENT_TOPIC_MISMATCH("Tournament %s does not have topic %d"),
     TOURNAMENT_CREATOR("User %s can not cancel this tournament"),
     USER_NOT_JOINED("User has not joined tournament: %s"),
     USER_TOURNAMENT_PERMISSIONS_NOT_CONSISTENT("Tournament permissions not consistent for user %s"),
