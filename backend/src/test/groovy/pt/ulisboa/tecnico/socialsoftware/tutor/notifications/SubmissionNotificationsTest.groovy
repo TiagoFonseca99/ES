@@ -19,6 +19,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionR
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.CryptoService
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.ServerKeys
+import pt.ulisboa.tecnico.socialsoftware.tutor.worker.WorkerService
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -227,7 +230,6 @@ class SubmissionNotificationsTest extends Specification {
 
     @TestConfiguration
     static class SubmissionNotificationServiceImplTestContextConfiguration {
-
         @Bean
         SubmissionService submissionService() {
             return new SubmissionService()
@@ -241,6 +243,21 @@ class SubmissionNotificationsTest extends Specification {
         @Bean
         QuestionService questionService() {
             return new QuestionService()
+        }
+
+        @Bean
+        WorkerService workerService() {
+            return new WorkerService()
+        }
+
+        @Bean
+        CryptoService cryptoService() {
+            return new CryptoService()
+        }
+
+        @Bean
+        ServerKeys serverKeys() {
+            return new ServerKeys()
         }
     }
 }
