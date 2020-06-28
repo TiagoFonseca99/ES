@@ -33,6 +33,7 @@ describe('Teacher walkthrough', () => {
       'Cenas',
       'ahhhhhhhhhhhhhh __ hacks!!!!'
     );
+    cy.get('[data-cy="cookies"]').click();
     cy.get('[data-cy="submitButton"]').click();
     cy.log('delete student submitted question');
     cy.wait(1000);
@@ -43,7 +44,7 @@ describe('Teacher walkthrough', () => {
         Cypress.env('DBNAME') +
         ' -U ' +
         Cypress.env('USER') +
-        ' -h localhost -c "DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews);\n"'
+        ' -h localhost -c "DELETE FROM reviews_observers WHERE review_observers_id IN (SELECT max(id) FROM reviews);DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews);\n"'
     );
     cy.exec(
       'PGPASSWORD=' +
@@ -64,6 +65,7 @@ describe('Teacher walkthrough', () => {
       'ahhhhhhhhhhhhhh __ hacks!!!!'
     );
     cy.get('[data-cy="Option1"]').clear();
+    cy.get('[data-cy="cookies"]').click();
     cy.get('[data-cy="submitButton"]').click();
 
     cy.closeErrorMessage();
@@ -80,7 +82,7 @@ describe('Teacher walkthrough', () => {
         Cypress.env('DBNAME') +
         ' -U ' +
         Cypress.env('USER') +
-        ' -h localhost -c "DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews);\n"'
+        ' -h localhost -c "DELETE FROM reviews_observers WHERE review_observers_id IN (SELECT max(id) FROM reviews);DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews);\n"'
     );
     cy.exec(
       'PGPASSWORD=' +

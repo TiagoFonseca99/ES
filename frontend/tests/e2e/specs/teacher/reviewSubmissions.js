@@ -28,7 +28,7 @@ describe('Teacher walkthrough', () => {
         Cypress.env('DBNAME') +
         ' -U ' +
         Cypress.env('USER') +
-        ' -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);"'
+        ' -h localhost -c "DELETE FROM reviews_observers WHERE review_observers_id IN (SELECT max(id) FROM reviews);WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);"'
     );
   });
 
@@ -43,7 +43,7 @@ describe('Teacher walkthrough', () => {
         Cypress.env('DBNAME') +
         ' -U ' +
         Cypress.env('USER') +
-        ' -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);"'
+        ' -h localhost -c "DELETE FROM reviews_observers WHERE review_observers_id IN (SELECT max(id) FROM reviews);WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);"'
     );
   });
 

@@ -70,7 +70,7 @@
             <stringProp name="checkQuery"></stringProp>
             <stringProp name="dbUrl">jdbc:postgresql://localhost:5432/tutordb?autoReconnect=true</stringProp>
             <stringProp name="driver">org.postgresql.Driver</stringProp>
-            <stringProp name="username">dserafim1999</stringProp>
+            <stringProp name="username">daniel</stringProp>
             <stringProp name="password"></stringProp>
             <stringProp name="connectionProperties"></stringProp>
           </JDBCDataSource>
@@ -246,10 +246,6 @@ if(ResponseCode.equals(&quot;200&quot;)) {
         <hashTree>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
             <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${token}</stringProp>
-              </elementProp>
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Content-Type</stringProp>
                 <stringProp name="Header.value">application/json</stringProp>
@@ -495,7 +491,7 @@ vars.putObject(&quot;di&quot;, myList.get(result));
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">dserafim1999</stringProp>
+          <stringProp name="username">daniel</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">

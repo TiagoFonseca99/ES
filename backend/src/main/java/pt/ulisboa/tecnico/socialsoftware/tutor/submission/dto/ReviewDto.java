@@ -5,7 +5,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.dto.ImageDto;
 
 import java.io.Serializable;
-import java.time.format.DateTimeFormatter;
 
 public class ReviewDto implements Serializable {
     private Integer id;

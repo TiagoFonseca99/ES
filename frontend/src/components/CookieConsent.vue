@@ -13,7 +13,7 @@
       </slot>
       <section @click="hide()">
         <slot name="dismiss">
-          <v-btn class="primary cookie-consent-dismiss">
+          <v-btn class="primary cookie-consent-dismiss" data-cy="cookies">
             {{ buttonLabel }}
           </v-btn>
         </slot>

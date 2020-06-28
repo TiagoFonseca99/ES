@@ -14,6 +14,8 @@ import javax.persistence.Table;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.worker.dto.SubscriptionDto;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "subscriptions")
 public class Subscription {
@@ -102,11 +104,16 @@ public class Subscription {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(getEndpoint());
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof Subscription)) {
             return false;
         }
 
-        return ((Subscription) o).getEndpoint() == getEndpoint();
+        return ((Subscription) o).getEndpoint().equals(getEndpoint());
     }
 }

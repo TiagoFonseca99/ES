@@ -7,9 +7,6 @@ public class SubscriptionDto {
     private Long expirationTime;
     private SubscriptionKeyDto keys;
 
-    public SubscriptionDto() {
-    }
-
     public String getEndpoint() {
         return this.endpoint;
     }

@@ -59,7 +59,7 @@ public class AuthService {
             if (JwtTokenProvider.getExpiry(token)
                     .before(new Date(new Date().getTime() + JwtTokenProvider.TOKEN_RENEW))) {
                 AuthService.setCookie(JwtTokenProvider.TOKEN_COOKIE_NAME, JwtTokenProvider.generateToken(user),
-                        (HttpServletResponse) response, true,
+                        response, true,
                         session != null && session ? null : AuthService.COOKIE_EXP_TIME);
             }
             return new AuthUserDto(user);

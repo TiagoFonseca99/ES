@@ -302,13 +302,15 @@
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">dserafim1999</stringProp>
+          <stringProp name="username">daniel</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
-          <stringProp name="query">DELETE FROM options WHERE content = &apos;Option_Content_FOR_TEST&apos;;
+          <stringProp name="query">DELETE FROM submissions_observers WHERE 1=1;
+DELETE FROM questions_observers WHERE 1=1;
+DELETE FROM options WHERE content = &apos;Option_Content_FOR_TEST&apos;;
 WITH sub AS(DELETE FROM submissions WHERE user_id = 676 RETURNING question_id)
 DELETE FROM questions WHERE id IN (SELECT * FROM sub);</stringProp>
           <stringProp name="queryArguments"></stringProp>

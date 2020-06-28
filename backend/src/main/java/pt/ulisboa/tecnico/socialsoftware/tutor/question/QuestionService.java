@@ -157,6 +157,7 @@ public class QuestionService {
 
         if (submission != null) {
             deleteSubmission(submission);
+
             submissionService.prepareNotification(submission.getQuestion(), submission.getUser(), user);
         }
 

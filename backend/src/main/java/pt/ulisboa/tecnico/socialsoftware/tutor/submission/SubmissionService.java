@@ -364,8 +364,6 @@ public class SubmissionService {
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void resetDemoSubmissions() {
-        submissionRepository.getCourseExecutionSubmissions(Demo.COURSE_EXECUTION_ID).stream().forEach(submission -> {
-                questionService.deleteQuestion(submission.getQuestion());
-        });
+        submissionRepository.getCourseExecutionSubmissions(Demo.COURSE_EXECUTION_ID).forEach(submission -> questionService.deleteQuestion(submission.getQuestion()));
     }
 }

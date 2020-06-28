@@ -40,7 +40,7 @@ public class ServerKeys {
 
     private String pubKeyB64;
 
-    private final static Logger logger = LoggerFactory.getLogger(ServerKeys.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServerKeys.class);
 
     public byte[] getUncompressed() {
         return this.pubKeyUncompressed;

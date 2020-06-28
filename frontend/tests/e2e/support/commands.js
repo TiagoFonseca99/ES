@@ -172,8 +172,8 @@ Cypress.Commands.add('joinTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 10)
-    .eq(9)
+    .should('have.length', 9)
+    .eq(0)
     .find('[data-cy="JoinTournament"]')
     .click({ force: true });
 });
@@ -183,8 +183,8 @@ Cypress.Commands.add('joinPrivateTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 10)
-    .eq(9)
+    .should('have.length', 9)
+    .eq(0)
     .find('[data-cy="JoinTournament"]')
     .click({ force: true });
 
@@ -196,8 +196,8 @@ Cypress.Commands.add('solveTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 10)
-    .eq(9)
+    .should('have.length', 9)
+    .eq(0)
     .find('[data-cy="SolveQuiz"]')
     .click({ force: true });
 });
@@ -207,8 +207,8 @@ Cypress.Commands.add('leaveTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 10)
-    .eq(9)
+    .should('have.length', 9)
+    .eq(0)
     .find('[data-cy="LeaveTournament"]')
     .click({ force: true });
 });
@@ -218,8 +218,8 @@ Cypress.Commands.add('editTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 10)
-    .eq(9)
+    .should('have.length', 9)
+    .eq(0)
     .find('[data-cy="EditTournament"]')
     .click({ force: true });
 
@@ -240,8 +240,8 @@ Cypress.Commands.add('cancelTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 10)
-    .eq(9)
+    .should('have.length', 9)
+    .eq(0)
     .find('[data-cy="CancelTournament"]')
     .click({ force: true });
 });
@@ -251,8 +251,8 @@ Cypress.Commands.add('removeTournament', tournament => {
     .children()
     .eq(tournament)
     .children()
-    .should('have.length', 10)
-    .eq(9)
+    .should('have.length', 9)
+    .eq(0)
     .find('[data-cy="RemoveTournament"]')
     .click({ force: true });
 });
@@ -348,7 +348,7 @@ Cypress.Commands.add('removeAllDiscussions', () => {
       Cypress.env('DBNAME') +
       ' -U ' +
       Cypress.env('USER') +
-      ' -h localhost -c "DELETE FROM discussions WHERE course_id = 2;"'
+      ' -h localhost -c "DELETE FROM discussions_observers *;DELETE FROM discussions WHERE course_id = 2;"'
   );
 });
 
@@ -442,7 +442,7 @@ Cypress.Commands.add('createAnnouncement', (title, content) => {
     .parent()
     .should('have.length', 1)
     .children()
-    .should('have.length', 3);
+    .should('have.length', 4);
   cy.wait(500);
 });
 
@@ -989,7 +989,7 @@ Cypress.Commands.add('removeSubmissionInfo', () => {
       Cypress.env('DBNAME') +
       ' -U ' +
       Cypress.env('USER') +
-      ' -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
+      ' -h localhost -c "DELETE FROM reviews_observers *;WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
   );
   cy.exec(
     'PGPASSWORD=' +
@@ -998,7 +998,7 @@ Cypress.Commands.add('removeSubmissionInfo', () => {
       Cypress.env('DBNAME') +
       ' -U ' +
       Cypress.env('USER') +
-      ' -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
+      ' -h localhost -c "DELETE FROM reviews_observers *;WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
   );
   cy.exec(
     'PGPASSWORD=' +
@@ -1007,7 +1007,7 @@ Cypress.Commands.add('removeSubmissionInfo', () => {
       Cypress.env('DBNAME') +
       ' -U ' +
       Cypress.env('USER') +
-      ' -h localhost -c "WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
+      ' -h localhost -c "DELETE FROM reviews_observers *;WITH rev AS (DELETE FROM reviews WHERE id IN (SELECT max(id) FROM reviews) RETURNING submission_id), sub AS (DELETE FROM submissions WHERE id IN (SELECT * FROM rev) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);" '
   );
 });
 
@@ -1019,7 +1019,7 @@ Cypress.Commands.add('removeDiscussionInfo', id => {
       Cypress.env('DBNAME') +
       ' -U ' +
       Cypress.env('USER') +
-      ' -h localhost -c "DELETE FROM discussions WHERE user_id = ' +
+      ' -h localhost -c "DELETE FROM discussions_observers *;DELETE FROM discussions WHERE user_id = ' +
       id +
       ';"'
   );

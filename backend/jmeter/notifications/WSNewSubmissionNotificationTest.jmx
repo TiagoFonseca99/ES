@@ -244,7 +244,7 @@
           <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert notification content" enabled="true">
             <stringProp name="JSON_PATH">$[0].content</stringProp>
-            <stringProp name="EXPECTED_VALUE">Submission was created by student Demo Student</stringProp>
+            <stringProp name="EXPECTED_VALUE">Submission created by student Demo Student</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
             <boolProp name="INVERT">false</boolProp>

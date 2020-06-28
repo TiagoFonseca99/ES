@@ -30,7 +30,7 @@ public class TutorApplication extends SpringBootServletInitializer implements In
     public TaskExecutor notifyExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
-        executor.setCorePoolSize(1);
+        executor.setCorePoolSize(3);
         executor.setQueueCapacity(20);
         executor.setMaxPoolSize(10);
         executor.setThreadNamePrefix("NotifyThread");
