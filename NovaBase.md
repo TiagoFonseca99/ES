@@ -95,13 +95,17 @@ caixa de diálogo que serve como preview do dashboard, para evitar sair da pági
     ##### - Students View
     1 - Docente carrega no username de um aluno
     ![Teacher clicks on username](assets/img/NovaBase/Dashboard/StudentsView.png)
+
     2 - Docente vê o dashboard do aluno
     ![Teacher sees dashboard](assets/img/NovaBase/Dashboard/Dashboard.png)
+
     ##### - Reviews View
     1 - Docente carrega no username de um aluno
     ![Teacher clicks on username](assets/img/NovaBase/Dashboard/DashboardDialog_1.png)
+
     2 - Docente vê um preview do dashboard do aluno
     ![Teacher sees dashboard preview](assets/img/NovaBase/Dashboard/DashboardDialog_2.png)
+
     3 - Docente pode abrir o dashboard completo
     ![Teacher sees dashboard](assets/img/NovaBase/Dashboard/Dashboard.png)
 
@@ -196,14 +200,17 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
   ##### - Docente elimina discussão
     1 - Docente acede à discussão
     ![Question with Discussion](assets/img/NovaBase/Ddp/DeleteDiscussion_1.png)
+
     2 - Docente elimina a discussão
     ![Delete Discussion](assets/img/NovaBase/Ddp/DeleteDiscussion_2.png)
+
     3 - A discussão é eliminada
     ![Deleted Discussion](assets/img/NovaBase/Ddp/DeleteDiscussion_3.png)
 
   ##### - Aluno elimina resposta
     1 - Aluno acede à resposta
     ![Discussion with own Reply](assets/img/NovaBase/Ddp/DeleteReply_1.png)
+
     2 - Aluno elimina a resposta
     ![Reply Deleted](assets/img/NovaBase/Ddp/DeleteReply_2.png)
 
@@ -277,6 +284,7 @@ anúncios em que docentes criam e alunos/outros docentes vêem na sua home page
 
   1 - Docente carrega no botão para criar anúncio
   ![Teacher creates announcement](assets/img/NovaBase/Adp/CreateAnnouncement_1.png)
+
   2 - Docente preenche campos para criar anúncio e guarda
   ![Teacher fills in requiremnts for announcement](assets/img/NovaBase/Adp/CreateAnnouncement_2.png)
 
@@ -285,8 +293,10 @@ anúncios em que docentes criam e alunos/outros docentes vêem na sua home page
 
   1 - Docente carrega no ícone para editar anúncio
   ![Teacher clicks on edit announcement](assets/img/NovaBase/Adp/EditAnnouncement_1.png)
+
   2 - Docente edita o anúncio
   ![Teacher edits announcement](assets/img/NovaBase/Adp/EditAnnouncement_2.png)
+
   3 - Indicação de que anúncio foi editado é visivel
   ![Teacher sees edited announcement](assets/img/NovaBase/Adp/EditAnnouncement_3.png)
 
@@ -295,8 +305,10 @@ anúncios em que docentes criam e alunos/outros docentes vêem na sua home page
 
   1 - Docente carrega no ícone para eliminar anúncio
   ![Teacher clicks on delete announcement](assets/img/NovaBase/Adp/DeleteAnnouncement_1.png)
+
   2 - Docente elimina o anúncio
   ![Teacher deletes announcement](assets/img/NovaBase/Adp/DeleteAnnouncement_2.png)
+
   3 - Anúncio é eliminado definitivamente
   ![Announcement eliminated](assets/img/NovaBase/Adp/DeleteAnnouncement_3.png)
 
@@ -370,26 +382,27 @@ ou seja, assim que se faz *login*
 
       1 - Após receber uma notificação, o número de notificações não lidas aumenta no botão de notificações
       ![Unread notifications](assets/img/NovaBase/Sdn/Button_1.png)
+
       2 - É disposta a lista de notificações, com ênfase nas notificações não lidas
       ![Unread notifications in list](assets/img/NovaBase/Sdn/Button_2.png)
-      3 - Qunado não existem notificações não lidas, lista é apresentada normalmente
+
+      3 - Quando não existem notificações não lidas, lista é apresentada normalmente
       ![Read notifications](assets/img/NovaBase/Sdn/Button_3.png)
 
     - Lista de Notificações
 
       1 - Aluno/Docente pode ver todas as notificações recebidas
       ![All notifications](assets/img/NovaBase/Sdn/List_1.png)
+
       2 - Notificações podem ser filtradas por tipo
       ![Notifications filtered by tournaments](assets/img/NovaBase/Sdn/List_2.png)
+
       ![Notifications filtered by discussions](assets/img/NovaBase/Sdn/List_3.png)
+
       ![Notifications filtered by submissions](assets/img/NovaBase/Sdn/List_4.png)
+
       ![Notifications filtered by reviews](assets/img/NovaBase/Sdn/List_5.png)
 
-    - Notificações
-
-    [todo] falar de api e da notificaçao em si
-
-    ![Notification example](assets/img/NovaBase/Sdn/Notification.png)
 
 ##### - Uso de *threads*
 
@@ -403,9 +416,11 @@ ou seja, assim que se faz *login*
 
   A primeira permite mostrar notificações independentemente do *browser* utilizado, fornecendo uma interface *standard*.
 
-  A segunda permite reagir a eventos de `push`, colocando um "servidor" do lado do cliente, com um *endpoint* único, para receber mensagens, despoletando o evento mencionado. No nosso caso, o *backend* envia a notificação para cada um destes *endpoints*, e por ser uma operação ainda mais dispendiosa que a anterior, por envolver cifrar dados e fazer pedidos através da rede, recorremos novamente às *Thread Pools*, no entanto, modificámos os limites, permitindo assim que estejam 5 *threads* ativas, 40 em espera e caso seja criada mais alguma após estes limites serem alcaçados, permitimos que no máximo estejam 20 threads ativas. O único possível problema desta API é o facto de não ser suportada pela Apple (e pelo Internet Explorer também), pelo que os utilizadores do Safari não poderão usufruir deste recurso, mas poderão ter na mesma as notificações através de chamadas ao backend.
+  A segunda permite reagir a eventos de `push`, colocando um "servidor" do lado do cliente, com um *endpoint* único, para receber mensagens, despoletando o evento mencionado. No nosso caso, o *backend* envia a notificação para cada um destes *endpoints*, e por ser uma operação ainda mais dispendiosa que a anterior, por envolver cifrar dados e fazer pedidos através da rede, recorremos novamente às *Thread Pools*, no entanto, modificámos os limites, permitindo assim que estejam 5 *threads* ativas, 40 em espera e caso seja criada mais alguma após estes limites serem alcançados, permitimos que no máximo estejam 20 threads ativas. O único possível problema desta API é o facto de não ser suportada pela Apple (e pelo Internet Explorer também), pelo que os utilizadores do Safari não poderão usufruir deste recurso, mas poderão ter na mesma as notificações através de chamadas ao backend.
 
   Assim, esta grande funcionalidade poderá ser utilizada por cerca de 77% dos utilizadores.
+
+  ![Notification example](assets/img/NovaBase/Sdn/Notification.png)
 
 
 ## 4. Deploy
@@ -416,32 +431,32 @@ ou seja, assim que se faz *login*
 
   Escolhemos fazer *deploy* diretamente numa VM, porque apesar de termos de instalar por nós as dependências necessárias, permite-nos ter mais controlo sobre o sistema e uma performance ligeiramente melhor do que se usássemos o Docker dentro desta, e permite-nos fazer *deploy* mais rapidamente.
 
-  Para servir o *frontend* do nosso Quizzes Tutor temos o `nginx` que permite gerir certificados de forma fácil, e para monitorizarmos o *backend*, utilizámos uma sessão de `tmux` que permite facilmente iniciar ou parar este servidor, tanto através dos comandos normais fornecidos por este, como por um *systemd service* e alguns *scripts* criados por nós. Para gerir os nossos ceriticados SSL, utilizámos o `Certbot` da `Let's Encrypt` que vai renovando automaticamente os certificados após ficarem inválidos.
+  Para servir o *frontend* do nosso Quizzes Tutor temos o `nginx` que permite gerir certificados de forma fácil, e para monitorizarmos o *backend*, utilizámos uma sessão de `tmux` que permite facilmente iniciar ou parar este servidor, tanto através dos comandos normais fornecidos por este, como por um *systemd service* e alguns *scripts* criados por nós. Para gerir os nossos certificados SSL, utilizámos o `Certbot` da `Let's Encrypt` que vai renovando automaticamente os certificados após ficarem inválidos.
 
 ### 4.2. Processo de Automatização
 
   Para fazermos *deploy* na nossa VM, escolhemos os Azure Pipelines, configurando todo o processo através de *scripts* e do ficheiro `azure-pipelines.yml`.
 
   Neste processo, temos as seguintes etapas:
-    - Fazer *checkout* do repositório para o *agent* (VM onde está a correr o *pipeline*)
-    - Testar a *cache* de dependências do *backend*
-    - Caso as dependências não estejam em *cache*, instalá-las e guardar na *cache* para a próxima vez que o *pipeline* for executado não demorar tanto tempo.
-    - Compilar o *backend* para um ficheiro `.jar`
-    - Testar a *cache* de dependências do *frontend*
-    - Caso estas não estejam guardadas na *cache*, instalá-las e guardá-las na *cache* pela mesma razão acima
-    - Compilar o *frontend* e criar um ficheiro `.zip` com os ficheiros gerados por esta etapa
-    - Colocar o ficheiros ficheiros `.jar` e `.zip` no `Artifact Staging Directory` para enviar para a nossa VM
-    - Neste momento, a computação neste *agent* termina e passa a realizar-se na nossa VM, que tivemos de associar ao *pipeline* através do registo desta num *Environment*
-    - Já na VM, retirar os ficheiros do `Artifact Staging Directory` para a VM
-    - Parar o *backend*
-    - Fazer *backup* das versões antigas tanto do *frontend* como do *backend*
-    - Fazer *unzip* ao *frontend* para a pasta "controlada" pelo `nginx`
-    - Colocar o *backend* em funcionamento
-    - Caso a operação anterior falhe, as novas versões são eliminadas e as anteriores são colocadas em funcionamento
+  - Fazer *checkout* do repositório para o *agent* (VM onde está a correr o *pipeline*)
+  - Testar a *cache* de dependências do *backend*
+  - Caso as dependências não estejam em *cache*, instalá-las e guardar na *cache* para a próxima vez que o *pipeline* for executado não demorar tanto tempo.
+  - Compilar o *backend* para um ficheiro `.jar`
+  - Testar a *cache* de dependências do *frontend*
+  - Caso estas não estejam guardadas na *cache*, instalá-las e guardá-las na *cache* pela mesma razão acima
+  - Compilar o *frontend* e criar um ficheiro `.zip` com os ficheiros gerados por esta etapa
+  - Colocar o ficheiros ficheiros `.jar` e `.zip` no `Artifact Staging Directory` para enviar para a nossa VM
+  - Neste momento, a computação neste *agent* termina e passa a realizar-se na nossa VM, que tivemos de associar ao *pipeline* através do registo desta num *Environment*
+  - Já na VM, retirar os ficheiros do `Artifact Staging Directory` para a VM
+  - Parar o *backend*
+  - Fazer *backup* das versões antigas tanto do *frontend* como do *backend*
+  - Fazer *unzip* ao *frontend* para a pasta "controlada" pelo `nginx`
+  - Colocar o *backend* em funcionamento
+  - Caso a operação anterior falhe, as novas versões são eliminadas e as anteriores são colocadas em funcionamento
 
 ### 4.3. Opções utilizadas
 
-  Decidimos apostar na segurança e na eficiência, por isso decidimos utilizar o protocolo **HTTPS** para estabelecer um canal seguro entre cliente e servidor, e visto que existe um grande suporte do *browsers* ao protocolo **HTTP/2**, decidimos recorrer a este, uma vez que necessita de TLS para ser executado, e nós já tínhamos configurado para o protocolo **HTTPS**. Utilizando **HTTP/2**, os dados são comprimidos e não existe o problema do bloqueio *Head of Line*, tornando a transmissão mais rápida. Como é implementado por quase todos os *browsers*, cerca de 96% dos nossos utilizadore poderão ter esta melhoria de velocidade.
+  Decidimos apostar na segurança e na eficiência, por isso decidimos utilizar o protocolo **HTTPS** para estabelecer um canal seguro entre cliente e servidor, e visto que existe um grande suporte do *browsers* ao protocolo **HTTP/2**, decidimos recorrer a este, uma vez que necessita de TLS para ser executado, e nós já tínhamos configurado para o protocolo **HTTPS**. Utilizando **HTTP/2**, os dados são comprimidos e não existe o problema do bloqueio *Head of Line*, tornando a transmissão mais rápida. Como é implementado por quase todos os *browsers*, cerca de 96% dos nossos utilizadores poderão ter esta melhoria de velocidade.
 
   Para prevenir a mudança de protocolo para HTTP, definimos o *header* HSTS, impedindo assim que ataques de *downgrade* de protocolo e consequente sequestro de *Cookies* ocorram.
 
