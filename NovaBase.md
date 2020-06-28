@@ -18,7 +18,7 @@
       - [4. Discussão de Perguntas (DdP)](#4-discussão-de-perguntas-ddp)
       - [5. Torneio de Perguntas (TdP)](#5-torneio-de-perguntas-tdp)
     - [3.3. Funcionalidades Novas](#33-funcionalidades-novas)
-      - [1. Anúncios de Professores (AdP)](#1-anúncios-de-professores-adp)
+      - [1. Anúncios de Docentes (AdP)](#1-anúncios-de-docentes-adp)
       - [2. Sistema de Notificações (SdN)](#2-sistema-de-notificações-sdn)
   - [4. Deploy](#4-deploy)
     - [4.1. Escolha da Tecnologia](#41-escolha-da-tecnologia)
@@ -70,6 +70,13 @@
 
   Um problema que surgiu nas aulas, foi o facto de alguns alunos não conseguirem ler o código QR para aceder a este tipo de Quiz ou devido a problemas com o telemóvel ou por a câmera não conseguir captar o código com resolução suficiente. Para ninguém sair prejudicado, foi adicionado um código numérico por baixo do código QR, permitindo assim àqueles que estiverem com dificuldades em fazer *scan* ao QRCode, conseguirem aceder ao quiz através deste código, inserindo-o numa caixa de texto na mesma página em que é feito o *scan*.
 
+  - Visão do docente
+
+  ![QRCode Teacher](assets/img/NovaBase/Quiz/QRCodeTeacher.png)
+
+  - Visão do aluno
+  ![QRCode Student](assets/img/NovaBase/Quiz/QRCodeStudent.png)
+
 ##### Quiz One-Way
 
   Na versão original, quando ocorria um erro a meio de um quiz, o utilizador era redirecionado para fora deste, e se o quiz fosse do tipo `One-Way`, não conseguiria voltar a entrar, sendo assim prejudicado. Para evitar isto, caso o utilizador seja "expulso" do quiz por causa de um erro, vai poder voltar ao quiz. No entanto, não vai poder alterar as respostas que já tiver dado e vai ter de avançar pergunta a pergunta até chegar a onde estava.
@@ -78,9 +85,10 @@
 
 - ##### Docente pode ver dashboard de alunos
   - Estendendo a funcionalidade que implementámos que permite aos alunos ver a informação pública no dashboard de outros alunos,
-agora os docentes também podem aceder a esses dashboards, clickando no username de um aluno. Em certos casos, aparecerá uma
+agora os docentes também podem aceder a esses dashboards, clicando no username de um aluno. Em certos casos, aparecerá uma
 caixa de diálogo que serve como preview do dashboard, para evitar sair da página atual.
 
+    <br/>
     Exemplos:
 
     ##### - Students View
@@ -88,7 +96,6 @@ caixa de diálogo que serve como preview do dashboard, para evitar sair da pági
     ![Teacher clicks on username](assets/img/NovaBase/Dashboard/StudentsView.png)
     2 - Docente vê o dashboard do aluno
     ![Teacher sees dashboard](assets/img/NovaBase/Dashboard/Dashboard.png)
-
     ##### - Reviews View
     1 - Docente carrega no username de um aluno
     ![Teacher clicks on username](assets/img/NovaBase/Dashboard/DashboardDialog_1.png)
@@ -97,7 +104,7 @@ caixa de diálogo que serve como preview do dashboard, para evitar sair da pági
     3 - Docente pode abrir o dashboard completo
     ![Teacher sees dashboard](assets/img/NovaBase/Dashboard/Dashboard.png)
 
-    **NOTA:** Este comportamento acontece sempre que aparecer o username de um utilizador
+    **NOTA:** As vistas apresentadas servem apenas de exemplo e não são totalmente representativas. Este comportamento acontece sempre que aparecer o username/nome de um utilizador e o cursor do rato mudar.
 
 
 #### 3. Perguntas por Alunos (PpA)
@@ -107,6 +114,7 @@ caixa de diálogo que serve como preview do dashboard, para evitar sair da pági
 submissão repetida. Também permite ao aluno perceber o critério dos docentes no processo de review. Também é possivel filtrar
 as submissões de modo a retirar as que foram feitas pelo próprio utilizador, ou pelo estado do review da submissão
 
+  <br/>
   1 - Aluno acede à lista de todas as submissões do curso em execução
   ![All submissions](assets/img/NovaBase/Ppa/AllSubmissions_1.png)
 
@@ -122,6 +130,7 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
 - ##### Aluno pode selecionar tópicos da pergunta submetida
   - Agora é possivel adicionar também tópicos à pergunta submetida, que podem ser alterados pelo docente
 
+  <br/>
   1 - Aluno escolhe tópicos a associar à pergunta (opcional)
   ![Student chooses topics](assets/img/NovaBase/Ppa/Topics_1.png)
 
@@ -136,6 +145,7 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
 - ##### Aluno pode acrescentar um argumento à submissão que justifique a mesma
   - Extendido do teste prático, o aluno agora pode, de forma opcional, apresentar um breve argumento que justifique a sua submissão.
 
+  <br/>
   1 - Antes da submissão ser enviada, aluno pode escolher se quer adicionar um argumento
   ![Argument question](assets/img/NovaBase/Ppa/Argument_1.png)
 
@@ -149,15 +159,52 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
 
 #### 4. Discussão de Perguntas (DdP)
 
-- Aluno/Docente pode editar as suas respostas/pedidos de esclarecimentos
-  - Breve descrição
+- ##### Utilizador pode editar as suas respostas/discussões
+  - Os utilizadores podem agora editar as suas respostas e as suas discussões, e os docentes podem alterar todas as discussões e todas as respostas.
 
-  - Caso de uso
+  <br/>
+  Exemplos:
 
-- Aluno/Docente pode eliminar as suas respostas/pedidos de esclarecimentos
-  - Breve descrição
+  ##### - Aluno edita discussão
+    1 - Aluno acede à lista de discussões
+    ![Discussions List](assets/img/NovaBase/Ddp/EditDiscussion_1.png)
 
-  - Caso de uso
+    2 - Aluno edita discussão
+    ![Edit Discussion](assets/img/NovaBase/Ddp/EditDiscussion_2.png)
+
+    3 - A discussão é alterada
+    ![Edited Discussion](assets/img/NovaBase/Ddp/EditDiscussion_3.png)
+
+  <br/>
+  ##### - Docente edita resposta
+    1 - Docente acede à resposta
+    ![Question with Discussion](assets/img/NovaBase/Ddp/EditReply_1.png)
+
+    2 - Docente edita resposta
+    ![Edit Reply](assets/img/NovaBase/Ddp/EditReply_2.png)
+
+    3 - A resposta é alterada
+    ![Edited Reply](assets/img/NovaBase/Ddp/EditReply_3.png)
+
+- #### Utilizador pode eliminar as suas respostas/discussões
+  - Os utilizadores podem também eliminar as suas respostas e as suas discussões, e os docentes podem remover tanto discussões como respostas, mesmo as que não foram submitadas por estes.
+
+  <br/>
+  Exemplos:
+
+  ##### - Docente elimina discussão
+    1 - Docente acede à discussão
+    ![Question with Discussion](assets/img/NovaBase/Ddp/DeleteDiscussion_1.png)
+    2 - Docente elimina a discussão
+    ![Delete Discussion](assets/img/NovaBase/Ddp/DeleteDiscussion_2.png)
+    3 - A discussão é eliminada
+    ![Deleted Discussion](assets/img/NovaBase/Ddp/DeleteDiscussion_3.png)
+
+  ##### - Aluno elimina resposta
+    1 - Aluno acede à resposta
+    ![Discussion with own Reply](assets/img/NovaBase/Ddp/DeleteReply_1.png)
+    2 - Aluno elimina a resposta
+    ![Reply Deleted](assets/img/NovaBase/Ddp/DeleteReply_2.png)
 
 #### 5. Torneio de Perguntas (TdP)
 
@@ -175,9 +222,9 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
 
 
 - ##### Docente tem acesso à informação dos torneios do curso em execução
-  - O professor é agora capaz de visualizar os torneios criados pelos alunos
+  - O docente é agora capaz de visualizar os torneios criados pelos alunos
 
-    1 - Professor acede à sua lista de torneios
+    1 - Docente acede à sua lista de torneios
     ![My Tournaments List](assets/img/NovaBase/Tdp/TeacherTournaments_1.png)
 
     2 - Seleciona um torneio existente
@@ -216,7 +263,7 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
 
 ### 3.3. Funcionalidades Novas
 
-#### 1. Anúncios de Professores (AdP)
+#### 1. Anúncios do Professor (AdP)
 
 - Esta nova funcionalidade permite uma maior comunicação entre os docentes com os alunos que não existia ao introduzir um sistema de
 anúncios em que docentes criam e alunos/outros docentes vêem na sua home page
