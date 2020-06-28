@@ -94,8 +94,10 @@ public class AnswerService {
             return new ArrayList<>();
         }
 
-        return quizAnswer.getQuestionAnswers().stream().sorted(Comparator.comparing(QuestionAnswer::getSequence))
-                .map(CorrectAnswerDto::new).collect(Collectors.toList());
+        return quizAnswer.getQuestionAnswers().stream()
+            .sorted(Comparator.comparing(QuestionAnswer::getSequence))
+            .map(CorrectAnswerDto::new)
+            .collect(Collectors.toList());
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -128,7 +130,7 @@ public class AnswerService {
             Option option;
             if (answer.getOptionId() != null) {
                 option = optionRepository.findById(answer.getOptionId())
-                        .orElseThrow(() -> new TutorException(OPTION_NOT_FOUND, answer.getOptionId()));
+                    .orElseThrow(() -> new TutorException(OPTION_NOT_FOUND, answer.getOptionId()));
 
                 if (isNotQuestionOption(questionAnswer.getQuizQuestion(), option)) {
                     throw new TutorException(QUESTION_OPTION_MISMATCH,
@@ -136,15 +138,24 @@ public class AnswerService {
                 }
 
                 if (questionAnswer.getOption() != null) {
-                    if (quizAnswer.getQuiz().isOneWay()) {
+                    if (quizAnswer.getQuiz().isOneWay() && !questionAnswer.getOption().getId().equals(answer.getOptionId())) {
                         throw new TutorException(CANNOT_CHANGE_ANSWER);
                     }
+
                     questionAnswer.getOption().getQuestionAnswers().remove(questionAnswer);
+                } else if (quizAnswer.getQuiz().isOneWay() && questionAnswer.getTimeTaken() != null) {
+                    throw new TutorException(CANNOT_CHANGE_ANSWER);
                 }
 
                 questionAnswer.setOption(option);
                 questionAnswer.setTimeTaken(answer.getTimeTaken());
                 quizAnswer.setAnswerDate(DateHandler.now());
+            } else if (quizAnswer.getQuiz().isOneWay()) {
+                if (questionAnswer.getOption() != null) {
+                    throw new TutorException(CANNOT_CHANGE_ANSWER);
+                }
+
+                questionAnswer.setTimeTaken(answer.getTimeTaken());
             }
         }
     }
