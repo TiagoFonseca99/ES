@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.Demo;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
@@ -113,7 +114,8 @@ public class TournamentService {
 
         List<Topic> topics = new ArrayList<>();
         for (Integer topicId : topicsId) {
-            Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
+            Topic topic = topicRepository.findById(topicId)
+                    .orElseThrow(() -> new TutorException(TOPIC_NOT_FOUND, topicId));
             topics.add(topic);
         }
 
@@ -145,7 +147,8 @@ public class TournamentService {
     public List<TournamentDto> getAllTournaments(User user) {
         List<CourseExecution> list = new ArrayList<>(user.getCourseExecutions());
         return tournamentRepository.getAllTournaments(list).stream().map(TournamentDto::new)
-                .collect(Collectors.toList());    }
+                .collect(Collectors.toList());
+    }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -164,7 +167,7 @@ public class TournamentService {
         return tournamentRepository.getClosedTournaments(list).stream().map(TournamentDto::new)
                 .collect(Collectors.toList());
     }
-    
+
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<TournamentDto> getUserTournaments(User user) {
@@ -289,8 +292,8 @@ public class TournamentService {
 
         tournament.setState(Tournament.Status.CANCELED);
 
-        NotificationDto notification = NotificationsCreation.create(CANCEL_TITLE, List.of(tournament.getId()), CANCEL_CONTENT,
-                List.of(tournament.getId()), Notification.Type.TOURNAMENT);
+        NotificationDto notification = NotificationsCreation.create(CANCEL_TITLE, List.of(tournament.getId()),
+                CANCEL_CONTENT, List.of(tournament.getId()), Notification.Type.TOURNAMENT);
         this.notify(tournament, notification, user);
     }
 
@@ -310,8 +313,8 @@ public class TournamentService {
             String oldTime = DateHandler.toString(tournament.getStartTime());
             tournament.setStartTime(DateHandler.toLocalDateTime(tournamentDto.getStartTime()));
 
-            NotificationDto notification = NotificationsCreation.create(EDIT_START_TIME_TITLE, List.of(tournament.getId()),
-                    EDIT_START_TIME_CONTENT,
+            NotificationDto notification = NotificationsCreation.create(EDIT_START_TIME_TITLE,
+                    List.of(tournament.getId()), EDIT_START_TIME_CONTENT,
                     List.of(tournament.getId(), oldTime, DateHandler.toString(tournament.getStartTime())),
                     Notification.Type.TOURNAMENT);
             this.notify(tournament, notification, user);
@@ -334,8 +337,8 @@ public class TournamentService {
             String oldTime = DateHandler.toString(tournament.getEndTime());
             tournament.setEndTime(DateHandler.toLocalDateTime(tournamentDto.getEndTime()));
 
-            NotificationDto notification = NotificationsCreation.create(EDIT_END_TIME_TITLE, List.of(tournament.getId()),
-                    EDIT_END_TIME_CONTENT,
+            NotificationDto notification = NotificationsCreation.create(EDIT_END_TIME_TITLE,
+                    List.of(tournament.getId()), EDIT_END_TIME_CONTENT,
                     List.of(tournament.getId(), oldTime, DateHandler.toString(tournament.getEndTime())),
                     Notification.Type.TOURNAMENT);
             this.notify(tournament, notification, user);
@@ -401,5 +404,14 @@ public class TournamentService {
 
     private void notify(Tournament tournament, NotificationDto notification, User user) {
         notificationService.notifyObservers(tournament, notificationService.createNotification(notification), user);
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void resetDemoTournaments() {
+        tournamentRepository.getCourseExecutionTournaments(Demo.COURSE_EXECUTION_ID).stream().forEach(tournament -> {
+            tournament.remove();
+            tournamentRepository.delete(tournament);
+        });
     }
 }

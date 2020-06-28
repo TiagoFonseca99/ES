@@ -47,7 +47,10 @@ export default new Vuex.Store({
       storage.createCookie(session.SESSION_TOKEN, String(state.session));
       storage.persist(session.LOGGED_TOKEN, 'true');
       await session.checkCourse(state.user);
-      worker.registerWorker();
+
+      if (state.user.role != 'ADMIN' && state.user.role != 'DEMO_ADMIN') {
+        worker.registerWorker();
+      }
     },
     async logout(state) {
       state.user = null;

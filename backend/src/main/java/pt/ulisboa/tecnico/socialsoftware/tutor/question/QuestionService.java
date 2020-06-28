@@ -157,9 +157,8 @@ public class QuestionService {
 
         if (submission != null) {
             deleteSubmission(submission);
+            submissionService.prepareNotification(submission.getQuestion(), submission.getUser(), user);
         }
-
-        submissionService.prepareNotification(submission.getQuestion(), submission.getUser(), user);
 
         question.remove();
         questionRepository.delete(question);
@@ -286,13 +285,8 @@ public class QuestionService {
             backoff = @Backoff(delay = 5000))
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteQuizQuestion(QuizQuestion quizQuestion) {
-        Question question = quizQuestion.getQuestion();
         quizQuestion.remove();
         quizQuestionRepository.delete(quizQuestion);
-
-        if (question.getQuizQuestions().isEmpty()) {
-            this.deleteQuestion(question);
-        }
     }
 
     @Retryable(
@@ -319,9 +313,12 @@ public class QuestionService {
         question.getTopics().clear();
 
         questionRepository.delete(question);
-
     }
 
+    @Retryable(
+            value = { SQLException.class },
+            backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteSubmission(Submission submission) {
         List<Review> reviews = new ArrayList<>(reviewRepository.findBySubmissionId(submission.getId()));
         for (Review review : reviews) {
@@ -329,7 +326,4 @@ public class QuestionService {
         }
         submissionRepository.delete(submission);
     }
-
-
 }
-
