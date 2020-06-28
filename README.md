@@ -58,7 +58,7 @@
 
 # About
 
-<img align="right" src="./frontend/public/Screenshot.png" height="250">
+<img align="right" src="./assets/Screenshot.png" height="250">
 
 <br/>
 
