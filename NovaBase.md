@@ -45,7 +45,7 @@ Na execução desta fase do projeto, decidimos manter a seriedade na abordagem a
 
 #### 2. Remember me
 
-  Devido ao problema referido anteriormente, não era possível um utilizador guardar sessão no Quizzes Tutor, isto é, fechar o *browser*, e no dia seguinte voltar a utilizar a plataforma. Para corrigir isto, definimos que o utilizador pode escolher se quer ser relembrado ou não, isto é, se quer que a sua sessão seja guardada durante 1 dia (validade do JWT) ou se após fechar o *browser* quer que a sessão termine. Isto é implementado simplesmente colocando uma data de validade na *Cookie* com a identificação do utilizador.
+  Devido ao problema referido anteriormente, não era possível um utilizador guardar sessão no Quizzes Tutor, isto é, fechar o *browser*, e no dia seguinte voltar a utilizar a plataforma. Para corrigir isto, definimos que o utilizador pode escolher se quer ser relembrado ou não, isto é, se quer que a sua sessão seja guardada durante 1 dia (validade do JWT) ou se após fechar o *browser* quer que a sessão termine. Isto é implementado simplesmente colocando uma data de validade na *Cookie* com a identificação do utilizador. Com isto, adicionámos também uma funcionalidade que gera um novo JWT, quando faltarem 6h para o token expirar. Estamos cientes de que nesse período de tempo vão existir 2 tokens em simultâneo e que caso um atacante consiga ter acesso a um, consegue acesso prolongado à plataforma devido a isto, mas para nós é importante que caso, por exemplo, um utilizador esteja a realizar uma tarefa e o token expire, não ser interrompido.
 
 #### 3. *Cache* da última cadeira acedida
 
