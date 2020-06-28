@@ -182,7 +182,19 @@ export default class QuizView extends Vue {
     }
   }
 
-  increaseOrder(): void {
+  async increaseOrder() {
+    if (this.statementQuiz!.oneWay) {
+      try {
+        this.calculateTime();
+        await RemoteServices.submitAnswer(
+          this.statementQuiz!.id,
+          this.statementQuiz!.answers[this.questionOrder]
+        );
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+      }
+    }
+
     if (this.questionOrder + 1 < +this.statementQuiz!.questions.length) {
       this.calculateTime();
       this.questionOrder += 1;
@@ -221,10 +233,12 @@ export default class QuizView extends Vue {
           this.statementQuiz.answers[this.questionOrder].optionId = optionId;
         }
 
-        await RemoteServices.submitAnswer(
-          this.statementQuiz.id,
-          this.statementQuiz.answers[this.questionOrder]
-        );
+        if (!this.statementQuiz.oneWay) {
+          await RemoteServices.submitAnswer(
+            this.statementQuiz.id,
+            this.statementQuiz.answers[this.questionOrder]
+          );
+        }
       } catch (error) {
         this.statementQuiz.answers[
           this.questionOrder
@@ -235,11 +249,11 @@ export default class QuizView extends Vue {
     }
   }
 
-  confirmAnswer() {
+  async confirmAnswer() {
     if (this.statementQuiz?.oneWay) {
       this.nextConfirmationDialog = true;
     } else {
-      this.increaseOrder();
+      await this.increaseOrder();
     }
   }
 
@@ -267,6 +281,18 @@ export default class QuizView extends Vue {
     await this.$store.dispatch('loading');
     try {
       this.calculateTime();
+
+      if (this.statementQuiz!.oneWay) {
+        try {
+          await RemoteServices.submitAnswer(
+            this.statementQuiz!.id,
+            this.statementQuiz!.answers[this.questionOrder]
+          );
+        } catch (error) {
+          await this.$store.dispatch('error', error);
+        }
+      }
+
       this.confirmed = true;
       await this.$store.dispatch('toggleInQuiz', false);
       await this.statementManager.concludeQuiz();

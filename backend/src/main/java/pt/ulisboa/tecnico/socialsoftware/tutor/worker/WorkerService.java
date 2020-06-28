@@ -179,4 +179,20 @@ public class WorkerService {
             throw new TutorException(INVALID_SUBSCRIPTION);
         }
     }
+
+    public void resetDemoSubscriptions() {
+        User user = userRepository.findByUsername("Demo-Student");
+
+        for (Subscription sub : user.getSubscriptions()) {
+            sub.remove();
+            subscriptionRepository.delete(sub);
+        }
+
+        user = userRepository.findByUsername("Demo-Teacher");
+
+        for (Subscription sub : user.getSubscriptions()) {
+            sub.remove();
+            subscriptionRepository.delete(sub);
+        }
+    }
 }
