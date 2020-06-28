@@ -130,7 +130,6 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
 - ##### Aluno pode selecionar tópicos da pergunta submetida
   - Agora é possivel adicionar também tópicos à pergunta submetida, que podem ser alterados pelo docente
 
-  <br/>
   1 - Aluno escolhe tópicos a associar à pergunta (opcional)
   ![Student chooses topics](assets/img/NovaBase/Ppa/Topics_1.png)
 
@@ -175,7 +174,6 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
     3 - A discussão é alterada
     ![Edited Discussion](assets/img/NovaBase/Ddp/EditDiscussion_3.png)
 
-  <br/>
   ##### - Docente edita resposta
     1 - Docente acede à resposta
     ![Question with Discussion](assets/img/NovaBase/Ddp/EditReply_1.png)
