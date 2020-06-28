@@ -250,8 +250,8 @@ public class Tournament implements Observable {
 
     @Override
     public void Notify(Notification notification, User user) {
-        for (Observer observer : observers) {
-            if (((User) observer).getId() == user.getId()) {
+        for (User observer : observers) {
+            if (observer.getId().equals(user.getId())) {
                 continue;
             }
             observer.update(this, notification);

@@ -6,6 +6,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService;
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.config.Demo;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseDto;
@@ -20,6 +22,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.AuthUserDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.dto.DashboardDto;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +38,9 @@ public class UserService {
 
     @Autowired
     private ReviewRepository reviewRepository;
+
+    @Autowired
+    private AnswerService answerService;
 
     public User findByUsername(String username) {
         return this.userRepository.findByUsername(username);
@@ -218,6 +224,14 @@ public class UserService {
         return newDemoUser;
     }
 
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void resetDemoStudent() {
+        User user = userRepository.findByUsername("Demo-Student");
+        for (QuizAnswer quizAnswer : new ArrayList<>(user.getQuizAnswers())) {
+            answerService.deleteQuizAnswer(quizAnswer);
+        }
+    }
 
     private void checkStudent(User user) {
         if (user.getRole() != User.Role.STUDENT) {

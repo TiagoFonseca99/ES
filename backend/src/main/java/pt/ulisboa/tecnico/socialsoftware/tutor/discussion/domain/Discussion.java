@@ -70,11 +70,10 @@ public class Discussion implements Observable {
         this.available = discussionDto.isAvailable();
         this.observers.add(user);
         this.observers.addAll(user.getCourseExecutions().stream()
-                .filter(execution -> execution.getCourseId() == course.getId() && execution.getUsers().contains(user))
-                .map(execution -> {
-                    return execution.getUsers().stream().filter(exUser -> exUser.isTeacher())
-                            .collect(Collectors.toList());
-                }).flatMap(List::stream).collect(Collectors.toList()));
+                .filter(execution -> execution.getCourseId().equals(course.getId()) && execution.getUsers().contains(user))
+                .map(execution -> execution.getUsers().stream().filter(User::isTeacher)
+                            .collect(Collectors.toList())
+                ).flatMap(List::stream).collect(Collectors.toList()));
     }
 
     public Course getCourse() {
@@ -177,8 +176,8 @@ public class Discussion implements Observable {
 
     @Override
     public void Notify(Notification notification, User user) {
-        for (Observer observer : observers) {
-            if (((User) observer).getId() == user.getId()) {
+        for (User observer : observers) {
+            if (observer.getId().equals(user.getId())) {
                 continue;
             }
 

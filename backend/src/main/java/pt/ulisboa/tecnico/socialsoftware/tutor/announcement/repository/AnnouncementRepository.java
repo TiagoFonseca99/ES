@@ -16,7 +16,8 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Inte
     @Query(value = "select * from announcements a where a.user_id = :userId and a.course_execution_id = :courseExecutionId", nativeQuery = true)
     List<Announcement> getAnnouncements(Integer userId, Integer courseExecutionId);
 
-
+    @Query(value = "SELECT * FROM announcements WHERE course_execution_id = :course", nativeQuery = true)
+    List<Announcement> getCourseAnnouncements(Integer course);
 }
 
 

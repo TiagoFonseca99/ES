@@ -277,7 +277,6 @@
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="query">DELETE FROM tournaments_topics;
 DELETE FROM tournaments_participants;
-DELETE FROM tournaments_notifications;
 DELETE FROM tournaments_observers;
 DELETE FROM tournaments t;
 

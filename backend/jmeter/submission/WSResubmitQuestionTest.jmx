@@ -80,7 +80,7 @@
           <stringProp name="checkQuery"></stringProp>
           <stringProp name="dbUrl">jdbc:postgresql://localhost:5432/tutordb?autoReconnect=true</stringProp>
           <stringProp name="driver">org.postgresql.Driver</stringProp>
-          <stringProp name="username">dserafim1999</stringProp>
+          <stringProp name="username">daniel</stringProp>
           <stringProp name="password"></stringProp>
           <stringProp name="connectionProperties"></stringProp>
         </JDBCDataSource>
@@ -516,13 +516,15 @@ SELECT * FROM options o JOIN quest q ON o.question_id = q.question_id;
           <stringProp name="timeout">10000</stringProp>
           <stringProp name="transactionIsolation">DEFAULT</stringProp>
           <stringProp name="trimInterval">60000</stringProp>
-          <stringProp name="username">dserafim1999</stringProp>
+          <stringProp name="username">daniel</stringProp>
         </JDBCDataSource>
         <hashTree/>
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="JDBC Request" enabled="true">
           <stringProp name="dataSource">sampleReq</stringProp>
           <stringProp name="queryType">Update Statement</stringProp>
-          <stringProp name="query">WITH sub AS (SELECT question_id FROM submissions WHERE id IN (SELECT max(id) FROM submissions)) DELETE FROM options WHERE question_id IN (SELECT * FROM sub);
+          <stringProp name="query">DELETE FROM submissions_observers WHERE 1=1;
+DELETE FROM questions_observers WHERE 1=1;
+WITH sub AS (SELECT question_id FROM submissions WHERE id IN (SELECT max(id) FROM submissions)) DELETE FROM options WHERE question_id IN (SELECT * FROM sub);
 WITH sub AS (DELETE FROM submissions WHERE id IN (SELECT max(id) FROM submissions) RETURNING question_id) DELETE FROM questions WHERE id IN (SELECT * FROM sub);
 
 WITH sub AS (SELECT question_id FROM submissions WHERE id IN (SELECT max(id) FROM submissions)) DELETE FROM options WHERE question_id IN (SELECT * FROM sub);

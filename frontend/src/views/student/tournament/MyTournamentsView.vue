@@ -105,8 +105,21 @@
           <span>Remove Tournament</span>
         </v-tooltip>
       </template>
+      <template v-slot:item.id="{ item }">
+        <v-chip
+          color="primary"
+          small
+          @click="$emit('close-show-dashboard-dialog', false)"
+          :to="openTournamentDashboard(item)"
+        >
+          <span> {{ item.id }} </span>
+        </v-chip>
+      </template>
     </v-data-table>
-
+    <footer>
+      <v-icon class="mr-2">mouse</v-icon>Left-click on tournament's number to
+      view the current ranking.
+    </footer>
     <create-tournament-dialog
       v-if="currentTournament"
       v-model="createTournamentDialog"
@@ -212,6 +225,10 @@ export default class MyTournamentsView extends Vue {
   sortById(a: Tournament, b: Tournament) {
     if (a.id && b.id) return a.id > b.id ? 1 : -1;
     else return 0;
+  }
+
+  openTournamentDashboard(tournament: Tournament) {
+    if (tournament) return '/student/tournament?id=' + tournament.id;
   }
 
   newTournament() {
