@@ -7,11 +7,13 @@ import org.springframework.context.annotation.Bean
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.AnnouncementService
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.dto.AnnouncementDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.repository.AnnouncementRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseService
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.AnswersXmlImport
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserService
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.UserRepository
@@ -133,7 +135,6 @@ class GetCourseExecutionAnnouncementsTest extends Specification {
 
     @TestConfiguration
     static class CourseServiceImplTestContextConfiguration {
-
         @Bean
         CourseService courseService() {
             return new CourseService()
@@ -142,6 +143,16 @@ class GetCourseExecutionAnnouncementsTest extends Specification {
         @Bean
         UserService userService() {
             return new UserService()
+        }
+
+        @Bean
+        AnswerService answerService() {
+            return new AnswerService()
+        }
+
+        @Bean
+        AnswersXmlImport answersXmlImport() {
+            return new AnswersXmlImport()
         }
     }
 }
