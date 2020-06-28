@@ -49,8 +49,8 @@
         </v-chip>
       </template>
       <template v-slot:item.state="{ item }">
-        <v-chip :color="getStateColor(item.state)">
-          {{ getStateName(item.state) }}
+        <v-chip :color="getStateColor(item)">
+          {{ getStateName(item) }}
         </v-chip>
       </template>
       <template v-slot:item.enrolled="{ item }">
@@ -64,7 +64,10 @@
         </v-chip>
       </template>
       <template v-slot:item.action="{ item }">
-        <v-tooltip bottom v-if="isNotEnrolled(item) && !isPrivate(item)">
+        <v-tooltip
+          bottom
+          v-if="isNotEnrolled(item) && !isPrivate(item) && !isClosed(item)"
+        >
           <template v-slot:activator="{ on }">
             <v-icon
               large
@@ -104,7 +107,21 @@
           <span>Leave Tournament</span>
         </v-tooltip>
       </template>
+      <template v-slot:item.id="{ item }">
+        <v-chip
+          color="primary"
+          small
+          @click="$emit('close-show-dashboard-dialog', false)"
+          :to="openTournamentDashboard(item)"
+        >
+          <span> {{ item.id }} </span>
+        </v-chip>
+      </template>
     </v-data-table>
+    <footer>
+      <v-icon class="mr-2">mouse</v-icon>Left-click on tournament's number to
+      view the current ranking.
+    </footer>
     <edit-tournament-dialog
       v-if="currentTournament"
       v-model="createTournamentDialog"
@@ -129,8 +146,6 @@ import RemoteServices from '@/services/RemoteServices';
 import CreateTournamentDialog from '@/views/student/tournament/CreateTournamentView.vue';
 import EditPasswordDialog from '@/views/student/tournament/PasswordTournamentView.vue';
 import ViewTournamentTopics from '@/views/student/tournament/ViewTournamentTopics.vue';
-import StatementQuiz from '@/models/statement/StatementQuiz';
-import StatementManager from '@/models/statement/StatementManager';
 
 @Component({
   components: {
@@ -141,6 +156,7 @@ import StatementManager from '@/models/statement/StatementManager';
 })
 export default class AllTournamentView extends Vue {
   tournaments: Tournament[] = [];
+  closedTournamentsId: number[] = [];
   currentTournament: Tournament | null = null;
   createTournamentDialog: boolean = false;
   editPasswordDialog: boolean = false;
@@ -209,6 +225,10 @@ export default class AllTournamentView extends Vue {
     await this.$store.dispatch('loading');
     try {
       this.tournaments = await RemoteServices.getAllTournaments();
+      let closedTournaments = await RemoteServices.getClosedTournaments();
+      closedTournaments.map(t => {
+        if (t.id) this.closedTournamentsId.push(t.id);
+      });
       this.tournaments.sort((a, b) => this.sortById(a, b));
     } catch (error) {
       await this.$store.dispatch('error', error);
@@ -219,6 +239,10 @@ export default class AllTournamentView extends Vue {
   sortById(a: Tournament, b: Tournament) {
     if (a.id && b.id) return a.id > b.id ? 1 : -1;
     else return 0;
+  }
+
+  openTournamentDashboard(tournament: Tournament) {
+    if (tournament) return '/student/tournament?id=' + tournament.id;
   }
 
   newTournament() {
@@ -247,13 +271,17 @@ export default class AllTournamentView extends Vue {
     this.currentTournament = null;
   }
 
-  getStateColor(state: string) {
-    if (state === 'NOT_CANCELED') return 'green';
+  getStateColor(tournament: Tournament) {
+    if (tournament.id && this.closedTournamentsId.includes(tournament.id))
+      return 'orange';
+    else if (tournament.state === 'NOT_CANCELED') return 'green';
     else return 'red';
   }
 
-  getStateName(state: string) {
-    if (state === 'NOT_CANCELED') return 'AVAILABLE';
+  getStateName(tournament: Tournament) {
+    if (tournament.id && this.closedTournamentsId.includes(tournament.id))
+      return 'FINISHED';
+    else if (tournament.state === 'NOT_CANCELED') return 'AVAILABLE';
     else return 'CANCELLED';
   }
 
@@ -283,6 +311,11 @@ export default class AllTournamentView extends Vue {
 
   isPrivate(tournamentToJoin: Tournament) {
     return tournamentToJoin.privateTournament;
+  }
+
+  isClosed(tournamentToJoin: Tournament) {
+    if (tournamentToJoin.id)
+      return this.closedTournamentsId.includes(tournamentToJoin.id);
   }
 
   async joinPrivateTournament(password: string) {
