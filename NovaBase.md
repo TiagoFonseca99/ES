@@ -258,8 +258,11 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
     1 - Aluno cria um torneio privado
     ![Private Tournament Create](assets/img/NovaBase/Tdp/PrivateTournament_1.png)
 
-    2 - Aluno tenta juntar-se a um torneio privado
+    2 - Aluno escolhe juntar-se a um torneio privado
     ![Private Tournament Join](assets/img/NovaBase/Tdp/PrivateTournament_2.png)
+
+    3 - Necessita de password para conseguir juntar-se
+    ![Private Tournament Join](assets/img/NovaBase/Tdp/PrivateTournament_3.png)
 
 ### 3.3. Funcionalidades Novas
 
@@ -313,7 +316,7 @@ ou seja, assim que se faz *login*
 - Está disponivel para alunos e docentes
 
 
-- Foi introduzido um botão que está sempre visivel ao aluno/docente, excepto durante a execução de um quiz. 
+- Foi introduzido um botão que está sempre visivel ao aluno/docente, excepto durante a execução de um quiz.
 
 - ##### Aluno/Docente recebe notificações
   - Quando o utilizador recebe uma notificação, poderá ver as notificações mais recentes no *dropdown* disponivel no botão de notificações, realçando as notificações ainda não lidas.
@@ -321,18 +324,18 @@ ou seja, assim que se faz *login*
   - Utilizador também pode optar por ver todas as notificações já recebidas, podendo filtrá-las por tipo
 
   - **Notificações possíveis**
-   
+
     - Aluno
 
       - Torneio (recebidas por todos os participantes de um torneio aberto)
-        
+
         - Tempo de inicio/fim editados
         - Número de questões editado
         - Tópicos editados
         - Torneio cancelado
-      
+
       - Discussões (recebidas pelo aluno acerca das suas discussões)
-        
+
         -  Discussão tornada pública/privada por docente
         -  Nova resposta à discussão
         -  Resposta a discussâo editada
@@ -342,11 +345,11 @@ ou seja, assim que se faz *login*
 
         - Submissão aprovada/rejeitada por docente
         - Submissão eliminada por docente
-    
+
     - Docente
 
       - Discussões (recebidas pelo docente acerca de discussões realizadas no curso em execução)
-      
+
         - Discussão criada por aluno
         - Discussão editada por aluno
         - Discussão eliminada por aluno
