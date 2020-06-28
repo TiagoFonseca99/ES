@@ -1,11 +1,16 @@
 # Projeto NovaBase Grupo 18
 
 ## 1. Tabela de Conteúdos
-- [Projeto NovaBase Grupo 18](#projeto-novabase-grupo-18)
   - [1. Tabela de Conteúdos](#1-tabela-de-conteúdos)
   - [2. Introdução](#2-introdução)
   - [3. Melhorias](#3-melhorias)
     - [3.1 Gerais](#31-gerais)
+      - [1. Recarregar a página](#1-recarregar-a-página)
+      - [2. Remember me](#2-remember-me)
+      - [3. Cache da última cadeira acedida](#3-cache-da-última-cadeira-acedida)
+      - [4. Reset ao Demo Course](#4-reset-ao-demo-course)
+      - [5. Erro para página não encontrada](#5-erro-para-página-não-encontrada)
+      - [6. Redirecionamento ao aceder à página de seleção de curso](#6-redirecionamento-ao-aceder-à-página-de-seleção-de-curso)
     - [3.2. Funcionalidades Já Existentes](#32-funcionalidades-já-existentes)
       - [1. Quizzes](#1-quizzes)
       - [2. Dashboard](#2-dashboard)
@@ -13,7 +18,7 @@
       - [4. Discussão de Perguntas (DdP)](#4-discussão-de-perguntas-ddp)
       - [5. Torneio de Perguntas (TdP)](#5-torneio-de-perguntas-tdp)
     - [3.3. Funcionalidades Novas](#33-funcionalidades-novas)
-      - [1. Anúncios de Professores (AdP)](#1-anúncios-de-professores-adp)
+      - [1. Anúncios de Professores (AdP)](#1-anúncios-de-docentes-adp)
       - [2. Sistema de Notificações (SdN)](#2-sistema-de-notificações-sdn)
   - [4. Deploy](#4-deploy)
     - [4.1. Escolha da Tecnologia](#41-escolha-da-tecnologia)
@@ -24,42 +29,82 @@
 
 ## 2. Introdução
 
+(Fizemos testes para tudo, cypress spock e jmeter, testámos bastante o nosso sistema, mas como é óbvio não é possível encontrar e corrigir todas as falhas, no entanto demos o nosso melhor...)
+
 ## 3. Melhorias
 
 ### 3.1 Gerais
 
-[todo] - refresh, cookies, remember me, lembrar curso...
+#### 1. Recarregar a página
+
+  Um problema que existia na versão original do Quizzes Tutor, era o facto de ao clicarmos na tecla F5 ou recarregarmos a página, sermos redirecionados para a página inicial e termos de fazer *login* outra vez. Conseguimos resolver este problema utilizando *Cookies* e, para tornar este mecanismo seguro, recorremos às seguintes *flags*:
+  - `HttpOnly`, que desativa o acesso de Javascript à *Cookie* com informação sobre o utilizador, prevenindo ataques XSS;
+  - `Secure`, que apenas permite que esta *Cookie* seja enviada através de ligações seguras (HTTPS), prevenindo ataques MITM;
+  - `SameSite` definida para `Lax`, que impede que esta *Cookie* seja enviada em pedidos para outros sites, para prevenir ataques CSRF. Sendo que é uma funcionalidade relativamente recente, não é implementada por todos os browsers, mas cerca de 92% dos utilizadores estarão protegidos com esta, por isso decidimos arriscar, uma vez que os principais *browsers* todos suportam esta *flag*.
+
+#### 2. Remember me
+
+  Devido ao problema referido anteriormente, não era possível um utilizador guardar sessão no Quizzes Tutor, isto é, fechar o browser, e no dia seguinte voltar a utilizar a plataforma. Para corrigir isto, definimos que o utilizador pode escolher se quer ser relembrado ou não, isto é, se quer que a sua sessão seja guardada durante 1 dia (validade do JWT) ou se após fechar o browser quer que a sessão termine. Isto é implementado simplesmente colocando uma data de validade na *Cookie* com a identificação do utilizador.
+
+#### 3. *Cache* da última cadeira acedida
+
+  Como a probabilidade de um aluno estar sempre a utilizar o Quizzes Tutor para a mesma cadeira é bastante elevada, decidimos guardar (em *cache*) a última cadeira a que o utilizador acedeu para, assim que fizer *login*, ser logo redirecionado para esta.
+
+#### 4. Reset ao Demo Course
+
+  Na versão original, quando se tentava fazer *reset* ao `Demo Course`, ocorriam exceções devido à tentativa de eliminar questões que tinham respostas. Isso foi corrigido, e ainda eliminamos torneios, discussões, anúncios, submissões e reviews, tópicos e *assessments*.
+
+#### 5. Erro para página não encontrada
+
+  Anteriormente, quando tentávamos aceder a uma página que não existia, éramos redirecionados para a página inicial sem perceber muito bem o que tinha acontecido. Agora é mostrado um erro ao utilizador caso a página não exista mesmo, ou caso exista e este não tenha acesso a esta, por não estar *logado*, por exemplo, é apenas redirecionado para a página inicial.
+
+#### 6. Redirecionamento ao aceder à página de seleção de curso
+
+   Quando um utilizador estava apenas inscrito numa só cadeira, este era levado para a página de seleção de cadeiras para escolher, o que do nosso ponto de vista é apenas inútil e uma perda de tempo, por isso decidimos que não é necessário levá-lo à página para escolher a cadeira a que quer aceder, entrando diretamente, e ficando esta automaticamente guardada na *cache*.
 
 ### 3.2. Funcionalidades Já Existentes
 
 #### 1. Quizzes
 
--
+##### Quiz de QRCode
+
+  Um problema que surgiu nas aulas, foi o facto de alguns alunos não conseguirem ler o código QR para aceder a este tipo de Quiz ou devido a problemas com o telemóvel ou por a câmera não conseguir captar o código com resolução suficiente. Para ninguém sair prejudicado, foi adicionado um código numérico por baixo do código QR, permitindo assim àqueles que estiverem com dificuldades em fazer *scan* ao QRCode, conseguirem aceder ao quiz através deste código, inserindo-o numa caixa de texto na mesma página em que é feito o *scan*.
+
+  - Visão do docente
+
+  ![QRCode Teacher](assets/img/NovaBase/Quiz/QRCodeTeacher.png)
+
+  - Visão do aluno
+  ![QRCode Student](assets/img/NovaBase/Quiz/QRCodeStudent.png)
+
+##### Quiz One-Way
+
+  Na versão original, quando ocorria um erro a meio de um quiz, o utilizador era redirecionado para fora deste, e se o quiz fosse do tipo `One-Way`, não conseguiria voltar a entrar, sendo assim prejudicado. Para evitar isto, caso o utilizador seja "expulso" do quiz por causa de um erro, vai poder voltar ao quiz. No entanto, não vai poder alterar as respostas que já tiver dado e vai ter de avançar pergunta a pergunta até chegar a onde estava.
 
 #### 2. Dashboard
 
 - ##### Docente pode ver dashboard de alunos
-  - Extendendo a funcionalidade que implementámos que permite aos alunos ver a informação pública no dashboard de outros alunos,
-agora os docentes também podem aceder a esses dashboards, clickando no username de um aluno. Em certos casos, aparecerá uma 
+  - Estendendo a funcionalidade que implementámos que permite aos alunos ver a informação pública no dashboard de outros alunos,
+agora os docentes também podem aceder a esses dashboards, clicando no username de um aluno. Em certos casos, aparecerá uma
 caixa de diálogo que serve como preview do dashboard, para evitar sair da página atual.
 
+    <br/>
     Exemplos:
 
     ##### - Students View
     1 - Docente carrega no username de um aluno
-    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/StudentsView.png)  
+    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/StudentsView.png)
     2 - Docente vê o dashboard do aluno
     ![Teacher sees dashboard](assets/img/NovaBase/Dashboard/Dashboard.png)
-
     ##### - Reviews View
     1 - Docente carrega no username de um aluno
-    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/DashboardDialog_1.png)  
+    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/DashboardDialog_1.png)
     2 - Docente vê um preview do dashboard do aluno
     ![Teacher sees dashboard preview](assets/img/NovaBase/Dashboard/DashboardDialog_2.png)
     3 - Docente pode abrir o dashboard completo
     ![Teacher sees dashboard](assets/img/NovaBase/Dashboard/Dashboard.png)
 
-    **NOTA:** Este comportamento acontece sempre que aparecer o username de um utilizador
+    **NOTA:** As vistas apresentadas servem apenas de exemplo e não são totalmente representativas. Este comportamento acontece sempre que aparecer o username/nome de um utilizador e o cursor do rato mudar.
 
 
 #### 3. Perguntas por Alunos (PpA)
@@ -68,6 +113,8 @@ caixa de diálogo que serve como preview do dashboard, para evitar sair da pági
   - Esta funcionalidade permite ao aluno ter uma ideia das submissões que já foram feitas e deste modo evitar uma possível
 submissão repetida. Também permite ao aluno perceber o critério dos docentes no processo de review. Também é possivel filtrar
 as submissões de modo a retirar as que foram feitas pelo próprio utilizador, ou pelo estado do review da submissão
+
+  <br/>
 
   1 - Aluno acede à lista de todas as submissões do curso em execução
   ![All submissions](assets/img/NovaBase/Ppa/AllSubmissions_1.png)
@@ -98,6 +145,8 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
 - ##### Aluno pode acrescentar um argumento à submissão que justifique a mesma
   - Extendido do teste prático, o aluno agora pode, de forma opcional, apresentar um breve argumento que justifique a sua submissão.
 
+  <br/>
+
   1 - Antes da submissão ser enviada, aluno pode escolher se quer adicionar um argumento
   ![Argument question](assets/img/NovaBase/Ppa/Argument_1.png)
 
@@ -111,15 +160,51 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
 
 #### 4. Discussão de Perguntas (DdP)
 
-- Aluno/Docente pode editar as suas respostas/pedidos de esclarecimentos
-  - Breve descrição
+- ##### Utilizador pode editar as suas respostas/discussões
+  - Os utilizadores podem agora editar as suas respostas e as suas discussões, e os docentes podem alterar todas as discussões e todas as respostas.
 
-  - Caso de uso
+  <br/>
+  Exemplos:
 
-- Aluno/Docente pode eliminar as suas respostas/pedidos de esclarecimentos
-  - Breve descrição
+  ##### - Aluno edita discussão
+    1 - Aluno acede à lista de discussões
+    ![Discussions List](assets/img/NovaBase/Ddp/EditDiscussion_1.png)
 
-  - Caso de uso
+    2 - Aluno edita discussão
+    ![Edit Discussion](assets/img/NovaBase/Ddp/EditDiscussion_2.png)
+
+    3 - A discussão é alterada
+    ![Edited Discussion](assets/img/NovaBase/Ddp/EditDiscussion_3.png)
+
+  ##### - Docente edita resposta
+    1 - Docente acede à resposta
+    ![Question with Discussion](assets/img/NovaBase/Ddp/EditReply_1.png)
+
+    2 - Docente edita resposta
+    ![Edit Reply](assets/img/NovaBase/Ddp/EditReply_2.png)
+
+    3 - A resposta é alterada
+    ![Edited Reply](assets/img/NovaBase/Ddp/EditReply_3.png)
+
+- #### Utilizador pode eliminar as suas respostas/discussões
+  - Os utilizadores podem também eliminar as suas respostas e as suas discussões, e os docentes podem remover tanto discussões como respostas, mesmo as que não foram submitadas por estes.
+
+  <br/>
+  Exemplos:
+
+  ##### - Docente elimina discussão
+    1 - Docente acede à discussão
+    ![Question with Discussion](assets/img/NovaBase/Ddp/DeleteDiscussion_1.png)
+    2 - Docente elimina a discussão
+    ![Delete Discussion](assets/img/NovaBase/Ddp/DeleteDiscussion_2.png)
+    3 - A discussão é eliminada
+    ![Deleted Discussion](assets/img/NovaBase/Ddp/DeleteDiscussion_3.png)
+
+  ##### - Aluno elimina resposta
+    1 - Aluno acede à resposta
+    ![Discussion with own Reply](assets/img/NovaBase/Ddp/DeleteReply_1.png)
+    2 - Aluno elimina a resposta
+    ![Reply Deleted](assets/img/NovaBase/Ddp/DeleteReply_2.png)
 
 #### 5. Torneio de Perguntas (TdP)
 
@@ -137,9 +222,9 @@ as submissões de modo a retirar as que foram feitas pelo próprio utilizador, o
 
 
 - ##### Docente tem acesso à informação dos torneios do curso em execução
-  - O professor é agora capaz de visualizar os torneios criados pelos alunos
+  - O docente é agora capaz de visualizar os torneios criados pelos alunos
 
-    1 - Professor acede à sua lista de torneios
+    1 - Docente acede à sua lista de torneios
     ![My Tournaments List](assets/img/NovaBase/Tdp/TeacherTournaments_1.png)
 
     2 - Seleciona um torneio existente
@@ -192,7 +277,7 @@ anúncios em que docentes criam e alunos/outros docentes vêem na sua home page
   ![Teacher fills in requiremnts for announcement](assets/img/NovaBase/Adp/CreateAnnouncement_2.png)
 
 - ##### Docente pode editar anúncios
-  - Docente pode editar um anúncio criado, e caso um docente decida editar um anúncio existente, será indicado que o anúncio foi editado 
+  - Docente pode editar um anúncio criado, e caso um docente decida editar um anúncio existente, será indicado que o anúncio foi editado
 
   1 - Docente carrega no ícone para editar anúncio
   ![Teacher clicks on edit announcement](assets/img/NovaBase/Adp/EditAnnouncement_1.png)
@@ -213,8 +298,8 @@ anúncios em que docentes criam e alunos/outros docentes vêem na sua home page
 
 
 - ##### Aluno/Docente podem ver anúncios do curso em execução na página principal
-  - Os anúncios do curso em execução que se encontra selecionado sao visiveis na pagina principal, 
-ou seja, assim que se faz login
+  - Os anúncios do curso em execução que se encontra selecionado sao visiveis na pagina principal,
+ou seja, assim que se faz *login*
 
   1 - Aluno/Docente abre página principal
   ![Student/Teacher sees course execution announcements](assets/img/NovaBase/Adp/ShowAnnouncements.png)
@@ -223,14 +308,84 @@ ou seja, assim que se faz login
 
 #### 2. Sistema de Notificações (SdN)
 
-- Breve descrição geral a justificar a criação desta funcionalidade (valor, etc...)
+- Esta nova funcionalidade permite receber em tempo real uma notificação cujo objetivo é alertar o utilizador de uma mudança no estado do sistema. Esta funcionalidade tem inúmeras vantagens, e permite ao utilizador uma maior facilidade de utilização.
 
-- Aluno/Docente recebe notificações
-  - Breve descrição
+- Está disponivel para alunos e docentes
 
-  - Notificações possíveis (???)
 
-  - Caso de uso
+- Foi introduzido um botão que está sempre visivel ao aluno/docente, excepto durante a execução de um quiz. 
+
+- ##### Aluno/Docente recebe notificações
+  - Quando o utilizador recebe uma notificação, poderá ver as notificações mais recentes no *dropdown* disponivel no botão de notificações, realçando as notificações ainda não lidas.
+
+  - Utilizador também pode optar por ver todas as notificações já recebidas, podendo filtrá-las por tipo
+
+  - **Notificações possíveis**
+   
+    - Aluno
+
+      - Torneio (recebidas por todos os participantes de um torneio aberto)
+        
+        - Tempo de inicio/fim editados
+        - Número de questões editado
+        - Tópicos editados
+        - Torneio cancelado
+      
+      - Discussões (recebidas pelo aluno acerca das suas discussões)
+        
+        -  Discussão tornada pública/privada por docente
+        -  Nova resposta à discussão
+        -  Resposta a discussâo editada
+        -  Resposta a discussão eliminada
+
+      - Submissões (recebidas pelo aluno acerca das suas submissões)
+
+        - Submissão aprovada/rejeitada por docente
+        - Submissão eliminada por docente
+    
+    - Docente
+
+      - Discussões (recebidas pelo docente acerca de discussões realizadas no curso em execução)
+      
+        - Discussão criada por aluno
+        - Discussão editada por aluno
+        - Discussão eliminada por aluno
+        - Resposta a discussão criada
+        - Resposta a discussão editada
+        - Resposta a discussão eliminada
+
+      - Submissões (recebidas pelo docente acerca de submissões realizada no curso em execução)
+
+        - Submissão criada por aluno
+
+
+
+  - **Demonstração**
+
+    - Botão de notificações
+
+      1 - Após receber uma notificação, o número de notificações não lidas aumenta no botão de notificações
+      ![Unread notifications](assets/img/NovaBase/Sdn/Button_1.png)
+      2 - É disposta a lista de notificações, com ênfase nas notificações não lidas
+      ![Unread notifications in list](assets/img/NovaBase/Sdn/Button_2.png)
+      3 - Qunado não existem notificações não lidas, lista é apresentada normalmente
+      ![Read notifications](assets/img/NovaBase/Sdn/Button_3.png)
+
+    - Lista de Notificações
+
+      1 - Aluno/Docente pode ver todas as notificações recebidas
+      ![All notifications](assets/img/NovaBase/Sdn/List_1.png)
+      2 - Notificações podem ser filtradas por tipo
+      ![Notifications filtered by tournaments](assets/img/NovaBase/Sdn/List_2.png)
+      ![Notifications filtered by discussions](assets/img/NovaBase/Sdn/List_3.png)
+      ![Notifications filtered by submissions](assets/img/NovaBase/Sdn/List_4.png)
+      ![Notifications filtered by reviews](assets/img/NovaBase/Sdn/List_5.png)
+
+    - Notificações
+
+    [todo] falar de api e da notificaçao em si
+
+    ![Notification example](assets/img/NovaBase/Sdn/Notification.png)
 
 - Explicação das threads / serem assincronas
 
@@ -247,4 +402,6 @@ ou seja, assim que se faz login
 
 ## 5. Considerações Finais
 
-[todo] Gostámos muito, aprendemos muito, estamos muito orgulhosos, blah blah blah
+Em nome de toda a equipa gostariamos de agradecer aos docentes da cadeira de Engenharia de Software, bem como à NovaBase, pela oportunidade de particpar neste projeto. Durante o semestre, e em particular neste último mês de desenvolvimento, aprendemos basteante sobre como trabalhar em equipa e sobre as tecnologias utilizadas, bem como a sua relevância no contexto profissional atual. Estamos extremamente orgulhosos do trabalho realizado, e acreditamos que o valor do produto tenha sido elevado. Foi um trabalho realizado em equipa que seguiu sempre a metodologia ensinada nesta UC.
+
+Em nome de todo o grupo 18, um grande obrigado, e espermos que desfrutem do nosso trabalho.
