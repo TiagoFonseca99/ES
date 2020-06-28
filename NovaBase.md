@@ -1,11 +1,16 @@
 # Projeto NovaBase Grupo 18
 
 ## 1. Tabela de Conteúdos
-- [Projeto NovaBase Grupo 18](#projeto-novabase-grupo-18)
   - [1. Tabela de Conteúdos](#1-tabela-de-conteúdos)
   - [2. Introdução](#2-introdução)
   - [3. Melhorias](#3-melhorias)
     - [3.1 Gerais](#31-gerais)
+      - [1. Recarregar a página](#1-recarregar-a-página)
+      - [2. Remember me](#2-remember-me)
+      - [3. Cache da última cadeira acedida](#3-cache-da-última-cadeira-acedida)
+      - [4. Reset ao Demo Course](#4-reset-ao-demo-course)
+      - [5. Erro para página não encontrada](#5-erro-para-página-não-encontrada)
+      - [6. Redirecionamento ao aceder à página de seleção de curso](#6-redirecionamento-ao-aceder-à-página-de-seleção-de-curso)
     - [3.2. Funcionalidades Já Existentes](#32-funcionalidades-já-existentes)
       - [1. Quizzes](#1-quizzes)
       - [2. Dashboard](#2-dashboard)
@@ -24,36 +29,69 @@
 
 ## 2. Introdução
 
+(Fizemos testes para tudo, cypress spock e jmeter, testámos bastante o nosso sistema, mas como é óbvio não é possível encontrar e corrigir todas as falhas, no entanto demos o nosso melhor...)
+
 ## 3. Melhorias
 
 ### 3.1 Gerais
 
-[todo] - refresh, cookies, remember me, lembrar curso...
+#### 1. Recarregar a página
+
+  Um problema que existia na versão original do Quizzes Tutor, era o facto de ao clicarmos na tecla F5 ou recarregarmos a página, sermos redirecionados para a página inicial e termos de fazer *login* outra vez. Conseguimos resolver este problema utilizando *Cookies* e, para tornar este mecanismo seguro, recorremos às seguintes *flags*:
+  - `HttpOnly`, que desativa o acesso de Javascript à *Cookie* com informação sobre o utilizador, prevenindo ataques XSS;
+  - `Secure`, que apenas permite que esta *Cookie* seja enviada através de ligações seguras (HTTPS), prevenindo ataques MITM;
+  - `SameSite` definida para `Lax`, que impede que esta *Cookie* seja enviada em pedidos para outros sites, para prevenir ataques CSRF. Sendo que é uma funcionalidade relativamente recente, não é implementada por todos os browsers, mas cerca de 92% dos utilizadores estarão protegidos com esta, por isso decidimos arriscar, uma vez que os principais *browsers* todos suportam esta *flag*.
+
+#### 2. Remember me
+
+  Devido ao problema referido anteriormente, não era possível um utilizador guardar sessão no Quizzes Tutor, isto é, fechar o browser, e no dia seguinte voltar a utilizar a plataforma. Para corrigir isto, definimos que o utilizador pode escolher se quer ser relembrado ou não, isto é, se quer que a sua sessão seja guardada durante 1 dia (validade do JWT) ou se após fechar o browser quer que a sessão termine. Isto é implementado simplesmente colocando uma data de validade na *Cookie* com a identificação do utilizador.
+
+#### 3. *Cache* da última cadeira acedida
+
+  Como a probabilidade de um aluno estar sempre a utilizar o Quizzes Tutor para a mesma cadeira é bastante elevada, decidimos guardar (em *cache*) a última cadeira a que o utilizador acedeu para, assim que fizer *login*, ser logo redirecionado para esta.
+
+#### 4. Reset ao Demo Course
+
+  Na versão original, quando se tentava fazer *reset* ao `Demo Course`, ocorriam exceções devido à tentativa de eliminar questões que tinham respostas. Isso foi corrigido, e ainda eliminamos torneios, discussões, anúncios, submissões e reviews, tópicos e *assessments*.
+
+#### 5. Erro para página não encontrada
+
+  Anteriormente, quando tentávamos aceder a uma página que não existia, éramos redirecionados para a página inicial sem perceber muito bem o que tinha acontecido. Agora é mostrado um erro ao utilizador caso a página não exista mesmo, ou caso exista e este não tenha acesso a esta, por não estar *logado*, por exemplo, é apenas redirecionado para a página inicial.
+
+#### 6. Redirecionamento ao aceder à página de seleção de curso
+
+   Quando um utilizador estava apenas inscrito numa só cadeira, este era levado para a página de seleção de cadeiras para escolher, o que do nosso ponto de vista é apenas inútil e uma perda de tempo, por isso decidimos que não é necessário levá-lo à página para escolher a cadeira a que quer aceder, entrando diretamente, e ficando esta automaticamente guardada na *cache*.
 
 ### 3.2. Funcionalidades Já Existentes
 
 #### 1. Quizzes
 
--
+##### Quiz de QRCode
+
+  Um problema que surgiu nas aulas, foi o facto de alguns alunos não conseguirem ler o código QR para aceder a este tipo de Quiz ou devido a problemas com o telemóvel ou por a câmera não conseguir captar o código com resolução suficiente. Para ninguém sair prejudicado, foi adicionado um código numérico por baixo do código QR, permitindo assim àqueles que estiverem com dificuldades em fazer *scan* ao QRCode, conseguirem aceder ao quiz através deste código, inserindo-o numa caixa de texto na mesma página em que é feito o *scan*.
+
+##### Quiz One-Way
+
+  Na versão original, quando ocorria um erro a meio de um quiz, o utilizador era redirecionado para fora deste, e se o quiz fosse do tipo `One-Way`, não conseguiria voltar a entrar, sendo assim prejudicado. Para evitar isto, caso o utilizador seja "expulso" do quiz por causa de um erro, vai poder voltar ao quiz. No entanto, não vai poder alterar as respostas que já tiver dado e vai ter de avançar pergunta a pergunta até chegar a onde estava.
 
 #### 2. Dashboard
 
 - ##### Docente pode ver dashboard de alunos
-  - Extendendo a funcionalidade que implementámos que permite aos alunos ver a informação pública no dashboard de outros alunos,
-agora os docentes também podem aceder a esses dashboards, clickando no username de um aluno. Em certos casos, aparecerá uma 
+  - Estendendo a funcionalidade que implementámos que permite aos alunos ver a informação pública no dashboard de outros alunos,
+agora os docentes também podem aceder a esses dashboards, clickando no username de um aluno. Em certos casos, aparecerá uma
 caixa de diálogo que serve como preview do dashboard, para evitar sair da página atual.
 
     Exemplos:
 
     ##### - Students View
     1 - Docente carrega no username de um aluno
-    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/StudentsView.png)  
+    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/StudentsView.png)
     2 - Docente vê o dashboard do aluno
     ![Teacher sees dashboard](assets/img/NovaBase/Dashboard/Dashboard.png)
 
     ##### - Reviews View
     1 - Docente carrega no username de um aluno
-    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/DashboardDialog_1.png)  
+    ![Teacher clicks on username](assets/img/NovaBase/Dashboard/DashboardDialog_1.png)
     2 - Docente vê um preview do dashboard do aluno
     ![Teacher sees dashboard preview](assets/img/NovaBase/Dashboard/DashboardDialog_2.png)
     3 - Docente pode abrir o dashboard completo
@@ -192,7 +230,7 @@ anúncios em que docentes criam e alunos/outros docentes vêem na sua home page
   ![Teacher fills in requiremnts for announcement](assets/img/NovaBase/Adp/CreateAnnouncement_2.png)
 
 - ##### Docente pode editar anúncios
-  - Docente pode editar um anúncio criado, e caso um docente decida editar um anúncio existente, será indicado que o anúncio foi editado 
+  - Docente pode editar um anúncio criado, e caso um docente decida editar um anúncio existente, será indicado que o anúncio foi editado
 
   1 - Docente carrega no ícone para editar anúncio
   ![Teacher clicks on edit announcement](assets/img/NovaBase/Adp/EditAnnouncement_1.png)
@@ -213,8 +251,8 @@ anúncios em que docentes criam e alunos/outros docentes vêem na sua home page
 
 
 - ##### Aluno/Docente podem ver anúncios do curso em execução na página principal
-  - Os anúncios do curso em execução que se encontra selecionado sao visiveis na pagina principal, 
-ou seja, assim que se faz login
+  - Os anúncios do curso em execução que se encontra selecionado sao visiveis na pagina principal,
+ou seja, assim que se faz *login*
 
   1 - Aluno/Docente abre página principal
   ![Student/Teacher sees course execution announcements](assets/img/NovaBase/Adp/ShowAnnouncements.png)
