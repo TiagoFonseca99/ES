@@ -21,8 +21,9 @@
       - [1. Anúncios de Professores (AdP)](#1-anúncios-de-docentes-adp)
       - [2. Sistema de Notificações (SdN)](#2-sistema-de-notificações-sdn)
   - [4. Deploy](#4-deploy)
-    - [4.1. Escolha da Tecnologia](#41-escolha-da-tecnologia)
+    - [4.1. Escolha da Plataforma](#41-escolha-da-plataforma)
     - [4.2. Processo de Automatização](#42-processo-de-automatização)
+    - [4.3. Opções utilizadas]($43-opções-utilizadas)
   - [5. Considerações Finais](#5-considerações-finais)
 
 
@@ -39,12 +40,12 @@
 
   Um problema que existia na versão original do Quizzes Tutor, era o facto de ao clicarmos na tecla F5 ou recarregarmos a página, sermos redirecionados para a página inicial e termos de fazer *login* outra vez. Conseguimos resolver este problema utilizando *Cookies* e, para tornar este mecanismo seguro, recorremos às seguintes *flags*:
   - `HttpOnly`, que desativa o acesso de Javascript à *Cookie* com informação sobre o utilizador, prevenindo ataques XSS;
-  - `Secure`, que apenas permite que esta *Cookie* seja enviada através de ligações seguras (HTTPS), prevenindo ataques MITM;
-  - `SameSite` definida para `Lax`, que impede que esta *Cookie* seja enviada em pedidos para outros sites, para prevenir ataques CSRF. Sendo que é uma funcionalidade relativamente recente, não é implementada por todos os browsers, mas cerca de 92% dos utilizadores estarão protegidos com esta, por isso decidimos arriscar, uma vez que os principais *browsers* todos suportam esta *flag*.
+  - `Secure`, que apenas permite que esta *Cookie* seja enviada através de ligações seguras (**HTTPS**), prevenindo ataques MITM;
+  - `SameSite` definida para `Lax`, que impede que esta *Cookie* seja enviada em pedidos para outros sites, para prevenir ataques CSRF. Sendo que é uma funcionalidade relativamente recente, não é implementada por todos os *browsers*, mas cerca de 92% dos utilizadores estarão protegidos com esta, por isso decidimos arriscar, uma vez que os principais *browsers* todos suportam esta *flag*.
 
 #### 2. Remember me
 
-  Devido ao problema referido anteriormente, não era possível um utilizador guardar sessão no Quizzes Tutor, isto é, fechar o browser, e no dia seguinte voltar a utilizar a plataforma. Para corrigir isto, definimos que o utilizador pode escolher se quer ser relembrado ou não, isto é, se quer que a sua sessão seja guardada durante 1 dia (validade do JWT) ou se após fechar o browser quer que a sessão termine. Isto é implementado simplesmente colocando uma data de validade na *Cookie* com a identificação do utilizador.
+  Devido ao problema referido anteriormente, não era possível um utilizador guardar sessão no Quizzes Tutor, isto é, fechar o *browser*, e no dia seguinte voltar a utilizar a plataforma. Para corrigir isto, definimos que o utilizador pode escolher se quer ser relembrado ou não, isto é, se quer que a sua sessão seja guardada durante 1 dia (validade do JWT) ou se após fechar o *browser* quer que a sessão termine. Isto é implementado simplesmente colocando uma data de validade na *Cookie* com a identificação do utilizador.
 
 #### 3. *Cache* da última cadeira acedida
 
@@ -390,21 +391,65 @@ ou seja, assim que se faz *login*
 
     ![Notification example](assets/img/NovaBase/Sdn/Notification.png)
 
-- Explicação das threads / serem assincronas
+##### - Uso de *threads*
+
+  Como a operação de notificação de vários utilizadores é dispendiosa e pode demorar bastante tempo, decidimos que a chamada à função para realizar esta operação deveria ser realizada numa *thread* diferente para as operações que geram notificações não ficarem muito tempo bloqueadas nesta operação, dando assim uma experiência de utilização mais agradável. Desta forma, por exemplo, o aluno poderá criar uma submissão e não notar que algo mais está a acontecer, porque o tempo para realizar esta ação é apenas o tempo que levaria caso não realizasse a notificação de utilizadores.
+
+  A nossa implementação passou por definir uma *Thread Pool* com limites diferentes do *default*, para não sobrecarregarmos a máquina com demasiado processamento paralelo, mas ao mesmo tempo não acumular demasiado processamento, levando à perda de possíveis *threads*. Assim, permitimos que 3 *threads* executem paralelamente, e que 20 outras possam esperar numa fila. Caso este limite seja atingido (isto é, 3 *threads* a executar e mais 20 em espera), permitimos que se ponham em execução mais 7 *threads*, totalizando 10 *threads* em execução e 20 em espera.
+
+##### - Notificações em tempo real
+
+  O comportamento descrito anteriormente apenas permitia que o utilizador recebesse notificações fazendo uma chamada ao *backend*, mas isto não é ideal, porque o utilizador pode perder notificações importantes. Para resolver este problema, recorremos a duas APIs em conjunto com *Service Workers*: Notifications API e Push API.
+
+  A primeira permite mostrar notificações independentemente do *browser* utilizado, fornecendo uma interface *standard*.
+
+  A segunda permite reagir a eventos de `push`, colocando um "servidor" do lado do cliente, com um *endpoint* único, para receber mensagens, despoletando o evento mencionado. No nosso caso, o *backend* envia a notificação para cada um destes *endpoints*, e por ser uma operação ainda mais dispendiosa que a anterior, por envolver cifrar dados e fazer pedidos através da rede, recorremos novamente às *Thread Pools*, no entanto, modificámos os limites, permitindo assim que estejam 5 *threads* ativas, 40 em espera e caso seja criada mais alguma após estes limites serem alcaçados, permitimos que no máximo estejam 20 threads ativas. O único possível problema desta API é o facto de não ser suportada pela Apple (e pelo Internet Explorer também), pelo que os utilizadores do Safari não poderão usufruir deste recurso, mas poderão ter na mesma as notificações através de chamadas ao backend.
+
+  Assim, esta grande funcionalidade poderá ser utilizada por cerca de 77% dos utilizadores.
+
 
 ## 4. Deploy
 
-### 4.1. Escolha da Tecnologia
+### 4.1. Escolha da Plataforma
 
-[todo] - justificar porque é que escolhemos Azure
+  Para a plataforma de *deploy*, escolhemos a Azure, porque tem preços bastante acessíveis, integração direta com o GitHub, o que facilita a interação com a própria plataforma; configuração dos Azure Pipelines através de YAML (linguagem também usada pelo GitHub para configurar as GitHub Actions) e também porque oferece um serviço de boa qualidade, sendo atualmente uma das melhores na área.
+
+  Escolhemos fazer *deploy* diretamente numa VM, porque apesar de termos de instalar por nós as dependências necessárias, permite-nos ter mais controlo sobre o sistema e uma performance ligeiramente melhor do que se usássemos o Docker dentro desta, e permite-nos fazer *deploy* mais rapidamente.
+
+  Para servir o *frontend* do nosso Quizzes Tutor temos o `nginx` que permite gerir certificados de forma fácil, e para monitorizarmos o *backend*, utilizámos uma sessão de `tmux` que permite facilmente iniciar ou parar este servidor, tanto através dos comandos normais fornecidos por este, como por um *systemd service* e alguns *scripts* criados por nós. Para gerir os nossos ceriticados SSL, utilizámos o `Certbot` da `Let's Encrypt` que vai renovando automaticamente os certificados após ficarem inválidos.
 
 ### 4.2. Processo de Automatização
 
-[todo] - explicar resumidamente o processo de deploy do github até ao dominio
+  Para fazermos *deploy* na nossa VM, escolhemos os Azure Pipelines, configurando todo o processo através de *scripts* e do ficheiro `azure-pipelines.yml`.
 
+  Neste processo, temos as seguintes etapas:
+    - Fazer *checkout* do repositório para o *agent* (VM onde está a correr o *pipeline*)
+    - Testar a *cache* de dependências do *backend*
+    - Caso as dependências não estejam em *cache*, instalá-las e guardar na *cache* para a próxima vez que o *pipeline* for executado não demorar tanto tempo.
+    - Compilar o *backend* para um ficheiro `.jar`
+    - Testar a *cache* de dependências do *frontend*
+    - Caso estas não estejam guardadas na *cache*, instalá-las e guardá-las na *cache* pela mesma razão acima
+    - Compilar o *frontend* e criar um ficheiro `.zip` com os ficheiros gerados por esta etapa
+    - Colocar o ficheiros ficheiros `.jar` e `.zip` no `Artifact Staging Directory` para enviar para a nossa VM
+    - Neste momento, a computação neste *agent* termina e passa a realizar-se na nossa VM, que tivemos de associar ao *pipeline* através do registo desta num *Environment*
+    - Já na VM, retirar os ficheiros do `Artifact Staging Directory` para a VM
+    - Parar o *backend*
+    - Fazer *backup* das versões antigas tanto do *frontend* como do *backend*
+    - Fazer *unzip* ao *frontend* para a pasta "controlada" pelo `nginx`
+    - Colocar o *backend* em funcionamento
+    - Caso a operação anterior falhe, as novas versões são eliminadas e as anteriores são colocadas em funcionamento
+
+### 4.3. Opções utilizadas
+
+  Decidimos apostar na segurança e na eficiência, por isso decidimos utilizar o protocolo **HTTPS** para estabelecer um canal seguro entre cliente e servidor, e visto que existe um grande suporte do *browsers* ao protocolo **HTTP/2**, decidimos recorrer a este, uma vez que necessita de TLS para ser executado, e nós já tínhamos configurado para o protocolo **HTTPS**. Utilizando **HTTP/2**, os dados são comprimidos e não existe o problema do bloqueio *Head of Line*, tornando a transmissão mais rápida. Como é implementado por quase todos os *browsers*, cerca de 96% dos nossos utilizadore poderão ter esta melhoria de velocidade.
+
+  Para prevenir a mudança de protocolo para HTTP, definimos o *header* HSTS, impedindo assim que ataques de *downgrade* de protocolo e consequente sequestro de *Cookies* ocorram.
 
 ## 5. Considerações Finais
 
-Em nome de toda a equipa gostariamos de agradecer aos docentes da cadeira de Engenharia de Software, bem como à NovaBase, pela oportunidade de particpar neste projeto. Durante o semestre, e em particular neste último mês de desenvolvimento, aprendemos basteante sobre como trabalhar em equipa e sobre as tecnologias utilizadas, bem como a sua relevância no contexto profissional atual. Estamos extremamente orgulhosos do trabalho realizado, e acreditamos que o valor do produto tenha sido elevado. Foi um trabalho realizado em equipa que seguiu sempre a metodologia ensinada nesta UC.
+  Em nome de toda a equipa gostariamos de agradecer aos docentes da cadeira de Engenharia de Software, bem como à NovaBase, pela oportunidade de participar neste projeto. Durante o semestre, e em particular neste último mês de desenvolvimento, aprendemos bastante sobre como trabalhar em equipa e sobre as tecnologias utilizadas, bem como a sua relevância no contexto profissional atual. Estamos extremamente orgulhosos do trabalho realizado, e acreditamos que o valor do produto tenha sido elevado. Foi um trabalho realizado em equipa que seguiu sempre a metodologia ensinada nesta UC.
 
-Em nome de todo o grupo 18, um grande obrigado, e espermos que desfrutem do nosso trabalho.
+  Em nome de todo o grupo 18, um grande obrigado, e esperemos que gostem do nosso trabalho.
+
+
+**NOTA:** Os dados estatísticos apresentados foram retirados do site https://caniuse.com, que mostra que *browsers* suportam determinadas funcionalidades, assim como a percentagem de utilizadores que podem possivelmente usufruir destas.
