@@ -30,7 +30,7 @@
 
 ## 2. Introdução
 
-(Fizemos testes para tudo, cypress spock e jmeter, testámos bastante o nosso sistema, mas como é óbvio não é possível encontrar e corrigir todas as falhas, no entanto demos o nosso melhor...)
+Na execução desta fase do projeto, decidimos manter a seriedade na abordagem ao projeto que já existia nas entregas realizadas ao longo do semestre. Deste modo, mantivemos os sprints, que consistiram em periodos de 2 semanas, culminando num sprint final mais curto, de uma semana, para focar em testar o sistema e resolver bugs/adicionar melhorias que fossem detetadas, sendo isto tudo acompanhado com uma devida organização do sprint em *projects* do GitHub. Também mantivemos a componente de testes, que foram desenvolvidos à medida que novas funcionalidades foram implementadas (Groovy, jmeter e Cypress). É certo que não é possível encontrar e corrigir todas as falhas, mas o foco nestes testes dão uma certa garantia de qualidade no trabalho produzido.
 
 ## 3. Melhorias
 
