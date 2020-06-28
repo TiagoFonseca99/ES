@@ -80,7 +80,10 @@
           </template>
           <span>Join Tournament</span>
         </v-tooltip>
-        <v-tooltip bottom v-if="isNotEnrolled(item) && isPrivate(item)">
+        <v-tooltip
+          bottom
+          v-if="isNotEnrolled(item) && isPrivate(item) && !isClosed(item)"
+        >
           <template v-slot:activator="{ on }">
             <v-icon
               large
@@ -93,7 +96,7 @@
           </template>
           <span>Join Tournament</span>
         </v-tooltip>
-        <v-tooltip bottom v-if="!isNotEnrolled(item)">
+        <v-tooltip bottom v-if="!isNotEnrolled(item) && !isClosed(item)">
           <template v-slot:activator="{ on }">
             <v-icon
               large
