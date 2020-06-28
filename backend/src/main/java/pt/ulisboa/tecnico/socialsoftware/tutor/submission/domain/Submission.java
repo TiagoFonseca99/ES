@@ -8,9 +8,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -137,8 +135,8 @@ public class Submission implements Observable {
 
     @Override
     public void Notify(Notification notification, User user) {
-        for (Observer observer : observers) {
-            if (((User) observer).getId() == user.getId()) {
+        for (User observer : observers) {
+            if (observer.getId().equals(user.getId())) {
                 continue;
             }
 

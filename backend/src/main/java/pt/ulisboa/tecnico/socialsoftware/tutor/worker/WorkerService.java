@@ -16,12 +16,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -95,9 +91,9 @@ public class WorkerService {
     public boolean isSubscribed(Integer userId, SubscriptionDto subscriptionDto) {
         checkEndpoint(subscriptionDto);
 
-        return subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint()).filter(sub -> {
-                return sub.getUser().getId().equals(userId);
-            }).count() == 1;
+        return subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint()).filter(sub ->
+                sub.getUser().getId().equals(userId)
+            ).count() == 1;
     }
 
     @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
@@ -106,7 +102,7 @@ public class WorkerService {
         checkEndpoint(subscriptionDto);
 
         Subscription subscription = subscriptionRepository.findByEndpoint(subscriptionDto.getEndpoint())
-            .filter(sub -> sub.getUser().getId() == userId).findFirst()
+            .filter(sub -> sub.getUser().getId().equals(userId)).findFirst()
             .orElseThrow(() -> new TutorException(SUBSCRIPTION_NOT_FOUND));
 
         subscription.remove();
@@ -123,34 +119,9 @@ public class WorkerService {
                 final String message = objectMapper.writeValueAsString(new NotificationDto(notification));
 
                 for (User user : users) {
-                    if (user.getId() != exclude.getId()) {
+                    if (!user.getId().equals(exclude.getId())) {
                         for (Subscription sub : user.getSubscriptions()) {
-                            try {
-                                Builder requestBuilder = HttpRequest.newBuilder();
-                                byte[] result = cryptoService.encrypt(message, sub.getP256dh(), sub.getAuth(), 0);
-                                URL url = new URL(sub.getEndpoint());
-                                String origin = url.getProtocol() + "://" + url.getHost();
-
-                                String token = JwtTokenProvider.generateToken(origin, user, serverKeys.getPrivate());
-
-                                URI endpoint = URI.create(sub.getEndpoint());
-
-                                HttpRequest request = requestBuilder.POST(BodyPublishers.ofByteArray(result)).uri(endpoint)
-                                    .header("Content-Type", "application/octet-stream")
-                                    .header("Content-Encoding", "aes128gcm").header("TTL", "180")
-                                    .header("Authorization", "vapid t=" + token + ", k=" + serverKeys.getBase64())
-                                    .build();
-
-                                HttpResponse<Void> response = httpClient.send(request, BodyHandlers.discarding());
-                                switch (response.statusCode()) {
-                                case 201:
-                                    break;
-                                default:
-                                    logger.error("HTTP Response: {} ### {}", response.statusCode(), response.body());
-                                }
-                            } catch (InterruptedException | IOException e) {
-                                logger.error("Error sending notification");
-                            }
+                            sendNotification(sub, user, message);
                         }
                     }
                 }
@@ -159,6 +130,32 @@ public class WorkerService {
                      | InvalidKeyException e) {
                 logger.error(e.getMessage());
             }
+        }
+    }
+
+    private void sendNotification(Subscription sub, User user, String message) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+        try {
+            Builder requestBuilder = HttpRequest.newBuilder();
+            byte[] result = cryptoService.encrypt(message, sub.getP256dh(), sub.getAuth(), 0);
+            URL url = new URL(sub.getEndpoint());
+            String origin = url.getProtocol() + "://" + url.getHost();
+
+            String token = JwtTokenProvider.generateToken(origin, user, serverKeys.getPrivate());
+
+            URI endpoint = URI.create(sub.getEndpoint());
+
+            HttpRequest request = requestBuilder.POST(BodyPublishers.ofByteArray(result)).uri(endpoint)
+                .header("Content-Type", "application/octet-stream")
+                .header("Content-Encoding", "aes128gcm").header("TTL", "180")
+                .header("Authorization", "vapid t=" + token + ", k=" + serverKeys.getBase64())
+                .build();
+
+            HttpResponse<Void> response = httpClient.send(request, BodyHandlers.discarding());
+            if(response.statusCode() != 201) {
+                logger.error("HTTP Response: {} ### {}", response.statusCode(), response.body());
+            }
+        } catch (InterruptedException | IOException e) {
+            logger.error("Error sending notification");
         }
     }
 

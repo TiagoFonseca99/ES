@@ -10,10 +10,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -161,8 +158,8 @@ public class Review implements Observable {
 
     @Override
     public void Notify(Notification notification, User user) {
-        for (Observer observer : observers) {
-            if (((User) observer).getId() == user.getId()) {
+        for (User observer : observers) {
+            if (observer.getId().equals(user.getId())) {
                 continue;
             }
 

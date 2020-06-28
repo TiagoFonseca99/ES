@@ -5,7 +5,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.AnnouncementService;
-import pt.ulisboa.tecnico.socialsoftware.tutor.announcement.repository.AnnouncementRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.ImpExpService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.AssessmentService;
