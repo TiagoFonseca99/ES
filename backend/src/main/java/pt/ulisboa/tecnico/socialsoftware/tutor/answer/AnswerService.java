@@ -58,10 +58,10 @@ public class AnswerService {
     private AnswersXmlImport xmlImporter;
 
     @Retryable(
-      value = { SQLException.class },
-      backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public QuizAnswerDto createQuizAnswer(Integer userId, Integer quizId) {
+               value = { SQLException.class },
+               backoff = @Backoff(delay = 5000))
+               @Transactional(isolation = Isolation.REPEATABLE_READ)
+               public QuizAnswerDto createQuizAnswer(Integer userId, Integer quizId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new TutorException(USER_NOT_FOUND, userId));
 
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new TutorException(QUIZ_NOT_FOUND, quizId));
@@ -73,12 +73,12 @@ public class AnswerService {
     }
 
     @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<CorrectAnswerDto> concludeQuiz(User user, Integer quizId) {
+               value = { SQLException.class },
+               backoff = @Backoff(delay = 5000))
+               @Transactional(isolation = Isolation.REPEATABLE_READ)
+               public List<CorrectAnswerDto> concludeQuiz(User user, Integer quizId) {
         QuizAnswer quizAnswer = user.getQuizAnswers().stream().filter(qa -> qa.getQuiz().getId().equals(quizId)).findFirst().orElseThrow(() ->
-                new TutorException(QUIZ_NOT_FOUND, quizId));
+                                                                                                                                         new TutorException(QUIZ_NOT_FOUND, quizId));
 
         if (quizAnswer.getQuiz().getAvailableDate() != null && quizAnswer.getQuiz().getAvailableDate().isAfter(DateHandler.now())) {
             throw new TutorException(QUIZ_NOT_YET_AVAILABLE);
@@ -98,25 +98,25 @@ public class AnswerService {
         }
 
         return quizAnswer.getQuestionAnswers().stream()
-                .sorted(Comparator.comparing(QuestionAnswer::getSequence))
-                .map(CorrectAnswerDto::new)
-                .collect(Collectors.toList());
+            .sorted(Comparator.comparing(QuestionAnswer::getSequence))
+            .map(CorrectAnswerDto::new)
+            .collect(Collectors.toList());
     }
 
     @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void submitAnswer(User user, Integer quizId, StatementAnswerDto answer) {
+               value = { SQLException.class },
+               backoff = @Backoff(delay = 5000))
+               @Transactional(isolation = Isolation.REPEATABLE_READ)
+               public void submitAnswer(User user, Integer quizId, StatementAnswerDto answer) {
         QuizAnswer quizAnswer = user.getQuizAnswers().stream()
-                .filter(qa -> qa.getQuiz().getId().equals(quizId))
-                .findFirst()
-                .orElseThrow(() -> new TutorException(QUIZ_NOT_FOUND, quizId));
+            .filter(qa -> qa.getQuiz().getId().equals(quizId))
+            .findFirst()
+            .orElseThrow(() -> new TutorException(QUIZ_NOT_FOUND, quizId));
 
         QuestionAnswer questionAnswer = quizAnswer.getQuestionAnswers().stream()
-                .filter(qa -> qa.getSequence().equals(answer.getSequence()))
-                .findFirst()
-                .orElseThrow(() -> new TutorException(QUESTION_ANSWER_NOT_FOUND, answer.getSequence()));
+            .filter(qa -> qa.getSequence().equals(answer.getSequence()))
+            .findFirst()
+            .orElseThrow(() -> new TutorException(QUESTION_ANSWER_NOT_FOUND, answer.getSequence()));
 
         if (isNotAssignedStudent(user, quizAnswer)) {
             throw new TutorException(QUIZ_USER_MISMATCH, String.valueOf(quizAnswer.getQuiz().getId()), user.getUsername());
@@ -135,22 +135,31 @@ public class AnswerService {
             Option option;
             if (answer.getOptionId() != null) {
                 option = optionRepository.findById(answer.getOptionId())
-                        .orElseThrow(() -> new TutorException(OPTION_NOT_FOUND, answer.getOptionId()));
+                    .orElseThrow(() -> new TutorException(OPTION_NOT_FOUND, answer.getOptionId()));
 
                 if (isNotQuestionOption(questionAnswer.getQuizQuestion(), option)) {
                     throw new TutorException(QUESTION_OPTION_MISMATCH, questionAnswer.getQuizQuestion().getQuestion().getId(), option.getId());
                 }
 
                 if (questionAnswer.getOption() != null) {
-                    if (quizAnswer.getQuiz().isOneWay()) {
+                    if (quizAnswer.getQuiz().isOneWay() && !questionAnswer.getOption().getId().equals(answer.getOptionId())) {
                         throw new TutorException(CANNOT_CHANGE_ANSWER);
                     }
+
                     questionAnswer.getOption().getQuestionAnswers().remove(questionAnswer);
+                } else if (quizAnswer.getQuiz().isOneWay() && questionAnswer.getTimeTaken() != null) {
+                    throw new TutorException(CANNOT_CHANGE_ANSWER);
                 }
 
                 questionAnswer.setOption(option);
                 questionAnswer.setTimeTaken(answer.getTimeTaken());
                 quizAnswer.setAnswerDate(DateHandler.now());
+            } else if (quizAnswer.getQuiz().isOneWay()) {
+                if (questionAnswer.getOption() != null) {
+                    throw new TutorException(CANNOT_CHANGE_ANSWER);
+                }
+
+                questionAnswer.setTimeTaken(answer.getTimeTaken());
             }
         }
     }
@@ -164,10 +173,10 @@ public class AnswerService {
     }
 
     @Retryable(
-      value = { SQLException.class },
-      backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public String exportAnswers() {
+               value = { SQLException.class },
+               backoff = @Backoff(delay = 5000))
+               @Transactional(isolation = Isolation.REPEATABLE_READ)
+               public String exportAnswers() {
         AnswersXmlExport xmlExport = new AnswersXmlExport();
 
         return xmlExport.export(quizAnswerRepository.findAll());
@@ -175,24 +184,24 @@ public class AnswerService {
 
 
     @Retryable(
-      value = { SQLException.class },
-      backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void importAnswers(String answersXml) {
+               value = { SQLException.class },
+               backoff = @Backoff(delay = 5000))
+               @Transactional(isolation = Isolation.REPEATABLE_READ)
+               public void importAnswers(String answersXml) {
         xmlImporter.importAnswers(answersXml, this, questionRepository, quizRepository, quizAnswerRepository, userRepository);
     }
 
     @Retryable(
-            value = { SQLException.class },
-            backoff = @Backoff(delay = 5000))
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void deleteQuizAnswer(QuizAnswer quizAnswer) {
+               value = { SQLException.class },
+               backoff = @Backoff(delay = 5000))
+               @Transactional(isolation = Isolation.REPEATABLE_READ)
+               public void deleteQuizAnswer(QuizAnswer quizAnswer) {
         List<QuestionAnswer> questionAnswers = new ArrayList<>(quizAnswer.getQuestionAnswers());
         questionAnswers.forEach(questionAnswer ->
-        {
-            questionAnswer.remove();
-            questionAnswerRepository.delete(questionAnswer);
-        });
+                                {
+                                    questionAnswer.remove();
+                                    questionAnswerRepository.delete(questionAnswer);
+                                });
         quizAnswer.remove();
         quizAnswerRepository.delete(quizAnswer);
     }
