@@ -6,6 +6,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.Demo;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecutionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationService;
@@ -19,6 +21,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.submission.domain.Review;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.dto.ReviewDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.ReviewRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.QuestionService;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.submission.repository.SubmissionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.notifications.NotificationsCreation;
@@ -56,6 +59,9 @@ public class SubmissionService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private QuestionService questionService;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -353,5 +359,13 @@ public class SubmissionService {
                 List.of(submission.getQuestion().getTitle()), NEW_SUBMISSION_CONTENT,
                 List.of(submission.getUser().getName()), Notification.Type.SUBMISSION);
         notificationService.notifyObservers(submission, notificationService.createNotification(notification), user);
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void resetDemoSubmissions() {
+        submissionRepository.getCourseExecutionSubmissions(Demo.COURSE_EXECUTION_ID).stream().forEach(submission -> {
+                questionService.deleteQuestion(submission.getQuestion());
+        });
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.config.Demo;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.Course;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseExecution;
 import pt.ulisboa.tecnico.socialsoftware.tutor.course.CourseRepository;
@@ -337,5 +338,14 @@ public class DiscussionService {
 
     private void notify(Discussion discussion, NotificationDto notification, User user) {
         notificationService.notifyObservers(discussion, notificationService.createNotification(notification), user);
+    }
+
+    @Retryable(value = { SQLException.class }, backoff = @Backoff(delay = 5000))
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void resetDemoDiscussions() {
+        discussionRepository.findByCourse(Demo.COURSE_ID).stream().forEach(discussion -> {
+            discussion.remove();
+            this.entityManager.remove(discussion);
+        });
     }
 }
